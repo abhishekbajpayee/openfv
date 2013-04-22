@@ -1,0 +1,150 @@
+#include "std_include.h"
+//#include "lib_include.h"
+
+#include "visualize.h"
+#include "calibration.h"
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv) {
+    
+    // Camera Calibration Section
+    clock_t begin = clock();
+
+<<<<<<< HEAD
+    string path("../experiment/calibration_skew/"); // Folder where calibration images lie
+    Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
+    double grid_size_phys = 5;  // in [mm]
+
+    multiCamCalibration calibration;
+    calibration.initialize(path, grid_size, grid_size_phys);
+    calibration.run();
+    
+    /*
+    write_ba_result(ba_problem, ba_result_file);
+    
+    //write_calib_result(ba_problem, cam_names, img_size, pix_per_phys, path);
+    
+    // Reading calibration 1st round data
+    vector<Mat> P_mats, rvecs2, tvecs2, translations;
+    double scale;
+    read_calib_data(ba_result_file, P_mats, rvecs2, tvecs2, translations, scale);
+    
+    //write_ba_matlab(ba_problem, translations, P_mats);
+    
+    int refocus = 1;
+    if (refocus) {
+    vector< vector<Mat> > refoc_imgs;
+    string refoc_path("../experiment/objects/");
+    read_refocusing_imgs(refoc_path, cam_names, refoc_imgs);
+
+    //refocus_img(refoc_imgs, P_mats, scale, 0, 0);
+    
+    vector<Mat> imgs;
+    for (int i=0; i<refoc_imgs.size(); i++) {
+        imgs.push_back(refoc_imgs[i][0].clone());
+    }
+    
+    gpuRefocus session(P_mats, imgs, scale, 0, img_size);
+    session.start();
+    }
+    */
+
+    clock_t end = clock();
+=======
+    string path("../experiment/calibration_skew/");
+    string ba_file("ba_files/scene.txt");
+    string ba_result_file("ba_files/scene_inter.txt");
+    string ba_align_file("ba_files/scene_align.txt");
+    
+    vector<string> cam_names = read_cam_names(path);
+    int center_cam_id = 4;
+    //cout<<"Enter center cam id: ";
+    //cin>>center_cam_id;
+    center_cam_id--;
+    int num_cams = cam_names.size();
+    
+    // Format (horizontal_corners, vertical_corners)
+    Size grid_size = Size(6,5);
+    double grid_size_phys = 5; // in [mm]
+    
+    vector< vector<Mat> > calib_imgs = read_calib_imgs(path, cam_names);
+    int num_imgs = calib_imgs[0].size();
+    Size img_size = Size(calib_imgs[0][0].cols, calib_imgs[0][0].rows);
+    /*
+    vector< vector< vector<Point2f> > > all_corner_points = find_corners(calib_imgs, grid_size, 0);
+
+    double grid_size_pix = get_grid_size_pix(all_corner_points, grid_size, center_cam_id);
+    double pix_per_phys = grid_size_pix/grid_size_phys; // in [pixels/mm]
+    
+    vector< vector<Point3f> > all_pattern_points;
+    vector<Mat> cameraMats;
+    vector<Mat> dist_coeffs;
+    vector< vector<Mat> > rvecs;
+    vector< vector<Mat> > tvecs;
+    calibrate_cameras(all_pattern_points, all_corner_points, num_cams, num_imgs, grid_size, img_size, cameraMats, 
+                      dist_coeffs, rvecs, tvecs);
+    
+    write_point_data(all_corner_points, cameraMats, rvecs, tvecs, dist_coeffs, ba_file);
+    
+    baProblem ba_problem;
+    ba_problem.scale = pix_per_phys;
+    cout<<"FINAL REPROJECTION ERROR: "<<BA_pinhole(ba_problem, ba_file, img_size, argv[0])<<endl;
+    
+    write_ba_result(ba_problem, ba_result_file);
+    */
+    vector<Mat> P_mats;
+    vector<Mat> translations;
+    double scale;
+    read_calib_data(ba_result_file, P_mats, translations, scale);
+
+    //write_ba_matlab(ba_problem, translations, P_mats);
+    
+    vector< vector<Mat> > refoc_imgs;
+    string refoc_path("../experiment/piv_sim_500/");
+    read_refocusing_imgs(refoc_path, cam_names, refoc_imgs);
+    
+    //refocus_img(calib_imgs, P_mats, scale, 0);
+    
+    vector<Mat> imgs;
+    for (int i=0; i<refoc_imgs.size(); i++) {
+        imgs.push_back(refoc_imgs[i][0]);
+    }
+    
+    gpuRefocus session;
+    session.P_mats = P_mats;
+    session.array_host = imgs;
+    session.scale = scale;
+    session.z = 0;
+    session.img_size = img_size;
+    session.start();
+    
+    //write_align_data(ba_problem, ba_align_file, translations_new, argv[0]);
+
+    /*
+    ofstream file, file1, file2;
+
+    file.open("ba_files/optimized.txt");
+    for (int i=0; i<ba_problem.num_points(); i++) {
+        double* points = ba_problem.mutable_points() + i*3;
+        file<<points[0]<<"\t"<<points[1]<<"\t"<<points[2]<<endl;
+    }
+    file.close();
+    
+    file1.open("ba_files/camera_points.txt");
+    for (int i=0; i<9; i++) {
+        for (int j=0; j<3; j++) {
+            file1<<translations[i].at<double>(0,j)<<"\t";
+        }
+        file1<<endl;
+    }
+    file1.close();
+    */
+    clock_t end = clock();
+
+>>>>>>> origin/master
+    cout<<endl<<"TIME TAKEN: "<<(float(end-begin)/CLOCKS_PER_SEC)<<" seconds"<<endl;
+    return 1;
+
+}

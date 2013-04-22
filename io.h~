@@ -1,0 +1,1 @@
+int read_cam_names(char* path);

@@ -1,0 +1,11 @@
+#include "stdinclude.h"
+
+using namespace cv;
+using namespace std;
+
+// -------------------------------------------------------
+// Function definitions for processing.h START
+vector< vector<Point2f> > find_corners(vector< vector<Mat> > calib_imgs);
+struct cameraData* calibrate_cameras(vector< vector<Point2f> > corner_points, int num_cams, int num_imgs);
+// Function definitions for processing.h END
+// -------------------------------------------------------

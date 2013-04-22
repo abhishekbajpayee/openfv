@@ -1,0 +1,11 @@
+#include "stdinclude.h"
+
+using namespace cv;
+using namespace std;
+
+// -------------------------------------------------------
+// Function definitions for io.h START
+vector<string> read_cam_names(string path);
+vector< vector<Mat> > read_calib_imgs(string path, vector<string> cam_names);
+// Function definitions for io.h END
+// -------------------------------------------------------

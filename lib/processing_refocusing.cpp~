@@ -1,0 +1,226 @@
+#include "std_include.h"
+
+using namespace cv;
+using namespace std;
+
+<<<<<<< HEAD
+// Function to calculate a transformation matrix to back project an image
+// to a given z depth and then blow it up and shift to match camera image
+// scale.
+=======
+// Function to get grid edge size in pixels
+// Work: - write so that function uses a specific image that defines reference plane
+double get_grid_size_pix(vector< vector< vector<Point2f> > > all_corner_points, Size grid_size, int center_cam_id) {
+
+    double grid_size_pix;
+
+    vector< vector<Point2f> > all_points = all_corner_points[center_cam_id];
+    vector<Point2f> points = all_points[0];
+
+    double xdist=0;
+    double ydist=0;
+    double dist=0;
+    int num=0;
+
+    cout<<"\nCALCULATING GRID EDGE SIZE...\n";
+    cout<<grid_size.height<<endl;
+    cout<<grid_size.width<<endl;
+    for (int i=1; i<grid_size.width; i++) {
+        for (int j=0; j<grid_size.height; j++) {
+            xdist = points[j*grid_size.width+i].x-points[j*grid_size.width+i-1].x;
+            ydist = points[j*grid_size.width+i].y-points[j*grid_size.width+i-1].y;
+            dist += sqrt(xdist*xdist+ydist*ydist);
+            //cout<<sqrt(xdist*xdist+ydist*ydist)<<"\n";
+            num++;
+        }
+    }
+    /*
+    for (int i=1; i<grid_size.height; i++) {
+        for (int j=0; j<grid_size.width; j++) {
+            xdist = points[j*grid_size.height+i].x-points[j*grid_size.height+i-1].x;
+            ydist = points[j*grid_size.height+i].y-points[j*grid_size.height+i-1].y;
+            //dist += sqrt(xdist*xdist+ydist*ydist);
+            //cout<<sqrt(xdist*xdist+ydist*ydist)<<"\n";
+            //num++;
+        }
+    }
+    */
+    grid_size_pix = dist/num;
+
+    cout<<"GRID SIZE: "<<grid_size_pix<<" pixels\n";
+
+    return(grid_size_pix);
+
+}
+
+>>>>>>> origin/master
+void T_from_P(Mat P, Mat &H, double z, double scale, Size img_size) {
+
+    Mat_<double> A = Mat_<double>::zeros(3,3);
+
+    for (int i=0; i<3; i++) {
+        for (int j=0; j<2; j++) {
+            A(i,j) = P.at<double>(i,j);
+        }
+    }
+
+    for (int i=0; i<3; i++) {
+        A(i,2) = P.at<double>(i,2)*z+P.at<double>(i,3);
+    }
+
+    Mat A_inv = A.inv();
+
+    Mat_<double> D = Mat_<double>::zeros(3,3);
+<<<<<<< HEAD
+    D(0,0) = scale;
+    D(1,1) = scale;
+=======
+    D(0,0) = (scale);
+    D(1,1) = (scale);
+>>>>>>> origin/master
+    D(2,2) = 1;
+    D(0,2) = img_size.width*0.5;
+    D(1,2) = img_size.height*0.5;
+    
+    Mat T = D*A_inv;
+
+    Mat T_t;
+    transpose(T, T_t);
+    
+    H = T.clone();
+
+}
+
+// Function to refocus an image at depth z
+// Work: - write eventually so that P_mats are read from previously saved
+//         calibration results; function right now assumes cam_names are same
+//         as camera ids
+<<<<<<< HEAD
+void refocus_img(vector< vector<Mat> > refocusing_imgs, vector<Mat> P_mats, double pix_per_phys, double z, int method) {
+
+    Size img_size = Size(refocusing_imgs[0][0].cols, refocusing_imgs[0][0].rows);
+    Mat H, transformed, refocused, image, power;
+    int num_cams = refocusing_imgs.size();
+
+    if (method==0) {
+        refocused = refocusing_imgs[0][0].clone();
+        refocused = Scalar(0);
+        for (int i=0; i<num_cams; i++) {
+            Mat_<double> H = Mat_<double>::zeros(3,3);
+            Mat transformed;
+            T_from_P(P_mats[i], H, z, pix_per_phys, img_size);
+            warpPerspective(refocusing_imgs[i][0], transformed, H, img_size);
+            transformed /= 255.0;
+            refocused += transformed.clone()/double(num_cams);
+        }
+    } else if (method==1) {
+        
+        double exp = 1/refocusing_imgs[0].size();
+        Mat_<double> H = Mat_<double>::zeros(3,3);
+        Mat transformed;
+        T_from_P(P_mats[0], H, z, pix_per_phys, img_size);
+        warpPerspective(refocusing_imgs[0][0], transformed, H, img_size);
+        transformed /= 255.0;
+        pow(transformed, exp, refocused);
+        imshow("img", refocused);
+        waitKey(0);
+        
+        for (int i=1; i<num_cams; i++) {
+            Mat_<double> H = Mat_<double>::zeros(3,3);
+            Mat transformed;
+            T_from_P(P_mats[i], H, z, pix_per_phys, img_size);
+            warpPerspective(refocusing_imgs[i][0], transformed, H, img_size);
+            transformed /= 255.0;
+            pow(transformed, exp, power);
+            imshow("img", power);
+            waitKey(0);
+            refocused = refocused.mul(power);
+        }
+        
+=======
+void refocus_img(vector< vector<Mat> > refocusing_imgs, vector<Mat> P_mats, double pix_per_phys, double z) {
+
+    Size img_size = Size(refocusing_imgs[0][0].cols, refocusing_imgs[0][0].rows);
+
+    Mat H, transformed;
+    
+    int num_cams = refocusing_imgs.size();
+
+    Mat refocused = refocusing_imgs[0][0]/double(100000);
+
+    for (int i=0; i<num_cams; i++) {
+
+        Mat_<double> H = Mat_<double>::zeros(3,3);
+        Mat transformed;
+
+        //cout<<P_mats[i]<<endl<<z<<endl<<pix_per_phys<<endl<<img_size.width<<endl;
+        T_from_P(P_mats[i], H, z, pix_per_phys, img_size);
+        cout<<H<<endl;
+        //cout<<H<<endl;
+
+        warpPerspective(refocusing_imgs[i][0], transformed, H, refocusing_imgs[i][0].size());
+
+        refocused += transformed.clone()/double(num_cams);
+
+>>>>>>> origin/master
+    }
+
+    imshow("Image", refocused);
+    waitKey(0);
+
+}
+
+// Function to calculate P matrices from calibration data
+// Work - account for distortion if any
+void get_P_mats(vector<Mat> cameraMats, vector< vector<Mat> > rvecs, vector< vector<Mat> > tvecs, vector<Mat> &P_mats) {
+
+    for (int i=0; i<cameraMats.size(); i++) {
+
+        Mat_<double> Rt = Mat_<double>::zeros(3,4);
+        
+        Mat R;
+        Rodrigues(rvecs[i][0], R);
+
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<3; k++) {
+                Rt(j,k) = R.at<double>(j,k);
+            }
+            Rt(j,3) = tvecs[i][0].at<double>(j,0);
+        }
+
+        Mat P = cameraMats[i]*Rt;
+
+        P_mats.push_back(P.clone());
+
+    }
+
+}
+
+// Function to calculate H matrices
+void get_H_mats(vector< vector<Mat> > rvecs, vector< vector<Mat> > tvecs, vector< vector<Mat> > translations, double scale, vector<Mat> &H_mats) {
+
+    Mat_<double> n = Mat_<double>::zeros(1,3);
+    n(0,2) = 1;
+
+    Mat_<double> r_ref = Mat_<double>::zeros(3,1);
+    Mat_<double> t_ref = Mat_<double>::zeros(3,1);
+    t_ref(2,0) = 200;
+
+    for (int i=0; i<rvecs.size(); i++) {
+
+        Mat R;
+        Rodrigues(rvecs[i][0]-r_ref, R);
+
+        Mat A;
+        A = (tvecs[i][0]-t_ref)*n;
+        double d = translations[i][0].at<double>(0,2);
+        A = (1/abs(d))*A;
+
+        Mat H = R - A;
+
+        H_mats.push_back(H.clone());
+        cout<<H<<endl;
+
+    }
+
+}

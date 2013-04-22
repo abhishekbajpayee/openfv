@@ -1,0 +1,159 @@
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{float}
+\usepackage[bookmarks=true,colorlinks=true,linkcolor=red,citecolor=red,filecolor=red,urlcolor=red]{hyperref}
+\usepackage[all]{hypcap}
+\usepackage{amsmath}
+%\usepackage{verbatim}
+\usepackage{subfigure}
+\usepackage{graphicx}
+\graphicspath{{./figures/}}
+\usepackage{amssymb}
+%\usepackage{lineno}
+%\usepackage{multicol}
+%\usepackage{tabularx}
+\usepackage{nomentbl}
+%\usepackage{fixfoot}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{type1cm}
+\usepackage{color}
+\usepackage{epstopdf}
+\usepackage{lastpage}
+
+%\journal{Journal Name}%
+
+\newcommand{\myvec}[1]{{\bf \hat{#1}}}
+\newcommand{\sgn}{\mathop{\mathrm{sgn}}}
+\newcommand{\figureheightsmall}{1.9in}
+
+
+\fancypagestyle{plain}{
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[c]{\footnotesize \it Bajpayee \& Mitsos \hfill Preliminary \hfill Page \thepage of \pageref*{LastPage} \hfill \today}
+}
+
+\newcommand{\mytitle}{Validation of hyperion with SolTRACE}
+\hypersetup{
+pdfauthor={Bajpayee},
+pdftitle= {\mytitle}
+}
+
+\setlength{\nomitemsep}{-\parsep}
+
+\makenomenclature
+
+\begin{document}
+\pagestyle{plain}
+
+
+\title{\mytitle}
+\author{Abhishek Bajpayee, Alexander Mitsos
+\\Dept. of Mechanical Engineering
+\\Massachusetts Institute of Technology}
+\date{\today}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+\label{sec:introduction}
+
+This report outlines the validation process of a code to calculate the annual optical efficiency of a heliostat field with NREL's software SolTRACE. Prior to this validation study, the efficiency of the field was calculated as described in [1]. To reiterate, the instantaneous efficiency $\eta_{\text{inst}}$ of the field is calculated as a product of 5 other terms as:
+
+\begin{eqnarray}
+\label{eq:eta_i}
+\eta_{\text{inst}} = \eta_{cos} \cdot \eta_{sb} \cdot \eta_{itc} \cdot \eta_{\text{aa}} \cdot \eta_{\text{ref}} \nonumber
+\end{eqnarray}
+
+where $\eta_{\text{cos}}$ represents cosine efficiency, $\eta_{\text{sb}}$ represents shading and blocking efficiency, $\eta_{\text{itc}}$ represents interception efficiency, $\eta_{\text{aa}}$ represents atmospheric attenuation efficiency and $\eta_{\text{ref}}$ represents the heliostat reflectivity.
+
+$\eta_{\text{ref}}$, which is a function of the surface of the heliostats is assumed to be constant for all heliostats and is just a factor multiplied by the other terms. For a given field, $\eta_{\text{aa}}$ is a constant and is calculated by averaging the atmospheric attenuation for each heliostat as shown in [1]. The other 3 terms in the equation above i.e. $\eta_{\text{cos}}$, $\eta_{\text{sb}}$ and $\eta_{\text{itc}}$ are calculated dynamically at each time step in the code as the instantaneous efficiency is integrated over the year to find the average.
+
+\section{Preliminary Validation}
+\label{sec:prelim_validation}
+
+In order to validate the code with SolTRACE, each instantaneous efficienc term was compared between the code and SolTRACE, keeping the field layout the same. Perfect parabolic mirrors were assumed in SolTRACE and a high heliostat discretization (50x50) assuming a parabolic shape was used to minimze differences due to heliostat geometry. $\eta_{\text{aa}}$ was neglected and $\eta_{\text{ref}}$ is a constant.
+
+To validate $\eta_{\text{cos}}$, a field having a single heliostat (this eliminates $\eta_{\text{sb}}$) was considered with a really large receiver (this eliminates the $\eta_{\text{itc}}$ term because no spillage occurs). The heliostat was moved to different locations around the field and the overall efficiency (which would now be only $\eta_{\text{cos}}$) from the code was compared with that from SolTRACE. The maximum percent difference was found to be only 0.11\% i.e. the difference between the results was not more than 0.001 in fractional efficiency. The percent difference also stays small for fields with a larger number of heliostats that do not shade or block each other.
+
+To validate $\eta_{\text{sb}}$, a field having two and three heliostats was considered with a really large receiver. The product of $\eta_{\text{cos}}$ and $\eta_{\text{sb}}$ from the code was compared with the overall effiency from SolTRACE (which would be a combination of $\eta_{\text{cos}}$ and $\eta_{\text{sb}}$ only).
+
+To validate $\eta_{\text{itc}}$, a field having a single heliostat with a finite sized receiver was considered. The finite size receiver ensures that $\eta_{\text{itc}}$ is taken into account. The $\eta_{\text{itc}}$ portion of the overall efficiency from SolTRACE was calculated by dividing the overall efficiency by that calculated using a large receiver for the same heliostat location. This was then compared with $\eta_{\text{itc}}$ from the code. Fairly large discrepancies were found between the code and SolTRACE with the code always overestimating $\eta_{\text{itc}}$ by about 4\% to 5\%.
+
+\section{Interception Efficiency Validation}
+\label{sec:itc_validation}
+
+Interception Effiency, as mentioned in [1], is calculated by finding the ratio of the integral of the solar flux on the receiver to the integral of the solar flux on the receiver plane. This estimates the fraction of reflected rays that are actually intercepted by the receiver. The flux on a surface due to a single sun ray is estimated according to a gaussian function around the point at which it strikes the surface. The total standard deviation ($\sigma_{\text{t}}$) of this gaussian distribution is a combination of the error due to the finite size of the sun ($\sigma_{\text{sun shape}}$), the error due to the optical imperfections on the heliostat surface ($\sigma_{\text{optical}}$) and the error due to the fact that heliostats are made up of facets ($\sigma_{\text{facet}}$) and are not perfect paraboloids. The total standard deviation is calculated as:
+
+\begin{eqnarray}
+\label{eq:sigma_t}
+\sigma_{\text{t}} = \sqrt{ {\sigma_{\text{sun shape}}}^2 + {\sigma_{\text{optical}}}^2 + {\sigma_{\text{facet}}}^2} \nonumber
+\end{eqnarray}
+
+The flux distribution of a ray striking a surface normally when the normal insolation per unit area is given by $I$ can then be written as a radially symmetric 2D function as:
+
+\begin{eqnarray}
+\label{eq:sigma_t}
+I(r) = I \frac{1}{\sigma_{\text{t}} \sqrt{2\pi}} e^{-\frac{r^2}{2 {\sigma_{\text{t}}}^2}} \nonumber
+\end{eqnarray}
+
+Figure \ref{fig:interception} shows how a ray after being reflected from a heliostat would strike the receiver surface. It can be seen that a simple radially symmetric distribution function is mapped to a 2D distribution having different standard deviation values in x and y directions on the receiver surface and thus cannot be accurately estimated using a radially symmetric function. This distribution, after applying a coordinate system rotation of angle $\theta$, can be written as:
+
+\begin{eqnarray}
+\label{eq:sigma_xy}
+I(x,y) &=& I \frac{1}{ \sigma_{\text{x}} \sigma_{\text{y}} 2\pi} e^{-{\left( \frac{x'^2}{2 {\sigma_{\text{x}}}^2} + \frac{y'^2}{2 {\sigma_{\text{y}}}^2} \right)}} \nonumber \\
+x' &=& x cos(\theta) - y sin(\theta) \nonumber \\
+y' &=& x sin(\theta) + y sin(\theta) \nonumber
+\end{eqnarray}
+
+This function can now be numerically integrated over the receiver dimensions since the point at which the ray hits the receiver is known. It was found that this method provides a much more accurate estimation of $\eta_{\text{itc}}$. For a single heliostat at different locations all over the field, the maximum deviation from SolTRACE was found to be 1.57\%.
+
+An issue with this new method is that it consumes exponentially more computation time. It might be advisable to either find ways to integrate the flux distribution function in a more computationally efficient manner or to use the old method for optimization purposes and then use the new method only to calculate the efficiency at the optimal. This however should be validated as a method that can be used.
+
+\begin{figure}
+\label{fig:interception}
+\centering
+\includegraphics[width=0.8\textwidth]{interception.jpg}
+\caption{A ray reflected from a heliostat and hitting the receiver}
+\end{figure}
+
+\section{Shading and Blocking Efficiency Validation}
+\label{sec:sb_validation}
+
+For fields having two and three heliostats located in different areas of the field, the code agrees with SolTRACE for most locations but yields overestimated efficiency by as much as about 7\%. For larger fields having more heliostats distributed symmetrically, the amount by which the code overestimates the efficiency grows with the number of heliostats in the field from about 2\% for about 25 heliostats to about 7\% for about 400 heliostats.
+
+If however atmospheric attentuation is taken into account in the code then this overestimation becomes much smaller and reduces to about 0.03\% for about 25 heliostats and to about 3\% for about 400 heliostats.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+$\eta_{\text{cos}}$ and $\eta_{\text{itc}}$ have been successfully validated with SolTRACE but it seems that $\eta_{\text{sb}}$ does not match between the code and SolTRACE. It is not evident from the study however whether it is the code that is incorrect of SolTRACE. A deeper analysis of both the code and SolTRACE using different cases is required to identify the cause of this deviation. An additional aspect that needs to be confirmed is whether SolTRACE takes atmospheric attenuation into account or not.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{}
+
+\bibitem{noone_2012}
+C. ~J. Noone, M. ~Torrilhon, A. ~Mitsos
+\newblock {Heliostat field optimization: A new computationally efficient model and biomimetic layout}.
+\newblock{\em Solar Energy}, 82(2):792--803, 2012.
+
+\end{thebibliography}
+
+\end{document}

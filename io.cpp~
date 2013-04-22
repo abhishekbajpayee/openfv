@@ -1,0 +1,26 @@
+
+
+std::vector<char*> read_cam_names(char* path) {
+    
+    DIR *dir;
+    struct dirent *ent;
+    dir = opendir(path);
+
+    std::vector<char*> cam_names;
+    
+    // Reading camera names
+    string temp_name;
+    string dir1(".");
+    string dir2("..");
+    while (ent = readdir(dir)) {
+        temp_name = ent->d_name;
+        if (temp_name.compare(dir1)) {
+            if (temp_name.compare(dir2)) {
+                cam_names.push_back(ent->d_name);
+            }
+        }
+    }
+
+    return(cam_names);
+
+}

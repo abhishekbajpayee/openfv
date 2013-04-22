@@ -1,0 +1,272 @@
+#ifndef OPTIMIZATION_H
+#define OPTIMIZATION_H
+
+#include "std_include.h"
+
+// Read a Bundle Adjustment dataset
+class baProblem {
+ public:
+    ~baProblem() {
+        delete[] point_index_;
+        delete[] camera_index_;
+        delete[] observations_;
+        delete[] parameters_;
+    }
+
+    int num_observations()       const { return num_observations_;               }
+    const double* observations() const { return observations_;                   }
+    double* mutable_cameras()          { return parameters_;                     }
+    double* mutable_points()           { return parameters_  + 9 * num_cameras_; }
+    int num_cameras()                  { return num_cameras_;                    }
+    int num_points()                   { return num_points_;                     }
+    int* camera_index()                { return camera_index_;                   }
+    int* point_index()                 { return point_index_;                    }
+    
+    double* mutable_camera_for_observation(int i) {
+        return mutable_cameras() + camera_index_[i] * 9;
+    }
+    double* mutable_point_for_observation(int i) {
+        return mutable_points() + point_index_[i] * 3;
+    }
+    
+    bool LoadFile(const char* filename) {
+        FILE* fptr = fopen(filename, "r");
+        if (fptr == NULL) {
+            return false;
+        };
+        
+        FscanfOrDie(fptr, "%d", &num_cameras_);
+        FscanfOrDie(fptr, "%d", &num_points_);
+        FscanfOrDie(fptr, "%d", &num_observations_);
+        
+        point_index_ = new int[num_observations_];
+        camera_index_ = new int[num_observations_];
+        observations_ = new double[2 * num_observations_];
+        
+        num_parameters_ = 9 * num_cameras_ + 3 * num_points_;
+        parameters_ = new double[num_parameters_];
+        
+        for (int i = 0; i < num_observations_; ++i) {
+            FscanfOrDie(fptr, "%d", camera_index_ + i);
+            FscanfOrDie(fptr, "%d", point_index_ + i);
+            for (int j = 0; j < 2; ++j) {
+                FscanfOrDie(fptr, "%lf", observations_ + 2*i + j);
+            }
+        }
+        
+        for (int i = 0; i < num_parameters_; ++i) {
+            FscanfOrDie(fptr, "%lf", parameters_ + i);
+        }
+        return true;
+    }
+    
+ private:
+    template<typename T>
+        void FscanfOrDie(FILE *fptr, const char *format, T *value) {
+        int num_scanned = fscanf(fptr, format, value);
+        if (num_scanned != 1) {
+            LOG(FATAL) << "Invalid UW data file.";
+        }
+    }
+    
+    int num_cameras_;
+    int num_points_;
+    int* point_index_;
+    int* camera_index_;
+    int num_observations_;
+    int num_parameters_;
+    
+    double* observations_;
+    double* parameters_;
+};
+
+// Pinhole Reprojection Error function
+struct pinholeReprojectionError {
+pinholeReprojectionError(double observed_x, double observed_y, double cx, double cy)
+: observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy) {}
+    template <typename T>
+    bool operator()(const T* const camera,
+                    const T* const point,
+                    T* residuals) const {
+        
+        
+        // camera[0,1,2] are the angle-axis rotation.
+        T p[3];
+        ceres::AngleAxisRotatePoint(camera, point, p);
+        
+        // camera[3,4,5] are the translation.
+        p[0] += camera[3];
+        p[1] += camera[4];
+        p[2] += camera[5];
+        
+        // Compute the center of distortion. The sign change comes from
+        // the camera model that Noah Snavely's Bundler assumes, whereby
+        // the camera coordinate system has a negative z axis.
+        T xp = p[0] / p[2];
+        T yp = p[1] / p[2];
+
+        // change to supply from code
+        T px = T(cx);
+        T py = T(cy);
+        
+        // Apply second and fourth order radial distortion.
+        const T& l1 = camera[7];
+        const T& l2 = camera[8];
+        T r2 = xp*xp + yp*yp;
+        T distortion = T(1.0) + r2  * (l1 + l2  * r2);
+        
+        // Compute final projected point position.
+        const T& focal = camera[6];
+        //T predicted_x = (focal * distortion * xp) + px;
+        //T predicted_y = (focal * distortion * yp) + py;
+        T predicted_x = (focal * xp) + px;
+        T predicted_y = (focal * yp) + py;
+
+
+        // The error is the squared euclidian distance between the predicted and observed position.
+        residuals[0] = pow((predicted_x - T(observed_x)),2) + pow((predicted_y - T(observed_y)),2);
+        
+        return true;
+    }
+    
+    double observed_x;
+    double observed_y;
+    double cx;
+    double cy;
+    
+};
+
+// Read a Bundle Adjustment refractive dataset
+class baProblem_ref {
+ public:
+    ~baProblem_ref() {
+        delete[] point_index_;
+        delete[] camera_index_;
+        delete[] observations_;
+        delete[] parameters_;
+    }
+    
+    int num_observations()       const { return num_observations_;               }
+    const double* observations() const { return observations_;                   }
+    double* mutable_cameras()          { return parameters_;                     }
+    double* mutable_points()           { return parameters_  + 9 * num_cameras_; }
+    double* mutable_scene_params()     { return parameters_ + 9 * num_cameras_ + 3 * num_points_; }
+    
+    double* mutable_camera_for_observation(int i) {
+        return mutable_cameras() + camera_index_[i] * 9;
+    }
+    double* mutable_point_for_observation(int i) {
+        return mutable_points() + point_index_[i] * 3;
+    }
+    
+    bool LoadFile(const char* filename) {
+        FILE* fptr = fopen(filename, "r");
+        if (fptr == NULL) {
+            return false;
+        };
+        
+        FscanfOrDie(fptr, "%d", &num_cameras_);
+        FscanfOrDie(fptr, "%d", &num_points_);
+        FscanfOrDie(fptr, "%d", &num_observations_);
+        
+        point_index_ = new int[num_observations_];
+        camera_index_ = new int[num_observations_];
+        observations_ = new double[2 * num_observations_];
+        
+        num_parameters_ = 9 * num_cameras_ + 3 * num_points_ + 5;
+        parameters_ = new double[num_parameters_];
+        
+        for (int i = 0; i < num_observations_; ++i) {
+            FscanfOrDie(fptr, "%d", camera_index_ + i);
+            FscanfOrDie(fptr, "%d", point_index_ + i);
+            for (int j = 0; j < 2; ++j) {
+                FscanfOrDie(fptr, "%lf", observations_ + 2*i + j);
+            }
+        }
+        
+        for (int i = 0; i < num_parameters_; ++i) {
+            FscanfOrDie(fptr, "%lf", parameters_ + i);
+        }
+        return true;
+    }
+    
+    int num_cameras_;
+    int num_points_;
+
+    double cx;
+    double cy;
+    
+ private:
+    template<typename T>
+        void FscanfOrDie(FILE *fptr, const char *format, T *value) {
+        int num_scanned = fscanf(fptr, format, value);
+        if (num_scanned != 1) {
+            LOG(FATAL) << "Invalid UW data file.";
+        }
+    }
+    
+    int num_observations_;
+    int num_parameters_;
+    
+    int* point_index_;
+    int* camera_index_;
+    double* observations_;
+    double* parameters_;
+};
+
+// Refractive Reprojection Error function
+struct refractiveReprojectionError {
+refractiveReprojectionError(double observed_x, double observed_y)
+: observed_x(observed_x), observed_y(observed_y) {}
+    template <typename T>
+    bool operator()(const T* const camera,
+                    const T* const point,
+                    const T* const scene,
+                    T* residuals) const {
+        
+        
+        // camera[0,1,2] are the angle-axis rotation.
+        T p[3];
+        ceres::AngleAxisRotatePoint(camera, point, p);
+        
+        // camera[3,4,5] are the translation.
+        p[0] += camera[3];
+        p[1] += camera[4];
+        p[2] += camera[5];
+        
+        // Compute the center of distortion. The sign change comes from
+        // the camera model that Noah Snavely's Bundler assumes, whereby
+        // the camera coordinate system has a negative z axis.
+        T xp = p[0] / p[2];
+        T yp = p[1] / p[2];
+
+        // change to supply from code
+        T cx = T(646);
+        T cy = T(482);
+        
+        // Apply second and fourth order radial distortion.
+        const T& l1 = camera[7];
+        const T& l2 = camera[8];
+        T r2 = xp*xp + yp*yp;
+        T distortion = T(1.0) + r2  * (l1 + l2  * r2);
+        
+        // Compute final projected point position.
+        const T& focal = camera[6];
+        T predicted_x = (focal * distortion * xp) + cx;
+        T predicted_y = (focal * distortion * yp) + cy;
+        //T predicted_x = (focal * xp) + cx;
+        //T predicted_y = (focal * yp) + cy;
+
+
+        // The error is the squared euclidian distance between the predicted and observed position.
+        residuals[0] = pow((predicted_x - T(observed_x)),2) + pow((predicted_y - T(observed_y)),2);
+        
+        return true;
+    }
+    
+    double observed_x;
+    double observed_y;
+    
+};
+
+#endif

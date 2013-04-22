@@ -1,0 +1,17 @@
+cmake_minimum_required (VERSION 2.6)
+
+project (calibrate)
+
+set (PROJECT_VERSION_MAJOR 1)
+set (PROJECT_VERSION_MINOR 0)
+
+# include directories
+include_directories(${PROJECT_SOURCE_DIR}/libraries)
+
+# subdirectories
+add_subdirectory(libraries)
+add_subdirectory(bin)
+
+find_package(OpenCV REQUIRED)
+
+target_link_libraries(calibrate ${OpenCV_LIBS})

@@ -1,0 +1,24 @@
+clear all;
+
+[cam_id, pts_id, u, v] = textread('../obervations.txt');
+I = imread('..
+
+cam = 0;
+pt_id = 0;
+ppi = 30;
+img = 0;
+
+ind = find(cam_id==cam);
+pts_f = pts_id(ind);
+u_f = u(ind);
+v_f = v(ind);
+
+scatter(u_f((img*ppi)+1:(img*ppi)+ppi), v_f((img*ppi)+1:(img*ppi)+ppi),'r+');
+
+% ind = find(pts_f==pt_id);
+% pts_f = pts_f(ind);
+% u_f = u_f(ind);
+% v_f = v_f(ind);
+
+% figure;
+% plot(u_f,v_f);

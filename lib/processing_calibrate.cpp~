@@ -1,0 +1,243 @@
+// -------------------------------------------------------
+// -------------------------------------------------------
+// Synthetic Aperture - Particle Tracking Velocimetry Code
+// --- Calibration Processing Library ---
+// -------------------------------------------------------
+// Author: Abhishek Bajpayee
+//         Dept. of Mechanical Engineering
+//         Massachusetts Institute of Technology
+// -------------------------------------------------------
+// -------------------------------------------------------
+
+#include "std_include.h"
+
+using namespace cv;
+using namespace std;
+
+<<<<<<< HEAD
+=======
+// Function to calculate reprojection error for single camera
+double reprojection_errors(const vector<vector<Point3f> > &objectPoints,
+                          const vector<vector<Point2f> > &imagePoints,
+                          const vector<Mat> &rvecs, const vector<Mat> &tvecs,
+                          const Mat &cameraMatrix , const Mat &distCoeffs,
+                          vector<float> &perViewErrors) {
+    
+    vector<Point2f> imagePoints2;
+    int i, totalPoints = 0;
+    double totalErr = 0, err;
+    perViewErrors.resize(objectPoints.size());
+    
+    for (i=0; i<(int)objectPoints.size(); i++) {
+        projectPoints( Mat(objectPoints[i]), rvecs[i], tvecs[i], cameraMatrix,  // project
+                       distCoeffs, imagePoints2);
+        err = norm(Mat(imagePoints[i]), Mat(imagePoints2), CV_L2);              // difference
+        
+        int n = (int)objectPoints[i].size();
+        perViewErrors[i] = (float) std::sqrt(err*err/n);                        // save for this view
+        totalErr        += err*err;                                             // sum it up
+        totalPoints     += n;
+    }
+    
+    return std::sqrt(totalErr/totalPoints);              // calculate the arithmetical mean
+}
+
+// Wrapper function to calculate reprojection errors for all cameras
+void all_reprojection_errors(vector<double> &reproj_errors, vector< vector<float> > &per_view_errors,
+                             vector< vector<Point3f> > all_pattern_points, vector< vector< vector<Point2f> > > all_corner_points,
+                             int num_cams, int num_imgs, vector<Mat> cameraMats, vector<Mat> dist_coeffs, 
+                             vector< vector<Mat> > rvecs, vector< vector<Mat> > tvecs) {
+
+    vector<float> perViewErrors;
+    cout<<"\nREPROJECTION ERRORS:\n\n";
+    for (int i=0; i<num_cams; i++) {
+
+        reproj_errors.push_back(reprojection_errors(all_pattern_points, all_corner_points[i], rvecs[i], tvecs[i],
+                                                    cameraMats[i], dist_coeffs[i], perViewErrors));
+        per_view_errors.push_back(perViewErrors);
+
+        cout<<"Camera "<<i+1<<":\n";
+        cout<<"Total: "<<reproj_errors.back();
+        cout<<" [ ";
+        for (int j=0; j<perViewErrors.size(); j++) {
+            cout<<"V"<<j+1<<": "<<perViewErrors[j]<<" ";
+        }
+        cout<<"]\n";
+    }
+    cout<<"\n";
+
+}
+
+// Note: Corner detection confuses the orientation of a square grid sometimes
+//       hence leading to garbage points data. Use rectangular grid instead.
+//       Function assumes that images in each folder are corresponding by name
+//       and orders points in a linear order.
+vector< vector< vector<Point2f> > > find_corners(vector< vector<Mat> > calib_imgs, Size grid_size, int draw) {
+
+    vector< vector< vector<Point2f> > > all_corner_points;
+    vector< vector<Point2f> > corner_points;
+    vector<Point2f> points;
+    Mat scene, scene_gray, scene_drawn;
+    
+    cout<<"\nFINDING CORNERS...\n\n";
+    for (int i=0; i<calib_imgs.size(); i++) {
+        
+        cout<<"Camera "<<i+1<<" of "<<calib_imgs.size();
+
+        vector<Mat> imgs_temp = calib_imgs[i];
+        for (int j=0; j<imgs_temp.size(); j++) {
+
+            //equalizeHist(imgs_temp[j], scene);
+            scene = imgs_temp[j];
+            bool found = findChessboardCorners(scene, grid_size, points, CV_CALIB_CB_ADAPTIVE_THRESH);
+            
+            if (found) {
+                //cvtColor(scene, scene_gray, CV_RGB2GRAY);
+                cornerSubPix(scene, points, Size(20, 20), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+                corner_points.push_back(points);
+                
+                if (draw) {
+                    scene_drawn = scene;
+                    drawChessboardCorners(scene_drawn, grid_size, points, found);
+                    namedWindow("Pattern", CV_WINDOW_AUTOSIZE);
+                    imshow("Pattern", scene);
+                    waitKey(0);
+                    cvDestroyWindow("Pattern");
+                }
+                
+            } else {
+                cout<<"pattern not found!\n";
+            }
+
+        }
+
+        all_corner_points.push_back(corner_points);
+        corner_points.clear();
+        cout<<"\n";
+
+    }
+
+    cout<<"\nCORNER FINDING COMPLETE!\n\n";
+    return(all_corner_points);
+
+}
+
+
+// Note: Function to calibrate all cameras and solve for cameraMat, dist_coeffs, rvecs, tvecs
+void calibrate_cameras(vector< vector<Point3f> > &all_pattern_points, vector< vector< vector<Point2f> > > all_corner_points, int num_cams, 
+                       int num_imgs, Size grid_size, Size img_size, vector<Mat> &cameraMats, vector<Mat> &dist_coeffs, 
+                       vector< vector<Mat> > &rvecs, vector< vector<Mat> > &tvecs) {
+
+    vector<Point3f> pattern_points;
+    float xshift = -(grid_size.width-1)/2.0;
+    float yshift = -(grid_size.height-1)/2.0;
+    for (int i=0; i<grid_size.height; i++) {
+        for (int j=0; j<grid_size.width; j++) {
+            pattern_points.push_back(Point3f( 5*(float(j)+xshift), 5*(float(i)+yshift), 0.0f));
+        }
+    }
+    for (int i=0; i<num_imgs; i++) {
+        all_pattern_points.push_back(pattern_points);
+    }
+
+    cout<<"\nINITIALIZING CAMERAS...\n\n";
+
+    for (int i=0; i<num_cams; i++) {
+
+        cout<<"Calibrating camera "<<i+1<<"...";
+        Mat_<double> A = Mat_<double>::zeros(3,3); 
+        //Mat A;
+        Mat_<double> dist_coeff;
+        
+        A(0,0) = 9000; 
+        A(1,1) = 9000;
+        A(0,2) = 646; 
+        A(1,2) = 482;
+        A(2,2) = 1;
+        
+        vector<Mat> rvec, tvec;
+        calibrateCamera(all_pattern_points, all_corner_points[i], img_size, A, dist_coeff, rvec, tvec, CV_CALIB_USE_INTRINSIC_GUESS|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_ASPECT_RATIO);
+        //cout<<calibrateCamera(all_pattern_points, all_corner_points[i], img_size, A, dist_coeff, rvec, tvec, CV_CALIB_FIX_ASPECT_RATIO)<<endl;
+        cout<<"done!\n";
+
+        cameraMats.push_back(A);
+        dist_coeffs.push_back(dist_coeff);
+        rvecs.push_back(rvec);
+        tvecs.push_back(tvec);
+
+    }
+
+    cout<<"\nCAMERA CALIBRATION COMPLETE!\n\n";
+
+}
+
+>>>>>>> origin/master
+// Function to calculate T (translation matrix) from R and t matrices for all cameras AND images
+void get_translations_all(vector< vector<Mat> > rvecs, vector< vector<Mat> > tvecs, vector< vector<Mat> > &translations) {
+
+    for (int i=0; i<rvecs.size(); i++) {
+        
+        vector<Mat> translations_cam;
+        Mat R, R_t;
+
+        for (int j=0; j<rvecs[0].size(); j++) {
+            
+            Mat T;
+            Rodrigues(rvecs[i][j], R);
+            transpose(R, R_t);
+            T = -R_t*tvecs[i][j];
+            translations_cam.push_back(T.clone());
+
+        }
+
+        translations.push_back(translations_cam);
+
+    }
+
+}
+
+// Function to calculate T (translation matrix) from R and t matrices for all cameras
+void get_translations(vector<Mat> rvecs, vector<Mat> tvecs, vector<Mat> &translations) {
+
+    for (int i=0; i<rvecs.size(); i++) {
+        
+        Mat translation_cam;
+        Mat R, R_t, T;
+       
+        Rodrigues(rvecs[i], R);
+        transpose(R, R_t);
+        T = -R_t*tvecs[i];
+
+        translations.push_back(T.clone());
+
+    }
+
+}
+<<<<<<< HEAD
+
+// Construct a P matrix from K, R and T matrices
+Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean) {
+
+    Mat R_o;
+    Rodrigues(rvec, R_o);
+
+    Mat rmean_t;
+    transpose(rmean, rmean_t);
+
+    Mat R = R_o*rmean_t;
+
+    Mat_<double> P = Mat_<double>::zeros(3,4);
+    for (int i=0; i<3; i++) {
+        for (int j=0; j<3; j++) {
+            P(i,j) = R.at<double>(i,j);
+        }
+        P(i,3) = tvec.at<double>(0,i);
+    }
+
+    P = K*P;
+                                              
+    return(P);
+
+}
+=======
+>>>>>>> origin/master

@@ -1,0 +1,50 @@
+\hypertarget{optimization_8h}{\section{/home/ab9/projects/sa-\/ptv/lib/optimization.h File Reference}
+\label{dd/d83/optimization_8h}\index{/home/ab9/projects/sa-\/ptv/lib/optimization.\-h@{/home/ab9/projects/sa-\/ptv/lib/optimization.\-h}}
+}
+{\ttfamily \#include \char`\"{}std\-\_\-include.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classbaProblem}{ba\-Problem}
+\item 
+struct \hyperlink{structpinholeReprojectionError}{pinhole\-Reprojection\-Error}
+\item 
+class \hyperlink{classbaProblem__ref}{ba\-Problem\-\_\-ref}
+\item 
+struct \hyperlink{structrefractiveReprojectionError}{refractive\-Reprojection\-Error}
+\item 
+class \hyperlink{classleastSquares}{least\-Squares}
+\item 
+struct \hyperlink{structrotationError}{rotation\-Error}
+\item 
+struct \hyperlink{structplaneError}{plane\-Error}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{optimization_8h_a5f16760b72e9bb9e281a2a5c85463423}{B\-A\-\_\-pinhole} (\hyperlink{classbaProblem}{ba\-Problem} \&ba\-\_\-problem, string ba\-\_\-file, Size img\-\_\-size, char $\ast$argv)
+\item 
+double \hyperlink{optimization_8h_a2d9a000d1a1b6e036fdbd38f264ff4ec}{fit\-\_\-plane} (\hyperlink{classleastSquares}{least\-Squares} \&ls\-\_\-problem, string filename, vector$<$ Mat $>$ points)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{optimization_8h_a5f16760b72e9bb9e281a2a5c85463423}{\index{optimization.\-h@{optimization.\-h}!B\-A\-\_\-pinhole@{B\-A\-\_\-pinhole}}
+\index{B\-A\-\_\-pinhole@{B\-A\-\_\-pinhole}!optimization.h@{optimization.\-h}}
+\subsubsection[{B\-A\-\_\-pinhole}]{\setlength{\rightskip}{0pt plus 5cm}double B\-A\-\_\-pinhole (
+\begin{DoxyParamCaption}
+\item[{{\bf ba\-Problem} \&}]{ba\-\_\-problem, }
+\item[{string}]{ba\-\_\-file, }
+\item[{Size}]{img\-\_\-size, }
+\item[{char $\ast$}]{argv}
+\end{DoxyParamCaption}
+)}}\label{dd/d83/optimization_8h_a5f16760b72e9bb9e281a2a5c85463423}
+\hypertarget{optimization_8h_a2d9a000d1a1b6e036fdbd38f264ff4ec}{\index{optimization.\-h@{optimization.\-h}!fit\-\_\-plane@{fit\-\_\-plane}}
+\index{fit\-\_\-plane@{fit\-\_\-plane}!optimization.h@{optimization.\-h}}
+\subsubsection[{fit\-\_\-plane}]{\setlength{\rightskip}{0pt plus 5cm}double fit\-\_\-plane (
+\begin{DoxyParamCaption}
+\item[{{\bf least\-Squares} \&}]{ls\-\_\-problem, }
+\item[{string}]{filename, }
+\item[{vector$<$ Mat $>$}]{points}
+\end{DoxyParamCaption}
+)}}\label{dd/d83/optimization_8h_a2d9a000d1a1b6e036fdbd38f264ff4ec}

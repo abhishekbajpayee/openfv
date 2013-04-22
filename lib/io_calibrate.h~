@@ -1,0 +1,12 @@
+#include "stdinclude.h"
+
+using namespace cv;
+using namespace std;
+
+// FUNCTIONS
+
+vector<string> read_cam_names(string path);
+
+vector< vector<Mat> > read_calib_imgs(string path, vector<string> cam_names);
+
+void disp_M(Mat M);

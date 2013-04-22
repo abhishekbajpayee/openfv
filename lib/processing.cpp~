@@ -1,0 +1,75 @@
+#include "stdinclude.h"
+
+using namespace cv;
+using namespace std;
+
+// -------------------------------------------------------
+// Function definitions for processing.cpp START
+
+// Note: Corner detection confuses the orientation of a square grid sometimes
+//       hence leading to garbage points data. Use rectangular grid instead.
+//       Function assumes that images in each folder are corresponding by name
+//       and orders points in a linear order.
+// Work: - Move patterSize declaration outside function
+vector< vector<Point2f> > find_corners(vector< vector<Mat> > calib_imgs) {
+
+    vector< vector<Point2f> > all_points;
+    vector<Point2f> points;
+    Size patternSize = Size(6,6);
+    Mat scene, scene_drawn;
+
+    for (int i=0; i<calib_imgs.size(); i++) {
+        
+        vector<Mat> imgs_temp = calib_imgs[i];
+        for (int j=0; j<imgs_temp.size(); j++) {
+            
+            scene = imgs_temp[j];
+            scene_drawn = scene;
+            
+            bool found = findChessboardCorners(scene, patternSize, points, CV_CALIB_CB_ADAPTIVE_THRESH);
+            
+            if (found) {
+                cornerSubPix(scene, points, Size(20, 20), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+                drawChessboardCorners(scene_drawn, patternSize, points, found);
+                all_points.push_back(points);
+            } else {
+                cout<<"Pattern not found!\n";
+            }
+            
+            /*
+            namedWindow("Pattern", CV_WINDOW_AUTOSIZE);
+            imshow("Pattern", scene);
+            waitKey(0);
+            cvDestroyWindow("Pattern");
+            */
+
+        }
+    }
+
+    return(all_points);
+
+}
+
+
+// Note: Function to solve for cameraData elements for each camera. Assume
+//       images are all in order.
+// Work: - write the funcion!
+struct cameraData* calibrate_cameras(vector< vector<Point2f> > corner_points, int num_cams, int num_imgs) {
+
+    cameraData* cData;
+
+    for (int i=0; i<num_cams; i++) {
+
+        for (int j=0; j<num_imgs; j++) {
+            
+            
+        }
+
+    }
+
+    return(cData);
+
+}
+
+// Function definitions for processing.cpp END
+// -------------------------------------------------------
