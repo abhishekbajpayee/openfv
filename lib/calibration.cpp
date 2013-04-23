@@ -11,26 +11,64 @@
 
 #include "calibration.h"
 #include "optimization.h"
+#include "tools.h"
 
 void multiCamCalibration::initialize() {
 
     ba_file_ = string("temp/ba_data.txt");
+    result_dir_ = string("calibration_results");
+    
+    run_calib_flag = 0;
+    load_results_flag = 0;
+    int result_dir_found = 0;
+    DIR *dir;
+    struct dirent *ent;
+    string temp_name;
+    dir = opendir(path_.c_str());
+    int choice;
+    while(ent = readdir(dir)) {
+        temp_name = ent->d_name;
+        if (!temp_name.compare(result_dir_)) {
+            result_dir_found = 1;
+            cout<<"\'"<<result_dir_<<"\' directory found in "<<path_<<"! Calibration has already been performed earlier. Please select what to do...\n1) Run calibration again\n2) Read results\nEnter your choice (1/2): ";
+            cin>>choice;
+            if (choice==1) {
+                run_calib_flag = 1;
+            } else if (choice==2) {
+                load_results_flag = 1;
+            } else {
+                cout<<"Invalid choice!\n";
+            }
+        }
+    }
+    if (!result_dir_found) run_calib_flag = 1;
 
     center_cam_id_ = 4; // TODO
 
     show_corners_flag = 0;
+    results_just_saved_flag = 0;
 
 }
 
 void multiCamCalibration::run() {
     
     initialize();
-    read_cam_names();
-    read_calib_imgs();
-    find_corners();
-    initialize_cams();
-    write_BA_data();
-    run_BA();
+
+    if (run_calib_flag) {
+        read_cam_names();
+        read_calib_imgs();
+        find_corners();
+        initialize_cams();
+        write_BA_data();
+        run_BA();
+        write_calib_results();
+    }
+
+    if (load_results_flag) {
+        load_calib_results();
+    }
+
+    cout<<"\nCALIBRATION COMPLETE!\n";
 
 }
 
@@ -51,9 +89,11 @@ void multiCamCalibration::read_cam_names() {
         temp_name = ent->d_name;
         if (temp_name.compare(dir1)) {
             if (temp_name.compare(dir2)) {
-                //cout<<"Camera "<<i<<": "<<ent->d_name<<"\n";
-                cam_names_.push_back(ent->d_name);
-                i++;
+                if (temp_name.compare(result_dir_)) {
+                    //cout<<"Camera "<<i<<": "<<ent->d_name<<"\n";
+                    cam_names_.push_back(ent->d_name);
+                    i++;
+                }
             }
         }
     }
@@ -90,7 +130,6 @@ void multiCamCalibration::read_calib_imgs() {
         path_tmp = path_+cam_names_[i]+"/"+img_prefix;
 
         dir = opendir(path_tmp.c_str());
-
         while(ent = readdir(dir)) {
             temp_name = ent->d_name;
             if (temp_name.compare(dir1)) {
@@ -289,11 +328,123 @@ void multiCamCalibration::write_BA_data() {
 
 void multiCamCalibration::run_BA() {
 
-    cout<<"FINAL REPROJECTION ERROR: "<<BA_pinhole(ba_problem_, ba_file_, img_size_)<<endl;
+    total_reproj_error_ = BA_pinhole(ba_problem_, ba_file_, img_size_);
+    avg_reproj_error_ = total_reproj_error_/double(ba_problem_.num_observations());
+    cout<<"FINAL TOTAL REPROJECTION ERROR: "<<total_reproj_error_<<endl;
 
 }
 
-void multiCamCalibration::write_BA_results() {
+void multiCamCalibration::write_calib_results() {
+
+    char choice;
+    cout<<"\nDo you wish to save the calibration results (y/n)?: ";
+    cin>>choice;
+
+    if (choice==89 || choice==121) {
+        
+        string newPath = path_ + result_dir_ + "/";
+        if (!dirExists(newPath)) {
+            cout<<"\'calibration_results\' directory does not exist..."<<endl;
+            mkdir(newPath.c_str(), S_IRWXU);
+            cout<<"directory created!"<<endl;
+        }
+
+        time_t timer;
+        char time_stamp[15];
+        sprintf(time_stamp, "%.15ld", timer);
+        string time_stamp_str(time_stamp);
+        result_file_ = newPath + "results_"+time_stamp_str+".txt";
+        results_just_saved_flag = 1;
+        
+        struct tm * timeinfo;
+        time (&timer);
+        timeinfo = localtime(&timer);
+        char time_stamp_hr[50];
+        sprintf(time_stamp_hr, "Calibration performed: %s", asctime(timeinfo));
+        string time_stamp_hr_str(time_stamp_hr);
+
+        double* camera_params = ba_problem_.mutable_cameras();
+
+        ofstream file;
+        file.open(result_file_.c_str());
+
+        // WRITING DATA TO RESULTS FILE
+        
+        file<<time_stamp_hr_str<<endl<<endl;
+        file<<total_reproj_error_<<endl<<avg_reproj_error_<<endl<<endl;
+        file<<num_cams_<<endl<<endl;
+
+        Mat_<double> rvec = Mat_<double>::zeros(1,3);
+        Mat_<double> tvec = Mat_<double>::zeros(3,1);
+        Mat_<double> K = Mat_<double>::zeros(3,3);
+        Mat_<double> dist = Mat_<double>::zeros(1,2);
+        Mat R;
+
+        for (int i=0; i<num_cams_; i++) {
+
+            for (int j=0; j<3; j++) {
+                rvec(0,j) = camera_params[(i*num_cams_)+j];
+                tvec(j,0) = camera_params[(i*num_cams_)+j+3];
+            }
+
+            Rodrigues(rvec, R);
+            
+            file<<cam_names_[i]<<endl;
+            file<<camera_params[(i*num_cams_)+6]<<"\t";
+            file<<camera_params[(i*num_cams_)+7]<<"\t";
+            file<<camera_params[(i*num_cams_)+8]<<"\t"<<endl;
+            for (int j=0; j<3; j++) {
+                for (int k=0; k<3; k++) {
+                    file<<R.at<double>(j,k)<<"\t";
+                }
+                file<<tvec(j,0)<<endl;
+            }
+            file<<endl;
+            
+            K(0,0) = camera_params[(i*num_cams_)+6];
+            K(1,1) = camera_params[(i*num_cams_)+6];
+            K(0,2) = img_size_.width*0.5;
+            K(1,2) = img_size_.height*0.5;
+            K(2,2) = 1;
+
+            rVecs_.push_back(rvec.clone());
+            tVecs_.push_back(tvec.clone());
+            K_mats_.push_back(K.clone());
+
+        }
+
+        Mat_<double> P_u = Mat_<double>::zeros(3,4);
+        Mat_<double> P = Mat_<double>::zeros(3,4);
+        Mat_<double> rmean = Mat_<double>::zeros(3,3);
+        matrixMean(rVecs_, rmean);
+        for (int i=0; i<num_cams_; i++) {
+            P_from_KRT(K_mats_[i], rVecs_[i], tVecs_[i], rmean, P_u, P);
+            P_mats_u_.push_back(P_u.clone());
+            P_mats_.push_back(P.clone());
+        }
+        
+        file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_;
+
+        file.close();
+
+        cout<<"\nCalibration results saved to file: "<<result_file_<<endl;
+
+    }
+
+}
+
+void multiCamCalibration::load_calib_results() {
+
+    ifstream file;
+    
+    // add stuff to read from folder for single and multiple result file cases
+
+    if (results_just_saved_flag) {
+        file.open(result_file_.c_str());
+    } else {
+        // choose which file to load
+    }
+
 
 }
 

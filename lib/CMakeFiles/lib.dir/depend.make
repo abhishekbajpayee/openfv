@@ -4,6 +4,7 @@
 lib/CMakeFiles/lib.dir/calibration.cpp.o: lib/calibration.cpp
 lib/CMakeFiles/lib.dir/calibration.cpp.o: lib/calibration.h
 lib/CMakeFiles/lib.dir/calibration.cpp.o: lib/optimization.h
+lib/CMakeFiles/lib.dir/calibration.cpp.o: lib/tools.h
 lib/CMakeFiles/lib.dir/calibration.cpp.o: /usr/local/include/Eigen/Cholesky
 lib/CMakeFiles/lib.dir/calibration.cpp.o: /usr/local/include/Eigen/Core
 lib/CMakeFiles/lib.dir/calibration.cpp.o: /usr/local/include/Eigen/Dense

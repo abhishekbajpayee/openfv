@@ -41,7 +41,8 @@ class multiCamCalibration {
     void write_BA_data();
     void run_BA();
 
-    void write_BA_results();
+    void write_calib_results();
+    void load_calib_results();
 
  private:
 
@@ -49,6 +50,8 @@ class multiCamCalibration {
 
     string path_;
     string ba_file_;
+    string result_dir_;
+    string result_file_;
     
     int num_cams_;
     int num_imgs_;
@@ -69,14 +72,26 @@ class multiCamCalibration {
     vector<Mat> dist_coeffs_;
     vector< vector<Mat> > rvecs_;
     vector< vector<Mat> > tvecs_;
+    
+    vector<Mat> P_mats_u_; // Unaligned P matrices
+    vector<Mat> P_mats_;
+    vector<Mat> rVecs_;
+    vector<Mat> tVecs_;
+    vector<Mat> K_mats_;
+    vector<Mat> dist_mats_;
 
     baProblem ba_problem_;
+    double total_reproj_error_;
+    double avg_reproj_error_;
 
     // Option flags
     int solveForDistortion; // TODO: NOT IMPLEMENTED
     int squareGrid; // TODO: NOT IMPLEMENTED
     int saveCornerImgs; // TODO: NOT IMPLEMENTED
     int show_corners_flag;
+    int run_calib_flag;
+    int results_just_saved_flag;
+    int load_results_flag;
     
 };
     

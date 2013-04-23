@@ -21,17 +21,6 @@ int main(int argc, char** argv) {
     calibration.run();
     
     /*
-    write_ba_result(ba_problem, ba_result_file);
-    
-    //write_calib_result(ba_problem, cam_names, img_size, pix_per_phys, path);
-    
-    // Reading calibration 1st round data
-    vector<Mat> P_mats, rvecs2, tvecs2, translations;
-    double scale;
-    read_calib_data(ba_result_file, P_mats, rvecs2, tvecs2, translations, scale);
-    
-    //write_ba_matlab(ba_problem, translations, P_mats);
-    
     int refocus = 1;
     if (refocus) {
     vector< vector<Mat> > refoc_imgs;
@@ -45,7 +34,7 @@ int main(int argc, char** argv) {
         imgs.push_back(refoc_imgs[i][0].clone());
     }
     
-    gpuRefocus session(P_mats, imgs, scale, 0, img_size);
+    gpuRefocus session(calibration.P_mats_, imgs, calibration.pix_per_phys_, 0, calibration.img_size_);
     session.start();
     }
     */

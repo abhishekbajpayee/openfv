@@ -10,6 +10,7 @@ using namespace std;
 
 // Read a Bundle Adjustment dataset
 class baProblem {
+ 
  public:
     ~baProblem() {
         delete[] point_index_;
@@ -17,6 +18,14 @@ class baProblem {
         delete[] plane_index_;
         delete[] observations_;
         delete[] parameters_;
+    }
+
+    baProblem() {
+        point_index_ = NULL;
+        camera_index_ = NULL;
+        plane_index_ = NULL;
+        observations_ = NULL;
+        parameters_ = NULL;
     }
 
     int num_observations()       const { return num_observations_;               }

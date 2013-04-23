@@ -11,6 +11,7 @@
 #include <math.h>
 #include <algorithm>
 #include <ctime>
+#include <sys/stat.h>
 
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
