@@ -156,6 +156,7 @@ void multiCamCalibration::read_calib_imgs() {
  
     num_imgs_ = calib_imgs_[0].size();
     img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
+    refocusing_params.img_size = img_size_;
 
     cout<<"\nDONE READING IMAGES!\n\n";
 
@@ -208,6 +209,7 @@ void multiCamCalibration::find_corners() {
 
     get_grid_size_pix();
     pix_per_phys_ = grid_size_pix_/grid_size_phys_;
+    refocusing_params.scale = pix_per_phys_;
 
     cout<<"\nCORNER FINDING COMPLETE!\n\n";
 
@@ -390,6 +392,7 @@ void multiCamCalibration::write_calib_results() {
             Rodrigues(rvec, R);
             
             file<<cam_names_[i]<<endl;
+            refocusing_params.cam_names.push_back(cam_names_[i]);
             file<<camera_params[(i*num_cams_)+6]<<"\t";
             file<<camera_params[(i*num_cams_)+7]<<"\t";
             file<<camera_params[(i*num_cams_)+8]<<"\t"<<endl;
@@ -412,16 +415,17 @@ void multiCamCalibration::write_calib_results() {
             K_mats_.push_back(K.clone());
 
         }
-
+        
         Mat_<double> P_u = Mat_<double>::zeros(3,4);
         Mat_<double> P = Mat_<double>::zeros(3,4);
         Mat_<double> rmean = Mat_<double>::zeros(3,3);
         matrixMean(rVecs_, rmean);
+        cout<<rmean<<endl;/*
         for (int i=0; i<num_cams_; i++) {
             P_from_KRT(K_mats_[i], rVecs_[i], tVecs_[i], rmean, P_u, P);
-            P_mats_u_.push_back(P_u.clone());
-            P_mats_.push_back(P.clone());
-        }
+            refocusing_params.P_mats_u.push_back(P_u.clone());
+            refocusing_params.P_mats.push_back(P.clone());
+            }*/
         
         file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_;
 
@@ -439,11 +443,43 @@ void multiCamCalibration::load_calib_results() {
     
     // add stuff to read from folder for single and multiple result file cases
 
-    if (results_just_saved_flag) {
-        file.open(result_file_.c_str());
-    } else {
-        // choose which file to load
+    DIR *dir;
+    struct dirent *ent;
+    dir = opendir((path_+result_dir_+"/").c_str());
+
+    string temp_name;
+    string dir1(".");
+    string dir2("..");
+    vector<string> result_files;
+    int i=0;
+
+    cout<<"\nLOOKING FOR CALIBRATION RESULT FILES...\n\n";
+    while (ent = readdir(dir)) {
+        temp_name = ent->d_name;
+        if (temp_name.compare(dir1)) {
+            if (temp_name.compare(dir2)) {
+                result_files.push_back(ent->d_name);
+                i++;
+            }
+        }
     }
+
+    int choice;
+    if (result_files.size()==0) {
+        cout<<"No result files found! Please run calibration first.\n";
+    } else if (result_files.size()==1) {
+        file.open(result_files[0].c_str());
+    } else {
+        cout<<"Multiple result files found!\n";
+        for (int i=0; i<result_files.size(); i++) {
+            cout<<i+1<<") "<<result_files[i]<<endl;
+        }
+        cout<<"Select the file to laod (1,..."<<result_files.size()<<"): ";
+        cin>>choice;
+        file.open(result_files[choice-1].c_str());
+    }
+
+    file.close();
 
 
 }

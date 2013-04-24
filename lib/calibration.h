@@ -73,12 +73,18 @@ class multiCamCalibration {
     vector< vector<Mat> > rvecs_;
     vector< vector<Mat> > tvecs_;
     
-    vector<Mat> P_mats_u_; // Unaligned P matrices
-    vector<Mat> P_mats_;
     vector<Mat> rVecs_;
     vector<Mat> tVecs_;
     vector<Mat> K_mats_;
     vector<Mat> dist_mats_;
+
+    struct refocusing_data {
+        vector<Mat> P_mats_u; // Unaligned P matrices
+        vector<Mat> P_mats;
+        vector<string> cam_names;
+        double scale;
+        Size img_size;
+    } refocusing_params;
 
     baProblem ba_problem_;
     double total_reproj_error_;
