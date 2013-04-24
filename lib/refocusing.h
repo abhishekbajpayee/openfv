@@ -34,6 +34,8 @@ class saRefocus {
 
     // Functions
 
+    void read_imgs(string path);
+
     void startGPUsession();
     void initializeGPU();
     void GPUrefocus(double z);
@@ -50,9 +52,10 @@ class saRefocus {
 
     double z;
 
-    vector<Mat> array_host;
+    // Vector of vectors that stores images from all cameras and for all time steps
+    vector< vector<Mat> > imgs;
+
     Mat refocused_host;
-    Mat den_host;
 
     vector<gpu::GpuMat> array;
     gpu::GpuMat temp;

@@ -17,6 +17,54 @@
 using namespace std;
 using namespace cv;
 
+void saRefocus::read_imgs(string path) {
+
+    DIR *dir;
+    struct dirent *ent;
+ 
+    string dir1(".");
+    string dir2("..");
+    string temp_name;
+    string img_prefix = "";
+
+    Mat image, fimage;
+
+    cout<<"\nREADING IMAGES TO REFOCUS...\n\n";
+
+    for (int i=0; i<num_cams_; i++) {
+
+        cout<<"Camera "<<i+1<<" of "<<num_cams_<<"...";
+
+        string path_tmp;
+        vector<Mat> refocusing_imgs_sub;
+
+        path_tmp = path+cam_names_[i]+"/"+img_prefix;
+
+        dir = opendir(path_tmp.c_str());
+
+        while(ent = readdir(dir)) {
+            temp_name = ent->d_name;
+            if (temp_name.compare(dir1)) {
+                if (temp_name.compare(dir2)) {
+                    string path_img = path_tmp+temp_name;
+                    image = imread(path_img, 0);
+                    image.convertTo(fimage, CV_32F);
+                    refocusing_imgs_sub.push_back(fimage.clone());
+                }
+            }
+        }
+
+        imgs.push_back(refocusing_imgs_sub);
+        path_tmp = "";
+
+        cout<<"done!\n";
+   
+    }
+ 
+    cout<<"\nDONE READING IMAGES!\n\n";
+
+}
+
 void saRefocus::startGPUsession() {
 
     initializeGPU();
@@ -27,10 +75,10 @@ void saRefocus::startGPUsession() {
     while( 1 ){
         int key = cvWaitKey(10);
         if( (key & 255)==83 ) {
-            z += 0.5;
+            z += 0.1;
             GPUrefocus(z);
         } else if( (key & 255)==81 ) {
-            z -= 0.5;
+            z -= 0.1;
             GPUrefocus(z);
         } else if( (key & 255)==27 ) {
             break;
@@ -39,6 +87,9 @@ void saRefocus::startGPUsession() {
 
 }
 
+// TODO: Right now this function only uploads first time step
+//       so change to upload more time steps so this can be controlled
+//       from outside
 void saRefocus::initializeGPU() {
 
     cout<<endl<<"INITIALIZING GPU FOR VISUALIZATION..."<<endl;
@@ -49,12 +100,14 @@ void saRefocus::initializeGPU() {
     cout<<"---"<<gpuDevice.name()<<"---"<<endl;
     cout<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
     cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
-    cout<<"Cores: "<<gpuDevice.multiProcessorCount()<<endl;
     
-    for (int i=0; i<array_host.size(); i++) {
-        temp.upload(array_host[i]);
+    int t=0;
+    cout<<"Uploading images to GPU..."<<endl;
+    for (int i=0; i<num_cams_; i++) {
+        temp.upload(imgs[i][t]);
         array.push_back(temp.clone());
     }
+    cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
 
 }
 
@@ -70,7 +123,7 @@ void saRefocus::GPUrefocus(double z) {
     
     refocused = temp2.clone();
     
-    for (int i=1; i<array_host.size(); i++) {
+    for (int i=1; i<num_cams_; i++) {
         
         T_from_P(P_mats_[i], H, z, scale_, img_size_);
         

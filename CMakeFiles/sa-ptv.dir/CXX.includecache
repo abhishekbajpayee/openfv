@@ -9,10 +9,10 @@
 /home/ab9/projects/sa-ptv/sa-ptv.cpp
 std_include.h
 /home/ab9/projects/sa-ptv/std_include.h
-visualize.h
-/home/ab9/projects/sa-ptv/visualize.h
 calibration.h
 /home/ab9/projects/sa-ptv/calibration.h
+refocusing.h
+/home/ab9/projects/sa-ptv/refocusing.h
 tools.h
 /home/ab9/projects/sa-ptv/tools.h
 
@@ -2077,22 +2077,30 @@ std_include.h
 lib/std_include.h
 optimization.h
 lib/optimization.h
+typedefs.h
+lib/typedefs.h
 
 lib/optimization.h
 std_include.h
 lib/std_include.h
 
-lib/tools.h
+lib/refocusing.h
 std_include.h
 lib/std_include.h
-
-lib/visualize.h
-std_include.h
-lib/std_include.h
+calibration.h
+lib/calibration.h
+typedefs.h
+lib/typedefs.h
 opencv2/opencv.hpp
 -
 opencv2/gpu/gpu.hpp
 -
-tools.h
+
 lib/tools.h
+std_include.h
+lib/std_include.h
+
+lib/typedefs.h
+std_include.h
+lib/std_include.h
 

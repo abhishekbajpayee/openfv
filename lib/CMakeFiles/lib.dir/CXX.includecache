@@ -6,14 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/ab9/projects/sa-ptv/lib/calibration.cpp
-calibration.h
-/home/ab9/projects/sa-ptv/lib/calibration.h
-optimization.h
-/home/ab9/projects/sa-ptv/lib/optimization.h
-tools.h
-/home/ab9/projects/sa-ptv/lib/tools.h
-
 /home/ab9/projects/sa-ptv/lib/calibration.h
 std_include.h
 /home/ab9/projects/sa-ptv/lib/std_include.h

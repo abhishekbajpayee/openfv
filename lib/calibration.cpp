@@ -354,14 +354,15 @@ void multiCamCalibration::write_calib_results() {
         }
 
         time_t timer;
-        char time_stamp[20];
-        sprintf(time_stamp, "%.20ld", timer);
+        time(&timer);
+        char time_stamp[15];
+        sprintf(time_stamp, "%.15ld", timer);
         string time_stamp_str(time_stamp);
         result_file_ = newPath + "results_"+time_stamp_str+".txt";
         results_just_saved_flag = 1;
         
         struct tm * timeinfo;
-        time (&timer);
+        time(&timer);
         timeinfo = localtime(&timer);
         char time_stamp_hr[50];
         sprintf(time_stamp_hr, "Calibration performed: %s", asctime(timeinfo));
@@ -374,9 +375,9 @@ void multiCamCalibration::write_calib_results() {
 
         // WRITING DATA TO RESULTS FILE
         
-        //file<<time_stamp_hr_str<<endl;
-        file<<total_reproj_error_<<endl<<avg_reproj_error_<<endl<<endl;
-        file<<num_cams_<<endl<<endl;
+        file<<time_stamp_hr_str<<endl;
+        file<<total_reproj_error_<<endl<<avg_reproj_error_<<endl;
+        file<<num_cams_<<endl;
 
         Mat_<double> rvec = Mat_<double>::zeros(1,3);
         Mat_<double> tvec = Mat_<double>::zeros(3,1);
@@ -393,18 +394,7 @@ void multiCamCalibration::write_calib_results() {
 
             Rodrigues(rvec, R);
             
-            file<<cam_names_[i]<<endl;
             refocusing_params_.cam_names.push_back(cam_names_[i]);
-            file<<camera_params[(i*num_cams_)+6]<<"\t";
-            file<<camera_params[(i*num_cams_)+7]<<"\t";
-            file<<camera_params[(i*num_cams_)+8]<<"\t"<<endl;
-            for (int j=0; j<3; j++) {
-                for (int k=0; k<3; k++) {
-                    file<<R.at<double>(j,k)<<"\t";
-                }
-                file<<tvec(j,0)<<endl;
-            }
-            file<<endl;
             
             K(0,0) = camera_params[(i*num_cams_)+6];
             K(1,1) = camera_params[(i*num_cams_)+6];
@@ -441,6 +431,21 @@ void multiCamCalibration::write_calib_results() {
             P = K*P;
             refocusing_params_.P_mats_u.push_back(P_u.clone());
             refocusing_params_.P_mats.push_back(P.clone());
+
+            // Writing camera names and P matrices to file
+            file<<cam_names_[i]<<endl;
+            for (int j=0; j<3; j++) {
+                for (int k=0; k<3; k++) {
+                    file<<P_u.at<double>(j,k)<<"\t";
+                }
+                file<<P_u.at<double>(j,3)<<endl;
+            }
+            for (int j=0; j<3; j++) {
+                for (int k=0; k<3; k++) {
+                    file<<P.at<double>(j,k)<<"\t";
+                }
+                file<<P.at<double>(j,3)<<endl;
+            }
 
         }
         
@@ -485,46 +490,67 @@ void multiCamCalibration::load_calib_results() {
     if (result_files.size()==0) {
         cout<<"No result files found! Please run calibration first.\n";
     } else if (result_files.size()==1) {
-        file.open(result_files[0].c_str());
+        temp_name = path_+result_dir_+"/"+result_files[0];
+        file.open(temp_name.c_str());
     } else {
         cout<<"Multiple result files found!\n";
         for (int i=0; i<result_files.size(); i++) {
-            cout<<i+1<<") "<<result_files[i]<<endl; // TODO: EXTRACT TIME AND DATE FROM FILENAME AND DISPLAY
+            cout<<i+1<<") "<<result_files[i]; // TODO: EXTRACT TIME AND DATE FROM FILENAME AND DISPLAY
+            temp_name = path_+result_dir_+"/"+result_files[i];
+            file.open(temp_name.c_str());
+            string time_stamp;
+            getline(file, time_stamp);
+            cout<<" ("<<time_stamp<<")"<<endl;
+            file.close();
         }
         cout<<"Select the file to load (1,..."<<result_files.size()<<"): ";
         cin>>choice;
-        file.open(result_files[choice-1].c_str());
+        temp_name = path_+result_dir_+"/"+result_files[choice-1];
+        file.open(temp_name.c_str());
     }
 
-    float dump;
-    file>>dump;
-    file>>refocusing_params_.num_cams;
-    cout<<dump;
-    file>>dump;
-    cout<<dump;
+    string time_stamp;
+    getline(file, time_stamp);
 
+    double reproj_error1, reproj_error2;
+    file>>reproj_error1>>reproj_error2;
+    file>>refocusing_params_.num_cams;
+
+    Mat_<double> P_u = Mat_<double>::zeros(3,4);
+    Mat_<double> P = Mat_<double>::zeros(3,4);
     string cam_name;
-    double f, d1, d2, tmp;
-    /*
-    for (int i=0; i<refocusing_params.num_cams; i++) {
-        file>>cam_name;
-        file>>f;
-        file>>d1;
-        file>>d2;
-        cout<<cam_name<<endl;
-        cout<<f<<endl;
+    double tmp;
+    
+    for (int i=0; i<refocusing_params_.num_cams; i++) {
+        
+        for (int j=0; j<2; j++) getline(file, cam_name);
+        
+        refocusing_params_.cam_names.push_back(cam_name);
+        
         for (int j=0; j<3; j++) {
             for (int k=0; k<3; k++) {
-                file>>tmp;
-                cout<<tmp<<"\t";
+                file>>P_u(j,k);
             }
-            file>>tmp;
-            cout<<tmp<<endl;
+            file>>P_u(j,3);
         }
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<3; k++) {
+                file>>P(j,k);
+            }
+            file>>P(j,3);
+        }
+        refocusing_params_.P_mats_u.push_back(P_u.clone());
+        refocusing_params_.P_mats.push_back(P.clone());
+
     }
-    */
+
+    file>>refocusing_params_.img_size.width;
+    file>>refocusing_params_.img_size.height;
+    file>>refocusing_params_.scale;
+
     file.close();
 
+    cout<<"\nCALIBRATION RESULTS LOADED!\n";
 
 }
 

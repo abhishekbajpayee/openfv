@@ -294,6 +294,7 @@ CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: /usr/local/include/opencv2/video/video.hpp
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: include/std_include.h
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: lib/calibration.h
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: lib/optimization.h
+CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: lib/refocusing.h
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: lib/tools.h
-CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: lib/visualize.h
+CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: lib/typedefs.h
 
