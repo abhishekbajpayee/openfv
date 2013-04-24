@@ -1,8 +1,8 @@
 #include "std_include.h"
 //#include "lib_include.h"
 
-#include "visualize.h"
 #include "calibration.h"
+#include "refocusing.h"
 #include "tools.h"
 
 using namespace cv;
@@ -13,13 +13,15 @@ int main(int argc, char** argv) {
     // Camera Calibration Section
     clock_t begin = clock();
 
-    string path("../experiment/calibration_skew/"); // Folder where calibration images lie
+    string path("../experiment/calibration_rect/"); // Folder where calibration images lie
     Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
 
     multiCamCalibration calibration(path, grid_size, grid_size_phys);
     calibration.run();
-    
+
+    saRefocus refocus(calibration.refocusing_params());
+
     /*
     int refocus = 1;
     if (refocus) {

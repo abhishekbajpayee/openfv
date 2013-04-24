@@ -92,9 +92,32 @@ lib/CMakeFiles/lib.dir/calibration.cpp.o.provides: lib/CMakeFiles/lib.dir/calibr
 
 lib/CMakeFiles/lib.dir/calibration.cpp.o.provides.build: lib/CMakeFiles/lib.dir/calibration.cpp.o
 
+lib/CMakeFiles/lib.dir/refocusing.cpp.o: lib/CMakeFiles/lib.dir/flags.make
+lib/CMakeFiles/lib.dir/refocusing.cpp.o: lib/refocusing.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/CMakeFiles $(CMAKE_PROGRESS_3)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object lib/CMakeFiles/lib.dir/refocusing.cpp.o"
+	cd /home/ab9/projects/sa-ptv/lib && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lib.dir/refocusing.cpp.o -c /home/ab9/projects/sa-ptv/lib/refocusing.cpp
+
+lib/CMakeFiles/lib.dir/refocusing.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lib.dir/refocusing.cpp.i"
+	cd /home/ab9/projects/sa-ptv/lib && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ab9/projects/sa-ptv/lib/refocusing.cpp > CMakeFiles/lib.dir/refocusing.cpp.i
+
+lib/CMakeFiles/lib.dir/refocusing.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lib.dir/refocusing.cpp.s"
+	cd /home/ab9/projects/sa-ptv/lib && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ab9/projects/sa-ptv/lib/refocusing.cpp -o CMakeFiles/lib.dir/refocusing.cpp.s
+
+lib/CMakeFiles/lib.dir/refocusing.cpp.o.requires:
+.PHONY : lib/CMakeFiles/lib.dir/refocusing.cpp.o.requires
+
+lib/CMakeFiles/lib.dir/refocusing.cpp.o.provides: lib/CMakeFiles/lib.dir/refocusing.cpp.o.requires
+	$(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/refocusing.cpp.o.provides.build
+.PHONY : lib/CMakeFiles/lib.dir/refocusing.cpp.o.provides
+
+lib/CMakeFiles/lib.dir/refocusing.cpp.o.provides.build: lib/CMakeFiles/lib.dir/refocusing.cpp.o
+
 lib/CMakeFiles/lib.dir/tools.cpp.o: lib/CMakeFiles/lib.dir/flags.make
 lib/CMakeFiles/lib.dir/tools.cpp.o: lib/tools.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/CMakeFiles $(CMAKE_PROGRESS_3)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object lib/CMakeFiles/lib.dir/tools.cpp.o"
 	cd /home/ab9/projects/sa-ptv/lib && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lib.dir/tools.cpp.o -c /home/ab9/projects/sa-ptv/lib/tools.cpp
 
@@ -119,6 +142,7 @@ lib/CMakeFiles/lib.dir/tools.cpp.o.provides.build: lib/CMakeFiles/lib.dir/tools.
 lib_OBJECTS = \
 "CMakeFiles/lib.dir/optimization.cpp.o" \
 "CMakeFiles/lib.dir/calibration.cpp.o" \
+"CMakeFiles/lib.dir/refocusing.cpp.o" \
 "CMakeFiles/lib.dir/tools.cpp.o"
 
 # External object files for target lib
@@ -126,6 +150,7 @@ lib_EXTERNAL_OBJECTS =
 
 lib/liblib.a: lib/CMakeFiles/lib.dir/optimization.cpp.o
 lib/liblib.a: lib/CMakeFiles/lib.dir/calibration.cpp.o
+lib/liblib.a: lib/CMakeFiles/lib.dir/refocusing.cpp.o
 lib/liblib.a: lib/CMakeFiles/lib.dir/tools.cpp.o
 lib/liblib.a: lib/CMakeFiles/lib.dir/build.make
 lib/liblib.a: lib/CMakeFiles/lib.dir/link.txt
@@ -139,6 +164,7 @@ lib/CMakeFiles/lib.dir/build: lib/liblib.a
 
 lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/optimization.cpp.o.requires
 lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/calibration.cpp.o.requires
+lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/refocusing.cpp.o.requires
 lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/tools.cpp.o.requires
 .PHONY : lib/CMakeFiles/lib.dir/requires
 

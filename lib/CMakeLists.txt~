@@ -1,5 +1,6 @@
 add_library (lib optimization.cpp
-                 calibration.cpp)
+                 calibration.cpp
+		 tools.cpp)
 
 find_package (OpenCV REQUIRED)
 

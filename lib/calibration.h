@@ -9,8 +9,12 @@
 // -------------------------------------------------------
 // -------------------------------------------------------
 
+#ifndef CALIBRATION_LIBRARY
+#define CALIBRATION_LIBRARY
+
 #include "std_include.h"
 #include "optimization.h"
+#include "typedefs.h"
 
 class multiCamCalibration {
  
@@ -27,6 +31,7 @@ class multiCamCalibration {
     int num_imgs() { return num_imgs_; }
     Size grid_size() { return grid_size_; }
     vector<string> cam_names() { return cam_names_; }
+    refocusing_data refocusing_params() { return refocusing_params_; }
     
     // Functions to run calibration
     void initialize();
@@ -78,13 +83,7 @@ class multiCamCalibration {
     vector<Mat> K_mats_;
     vector<Mat> dist_mats_;
 
-    struct refocusing_data {
-        vector<Mat> P_mats_u; // Unaligned P matrices
-        vector<Mat> P_mats;
-        vector<string> cam_names;
-        double scale;
-        Size img_size;
-    } refocusing_params;
+    refocusing_data refocusing_params_;
 
     baProblem ba_problem_;
     double total_reproj_error_;
@@ -101,4 +100,4 @@ class multiCamCalibration {
     
 };
     
-    
+#endif

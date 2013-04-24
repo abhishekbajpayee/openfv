@@ -1,3 +1,6 @@
+#ifndef TOOLS_LIBRARY
+#define TOOLS_LIBRARY
+
 #include "std_include.h"
 #include "tools.h"
 
@@ -64,12 +67,9 @@ int matrixMean(vector<Mat> mats_in, Mat &mat_out) {
         return 0;
     }
 
-    int rows = mats_in[0].rows;
-    int cols = mats_in[0].cols;
-
     for (int i=0; i<mats_in.size(); i++) {
-        for (int j=0; j<rows; j++) {
-            for (int k=0; k<cols; k++) {
+        for (int j=0; j<mats_in[0].rows; j++) {
+            for (int k=0; k<mats_in[0].cols; k++) {
                 mat_out.at<double>(j,k) += mats_in[i].at<double>(j,k);
             }
         }
@@ -84,24 +84,23 @@ int matrixMean(vector<Mat> mats_in, Mat &mat_out) {
 // Construct aligned and unaligned P matrix from K, R and T matrices
 Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P) {
 
-    Mat R_o;
-    Rodrigues(rvec, R_o);
-
     Mat rmean_t;
     transpose(rmean, rmean_t);
 
-    Mat R = R_o*rmean_t;
+    Mat R = rvec*rmean_t;
     
     for (int i=0; i<3; i++) {
         for (int j=0; j<3; j++) {
-            P_u.at<double>(i,j) = R_o.at<double>(i,j);
+            P_u.at<double>(i,j) = rvec.at<double>(i,j);
             P.at<double>(i,j) = R.at<double>(i,j);
         }
         P_u.at<double>(i,3) = tvec.at<double>(0,i);
         P.at<double>(i,3) = tvec.at<double>(0,i);
     }
-
-    P_u = K*P;
+    
+    P_u = K*P_u;
     P = K*P;
 
 }
+
+#endif

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <fstream>
+#include <sstream>
 #include <math.h>
 #include <algorithm>
 #include <ctime>

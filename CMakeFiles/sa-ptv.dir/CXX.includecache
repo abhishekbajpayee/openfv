@@ -2057,6 +2057,8 @@ dirent.h
 -
 fstream
 -
+sstream
+-
 math.h
 -
 algorithm

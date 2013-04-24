@@ -1,0 +1,33 @@
+// -------------------------------------------------------
+// -------------------------------------------------------
+// Synthetic Aperture - Particle Tracking Velocimetry Code
+// --- Refocusing Library ---
+// -------------------------------------------------------
+// Author: Abhishek Bajpayee
+//         Dept. of Mechanical Engineering
+//         Massachusetts Institute of Technology
+// -------------------------------------------------------
+// -------------------------------------------------------
+
+#include "std_include.h"
+#include "calibration.h"
+#include "refocusing.h"
+
+using namespace std;
+using namespace cv;
+
+void saRefocus::startGPUsession() {
+
+
+}
+
+void saRefocus::initializeGPU() {
+
+
+}
+
+
+void saRefocus::refocus(double z) {
+
+
+}
