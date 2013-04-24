@@ -1,2 +1,2 @@
-/usr/bin/ar cr liblib.a  CMakeFiles/lib.dir/optimization.cpp.o CMakeFiles/lib.dir/calibration.cpp.o CMakeFiles/lib.dir/refocusing.cpp.o CMakeFiles/lib.dir/tools.cpp.o
+/usr/bin/ar cr liblib.a  CMakeFiles/lib.dir/optimization.cpp.o CMakeFiles/lib.dir/calibration.cpp.o CMakeFiles/lib.dir/refocusing.cpp.o CMakeFiles/lib.dir/pLoc.cpp.o CMakeFiles/lib.dir/tools.cpp.o
 /usr/bin/ranlib liblib.a

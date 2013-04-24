@@ -1,0 +1,36 @@
+// -------------------------------------------------------
+// -------------------------------------------------------
+// Synthetic Aperture - Particle Tracking Velocimetry Code
+// --- Particle Localization Header ---
+// -------------------------------------------------------
+// Author: Abhishek Bajpayee
+//         Dept. of Mechanical Engineering
+//         Massachusetts Institute of Technology
+// -------------------------------------------------------
+// -------------------------------------------------------
+
+#ifndef LOCALIZATION_LIBRARY
+#define LOCALIZATION_LIBRARY
+
+#include "std_include.h"
+
+using namespace std;
+using namespace cv;
+
+class pLocalize {
+
+ public:
+
+    ~pLocalize() {
+
+    }
+
+    pLocalize() {}
+
+    //Functions
+
+ private:
+
+    // private variables and functions
+
+};

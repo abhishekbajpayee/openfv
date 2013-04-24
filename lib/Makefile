@@ -157,6 +157,30 @@ optimization.cpp.s:
 	cd /home/ab9/projects/sa-ptv && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/optimization.cpp.s
 .PHONY : optimization.cpp.s
 
+pLoc.o: pLoc.cpp.o
+.PHONY : pLoc.o
+
+# target to build an object file
+pLoc.cpp.o:
+	cd /home/ab9/projects/sa-ptv && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/pLoc.cpp.o
+.PHONY : pLoc.cpp.o
+
+pLoc.i: pLoc.cpp.i
+.PHONY : pLoc.i
+
+# target to preprocess a source file
+pLoc.cpp.i:
+	cd /home/ab9/projects/sa-ptv && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/pLoc.cpp.i
+.PHONY : pLoc.cpp.i
+
+pLoc.s: pLoc.cpp.s
+.PHONY : pLoc.s
+
+# target to generate assembly for a file
+pLoc.cpp.s:
+	cd /home/ab9/projects/sa-ptv && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/pLoc.cpp.s
+.PHONY : pLoc.cpp.s
+
 refocusing.o: refocusing.cpp.o
 .PHONY : refocusing.o
 
@@ -220,6 +244,9 @@ help:
 	@echo "... optimization.o"
 	@echo "... optimization.i"
 	@echo "... optimization.s"
+	@echo "... pLoc.o"
+	@echo "... pLoc.i"
+	@echo "... pLoc.s"
 	@echo "... refocusing.o"
 	@echo "... refocusing.i"
 	@echo "... refocusing.s"

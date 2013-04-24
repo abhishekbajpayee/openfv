@@ -70,7 +70,7 @@ void saRefocus::GPUliveView() {
     initializeGPU();
 
     namedWindow("Result", CV_WINDOW_AUTOSIZE);       
-    GPUrefocus(z, thresh);
+    GPUrefocus(z, thresh, 1);
     
     double dz = 0.5;
     double dthresh = 5;
@@ -79,14 +79,20 @@ void saRefocus::GPUliveView() {
         int key = cvWaitKey(10);
         if( (key & 255)==83 ) {
             z += dz;
-            GPUrefocus(z, thresh);
+            GPUrefocus(z, thresh, 1);
         } else if( (key & 255)==81 ) {
             z -= dz;
-            GPUrefocus(z, thresh);
+            GPUrefocus(z, thresh, 1);
         } else if( (key & 255)==82 ) {
-            if (thresh<255) { thresh += dthresh; GPUrefocus(z, thresh); }
+            if (thresh<255) { 
+                thresh += dthresh; 
+                GPUrefocus(z, thresh, 1); 
+            }
         } else if( (key & 255)==84 ) {
-            if (thresh>0) { thresh -= dthresh; GPUrefocus(z, thresh); }
+            if (thresh>0) { 
+                thresh -= dthresh; 
+                GPUrefocus(z, thresh, 1); 
+            }
         } else if( (key & 255)==27 ) {
             break;
         }
@@ -119,7 +125,7 @@ void saRefocus::initializeGPU() {
 }
 
 
-void saRefocus::GPUrefocus(double z, double thresh) {
+void saRefocus::GPUrefocus(double z, double thresh, int live) {
 
     Scalar fact = Scalar(1/double(array.size()));
 
@@ -142,11 +148,14 @@ void saRefocus::GPUrefocus(double z, double thresh) {
     
     gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
 
-    Mat refocused_host(refocused);
-    refocused_host /= 255.0;
-    char title[50];
-    sprintf(title, "z = %f, thresh = %f", z, thresh);
-    putText(refocused_host, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-    imshow("Result", refocused_host);
+    Mat refocused_host_(refocused);
+    refocused_host_ /= 255.0;
+
+    if (live) {
+        char title[50];
+        sprintf(title, "z = %f, thresh = %f", z, thresh);
+        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
+        imshow("Result", refocused_host_);
+    }
 
 }

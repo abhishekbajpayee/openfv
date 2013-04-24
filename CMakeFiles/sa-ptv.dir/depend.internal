@@ -295,6 +295,7 @@ CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o
  include/std_include.h
  lib/calibration.h
  lib/optimization.h
+ lib/pLoc.h
  lib/refocusing.h
  lib/tools.h
  lib/typedefs.h

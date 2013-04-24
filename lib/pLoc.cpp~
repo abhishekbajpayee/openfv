@@ -1,0 +1,44 @@
+// -------------------------------------------------------
+// -------------------------------------------------------
+// Synthetic Aperture - Particle Tracking Velocimetry Code
+// --- Particle Localization Header ---
+// -------------------------------------------------------
+// Author: Abhishek Bajpayee
+//         Dept. of Mechanical Engineering
+//         Massachusetts Institute of Technology
+// -------------------------------------------------------
+// -------------------------------------------------------
+
+#include "std_include.h"
+
+using namespace std;
+using namespace cv;
+
+void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
+
+
+
+}
+
+void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<Point2f> &points_out) {
+
+
+}
+
+int point_in_list(Point2f point, vector<Point2f> points) {
+
+
+
+}
+
+double min_dist(Point2f point, vector<Point2f> points) {
+
+
+
+}
+
+void draw_points(Mat image, Mat &drawn, vector<Point2f> points) {
+
+
+
+}

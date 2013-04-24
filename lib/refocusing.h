@@ -32,13 +32,13 @@ class saRefocus {
  saRefocus(refocusing_data refocusing_params):
     P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), z(0), thresh(0) {}
 
-    // Functions
+    Mat refocused_host() { return refocused_host_; }
 
     void read_imgs(string path);
 
     void GPUliveView();
     void initializeGPU();
-    void GPUrefocus(double z, double thresh);
+    void GPUrefocus(double z, double thresh, int live);
 
  private:
 
@@ -56,7 +56,7 @@ class saRefocus {
     // Vector of vectors that stores images from all cameras and for all time steps
     vector< vector<Mat> > imgs;
 
-    Mat refocused_host;
+    Mat refocused_host_;
 
     vector<gpu::GpuMat> array;
     gpu::GpuMat temp;

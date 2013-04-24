@@ -13,6 +13,8 @@ calibration.h
 /home/ab9/projects/sa-ptv/calibration.h
 refocusing.h
 /home/ab9/projects/sa-ptv/refocusing.h
+pLoc.h
+/home/ab9/projects/sa-ptv/pLoc.h
 tools.h
 /home/ab9/projects/sa-ptv/tools.h
 
@@ -2081,6 +2083,10 @@ typedefs.h
 lib/typedefs.h
 
 lib/optimization.h
+std_include.h
+lib/std_include.h
+
+lib/pLoc.h
 std_include.h
 lib/std_include.h
 

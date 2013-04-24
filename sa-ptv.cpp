@@ -3,6 +3,7 @@
 
 #include "calibration.h"
 #include "refocusing.h"
+#include "pLoc.h"
 #include "tools.h"
 
 using namespace cv;
@@ -24,26 +25,20 @@ int main(int argc, char** argv) {
 
     saRefocus refocus(calibration.refocusing_params());
     refocus.read_imgs(refoc_path);
-    refocus.GPUliveView();
+    //refocus.GPUliveView();
+    refocus.initializeGPU();
+    refocus.GPUrefocus(0, 50.0, 0);
 
-    /*
-    int refocus = 1;
-    if (refocus) {
-    vector< vector<Mat> > refoc_imgs;
-    string refoc_path("../experiment/objects/");
-    read_refocusing_imgs(refoc_path, cam_names, refoc_imgs);
+    vector<Point2f> points;
+    vector<Point2f> points_spix;
+    Mat result;
+    Mat image = refocus.refocused_host();
 
-    //refocus_img(refoc_imgs, P_mats, scale, 0, 0);
-    
-    vector<Mat> imgs;
-    for (int i=0; i<refoc_imgs.size(); i++) {
-        imgs.push_back(refoc_imgs[i][0].clone());
-    }
-    
-    gpuRefocus session(calibration.P_mats_, imgs, calibration.pix_per_phys_, 0, calibration.img_size_);
-    session.start();
-    }
-    */
+    pLocalize localizer(2);
+    localizer.find_particles(image, points);
+    localizer.refine_subpixel(image, points, points_spix);
+    localizer.draw_points(image, result, points_spix);
+    imshow("result", result);
 
     clock_t end = clock();
     cout<<endl<<"TIME TAKEN: "<<(float(end-begin)/CLOCKS_PER_SEC)<<" seconds"<<endl;
