@@ -6,60 +6,25 @@
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-vector$<$ string $>$ \hyperlink{io__calibrate_8h_a96aee1792da1246ba789efea82733e19}{read\-\_\-cam\-\_\-names} (string path)
-\begin{DoxyCompactList}\small\item\em Function to read camera names. \end{DoxyCompactList}\item 
-vector$<$ vector$<$ Mat $>$ $>$ \hyperlink{io__calibrate_8h_a5b763d5760b62c11bd0320c3b543b682}{read\-\_\-calib\-\_\-imgs} (string path, vector$<$ string $>$ cam\-\_\-names)
-\item 
-void \hyperlink{io__calibrate_8h_aa15b2fb805db857c0a5bc0b84a417b53}{disp\-\_\-\-M} (Mat M)
-\item 
-void \hyperlink{io__calibrate_8h_a8a85fb9c7b10335f197c98d03a849f2d}{write\-\_\-point\-\_\-data} (vector$<$ vector$<$ vector$<$ Point2f $>$ $>$ $>$ all\-\_\-corner\-\_\-points, vector$<$ Mat $>$ camera\-Mats, vector$<$ vector$<$ Mat $>$ $>$ rvecs, vector$<$ vector$<$ Mat $>$ $>$ tvecs, vector$<$ Mat $>$ dist\-\_\-coeffs, string filename)
-\item 
-void \hyperlink{io__calibrate_8h_adb3a6d6f47334cf6380dfc5c19ce759e}{write\-\_\-ba\-\_\-result} (\hyperlink{classbaProblem}{ba\-Problem} \&ba\-\_\-problem, string filename)
+$<$$<$$<$$<$$<$$<$$<$ H\-E\-A\-Dvoiddisp\-\_\-\-M(Mat\-M);=======vector\\*
+$<$ string $>$read\-\_\-cam\-\_\-names(stringpath);vector\\*
+$<$ vector$<$ Mat $>$\\*
+$>$read\-\_\-calib\-\_\-imgs(stringpath, \\*
+vector$<$ string $>$cam\-\_\-names);voiddisp\-\_\-\-M(Mat\-M);voidwrite\-\_\-point\-\_\-data(vector\\*
+$<$ vector$<$ vector$<$ Point2f $>$\\*
+$>$$>$all\-\_\-corner\-\_\-points, vector\\*
+$<$ Mat $>$camera\-Mats, vector\\*
+$<$ vector$<$ Mat $>$$>$rvecs, vector\\*
+$<$ vector$<$ Mat $>$$>$tvecs, vector\\*
+$<$ Mat $>$dist\-\_\-coeffs, \\*
+stringfilename);$>$$>$$>$$>$$>$$>$ origin \\*
+master void \hyperlink{io__calibrate_8h_acb606cd44af9e41bdba0c76d3aa9ea0c}{write\-\_\-ba\-\_\-result} (\hyperlink{classbaProblem}{ba\-Problem} \&ba\-\_\-problem, string filename)
 \item 
 void \hyperlink{io__calibrate_8h_adf8de2e249af632f5ac1670d57d9ffdf}{write\-\_\-ba\-\_\-matlab} (\hyperlink{classbaProblem}{ba\-Problem} \&ba\-\_\-problem, vector$<$ Mat $>$ translations, vector$<$ Mat $>$ P\-\_\-mats)
-\item 
-void \hyperlink{io__calibrate_8h_ab19fe9763eadb2a2606d99328f0850a7}{write\-\_\-align\-\_\-data} (string in\-\_\-file, string out\-\_\-file, vector$<$ Mat $>$ cam\-\_\-locations)
-\item 
-void \hyperlink{io__calibrate_8h_ac5f8b8901c748b5b305451d5e3ad903b}{write\-\_\-calib\-\_\-result} (\hyperlink{classbaProblem}{ba\-Problem} ba\-\_\-problem, vector$<$ string $>$ cam\-\_\-names, Size img\-\_\-size, double pix\-\_\-per\-\_\-phys, string path)
 \end{DoxyCompactItemize}
 
 
 \subsection{Function Documentation}
-\hypertarget{io__calibrate_8h_aa15b2fb805db857c0a5bc0b84a417b53}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!disp\-\_\-\-M@{disp\-\_\-\-M}}
-\index{disp\-\_\-\-M@{disp\-\_\-\-M}!io_calibrate.h@{io\-\_\-calibrate.\-h}}
-\subsubsection[{disp\-\_\-\-M}]{\setlength{\rightskip}{0pt plus 5cm}void disp\-\_\-\-M (
-\begin{DoxyParamCaption}
-\item[{Mat}]{M}
-\end{DoxyParamCaption}
-)}}\label{d2/d17/io__calibrate_8h_aa15b2fb805db857c0a5bc0b84a417b53}
-\hypertarget{io__calibrate_8h_a5b763d5760b62c11bd0320c3b543b682}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!read\-\_\-calib\-\_\-imgs@{read\-\_\-calib\-\_\-imgs}}
-\index{read\-\_\-calib\-\_\-imgs@{read\-\_\-calib\-\_\-imgs}!io_calibrate.h@{io\-\_\-calibrate.\-h}}
-\subsubsection[{read\-\_\-calib\-\_\-imgs}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$ vector$<$Mat$>$ $>$ read\-\_\-calib\-\_\-imgs (
-\begin{DoxyParamCaption}
-\item[{string}]{path, }
-\item[{vector$<$ string $>$}]{cam\-\_\-names}
-\end{DoxyParamCaption}
-)}}\label{d2/d17/io__calibrate_8h_a5b763d5760b62c11bd0320c3b543b682}
-\hypertarget{io__calibrate_8h_a96aee1792da1246ba789efea82733e19}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!read\-\_\-cam\-\_\-names@{read\-\_\-cam\-\_\-names}}
-\index{read\-\_\-cam\-\_\-names@{read\-\_\-cam\-\_\-names}!io_calibrate.h@{io\-\_\-calibrate.\-h}}
-\subsubsection[{read\-\_\-cam\-\_\-names}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$string$>$ read\-\_\-cam\-\_\-names (
-\begin{DoxyParamCaption}
-\item[{string}]{path}
-\end{DoxyParamCaption}
-)}}\label{d2/d17/io__calibrate_8h_a96aee1792da1246ba789efea82733e19}
-
-
-Function to read camera names. 
-
-\hypertarget{io__calibrate_8h_ab19fe9763eadb2a2606d99328f0850a7}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!write\-\_\-align\-\_\-data@{write\-\_\-align\-\_\-data}}
-\index{write\-\_\-align\-\_\-data@{write\-\_\-align\-\_\-data}!io_calibrate.h@{io\-\_\-calibrate.\-h}}
-\subsubsection[{write\-\_\-align\-\_\-data}]{\setlength{\rightskip}{0pt plus 5cm}void write\-\_\-align\-\_\-data (
-\begin{DoxyParamCaption}
-\item[{string}]{in\-\_\-file, }
-\item[{string}]{out\-\_\-file, }
-\item[{vector$<$ Mat $>$}]{cam\-\_\-locations}
-\end{DoxyParamCaption}
-)}}\label{d2/d17/io__calibrate_8h_ab19fe9763eadb2a2606d99328f0850a7}
 \hypertarget{io__calibrate_8h_adf8de2e249af632f5ac1670d57d9ffdf}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!write\-\_\-ba\-\_\-matlab@{write\-\_\-ba\-\_\-matlab}}
 \index{write\-\_\-ba\-\_\-matlab@{write\-\_\-ba\-\_\-matlab}!io_calibrate.h@{io\-\_\-calibrate.\-h}}
 \subsubsection[{write\-\_\-ba\-\_\-matlab}]{\setlength{\rightskip}{0pt plus 5cm}void write\-\_\-ba\-\_\-matlab (
@@ -69,34 +34,11 @@ Function to read camera names.
 \item[{vector$<$ Mat $>$}]{P\-\_\-mats}
 \end{DoxyParamCaption}
 )}}\label{d2/d17/io__calibrate_8h_adf8de2e249af632f5ac1670d57d9ffdf}
-\hypertarget{io__calibrate_8h_adb3a6d6f47334cf6380dfc5c19ce759e}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!write\-\_\-ba\-\_\-result@{write\-\_\-ba\-\_\-result}}
+\hypertarget{io__calibrate_8h_acb606cd44af9e41bdba0c76d3aa9ea0c}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!write\-\_\-ba\-\_\-result@{write\-\_\-ba\-\_\-result}}
 \index{write\-\_\-ba\-\_\-result@{write\-\_\-ba\-\_\-result}!io_calibrate.h@{io\-\_\-calibrate.\-h}}
-\subsubsection[{write\-\_\-ba\-\_\-result}]{\setlength{\rightskip}{0pt plus 5cm}void write\-\_\-ba\-\_\-result (
+\subsubsection[{write\-\_\-ba\-\_\-result}]{\setlength{\rightskip}{0pt plus 5cm}$<$$<$$<$$<$$<$$<$$<$H\-E\-A\-Dvoiddisp\-\_\-\-M(Mat\-M);=======vector$<$string$>$read\-\_\-cam\-\_\-names(stringpath);vector$<$vector$<$Mat$>$$>$read\-\_\-calib\-\_\-imgs(stringpath,vector$<$string$>$cam\-\_\-names);voiddisp\-\_\-\-M(Mat\-M);voidwrite\-\_\-point\-\_\-data(vector$<$vector$<$vector$<$Point2f$>$$>$$>$all\-\_\-corner\-\_\-points,vector$<$Mat$>$camera\-Mats,vector$<$vector$<$Mat$>$$>$rvecs,vector$<$vector$<$Mat$>$$>$tvecs,vector$<$Mat$>$dist\-\_\-coeffs,stringfilename);$>$$>$$>$$>$$>$$>$ origin master void write\-\_\-ba\-\_\-result (
 \begin{DoxyParamCaption}
 \item[{{\bf ba\-Problem} \&}]{ba\-\_\-problem, }
 \item[{string}]{filename}
 \end{DoxyParamCaption}
-)}}\label{d2/d17/io__calibrate_8h_adb3a6d6f47334cf6380dfc5c19ce759e}
-\hypertarget{io__calibrate_8h_ac5f8b8901c748b5b305451d5e3ad903b}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!write\-\_\-calib\-\_\-result@{write\-\_\-calib\-\_\-result}}
-\index{write\-\_\-calib\-\_\-result@{write\-\_\-calib\-\_\-result}!io_calibrate.h@{io\-\_\-calibrate.\-h}}
-\subsubsection[{write\-\_\-calib\-\_\-result}]{\setlength{\rightskip}{0pt plus 5cm}void write\-\_\-calib\-\_\-result (
-\begin{DoxyParamCaption}
-\item[{{\bf ba\-Problem}}]{ba\-\_\-problem, }
-\item[{vector$<$ string $>$}]{cam\-\_\-names, }
-\item[{Size}]{img\-\_\-size, }
-\item[{double}]{pix\-\_\-per\-\_\-phys, }
-\item[{string}]{path}
-\end{DoxyParamCaption}
-)}}\label{d2/d17/io__calibrate_8h_ac5f8b8901c748b5b305451d5e3ad903b}
-\hypertarget{io__calibrate_8h_a8a85fb9c7b10335f197c98d03a849f2d}{\index{io\-\_\-calibrate.\-h@{io\-\_\-calibrate.\-h}!write\-\_\-point\-\_\-data@{write\-\_\-point\-\_\-data}}
-\index{write\-\_\-point\-\_\-data@{write\-\_\-point\-\_\-data}!io_calibrate.h@{io\-\_\-calibrate.\-h}}
-\subsubsection[{write\-\_\-point\-\_\-data}]{\setlength{\rightskip}{0pt plus 5cm}void write\-\_\-point\-\_\-data (
-\begin{DoxyParamCaption}
-\item[{vector$<$ vector$<$ vector$<$ Point2f $>$ $>$ $>$}]{all\-\_\-corner\-\_\-points, }
-\item[{vector$<$ Mat $>$}]{camera\-Mats, }
-\item[{vector$<$ vector$<$ Mat $>$ $>$}]{rvecs, }
-\item[{vector$<$ vector$<$ Mat $>$ $>$}]{tvecs, }
-\item[{vector$<$ Mat $>$}]{dist\-\_\-coeffs, }
-\item[{string}]{filename}
-\end{DoxyParamCaption}
-)}}\label{d2/d17/io__calibrate_8h_a8a85fb9c7b10335f197c98d03a849f2d}
+)}}\label{d2/d17/io__calibrate_8h_acb606cd44af9e41bdba0c76d3aa9ea0c}

@@ -70,7 +70,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -83,7 +83,6 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="../../d5/d21/classcpuRefocus-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">cpuRefocus Class Reference</div>  </div>
@@ -94,29 +93,14 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3866f972073b5532628f44be97aaa33d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a3866f972073b5532628f44be97aaa33d">cpuRefocus</a> (vector&lt; Mat &gt; <a class="el" href="../../db/df2/classcpuRefocus.html#a5118d8dd93e7f29036018f0298f3e510">P_mats</a>, vector&lt; Mat &gt; imgs, double <a class="el" href="../../db/df2/classcpuRefocus.html#a04beb5d2309c9fd6ab07af93c5bfdbfa">scale</a>, double <a class="el" href="../../db/df2/classcpuRefocus.html#a9a19ed4cd125f555ca8a646574b0593c">z</a>, Size <a class="el" href="../../db/df2/classcpuRefocus.html#ac2b296ff170fd88ef9c3bb31e1ef9a7b">img_size</a>)</td></tr>
+<tr class="memitem:a3866f972073b5532628f44be97aaa33d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a3866f972073b5532628f44be97aaa33d">cpuRefocus</a> (vector&lt; Mat &gt; P_mats, vector&lt; Mat &gt; imgs, double scale, double z, Size img_size)</td></tr>
 <tr class="separator:a3866f972073b5532628f44be97aaa33d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64b13f3ff7051ab641756773c5d66979"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a64b13f3ff7051ab641756773c5d66979">~cpuRefocus</a> ()</td></tr>
 <tr class="separator:a64b13f3ff7051ab641756773c5d66979"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a013771771ba3e9a6a8ad3f4632ff38a0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a013771771ba3e9a6a8ad3f4632ff38a0">start</a> ()</td></tr>
 <tr class="separator:a013771771ba3e9a6a8ad3f4632ff38a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaeaf04bd8af93b84a2b0294ea101ae06"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#aaeaf04bd8af93b84a2b0294ea101ae06">refocus</a> (double <a class="el" href="../../db/df2/classcpuRefocus.html#a9a19ed4cd125f555ca8a646574b0593c">z</a>)</td></tr>
+<tr class="memitem:aaeaf04bd8af93b84a2b0294ea101ae06"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#aaeaf04bd8af93b84a2b0294ea101ae06">refocus</a> (double z)</td></tr>
 <tr class="separator:aaeaf04bd8af93b84a2b0294ea101ae06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a6eda3a5bcf68f0eaee5cc2ee70f7302b"><td class="memItemLeft" align="right" valign="top">vector&lt; Mat &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a6eda3a5bcf68f0eaee5cc2ee70f7302b">array</a></td></tr>
-<tr class="separator:a6eda3a5bcf68f0eaee5cc2ee70f7302b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5118d8dd93e7f29036018f0298f3e510"><td class="memItemLeft" align="right" valign="top">vector&lt; Mat &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a5118d8dd93e7f29036018f0298f3e510">P_mats</a></td></tr>
-<tr class="separator:a5118d8dd93e7f29036018f0298f3e510"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fddfc2019021e97892314faef6bf211"><td class="memItemLeft" align="right" valign="top">Mat&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a0fddfc2019021e97892314faef6bf211">refocused</a></td></tr>
-<tr class="separator:a0fddfc2019021e97892314faef6bf211"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2b296ff170fd88ef9c3bb31e1ef9a7b"><td class="memItemLeft" align="right" valign="top">Size&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#ac2b296ff170fd88ef9c3bb31e1ef9a7b">img_size</a></td></tr>
-<tr class="separator:ac2b296ff170fd88ef9c3bb31e1ef9a7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a19ed4cd125f555ca8a646574b0593c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a9a19ed4cd125f555ca8a646574b0593c">z</a></td></tr>
-<tr class="separator:a9a19ed4cd125f555ca8a646574b0593c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04beb5d2309c9fd6ab07af93c5bfdbfa"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classcpuRefocus.html#a04beb5d2309c9fd6ab07af93c5bfdbfa">scale</a></td></tr>
-<tr class="separator:a04beb5d2309c9fd6ab07af93c5bfdbfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a3866f972073b5532628f44be97aaa33d"></a>
@@ -242,86 +226,13 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a class="anchor" id="a6eda3a5bcf68f0eaee5cc2ee70f7302b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">vector&lt;Mat&gt; cpuRefocus::array</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ac2b296ff170fd88ef9c3bb31e1ef9a7b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Size cpuRefocus::img_size</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a5118d8dd93e7f29036018f0298f3e510"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">vector&lt;Mat&gt; cpuRefocus::P_mats</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a0fddfc2019021e97892314faef6bf211"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Mat cpuRefocus::refocused</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a04beb5d2309c9fd6ab07af93c5bfdbfa"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double cpuRefocus::scale</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="a9a19ed4cd125f555ca8a646574b0593c"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double cpuRefocus::z</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/ab9/projects/sa-ptv/lib/<a class="el" href="../../d8/dab/visualize_8h_source.html">visualize.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Mar 9 2013 14:17:59 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

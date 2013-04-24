@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['p_5fmats',['P_mats',['../df/d10/classgpuRefocus.html#a7e4bc1dd02a430a17f9d4f3762ba1818',1,'gpuRefocus::P_mats()'],['../db/df2/classcpuRefocus.html#a5118d8dd93e7f29036018f0298f3e510',1,'cpuRefocus::P_mats()']]]
+  ['p_5fmats',['P_mats',['../d3/d46/structrefocusing__data.html#a3cdccbbbf32a70f5049d6d4fa83fe6da',1,'refocusing_data']]],
+  ['p_5fmats_5fu',['P_mats_u',['../d3/d46/structrefocusing__data.html#aea3885e85150df53e2c8d65203e7c0bf',1,'refocusing_data']]]
 ];

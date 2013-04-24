@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 
     saRefocus refocus(calibration.refocusing_params());
     refocus.read_imgs(refoc_path);
-    refocus.startGPUsession();
+    refocus.GPUliveView();
 
     /*
     int refocus = 1;

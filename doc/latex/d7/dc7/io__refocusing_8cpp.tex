@@ -6,23 +6,50 @@
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \hyperlink{io__refocusing_8cpp_ab3b84a4766bfbb58bf954a07675fad64}{read\-\_\-calib\-\_\-data} (string filename, vector$<$ Mat $>$ \&P\-\_\-mats, vector$<$ Mat $>$ \&translations, double \&scale)
+void \hyperlink{io__refocusing_8cpp_a14586c3ac632d4ce6b6b1f603239f4ce}{read\-\_\-calib\-\_\-data} (string filename, vector$<$ Mat $>$ \&P\-\_\-mats, vector$<$ Mat $>$ \&rvecs, vector$<$ Mat $>$ \&tvecs, vector$<$ Mat $>$ \&translations, double \&scale)
+\item 
+\hyperlink{io__refocusing_8cpp_ab05e912e4e22a479945c48ab97983ea0}{get\-\_\-translations} (rvecs, tvecs, translations)
+\item 
+\hyperlink{io__refocusing_8cpp_a0fba5c8ee26e69814cc692e95fe9bc7d}{for} (int i=0;i$<$ rvecs.\-size();i++)
 \item 
 void \hyperlink{io__refocusing_8cpp_ab8a197a117b0be64ae4d4f48b3d01fe2}{read\-\_\-refocusing\-\_\-imgs} (string path, vector$<$ string $>$ cam\-\_\-names, vector$<$ vector$<$ Mat $>$ $>$ \&refocusing\-\_\-imgs)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+vector$<$ Mat $>$ \hyperlink{io__refocusing_8cpp_a1cdde9992db763536d2500260518a6e6}{R}
 \end{DoxyCompactItemize}
 
 
 \subsection{Function Documentation}
-\hypertarget{io__refocusing_8cpp_ab3b84a4766bfbb58bf954a07675fad64}{\index{io\-\_\-refocusing.\-cpp@{io\-\_\-refocusing.\-cpp}!read\-\_\-calib\-\_\-data@{read\-\_\-calib\-\_\-data}}
+\hypertarget{io__refocusing_8cpp_a0fba5c8ee26e69814cc692e95fe9bc7d}{\index{io\-\_\-refocusing.\-cpp@{io\-\_\-refocusing.\-cpp}!for@{for}}
+\index{for@{for}!io_refocusing.cpp@{io\-\_\-refocusing.\-cpp}}
+\subsubsection[{for}]{\setlength{\rightskip}{0pt plus 5cm}for (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/dc7/io__refocusing_8cpp_a0fba5c8ee26e69814cc692e95fe9bc7d}
+\hypertarget{io__refocusing_8cpp_ab05e912e4e22a479945c48ab97983ea0}{\index{io\-\_\-refocusing.\-cpp@{io\-\_\-refocusing.\-cpp}!get\-\_\-translations@{get\-\_\-translations}}
+\index{get\-\_\-translations@{get\-\_\-translations}!io_refocusing.cpp@{io\-\_\-refocusing.\-cpp}}
+\subsubsection[{get\-\_\-translations}]{\setlength{\rightskip}{0pt plus 5cm}get\-\_\-translations (
+\begin{DoxyParamCaption}
+\item[{rvecs}]{, }
+\item[{tvecs}]{, }
+\item[{translations}]{}
+\end{DoxyParamCaption}
+)}}\label{d7/dc7/io__refocusing_8cpp_ab05e912e4e22a479945c48ab97983ea0}
+\hypertarget{io__refocusing_8cpp_a14586c3ac632d4ce6b6b1f603239f4ce}{\index{io\-\_\-refocusing.\-cpp@{io\-\_\-refocusing.\-cpp}!read\-\_\-calib\-\_\-data@{read\-\_\-calib\-\_\-data}}
 \index{read\-\_\-calib\-\_\-data@{read\-\_\-calib\-\_\-data}!io_refocusing.cpp@{io\-\_\-refocusing.\-cpp}}
 \subsubsection[{read\-\_\-calib\-\_\-data}]{\setlength{\rightskip}{0pt plus 5cm}void read\-\_\-calib\-\_\-data (
 \begin{DoxyParamCaption}
 \item[{string}]{filename, }
 \item[{vector$<$ Mat $>$ \&}]{P\-\_\-mats, }
+\item[{vector$<$ Mat $>$ \&}]{rvecs, }
+\item[{vector$<$ Mat $>$ \&}]{tvecs, }
 \item[{vector$<$ Mat $>$ \&}]{translations, }
 \item[{double \&}]{scale}
 \end{DoxyParamCaption}
-)}}\label{d7/dc7/io__refocusing_8cpp_ab3b84a4766bfbb58bf954a07675fad64}
+)}}\label{d7/dc7/io__refocusing_8cpp_a14586c3ac632d4ce6b6b1f603239f4ce}
 \hypertarget{io__refocusing_8cpp_ab8a197a117b0be64ae4d4f48b3d01fe2}{\index{io\-\_\-refocusing.\-cpp@{io\-\_\-refocusing.\-cpp}!read\-\_\-refocusing\-\_\-imgs@{read\-\_\-refocusing\-\_\-imgs}}
 \index{read\-\_\-refocusing\-\_\-imgs@{read\-\_\-refocusing\-\_\-imgs}!io_refocusing.cpp@{io\-\_\-refocusing.\-cpp}}
 \subsubsection[{read\-\_\-refocusing\-\_\-imgs}]{\setlength{\rightskip}{0pt plus 5cm}void read\-\_\-refocusing\-\_\-imgs (
@@ -32,3 +59,9 @@ void \hyperlink{io__refocusing_8cpp_ab8a197a117b0be64ae4d4f48b3d01fe2}{read\-\_\
 \item[{vector$<$ vector$<$ Mat $>$ $>$ \&}]{refocusing\-\_\-imgs}
 \end{DoxyParamCaption}
 )}}\label{d7/dc7/io__refocusing_8cpp_ab8a197a117b0be64ae4d4f48b3d01fe2}
+
+
+\subsection{Variable Documentation}
+\hypertarget{io__refocusing_8cpp_a1cdde9992db763536d2500260518a6e6}{\index{io\-\_\-refocusing.\-cpp@{io\-\_\-refocusing.\-cpp}!R@{R}}
+\index{R@{R}!io_refocusing.cpp@{io\-\_\-refocusing.\-cpp}}
+\subsubsection[{R}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$Mat$>$ R}}\label{d7/dc7/io__refocusing_8cpp_a1cdde9992db763536d2500260518a6e6}

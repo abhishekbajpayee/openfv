@@ -2,68 +2,56 @@
 \label{d7/d48/processing__calibrate_8h}\index{/home/ab9/projects/sa-\/ptv/lib/processing\-\_\-calibrate.\-h@{/home/ab9/projects/sa-\/ptv/lib/processing\-\_\-calibrate.\-h}}
 }
 {\ttfamily \#include \char`\"{}std\-\_\-include.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}optimization.\-h\char`\"{}}\\*
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-double \hyperlink{processing__calibrate_8h_ac710261717518c9f0f2b1bfe3bc763d3}{reprojection\-\_\-errors} (const vector$<$ vector$<$ Point3f $>$ $>$ \&object\-Points, const vector$<$ vector$<$ Point2f $>$ $>$ \&image\-Points, const vector$<$ Mat $>$ \&rvecs, const vector$<$ Mat $>$ \&tvecs, const Mat \&camera\-Matrix, const Mat \&dist\-Coeffs, vector$<$ float $>$ \&per\-View\-Errors)
-\item 
-void \hyperlink{processing__calibrate_8h_ad436d9e31201560fc6a469e715c8b8e5}{all\-\_\-reprojection\-\_\-errors} (vector$<$ double $>$ \&reproj\-\_\-errors, vector$<$ vector$<$ float $>$ $>$ \&per\-\_\-view\-\_\-errors, vector$<$ vector$<$ Point3f $>$ $>$ all\-\_\-pattern\-\_\-points, vector$<$ vector$<$ vector$<$ Point2f $>$ $>$ $>$ all\-\_\-corner\-\_\-points, int num\-\_\-cams, int num\-\_\-imgs, vector$<$ Mat $>$ camera\-Mats, vector$<$ Mat $>$ dist\-\_\-coeffs, vector$<$ vector$<$ Mat $>$ $>$ rvecs, vector$<$ vector$<$ Mat $>$ $>$ tvecs)
-\item 
-vector$<$ vector$<$ vector\\*
-$<$ Point2f $>$ $>$ $>$ \hyperlink{processing__calibrate_8h_a99fcc07980489b4095c070b7d81f75ba}{find\-\_\-corners} (vector$<$ vector$<$ Mat $>$ $>$ calib\-\_\-imgs, Size grid\-\_\-size, int draw)
-\item 
-void \hyperlink{processing__calibrate_8h_a814509ba8fb0fae0bf7ca2f7a4b7cfc9}{calibrate\-\_\-cameras} (vector$<$ vector$<$ Point3f $>$ $>$ \&all\-\_\-pattern\-\_\-points, vector$<$ vector$<$ vector$<$ Point2f $>$ $>$ $>$ corner\-\_\-points, int num\-\_\-cams, int num\-\_\-imgs, Size grid\-\_\-size, Size img\-\_\-size, vector$<$ Mat $>$ \&camera\-Mats, vector$<$ Mat $>$ \&dist\-\_\-coeffs, vector$<$ vector$<$ Mat $>$ $>$ \&rvecs, vector$<$ vector$<$ Mat $>$ $>$ \&tvecs)
-\item 
-void \hyperlink{processing__calibrate_8h_a9c2974af34df8ddd84d0c14cb55c984f}{get\-\_\-translations\-\_\-all} (vector$<$ vector$<$ Mat $>$ $>$ rvecs, vector$<$ vector$<$ Mat $>$ $>$ tvecs, vector$<$ vector$<$ Mat $>$ $>$ \&translations)
-\item 
 void \hyperlink{processing__calibrate_8h_a08d2b28502f191a1268b42b6f52dd5ea}{get\-\_\-translations} (vector$<$ Mat $>$ rvecs, vector$<$ Mat $>$ tvecs, vector$<$ Mat $>$ \&translations)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
 \item 
-Mat \hyperlink{processing__calibrate_8h_adfc64f519c76ee63a7cc34f92d8ed634}{P\-\_\-from\-\_\-\-K\-R\-T} (Mat K, Mat rvec, Mat tvec)
+$<$$<$$<$$<$$<$$<$$<$ H\-E\-A\-D=======doublereprojection\-\_\-errors(constvector\\*
+$<$ vector$<$ Point3f $>$\\*
+$>$ \&object\-Points, constvector\\*
+$<$ vector$<$ Point2f $>$\\*
+$>$ \&image\-Points, constvector\\*
+$<$ Mat $>$ \&rvecs, constvector\\*
+$<$ Mat $>$ \&tvecs, const\-Mat \\*
+\&camera\-Matrix, const\-Mat \\*
+\&dist\-Coeffs, vector$<$ float $>$\\*
+ \&per\-View\-Errors);voidall\-\_\-reprojection\-\_\-errors(vector\\*
+$<$ double $>$ \&reproj\-\_\-errors, \\*
+vector$<$ vector$<$ float $>$\\*
+$>$ \&per\-\_\-view\-\_\-errors, vector\\*
+$<$ vector$<$ Point3f $>$\\*
+$>$all\-\_\-pattern\-\_\-points, vector\\*
+$<$ vector$<$ vector$<$ Point2f $>$\\*
+$>$$>$all\-\_\-corner\-\_\-points, \\*
+intnum\-\_\-cams, intnum\-\_\-imgs, \\*
+vector$<$ Mat $>$camera\-Mats, \\*
+vector$<$ Mat $>$dist\-\_\-coeffs, \\*
+vector$<$ vector$<$ Mat $>$$>$rvecs, \\*
+vector$<$ vector$<$ Mat $>$$>$tvecs);vector\\*
+$<$ vector$<$ vector$<$ Point2f $>$\\*
+$>$$>$find\-\_\-corners(vector$<$ vector\\*
+$<$ Mat $>$$>$calib\-\_\-imgs, \\*
+Sizegrid\-\_\-size, intdraw);voidcalibrate\-\_\-cameras(vector\\*
+$<$ vector$<$ Point3f $>$\\*
+$>$ \&all\-\_\-pattern\-\_\-points, vector\\*
+$<$ vector$<$ vector$<$ Point2f $>$\\*
+$>$$>$corner\-\_\-points, intnum\-\_\-cams, \\*
+intnum\-\_\-imgs, Sizegrid\-\_\-size, \\*
+Sizeimg\-\_\-size, vector$<$ Mat $>$\\*
+ \&camera\-Mats, vector$<$ Mat $>$\\*
+ \&dist\-\_\-coeffs, vector$<$ vector\\*
+$<$ Mat $>$$>$ \&rvecs, vector\\*
+$<$ vector$<$ Mat $>$$>$ \&tvecs);$>$\\*
+$>$$>$$>$$>$$>$ origin master void \hyperlink{processing__calibrate_8h_ab5e5f89047cbe1032bed2c53433b657e}{get\-\_\-translations\-\_\-all} (vector$<$ vector$<$ Mat $>$ $>$ rvecs, vector$<$ vector$<$ Mat $>$ $>$ tvecs, vector$<$ vector$<$ Mat $>$ $>$ \&translations)
 \end{DoxyCompactItemize}
 
 
 \subsection{Function Documentation}
-\hypertarget{processing__calibrate_8h_ad436d9e31201560fc6a469e715c8b8e5}{\index{processing\-\_\-calibrate.\-h@{processing\-\_\-calibrate.\-h}!all\-\_\-reprojection\-\_\-errors@{all\-\_\-reprojection\-\_\-errors}}
-\index{all\-\_\-reprojection\-\_\-errors@{all\-\_\-reprojection\-\_\-errors}!processing_calibrate.h@{processing\-\_\-calibrate.\-h}}
-\subsubsection[{all\-\_\-reprojection\-\_\-errors}]{\setlength{\rightskip}{0pt plus 5cm}void all\-\_\-reprojection\-\_\-errors (
-\begin{DoxyParamCaption}
-\item[{vector$<$ double $>$ \&}]{reproj\-\_\-errors, }
-\item[{vector$<$ vector$<$ float $>$ $>$ \&}]{per\-\_\-view\-\_\-errors, }
-\item[{vector$<$ vector$<$ Point3f $>$ $>$}]{all\-\_\-pattern\-\_\-points, }
-\item[{vector$<$ vector$<$ vector$<$ Point2f $>$ $>$ $>$}]{all\-\_\-corner\-\_\-points, }
-\item[{int}]{num\-\_\-cams, }
-\item[{int}]{num\-\_\-imgs, }
-\item[{vector$<$ Mat $>$}]{camera\-Mats, }
-\item[{vector$<$ Mat $>$}]{dist\-\_\-coeffs, }
-\item[{vector$<$ vector$<$ Mat $>$ $>$}]{rvecs, }
-\item[{vector$<$ vector$<$ Mat $>$ $>$}]{tvecs}
-\end{DoxyParamCaption}
-)}}\label{d7/d48/processing__calibrate_8h_ad436d9e31201560fc6a469e715c8b8e5}
-\hypertarget{processing__calibrate_8h_a814509ba8fb0fae0bf7ca2f7a4b7cfc9}{\index{processing\-\_\-calibrate.\-h@{processing\-\_\-calibrate.\-h}!calibrate\-\_\-cameras@{calibrate\-\_\-cameras}}
-\index{calibrate\-\_\-cameras@{calibrate\-\_\-cameras}!processing_calibrate.h@{processing\-\_\-calibrate.\-h}}
-\subsubsection[{calibrate\-\_\-cameras}]{\setlength{\rightskip}{0pt plus 5cm}void calibrate\-\_\-cameras (
-\begin{DoxyParamCaption}
-\item[{vector$<$ vector$<$ Point3f $>$ $>$ \&}]{all\-\_\-pattern\-\_\-points, }
-\item[{vector$<$ vector$<$ vector$<$ Point2f $>$ $>$ $>$}]{corner\-\_\-points, }
-\item[{int}]{num\-\_\-cams, }
-\item[{int}]{num\-\_\-imgs, }
-\item[{Size}]{grid\-\_\-size, }
-\item[{Size}]{img\-\_\-size, }
-\item[{vector$<$ Mat $>$ \&}]{camera\-Mats, }
-\item[{vector$<$ Mat $>$ \&}]{dist\-\_\-coeffs, }
-\item[{vector$<$ vector$<$ Mat $>$ $>$ \&}]{rvecs, }
-\item[{vector$<$ vector$<$ Mat $>$ $>$ \&}]{tvecs}
-\end{DoxyParamCaption}
-)}}\label{d7/d48/processing__calibrate_8h_a814509ba8fb0fae0bf7ca2f7a4b7cfc9}
-\hypertarget{processing__calibrate_8h_a99fcc07980489b4095c070b7d81f75ba}{\index{processing\-\_\-calibrate.\-h@{processing\-\_\-calibrate.\-h}!find\-\_\-corners@{find\-\_\-corners}}
-\index{find\-\_\-corners@{find\-\_\-corners}!processing_calibrate.h@{processing\-\_\-calibrate.\-h}}
-\subsubsection[{find\-\_\-corners}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$ vector$<$ vector$<$Point2f$>$ $>$ $>$ find\-\_\-corners (
-\begin{DoxyParamCaption}
-\item[{vector$<$ vector$<$ Mat $>$ $>$}]{calib\-\_\-imgs, }
-\item[{Size}]{grid\-\_\-size, }
-\item[{int}]{draw}
-\end{DoxyParamCaption}
-)}}\label{d7/d48/processing__calibrate_8h_a99fcc07980489b4095c070b7d81f75ba}
 \hypertarget{processing__calibrate_8h_a08d2b28502f191a1268b42b6f52dd5ea}{\index{processing\-\_\-calibrate.\-h@{processing\-\_\-calibrate.\-h}!get\-\_\-translations@{get\-\_\-translations}}
 \index{get\-\_\-translations@{get\-\_\-translations}!processing_calibrate.h@{processing\-\_\-calibrate.\-h}}
 \subsubsection[{get\-\_\-translations}]{\setlength{\rightskip}{0pt plus 5cm}void get\-\_\-translations (
@@ -73,34 +61,9 @@ Mat \hyperlink{processing__calibrate_8h_adfc64f519c76ee63a7cc34f92d8ed634}{P\-\_
 \item[{vector$<$ Mat $>$ \&}]{translations}
 \end{DoxyParamCaption}
 )}}\label{d7/d48/processing__calibrate_8h_a08d2b28502f191a1268b42b6f52dd5ea}
-\hypertarget{processing__calibrate_8h_a9c2974af34df8ddd84d0c14cb55c984f}{\index{processing\-\_\-calibrate.\-h@{processing\-\_\-calibrate.\-h}!get\-\_\-translations\-\_\-all@{get\-\_\-translations\-\_\-all}}
+
+
+\subsection{Variable Documentation}
+\hypertarget{processing__calibrate_8h_ab5e5f89047cbe1032bed2c53433b657e}{\index{processing\-\_\-calibrate.\-h@{processing\-\_\-calibrate.\-h}!get\-\_\-translations\-\_\-all@{get\-\_\-translations\-\_\-all}}
 \index{get\-\_\-translations\-\_\-all@{get\-\_\-translations\-\_\-all}!processing_calibrate.h@{processing\-\_\-calibrate.\-h}}
-\subsubsection[{get\-\_\-translations\-\_\-all}]{\setlength{\rightskip}{0pt plus 5cm}void get\-\_\-translations\-\_\-all (
-\begin{DoxyParamCaption}
-\item[{vector$<$ vector$<$ Mat $>$ $>$}]{rvecs, }
-\item[{vector$<$ vector$<$ Mat $>$ $>$}]{tvecs, }
-\item[{vector$<$ vector$<$ Mat $>$ $>$ \&}]{translations}
-\end{DoxyParamCaption}
-)}}\label{d7/d48/processing__calibrate_8h_a9c2974af34df8ddd84d0c14cb55c984f}
-\hypertarget{processing__calibrate_8h_adfc64f519c76ee63a7cc34f92d8ed634}{\index{processing\-\_\-calibrate.\-h@{processing\-\_\-calibrate.\-h}!P\-\_\-from\-\_\-\-K\-R\-T@{P\-\_\-from\-\_\-\-K\-R\-T}}
-\index{P\-\_\-from\-\_\-\-K\-R\-T@{P\-\_\-from\-\_\-\-K\-R\-T}!processing_calibrate.h@{processing\-\_\-calibrate.\-h}}
-\subsubsection[{P\-\_\-from\-\_\-\-K\-R\-T}]{\setlength{\rightskip}{0pt plus 5cm}Mat P\-\_\-from\-\_\-\-K\-R\-T (
-\begin{DoxyParamCaption}
-\item[{Mat}]{K, }
-\item[{Mat}]{rvec, }
-\item[{Mat}]{tvec}
-\end{DoxyParamCaption}
-)}}\label{d7/d48/processing__calibrate_8h_adfc64f519c76ee63a7cc34f92d8ed634}
-\hypertarget{processing__calibrate_8h_ac710261717518c9f0f2b1bfe3bc763d3}{\index{processing\-\_\-calibrate.\-h@{processing\-\_\-calibrate.\-h}!reprojection\-\_\-errors@{reprojection\-\_\-errors}}
-\index{reprojection\-\_\-errors@{reprojection\-\_\-errors}!processing_calibrate.h@{processing\-\_\-calibrate.\-h}}
-\subsubsection[{reprojection\-\_\-errors}]{\setlength{\rightskip}{0pt plus 5cm}double reprojection\-\_\-errors (
-\begin{DoxyParamCaption}
-\item[{const vector$<$ vector$<$ Point3f $>$ $>$ \&}]{object\-Points, }
-\item[{const vector$<$ vector$<$ Point2f $>$ $>$ \&}]{image\-Points, }
-\item[{const vector$<$ Mat $>$ \&}]{rvecs, }
-\item[{const vector$<$ Mat $>$ \&}]{tvecs, }
-\item[{const Mat \&}]{camera\-Matrix, }
-\item[{const Mat \&}]{dist\-Coeffs, }
-\item[{vector$<$ float $>$ \&}]{per\-View\-Errors}
-\end{DoxyParamCaption}
-)}}\label{d7/d48/processing__calibrate_8h_ac710261717518c9f0f2b1bfe3bc763d3}
+\subsubsection[{get\-\_\-translations\-\_\-all}]{\setlength{\rightskip}{0pt plus 5cm}$<$$<$$<$$<$$<$$<$$<$H\-E\-A\-D=======doublereprojection\-\_\-errors(constvector$<$vector$<$Point3f$>$$>$\&object\-Points,constvector$<$vector$<$Point2f$>$$>$\&image\-Points,constvector$<$Mat$>$\&rvecs,constvector$<$Mat$>$\&tvecs,const\-Mat\&camera\-Matrix,const\-Mat\&dist\-Coeffs,vector$<$float$>$\&per\-View\-Errors);voidall\-\_\-reprojection\-\_\-errors(vector$<$double$>$\&reproj\-\_\-errors,vector$<$vector$<$float$>$$>$\&per\-\_\-view\-\_\-errors,vector$<$vector$<$Point3f$>$$>$all\-\_\-pattern\-\_\-points,vector$<$vector$<$vector$<$Point2f$>$$>$$>$all\-\_\-corner\-\_\-points,intnum\-\_\-cams,intnum\-\_\-imgs,vector$<$Mat$>$camera\-Mats,vector$<$Mat$>$dist\-\_\-coeffs,vector$<$vector$<$Mat$>$$>$rvecs,vector$<$vector$<$Mat$>$$>$tvecs);vector$<$vector$<$vector$<$Point2f$>$$>$$>$find\-\_\-corners(vector$<$vector$<$Mat$>$$>$calib\-\_\-imgs,Sizegrid\-\_\-size,intdraw);voidcalibrate\-\_\-cameras(vector$<$vector$<$Point3f$>$$>$\&all\-\_\-pattern\-\_\-points,vector$<$vector$<$vector$<$Point2f$>$$>$$>$corner\-\_\-points,intnum\-\_\-cams,intnum\-\_\-imgs,Sizegrid\-\_\-size,Sizeimg\-\_\-size,vector$<$Mat$>$\&camera\-Mats,vector$<$Mat$>$\&dist\-\_\-coeffs,vector$<$vector$<$Mat$>$$>$\&rvecs,vector$<$vector$<$Mat$>$$>$\&tvecs);$>$$>$$>$$>$$>$$>$ origin master void get\-\_\-translations\-\_\-all(vector$<$ vector$<$ Mat $>$ $>$ rvecs, vector$<$ vector$<$ Mat $>$ $>$ tvecs, vector$<$ vector$<$ Mat $>$ $>$ \&translations)}}\label{d7/d48/processing__calibrate_8h_ab5e5f89047cbe1032bed2c53433b657e}

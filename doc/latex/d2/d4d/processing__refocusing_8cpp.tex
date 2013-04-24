@@ -5,10 +5,6 @@
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-double \hyperlink{processing__refocusing_8cpp_ad683e2c82824ca18f0d4a0f9063bb555}{get\-\_\-grid\-\_\-size\-\_\-pix} (vector$<$ vector$<$ vector$<$ Point2f $>$ $>$ $>$ all\-\_\-corner\-\_\-points, Size grid\-\_\-size, int center\-\_\-cam\-\_\-id)
-\item 
-void \hyperlink{processing__refocusing_8cpp_a2d6263082d189692b0664c613b74767f}{T\-\_\-from\-\_\-\-P} (Mat P, Mat \&H, double z, double scale, Size img\-\_\-size)
-\item 
 void \hyperlink{processing__refocusing_8cpp_a39b3139e492760fa97569f3f2f8bc44f}{refocus\-\_\-img} (vector$<$ vector$<$ Mat $>$ $>$ refocusing\-\_\-imgs, vector$<$ Mat $>$ P\-\_\-mats, double pix\-\_\-per\-\_\-phys, double z, int method)
 \item 
 void \hyperlink{processing__refocusing_8cpp_a90ff608a2881f2d8812a0679d5b4dfb9}{get\-\_\-\-P\-\_\-mats} (vector$<$ Mat $>$ camera\-Mats, vector$<$ vector$<$ Mat $>$ $>$ rvecs, vector$<$ vector$<$ Mat $>$ $>$ tvecs, vector$<$ Mat $>$ \&P\-\_\-mats)
@@ -18,15 +14,6 @@ void \hyperlink{processing__refocusing_8cpp_acb7c4143b72b05fc9d4c19b741661276}{g
 
 
 \subsection{Function Documentation}
-\hypertarget{processing__refocusing_8cpp_ad683e2c82824ca18f0d4a0f9063bb555}{\index{processing\-\_\-refocusing.\-cpp@{processing\-\_\-refocusing.\-cpp}!get\-\_\-grid\-\_\-size\-\_\-pix@{get\-\_\-grid\-\_\-size\-\_\-pix}}
-\index{get\-\_\-grid\-\_\-size\-\_\-pix@{get\-\_\-grid\-\_\-size\-\_\-pix}!processing_refocusing.cpp@{processing\-\_\-refocusing.\-cpp}}
-\subsubsection[{get\-\_\-grid\-\_\-size\-\_\-pix}]{\setlength{\rightskip}{0pt plus 5cm}double get\-\_\-grid\-\_\-size\-\_\-pix (
-\begin{DoxyParamCaption}
-\item[{vector$<$ vector$<$ vector$<$ Point2f $>$ $>$ $>$}]{all\-\_\-corner\-\_\-points, }
-\item[{Size}]{grid\-\_\-size, }
-\item[{int}]{center\-\_\-cam\-\_\-id}
-\end{DoxyParamCaption}
-)}}\label{d2/d4d/processing__refocusing_8cpp_ad683e2c82824ca18f0d4a0f9063bb555}
 \hypertarget{processing__refocusing_8cpp_acb7c4143b72b05fc9d4c19b741661276}{\index{processing\-\_\-refocusing.\-cpp@{processing\-\_\-refocusing.\-cpp}!get\-\_\-\-H\-\_\-mats@{get\-\_\-\-H\-\_\-mats}}
 \index{get\-\_\-\-H\-\_\-mats@{get\-\_\-\-H\-\_\-mats}!processing_refocusing.cpp@{processing\-\_\-refocusing.\-cpp}}
 \subsubsection[{get\-\_\-\-H\-\_\-mats}]{\setlength{\rightskip}{0pt plus 5cm}void get\-\_\-\-H\-\_\-mats (
@@ -59,14 +46,3 @@ void \hyperlink{processing__refocusing_8cpp_acb7c4143b72b05fc9d4c19b741661276}{g
 \item[{int}]{method}
 \end{DoxyParamCaption}
 )}}\label{d2/d4d/processing__refocusing_8cpp_a39b3139e492760fa97569f3f2f8bc44f}
-\hypertarget{processing__refocusing_8cpp_a2d6263082d189692b0664c613b74767f}{\index{processing\-\_\-refocusing.\-cpp@{processing\-\_\-refocusing.\-cpp}!T\-\_\-from\-\_\-\-P@{T\-\_\-from\-\_\-\-P}}
-\index{T\-\_\-from\-\_\-\-P@{T\-\_\-from\-\_\-\-P}!processing_refocusing.cpp@{processing\-\_\-refocusing.\-cpp}}
-\subsubsection[{T\-\_\-from\-\_\-\-P}]{\setlength{\rightskip}{0pt plus 5cm}void T\-\_\-from\-\_\-\-P (
-\begin{DoxyParamCaption}
-\item[{Mat}]{P, }
-\item[{Mat \&}]{H, }
-\item[{double}]{z, }
-\item[{double}]{scale, }
-\item[{Size}]{img\-\_\-size}
-\end{DoxyParamCaption}
-)}}\label{d2/d4d/processing__refocusing_8cpp_a2d6263082d189692b0664c613b74767f}

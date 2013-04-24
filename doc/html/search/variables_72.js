@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['refocused',['refocused',['../df/d10/classgpuRefocus.html#a3b2c86202e1900183168e1971069f016',1,'gpuRefocus::refocused()'],['../db/df2/classcpuRefocus.html#a0fddfc2019021e97892314faef6bf211',1,'cpuRefocus::refocused()']]],
-  ['refocused_5fhost',['refocused_host',['../df/d10/classgpuRefocus.html#a897b942b2f19ee124e8abe5b7bfda87c',1,'gpuRefocus']]]
+  ['r',['R',['../d7/dc7/io__refocusing_8cpp.html#a1cdde9992db763536d2500260518a6e6',1,'io_refocusing.cpp']]],
+  ['read_5frefocusing_5fimgs',['read_refocusing_imgs',['../dc/d97/io__refocusing_8h.html#a7cc971905919feaee4ec907c9d7dffb4',1,'io_refocusing.h']]],
+  ['rvecs',['rvecs',['../d7/d56/structpinholeReprojectionError2.html#af1afb81c570c7bf8d497a8ecf1cc7e69',1,'pinholeReprojectionError2']]]
 ];

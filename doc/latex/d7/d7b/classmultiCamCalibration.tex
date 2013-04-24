@@ -1,0 +1,177 @@
+\hypertarget{classmultiCamCalibration}{\section{multi\-Cam\-Calibration Class Reference}
+\label{d7/d7b/classmultiCamCalibration}\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}}
+}
+
+
+{\ttfamily \#include $<$calibration.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classmultiCamCalibration_a3ea94ec1303dc7b8fc35a195ba14a4d3}{$\sim$multi\-Cam\-Calibration} ()
+\item 
+\hyperlink{classmultiCamCalibration_a4dfba58ddb1abc222c287326da6fa03f}{multi\-Cam\-Calibration} (string path, Size \hyperlink{classmultiCamCalibration_a210c43ef7397dcf9b2c1c10c43a243e8}{grid\-\_\-size}, double grid\-\_\-size\-\_\-phys)
+\item 
+int \hyperlink{classmultiCamCalibration_a0672baa65e2c4f6f9457f05f33c55271}{num\-\_\-cams} ()
+\item 
+int \hyperlink{classmultiCamCalibration_a69f0c4582fa045cfcc7c146dbbea4078}{num\-\_\-imgs} ()
+\item 
+Size \hyperlink{classmultiCamCalibration_a210c43ef7397dcf9b2c1c10c43a243e8}{grid\-\_\-size} ()
+\item 
+vector$<$ string $>$ \hyperlink{classmultiCamCalibration_aec318f334898f58be8593ea7a9051dda}{cam\-\_\-names} ()
+\item 
+\hyperlink{structrefocusing__data}{refocusing\-\_\-data} \hyperlink{classmultiCamCalibration_a1591b01ff77ffb077f4b714239f61f55}{refocusing\-\_\-params} ()
+\item 
+void \hyperlink{classmultiCamCalibration_aaf34f70de1370d4a436cd44f0e5fa117}{initialize} ()
+\item 
+void \hyperlink{classmultiCamCalibration_aeee89100553583b0bd4570e94f2f505d}{run} ()
+\item 
+void \hyperlink{classmultiCamCalibration_a4aec5f46a3029784fd76e412308e65b5}{read\-\_\-cam\-\_\-names} ()
+\item 
+void \hyperlink{classmultiCamCalibration_aae9b08ca3712d652ae875df269db4cad}{read\-\_\-calib\-\_\-imgs} ()
+\item 
+void \hyperlink{classmultiCamCalibration_a311de3776df8af06bd7af56f9f9743f9}{find\-\_\-corners} ()
+\item 
+void \hyperlink{classmultiCamCalibration_afa0d93d6ccaf0adad301b9593fe4ecb3}{initialize\-\_\-cams} ()
+\item 
+void \hyperlink{classmultiCamCalibration_a9e4a9c17b8161d5fd8e3bc806d614cd6}{write\-\_\-\-B\-A\-\_\-data} ()
+\item 
+void \hyperlink{classmultiCamCalibration_aad7df81c049d346c5fe638e0f928d094}{run\-\_\-\-B\-A} ()
+\item 
+void \hyperlink{classmultiCamCalibration_a2a1ef9ac02e6c5f78b209630c3f36167}{write\-\_\-calib\-\_\-results} ()
+\item 
+void \hyperlink{classmultiCamCalibration_aa7500cc391078215bbe37faaa9a8839f}{load\-\_\-calib\-\_\-results} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classmultiCamCalibration_a3ea94ec1303dc7b8fc35a195ba14a4d3}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!$\sim$multi\-Cam\-Calibration@{$\sim$multi\-Cam\-Calibration}}
+\index{$\sim$multi\-Cam\-Calibration@{$\sim$multi\-Cam\-Calibration}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{$\sim$multi\-Cam\-Calibration}]{\setlength{\rightskip}{0pt plus 5cm}multi\-Cam\-Calibration\-::$\sim$multi\-Cam\-Calibration (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d7b/classmultiCamCalibration_a3ea94ec1303dc7b8fc35a195ba14a4d3}
+\hypertarget{classmultiCamCalibration_a4dfba58ddb1abc222c287326da6fa03f}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!multi\-Cam\-Calibration@{multi\-Cam\-Calibration}}
+\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{multi\-Cam\-Calibration}]{\setlength{\rightskip}{0pt plus 5cm}multi\-Cam\-Calibration\-::multi\-Cam\-Calibration (
+\begin{DoxyParamCaption}
+\item[{string}]{path, }
+\item[{Size}]{grid\-\_\-size, }
+\item[{double}]{grid\-\_\-size\-\_\-phys}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d7b/classmultiCamCalibration_a4dfba58ddb1abc222c287326da6fa03f}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classmultiCamCalibration_aec318f334898f58be8593ea7a9051dda}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!cam\-\_\-names@{cam\-\_\-names}}
+\index{cam\-\_\-names@{cam\-\_\-names}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{cam\-\_\-names}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$string$>$ multi\-Cam\-Calibration\-::cam\-\_\-names (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d7b/classmultiCamCalibration_aec318f334898f58be8593ea7a9051dda}
+\hypertarget{classmultiCamCalibration_a311de3776df8af06bd7af56f9f9743f9}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!find\-\_\-corners@{find\-\_\-corners}}
+\index{find\-\_\-corners@{find\-\_\-corners}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{find\-\_\-corners}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::find\-\_\-corners (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_a311de3776df8af06bd7af56f9f9743f9}
+\hypertarget{classmultiCamCalibration_a210c43ef7397dcf9b2c1c10c43a243e8}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!grid\-\_\-size@{grid\-\_\-size}}
+\index{grid\-\_\-size@{grid\-\_\-size}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{grid\-\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}Size multi\-Cam\-Calibration\-::grid\-\_\-size (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d7b/classmultiCamCalibration_a210c43ef7397dcf9b2c1c10c43a243e8}
+\hypertarget{classmultiCamCalibration_aaf34f70de1370d4a436cd44f0e5fa117}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!initialize@{initialize}}
+\index{initialize@{initialize}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{initialize}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::initialize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_aaf34f70de1370d4a436cd44f0e5fa117}
+\hypertarget{classmultiCamCalibration_afa0d93d6ccaf0adad301b9593fe4ecb3}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!initialize\-\_\-cams@{initialize\-\_\-cams}}
+\index{initialize\-\_\-cams@{initialize\-\_\-cams}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{initialize\-\_\-cams}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::initialize\-\_\-cams (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_afa0d93d6ccaf0adad301b9593fe4ecb3}
+\hypertarget{classmultiCamCalibration_aa7500cc391078215bbe37faaa9a8839f}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!load\-\_\-calib\-\_\-results@{load\-\_\-calib\-\_\-results}}
+\index{load\-\_\-calib\-\_\-results@{load\-\_\-calib\-\_\-results}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{load\-\_\-calib\-\_\-results}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::load\-\_\-calib\-\_\-results (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_aa7500cc391078215bbe37faaa9a8839f}
+\hypertarget{classmultiCamCalibration_a0672baa65e2c4f6f9457f05f33c55271}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!num\-\_\-cams@{num\-\_\-cams}}
+\index{num\-\_\-cams@{num\-\_\-cams}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{num\-\_\-cams}]{\setlength{\rightskip}{0pt plus 5cm}int multi\-Cam\-Calibration\-::num\-\_\-cams (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d7b/classmultiCamCalibration_a0672baa65e2c4f6f9457f05f33c55271}
+\hypertarget{classmultiCamCalibration_a69f0c4582fa045cfcc7c146dbbea4078}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!num\-\_\-imgs@{num\-\_\-imgs}}
+\index{num\-\_\-imgs@{num\-\_\-imgs}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{num\-\_\-imgs}]{\setlength{\rightskip}{0pt plus 5cm}int multi\-Cam\-Calibration\-::num\-\_\-imgs (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d7b/classmultiCamCalibration_a69f0c4582fa045cfcc7c146dbbea4078}
+\hypertarget{classmultiCamCalibration_aae9b08ca3712d652ae875df269db4cad}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!read\-\_\-calib\-\_\-imgs@{read\-\_\-calib\-\_\-imgs}}
+\index{read\-\_\-calib\-\_\-imgs@{read\-\_\-calib\-\_\-imgs}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{read\-\_\-calib\-\_\-imgs}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::read\-\_\-calib\-\_\-imgs (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_aae9b08ca3712d652ae875df269db4cad}
+\hypertarget{classmultiCamCalibration_a4aec5f46a3029784fd76e412308e65b5}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!read\-\_\-cam\-\_\-names@{read\-\_\-cam\-\_\-names}}
+\index{read\-\_\-cam\-\_\-names@{read\-\_\-cam\-\_\-names}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{read\-\_\-cam\-\_\-names}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::read\-\_\-cam\-\_\-names (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_a4aec5f46a3029784fd76e412308e65b5}
+\hypertarget{classmultiCamCalibration_a1591b01ff77ffb077f4b714239f61f55}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!refocusing\-\_\-params@{refocusing\-\_\-params}}
+\index{refocusing\-\_\-params@{refocusing\-\_\-params}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{refocusing\-\_\-params}]{\setlength{\rightskip}{0pt plus 5cm}{\bf refocusing\-\_\-data} multi\-Cam\-Calibration\-::refocusing\-\_\-params (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d7b/classmultiCamCalibration_a1591b01ff77ffb077f4b714239f61f55}
+\hypertarget{classmultiCamCalibration_aeee89100553583b0bd4570e94f2f505d}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!run@{run}}
+\index{run@{run}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{run}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::run (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_aeee89100553583b0bd4570e94f2f505d}
+\hypertarget{classmultiCamCalibration_aad7df81c049d346c5fe638e0f928d094}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!run\-\_\-\-B\-A@{run\-\_\-\-B\-A}}
+\index{run\-\_\-\-B\-A@{run\-\_\-\-B\-A}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{run\-\_\-\-B\-A}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::run\-\_\-\-B\-A (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_aad7df81c049d346c5fe638e0f928d094}
+\hypertarget{classmultiCamCalibration_a9e4a9c17b8161d5fd8e3bc806d614cd6}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!write\-\_\-\-B\-A\-\_\-data@{write\-\_\-\-B\-A\-\_\-data}}
+\index{write\-\_\-\-B\-A\-\_\-data@{write\-\_\-\-B\-A\-\_\-data}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{write\-\_\-\-B\-A\-\_\-data}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::write\-\_\-\-B\-A\-\_\-data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_a9e4a9c17b8161d5fd8e3bc806d614cd6}
+\hypertarget{classmultiCamCalibration_a2a1ef9ac02e6c5f78b209630c3f36167}{\index{multi\-Cam\-Calibration@{multi\-Cam\-Calibration}!write\-\_\-calib\-\_\-results@{write\-\_\-calib\-\_\-results}}
+\index{write\-\_\-calib\-\_\-results@{write\-\_\-calib\-\_\-results}!multiCamCalibration@{multi\-Cam\-Calibration}}
+\subsubsection[{write\-\_\-calib\-\_\-results}]{\setlength{\rightskip}{0pt plus 5cm}void multi\-Cam\-Calibration\-::write\-\_\-calib\-\_\-results (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d7b/classmultiCamCalibration_a2a1ef9ac02e6c5f78b209630c3f36167}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/ab9/projects/sa-\/ptv/lib/\hyperlink{calibration_8h}{calibration.\-h}\item 
+/home/ab9/projects/sa-\/ptv/lib/\hyperlink{calibration_8cpp}{calibration.\-cpp}\end{DoxyCompactItemize}

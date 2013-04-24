@@ -65,21 +65,28 @@ void saRefocus::read_imgs(string path) {
 
 }
 
-void saRefocus::startGPUsession() {
+void saRefocus::GPUliveView() {
 
     initializeGPU();
 
     namedWindow("Result", CV_WINDOW_AUTOSIZE);       
-    GPUrefocus(z);
+    GPUrefocus(z, thresh);
     
+    double dz = 0.5;
+    double dthresh = 5;
+
     while( 1 ){
         int key = cvWaitKey(10);
         if( (key & 255)==83 ) {
-            z += 0.1;
-            GPUrefocus(z);
+            z += dz;
+            GPUrefocus(z, thresh);
         } else if( (key & 255)==81 ) {
-            z -= 0.1;
-            GPUrefocus(z);
+            z -= dz;
+            GPUrefocus(z, thresh);
+        } else if( (key & 255)==82 ) {
+            if (thresh<255) { thresh += dthresh; GPUrefocus(z, thresh); }
+        } else if( (key & 255)==84 ) {
+            if (thresh>0) { thresh -= dthresh; GPUrefocus(z, thresh); }
         } else if( (key & 255)==27 ) {
             break;
         }
@@ -112,7 +119,7 @@ void saRefocus::initializeGPU() {
 }
 
 
-void saRefocus::GPUrefocus(double z) {
+void saRefocus::GPUrefocus(double z, double thresh) {
 
     Scalar fact = Scalar(1/double(array.size()));
 
@@ -133,10 +140,12 @@ void saRefocus::GPUrefocus(double z) {
         
     }
     
+    gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
+
     Mat refocused_host(refocused);
     refocused_host /= 255.0;
-    char title[20];
-    sprintf(title, "z = %f", z);
+    char title[50];
+    sprintf(title, "z = %f, thresh = %f", z, thresh);
     putText(refocused_host, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
     imshow("Result", refocused_host);
 

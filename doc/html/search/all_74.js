@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['t_5ffrom_5fp',['T_from_P',['../d2/d4d/processing__refocusing_8cpp.html#a2d6263082d189692b0664c613b74767f',1,'T_from_P(Mat P, Mat &amp;H, double z, double scale, Size img_size):&#160;processing_refocusing.cpp'],['../d0/d19/processing__refocusing_8h.html#a29700b96446ccb770c6c47025cdeda3f',1,'T_from_P(Mat P_mats, Mat &amp;H, double z, double scale, Size img_size):&#160;processing_refocusing.cpp']]],
-  ['temp',['temp',['../df/d10/classgpuRefocus.html#a5b9f962dd767a6635c7cc49777c2698a',1,'gpuRefocus']]],
-  ['temp2',['temp2',['../df/d10/classgpuRefocus.html#acf08da2a44d6d6e57213db20adb51e43',1,'gpuRefocus']]]
+  ['t_5ffrom_5fp',['T_from_P',['../d3/d62/tools_8cpp.html#a2d6263082d189692b0664c613b74767f',1,'T_from_P(Mat P, Mat &amp;H, double z, double scale, Size img_size):&#160;tools.cpp'],['../d5/da5/tools_8h.html#a2d6263082d189692b0664c613b74767f',1,'T_from_P(Mat P, Mat &amp;H, double z, double scale, Size img_size):&#160;tools.cpp']]],
+  ['tools_2ecpp',['tools.cpp',['../d3/d62/tools_8cpp.html',1,'']]],
+  ['tools_2eh',['tools.h',['../d5/da5/tools_8h.html',1,'']]],
+  ['tools_5flibrary',['TOOLS_LIBRARY',['../d3/d62/tools_8cpp.html#ae0f3f3fbcdd375913d3d68feca675ae2',1,'tools.cpp']]],
+  ['typedefs_2eh',['typedefs.h',['../d7/d69/typedefs_8h.html',1,'']]]
 ];

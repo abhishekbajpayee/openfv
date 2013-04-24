@@ -1,19 +1,21 @@
 var searchData=
 [
-<<<<<<< HEAD
-  ['read_5fcalib_5fdata',['read_calib_data',['../d7/dc7/io__refocusing_8cpp.html#ab3b84a4766bfbb58bf954a07675fad64',1,'read_calib_data(string filename, vector&lt; Mat &gt; &amp;P_mats, vector&lt; Mat &gt; &amp;translations, double &amp;scale):&#160;io_refocusing.cpp'],['../dc/d97/io__refocusing_8h.html#ab3b84a4766bfbb58bf954a07675fad64',1,'read_calib_data(string filename, vector&lt; Mat &gt; &amp;P_mats, vector&lt; Mat &gt; &amp;translations, double &amp;scale):&#160;io_refocusing.cpp']]],
-  ['read_5fcalib_5fimgs',['read_calib_imgs',['../db/d01/io__calibrate_8cpp.html#a5b763d5760b62c11bd0320c3b543b682',1,'read_calib_imgs(string path, vector&lt; string &gt; cam_names):&#160;io_calibrate.cpp'],['../d2/d17/io__calibrate_8h.html#a5b763d5760b62c11bd0320c3b543b682',1,'read_calib_imgs(string path, vector&lt; string &gt; cam_names):&#160;io_calibrate.cpp']]],
-  ['read_5fcam_5fnames',['read_cam_names',['../db/d01/io__calibrate_8cpp.html#a96aee1792da1246ba789efea82733e19',1,'read_cam_names(string path):&#160;io_calibrate.cpp'],['../d2/d17/io__calibrate_8h.html#a96aee1792da1246ba789efea82733e19',1,'read_cam_names(string path):&#160;io_calibrate.cpp']]],
-  ['read_5frefocusing_5fimgs',['read_refocusing_imgs',['../d7/dc7/io__refocusing_8cpp.html#ab8a197a117b0be64ae4d4f48b3d01fe2',1,'read_refocusing_imgs(string path, vector&lt; string &gt; cam_names, vector&lt; vector&lt; Mat &gt; &gt; &amp;refocusing_imgs):&#160;io_refocusing.cpp'],['../dc/d97/io__refocusing_8h.html#ab8a197a117b0be64ae4d4f48b3d01fe2',1,'read_refocusing_imgs(string path, vector&lt; string &gt; cam_names, vector&lt; vector&lt; Mat &gt; &gt; &amp;refocusing_imgs):&#160;io_refocusing.cpp']]],
+  ['r',['R',['../d7/dc7/io__refocusing_8cpp.html#a1cdde9992db763536d2500260518a6e6',1,'io_refocusing.cpp']]],
+  ['r_5fc',['r_c',['../d6/d86/classalignProblem.html#a323c12e9a214e9dfd68f834e1b61a4c7',1,'alignProblem']]],
+  ['read_5fcalib_5fdata',['read_calib_data',['../d7/dc7/io__refocusing_8cpp.html#a14586c3ac632d4ce6b6b1f603239f4ce',1,'io_refocusing.cpp']]],
+  ['read_5fcalib_5fimgs',['read_calib_imgs',['../d7/d7b/classmultiCamCalibration.html#aae9b08ca3712d652ae875df269db4cad',1,'multiCamCalibration']]],
+  ['read_5fcam_5fnames',['read_cam_names',['../d7/d7b/classmultiCamCalibration.html#a4aec5f46a3029784fd76e412308e65b5',1,'multiCamCalibration']]],
+  ['read_5fimgs',['read_imgs',['../d7/d89/classsaRefocus.html#a3d75da5d4cf776ea324413f9f138ef70',1,'saRefocus']]],
+  ['read_5frefocusing_5fimgs',['read_refocusing_imgs',['../dc/d97/io__refocusing_8h.html#a7cc971905919feaee4ec907c9d7dffb4',1,'read_refocusing_imgs():&#160;io_refocusing.h'],['../d7/dc7/io__refocusing_8cpp.html#ab8a197a117b0be64ae4d4f48b3d01fe2',1,'read_refocusing_imgs(string path, vector&lt; string &gt; cam_names, vector&lt; vector&lt; Mat &gt; &gt; &amp;refocusing_imgs):&#160;io_refocusing.cpp']]],
   ['refocus',['refocus',['../df/d10/classgpuRefocus.html#a0722e109830d8de6ff53c0e8e8f73891',1,'gpuRefocus::refocus()'],['../db/df2/classcpuRefocus.html#aaeaf04bd8af93b84a2b0294ea101ae06',1,'cpuRefocus::refocus()']]],
-  ['refocus_5fimg',['refocus_img',['../d2/d4d/processing__refocusing_8cpp.html#a39b3139e492760fa97569f3f2f8bc44f',1,'refocus_img(vector&lt; vector&lt; Mat &gt; &gt; refocusing_imgs, vector&lt; Mat &gt; P_mats, double pix_per_phys, double z, int method):&#160;processing_refocusing.cpp'],['../d0/d19/processing__refocusing_8h.html#a39b3139e492760fa97569f3f2f8bc44f',1,'refocus_img(vector&lt; vector&lt; Mat &gt; &gt; refocusing_imgs, vector&lt; Mat &gt; P_mats, double pix_per_phys, double z, int method):&#160;processing_refocusing.cpp']]],
-  ['refocused',['refocused',['../df/d10/classgpuRefocus.html#a3b2c86202e1900183168e1971069f016',1,'gpuRefocus::refocused()'],['../db/df2/classcpuRefocus.html#a0fddfc2019021e97892314faef6bf211',1,'cpuRefocus::refocused()']]],
-  ['refocused_5fhost',['refocused_host',['../df/d10/classgpuRefocus.html#a897b942b2f19ee124e8abe5b7bfda87c',1,'gpuRefocus']]],
+  ['refocus_5fimg',['refocus_img',['../d2/d4d/processing__refocusing_8cpp.html#a39b3139e492760fa97569f3f2f8bc44f',1,'processing_refocusing.cpp']]],
+  ['refocusing_2ecpp',['refocusing.cpp',['../d9/d67/refocusing_8cpp.html',1,'']]],
+  ['refocusing_2eh',['refocusing.h',['../d2/dc4/refocusing_8h.html',1,'']]],
+  ['refocusing_5fdata',['refocusing_data',['../d3/d46/structrefocusing__data.html',1,'']]],
+  ['refocusing_5fparams',['refocusing_params',['../d7/d7b/classmultiCamCalibration.html#a1591b01ff77ffb077f4b714239f61f55',1,'multiCamCalibration']]],
   ['refractivereprojectionerror',['refractiveReprojectionError',['../d8/d20/structrefractiveReprojectionError.html',1,'refractiveReprojectionError'],['../d8/d20/structrefractiveReprojectionError.html#a0bd1a52a65545d440518fa718beba32b',1,'refractiveReprojectionError::refractiveReprojectionError()']]],
-  ['reprojection_5ferrors',['reprojection_errors',['../db/def/processing__calibrate_8cpp.html#ac710261717518c9f0f2b1bfe3bc763d3',1,'reprojection_errors(const vector&lt; vector&lt; Point3f &gt; &gt; &amp;objectPoints, const vector&lt; vector&lt; Point2f &gt; &gt; &amp;imagePoints, const vector&lt; Mat &gt; &amp;rvecs, const vector&lt; Mat &gt; &amp;tvecs, const Mat &amp;cameraMatrix, const Mat &amp;distCoeffs, vector&lt; float &gt; &amp;perViewErrors):&#160;processing_calibrate.cpp'],['../d7/d48/processing__calibrate_8h.html#ac710261717518c9f0f2b1bfe3bc763d3',1,'reprojection_errors(const vector&lt; vector&lt; Point3f &gt; &gt; &amp;objectPoints, const vector&lt; vector&lt; Point2f &gt; &gt; &amp;imagePoints, const vector&lt; Mat &gt; &amp;rvecs, const vector&lt; Mat &gt; &amp;tvecs, const Mat &amp;cameraMatrix, const Mat &amp;distCoeffs, vector&lt; float &gt; &amp;perViewErrors):&#160;processing_calibrate.cpp']]],
-  ['rotationerror',['rotationError',['../dd/d4e/structrotationError.html',1,'rotationError'],['../dd/d4e/structrotationError.html#aae8d21c715df1ad4f3a004eed8ba17a4',1,'rotationError::rotationError()']]]
-=======
-  ['refractivereprojectionerror',['refractiveReprojectionError',['../d8/d20/structrefractiveReprojectionError.html',1,'']]],
-  ['rotationerror',['rotationError',['../dd/d4e/structrotationError.html',1,'']]]
->>>>>>> origin/master
+  ['rotationerror',['rotationError',['../dd/d4e/structrotationError.html',1,'rotationError'],['../dd/d4e/structrotationError.html#aae8d21c715df1ad4f3a004eed8ba17a4',1,'rotationError::rotationError()']]],
+  ['run',['run',['../d7/d7b/classmultiCamCalibration.html#aeee89100553583b0bd4570e94f2f505d',1,'multiCamCalibration']]],
+  ['run_5fba',['run_BA',['../d7/d7b/classmultiCamCalibration.html#aad7df81c049d346c5fe638e0f928d094',1,'multiCamCalibration']]],
+  ['rvecs',['rvecs',['../d7/d56/structpinholeReprojectionError2.html#af1afb81c570c7bf8d497a8ecf1cc7e69',1,'pinholeReprojectionError2']]]
 ];

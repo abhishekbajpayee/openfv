@@ -7,7 +7,13 @@
 \item 
 class \hyperlink{classbaProblem}{ba\-Problem}
 \item 
+class \hyperlink{classalignProblem}{align\-Problem}
+\item 
 struct \hyperlink{structpinholeReprojectionError}{pinhole\-Reprojection\-Error}
+\item 
+struct \hyperlink{structpinholeReprojectionError2}{pinhole\-Reprojection\-Error2}
+\item 
+struct \hyperlink{structalignmentError}{alignment\-Error}
 \item 
 class \hyperlink{classbaProblem__ref}{ba\-Problem\-\_\-ref}
 \item 
@@ -22,13 +28,38 @@ struct \hyperlink{structplaneError}{plane\-Error}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-double \hyperlink{optimization_8h_a5f16760b72e9bb9e281a2a5c85463423}{B\-A\-\_\-pinhole} (\hyperlink{classbaProblem}{ba\-Problem} \&ba\-\_\-problem, string ba\-\_\-file, Size img\-\_\-size, char $\ast$argv)
+double \hyperlink{optimization_8h_afff561738b91ea01d3ba822754a48693}{B\-A\-\_\-pinhole} (\hyperlink{classbaProblem}{ba\-Problem} \&ba\-\_\-problem, string ba\-\_\-file, Size img\-\_\-size)
+\item 
+double \hyperlink{optimization_8h_a6023ee69ffa94d1365623aabe0d3b40f}{B\-A\-\_\-pinhole2} (\hyperlink{classbaProblem}{ba\-Problem} \&ba\-\_\-problem, string ba\-\_\-file, Size img\-\_\-size, char $\ast$argv)
+\item 
+double \hyperlink{optimization_8h_a5ab8ebab3bd5a91176a6f4122ac9f1fa}{B\-A\-\_\-align} (\hyperlink{classalignProblem}{align\-Problem} \&align\-\_\-problem, string align\-\_\-file)
 \item 
 double \hyperlink{optimization_8h_a2d9a000d1a1b6e036fdbd38f264ff4ec}{fit\-\_\-plane} (\hyperlink{classleastSquares}{least\-Squares} \&ls\-\_\-problem, string filename, vector$<$ Mat $>$ points)
+\item 
+double \hyperlink{optimization_8h_a5f16760b72e9bb9e281a2a5c85463423}{B\-A\-\_\-pinhole} (\hyperlink{classbaProblem}{ba\-Problem} \&ba\-\_\-problem, string ba\-\_\-file, Size img\-\_\-size, char $\ast$argv)
+\item 
+double \hyperlink{optimization_8h_a3d511ddd4a41b6fb9f1af4be14e24e23}{fit\-\_\-plane} (\hyperlink{classleastSquares}{least\-Squares} \&ls\-\_\-problem, string filename, char $\ast$argv, vector$<$ Mat $>$ points)
 \end{DoxyCompactItemize}
 
 
 \subsection{Function Documentation}
+\hypertarget{optimization_8h_a5ab8ebab3bd5a91176a6f4122ac9f1fa}{\index{optimization.\-h@{optimization.\-h}!B\-A\-\_\-align@{B\-A\-\_\-align}}
+\index{B\-A\-\_\-align@{B\-A\-\_\-align}!optimization.h@{optimization.\-h}}
+\subsubsection[{B\-A\-\_\-align}]{\setlength{\rightskip}{0pt plus 5cm}double B\-A\-\_\-align (
+\begin{DoxyParamCaption}
+\item[{{\bf align\-Problem} \&}]{align\-\_\-problem, }
+\item[{string}]{align\-\_\-file}
+\end{DoxyParamCaption}
+)}}\label{dd/d83/optimization_8h_a5ab8ebab3bd5a91176a6f4122ac9f1fa}
+\hypertarget{optimization_8h_afff561738b91ea01d3ba822754a48693}{\index{optimization.\-h@{optimization.\-h}!B\-A\-\_\-pinhole@{B\-A\-\_\-pinhole}}
+\index{B\-A\-\_\-pinhole@{B\-A\-\_\-pinhole}!optimization.h@{optimization.\-h}}
+\subsubsection[{B\-A\-\_\-pinhole}]{\setlength{\rightskip}{0pt plus 5cm}double B\-A\-\_\-pinhole (
+\begin{DoxyParamCaption}
+\item[{{\bf ba\-Problem} \&}]{ba\-\_\-problem, }
+\item[{string}]{ba\-\_\-file, }
+\item[{Size}]{img\-\_\-size}
+\end{DoxyParamCaption}
+)}}\label{dd/d83/optimization_8h_afff561738b91ea01d3ba822754a48693}
 \hypertarget{optimization_8h_a5f16760b72e9bb9e281a2a5c85463423}{\index{optimization.\-h@{optimization.\-h}!B\-A\-\_\-pinhole@{B\-A\-\_\-pinhole}}
 \index{B\-A\-\_\-pinhole@{B\-A\-\_\-pinhole}!optimization.h@{optimization.\-h}}
 \subsubsection[{B\-A\-\_\-pinhole}]{\setlength{\rightskip}{0pt plus 5cm}double B\-A\-\_\-pinhole (
@@ -39,6 +70,16 @@ double \hyperlink{optimization_8h_a2d9a000d1a1b6e036fdbd38f264ff4ec}{fit\-\_\-pl
 \item[{char $\ast$}]{argv}
 \end{DoxyParamCaption}
 )}}\label{dd/d83/optimization_8h_a5f16760b72e9bb9e281a2a5c85463423}
+\hypertarget{optimization_8h_a6023ee69ffa94d1365623aabe0d3b40f}{\index{optimization.\-h@{optimization.\-h}!B\-A\-\_\-pinhole2@{B\-A\-\_\-pinhole2}}
+\index{B\-A\-\_\-pinhole2@{B\-A\-\_\-pinhole2}!optimization.h@{optimization.\-h}}
+\subsubsection[{B\-A\-\_\-pinhole2}]{\setlength{\rightskip}{0pt plus 5cm}double B\-A\-\_\-pinhole2 (
+\begin{DoxyParamCaption}
+\item[{{\bf ba\-Problem} \&}]{ba\-\_\-problem, }
+\item[{string}]{ba\-\_\-file, }
+\item[{Size}]{img\-\_\-size, }
+\item[{char $\ast$}]{argv}
+\end{DoxyParamCaption}
+)}}\label{dd/d83/optimization_8h_a6023ee69ffa94d1365623aabe0d3b40f}
 \hypertarget{optimization_8h_a2d9a000d1a1b6e036fdbd38f264ff4ec}{\index{optimization.\-h@{optimization.\-h}!fit\-\_\-plane@{fit\-\_\-plane}}
 \index{fit\-\_\-plane@{fit\-\_\-plane}!optimization.h@{optimization.\-h}}
 \subsubsection[{fit\-\_\-plane}]{\setlength{\rightskip}{0pt plus 5cm}double fit\-\_\-plane (
@@ -48,3 +89,13 @@ double \hyperlink{optimization_8h_a2d9a000d1a1b6e036fdbd38f264ff4ec}{fit\-\_\-pl
 \item[{vector$<$ Mat $>$}]{points}
 \end{DoxyParamCaption}
 )}}\label{dd/d83/optimization_8h_a2d9a000d1a1b6e036fdbd38f264ff4ec}
+\hypertarget{optimization_8h_a3d511ddd4a41b6fb9f1af4be14e24e23}{\index{optimization.\-h@{optimization.\-h}!fit\-\_\-plane@{fit\-\_\-plane}}
+\index{fit\-\_\-plane@{fit\-\_\-plane}!optimization.h@{optimization.\-h}}
+\subsubsection[{fit\-\_\-plane}]{\setlength{\rightskip}{0pt plus 5cm}double fit\-\_\-plane (
+\begin{DoxyParamCaption}
+\item[{{\bf least\-Squares} \&}]{ls\-\_\-problem, }
+\item[{string}]{filename, }
+\item[{char $\ast$}]{argv, }
+\item[{vector$<$ Mat $>$}]{points}
+\end{DoxyParamCaption}
+)}}\label{dd/d83/optimization_8h_a3d511ddd4a41b6fb9f1af4be14e24e23}

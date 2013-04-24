@@ -61,10 +61,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="../../files.html"><span>File&#160;List</span></a></li>
-<<<<<<< HEAD
       <li><a href="../../globals.html"><span>File&#160;Members</span></a></li>
-=======
->>>>>>> origin/master
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -72,11 +69,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<<<<<<< HEAD
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
-=======
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a></div>
->>>>>>> origin/master
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -95,76 +88,55 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <div class="title">processing_calibrate.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<<<<<<< HEAD
 <a href="../../d7/d48/processing__calibrate_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef CALIBRATION_PROC_LIB</span></div>
-=======
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef CALIBRATION_PROC_LIB</span></div>
->>>>>>> origin/master
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define CALIBRATION_PROC_LIB</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;std_include.h&quot;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">using namespace </span>cv;</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">using namespace </span>std;</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">// FUNCTIONS</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div>
-<<<<<<< HEAD
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keywordtype">double</span> <a class="code" href="../../db/def/processing__calibrate_8cpp.html#ac710261717518c9f0f2b1bfe3bc763d3">reprojection_errors</a>(<span class="keyword">const</span> vector&lt;vector&lt;Point3f&gt; &gt; &amp;objectPoints,</div>
-=======
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keywordtype">double</span> reprojection_errors(<span class="keyword">const</span> vector&lt;vector&lt;Point3f&gt; &gt; &amp;objectPoints,</div>
->>>>>>> origin/master
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;                           <span class="keyword">const</span> vector&lt;vector&lt;Point2f&gt; &gt; &amp;imagePoints,</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;                           <span class="keyword">const</span> vector&lt;Mat&gt; &amp;rvecs, <span class="keyword">const</span> vector&lt;Mat&gt; &amp;tvecs,</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;                           <span class="keyword">const</span> Mat &amp;cameraMatrix , <span class="keyword">const</span> Mat &amp;distCoeffs,</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;                           vector&lt;float&gt; &amp;perViewErrors);</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<<<<<<< HEAD
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../db/def/processing__calibrate_8cpp.html#ad436d9e31201560fc6a469e715c8b8e5">all_reprojection_errors</a>(vector&lt;double&gt; &amp;reproj_errors, vector&lt; vector&lt;float&gt; &gt; &amp;per_view_errors,</div>
-=======
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">void</span> all_reprojection_errors(vector&lt;double&gt; &amp;reproj_errors, vector&lt; vector&lt;float&gt; &gt; &amp;per_view_errors,</div>
->>>>>>> origin/master
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;                             vector&lt; vector&lt;Point3f&gt; &gt; all_pattern_points, vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; all_corner_points,</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;                             <span class="keywordtype">int</span> num_cams, <span class="keywordtype">int</span> num_imgs, vector&lt;Mat&gt; cameraMats, vector&lt;Mat&gt; dist_coeffs, </div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;                             vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs);</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;</div>
-<<<<<<< HEAD
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; <a class="code" href="../../db/def/processing__calibrate_8cpp.html#a99fcc07980489b4095c070b7d81f75ba">find_corners</a>(vector&lt; vector&lt;Mat&gt; &gt; calib_imgs, Size grid_size, <span class="keywordtype">int</span> draw);</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../db/def/processing__calibrate_8cpp.html#a258730dbd6135feeebc36628eb3e2ffc">calibrate_cameras</a>(vector&lt; vector&lt;Point3f&gt; &gt; &amp;all_pattern_points, vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; corner_points, </div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;                       <span class="keywordtype">int</span> num_cams, <span class="keywordtype">int</span> num_imgs, Size grid_size, Size img_size, vector&lt;Mat&gt; &amp;cameraMats, </div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;                       vector&lt;Mat&gt; &amp;dist_coeffs, vector&lt; vector&lt;Mat&gt; &gt; &amp;rvecs, vector&lt; vector&lt;Mat&gt; &gt; &amp;tvecs);</div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="../../dd/d83/optimization_8h.html">optimization.h</a>&quot;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;=======</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/master</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">using namespace </span>cv;</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">using namespace </span>std;</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">// FUNCTIONS</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;=======</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">double</span> reprojection_errors(<span class="keyword">const</span> vector&lt;vector&lt;Point3f&gt; &gt; &amp;objectPoints,</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;                           <span class="keyword">const</span> vector&lt;vector&lt;Point2f&gt; &gt; &amp;imagePoints,</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;                           <span class="keyword">const</span> vector&lt;Mat&gt; &amp;rvecs, <span class="keyword">const</span> vector&lt;Mat&gt; &amp;tvecs,</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;                           <span class="keyword">const</span> Mat &amp;cameraMatrix , <span class="keyword">const</span> Mat &amp;distCoeffs,</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;                           vector&lt;float&gt; &amp;perViewErrors);</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keywordtype">void</span> all_reprojection_errors(vector&lt;double&gt; &amp;reproj_errors, vector&lt; vector&lt;float&gt; &gt; &amp;per_view_errors,</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;                             vector&lt; vector&lt;Point3f&gt; &gt; all_pattern_points, vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; all_corner_points,</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;                             <span class="keywordtype">int</span> num_cams, <span class="keywordtype">int</span> num_imgs, vector&lt;Mat&gt; cameraMats, vector&lt;Mat&gt; dist_coeffs, </div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;                             vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs);</div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../db/def/processing__calibrate_8cpp.html#a9c2974af34df8ddd84d0c14cb55c984f">get_translations_all</a>(vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                     vector&lt; vector&lt;Mat&gt; &gt; &amp;translations);</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../db/def/processing__calibrate_8cpp.html#a08d2b28502f191a1268b42b6f52dd5ea">get_translations</a>(vector&lt;Mat&gt; rvecs, vector&lt;Mat&gt; tvecs, vector&lt;Mat&gt; &amp;translations);</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;Mat <a class="code" href="../../db/def/processing__calibrate_8cpp.html#adfc64f519c76ee63a7cc34f92d8ed634">P_from_KRT</a>(Mat K, Mat rvec, Mat tvec);</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; find_corners(vector&lt; vector&lt;Mat&gt; &gt; calib_imgs, Size grid_size, <span class="keywordtype">int</span> draw);</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keywordtype">void</span> calibrate_cameras(vector&lt; vector&lt;Point3f&gt; &gt; &amp;all_pattern_points, vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; corner_points, </div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;                       <span class="keywordtype">int</span> num_cams, <span class="keywordtype">int</span> num_imgs, Size grid_size, Size img_size, vector&lt;Mat&gt; &amp;cameraMats, </div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;                       vector&lt;Mat&gt; &amp;dist_coeffs, vector&lt; vector&lt;Mat&gt; &gt; &amp;rvecs, vector&lt; vector&lt;Mat&gt; &gt; &amp;tvecs);</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/master</div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="code" href="../../d7/d48/processing__calibrate_8h.html#ab5e5f89047cbe1032bed2c53433b657e">   35</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d7/d48/processing__calibrate_8h.html#ab5e5f89047cbe1032bed2c53433b657e">get_translations_all</a>(vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;                     vector&lt; vector&lt;Mat&gt; &gt; &amp;translations);</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d7/dc7/io__refocusing_8cpp.html#ab05e912e4e22a479945c48ab97983ea0">get_translations</a>(vector&lt;Mat&gt; rvecs, vector&lt;Mat&gt; tvecs, vector&lt;Mat&gt; &amp;translations);</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;Mat <a class="code" href="../../db/def/processing__calibrate_8cpp.html#a2334446d42f9a9b61bd5c1fe2048da7f">P_from_KRT</a>(Mat K, Mat rvec, Mat tvec, Mat rmean);</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;=======</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/master</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Mar 9 2013 14:17:59 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
-=======
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; find_corners(vector&lt; vector&lt;Mat&gt; &gt; calib_imgs, Size grid_size, <span class="keywordtype">int</span> draw);</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keywordtype">void</span> calibrate_cameras(vector&lt; vector&lt;Point3f&gt; &gt; &amp;all_pattern_points, vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; corner_points, </div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;                       <span class="keywordtype">int</span> num_cams, <span class="keywordtype">int</span> num_imgs, Size grid_size, Size img_size, vector&lt;Mat&gt; &amp;cameraMats, </div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;                       vector&lt;Mat&gt; &amp;dist_coeffs, vector&lt; vector&lt;Mat&gt; &gt; &amp;rvecs, vector&lt; vector&lt;Mat&gt; &gt; &amp;tvecs);</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keywordtype">void</span> get_translations_all(vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                     vector&lt; vector&lt;Mat&gt; &gt; &amp;translations);</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keywordtype">void</span> get_translations(vector&lt;Mat&gt; rvecs, vector&lt;Mat&gt; tvecs, vector&lt;Mat&gt; &amp;translations);</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#endif</span></div>
-</div><!-- fragment --></div><!-- contents -->
-<!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 28 2013 14:44:20 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
->>>>>>> origin/master
+Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

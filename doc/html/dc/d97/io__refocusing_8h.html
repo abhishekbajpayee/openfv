@@ -69,7 +69,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -85,7 +85,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">io_refocusing.h File Reference</div>  </div>
 </div><!--header-->
@@ -94,78 +94,27 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </div>
 <p><a href="../../dc/d97/io__refocusing_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:ab3b84a4766bfbb58bf954a07675fad64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d97/io__refocusing_8h.html#ab3b84a4766bfbb58bf954a07675fad64">read_calib_data</a> (string filename, vector&lt; Mat &gt; &amp;P_mats, vector&lt; Mat &gt; &amp;translations, double &amp;scale)</td></tr>
-<tr class="separator:ab3b84a4766bfbb58bf954a07675fad64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8a197a117b0be64ae4d4f48b3d01fe2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d97/io__refocusing_8h.html#ab8a197a117b0be64ae4d4f48b3d01fe2">read_refocusing_imgs</a> (string path, vector&lt; string &gt; cam_names, vector&lt; vector&lt; Mat &gt; &gt; &amp;refocusing_imgs)</td></tr>
-<tr class="separator:ab8a197a117b0be64ae4d4f48b3d01fe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a7cc971905919feaee4ec907c9d7dffb4"><td class="memItemLeft" align="right" valign="top"><br class="typebreak"/>
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEADvoidread_calib_data(stringfilename, <br class="typebreak"/>
+vector&lt; Mat &gt; &amp;P_mats, vector<br class="typebreak"/>
+&lt; Mat &gt; &amp;rvecs, vector&lt; Mat &gt;<br class="typebreak"/>
+ &amp;tvecs, vector&lt; Mat &gt;<br class="typebreak"/>
+ &amp;translations, double &amp;scale);=======voidread_calib_data(stringfilename, <br class="typebreak"/>
+vector&lt; Mat &gt; &amp;P_mats, vector<br class="typebreak"/>
+&lt; Mat &gt; &amp;translations, double <br class="typebreak"/>
+&amp;scale);&gt;&gt;&gt;&gt;&gt;&gt; origin master <br class="typebreak"/>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d97/io__refocusing_8h.html#a7cc971905919feaee4ec907c9d7dffb4">read_refocusing_imgs</a> (string path, vector&lt; string &gt; cam_names, vector&lt; vector&lt; Mat &gt; &gt; &amp;refocusing_imgs)</td></tr>
+<tr class="separator:a7cc971905919feaee4ec907c9d7dffb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="ab3b84a4766bfbb58bf954a07675fad64"></a>
+<h2 class="groupheader">Variable Documentation</h2>
+<a class="anchor" id="a7cc971905919feaee4ec907c9d7dffb4"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void read_calib_data </td>
-          <td>(</td>
-          <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>filename</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">vector&lt; Mat &gt; &amp;&#160;</td>
-          <td class="paramname"><em>P_mats</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">vector&lt; Mat &gt; &amp;&#160;</td>
-          <td class="paramname"><em>translations</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double &amp;&#160;</td>
-          <td class="paramname"><em>scale</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ab8a197a117b0be64ae4d4f48b3d01fe2"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void read_refocusing_imgs </td>
-          <td>(</td>
-          <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>path</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">vector&lt; string &gt;&#160;</td>
-          <td class="paramname"><em>cam_names</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">vector&lt; vector&lt; Mat &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>refocusing_imgs</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
+          <td class="memname">&lt;&lt;&lt;&lt;&lt;&lt;&lt;HEADvoidread_calib_data(stringfilename,vector&lt;Mat&gt;&amp;P_mats,vector&lt;Mat&gt;&amp;rvecs,vector&lt;Mat&gt;&amp;tvecs,vector&lt;Mat&gt;&amp;translations,double&amp;scale);=======voidread_calib_data(stringfilename,vector&lt;Mat&gt;&amp;P_mats,vector&lt;Mat&gt;&amp;translations,double&amp;scale);&gt;&gt;&gt;&gt;&gt;&gt; origin master void read_refocusing_imgs(string path, vector&lt; string &gt; cam_names, vector&lt; vector&lt; Mat &gt; &gt; &amp;refocusing_imgs)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -175,7 +124,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Mar 9 2013 14:17:59 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

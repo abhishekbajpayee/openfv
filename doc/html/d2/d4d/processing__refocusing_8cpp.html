@@ -69,7 +69,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -94,10 +94,6 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ad683e2c82824ca18f0d4a0f9063bb555"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d4d/processing__refocusing_8cpp.html#ad683e2c82824ca18f0d4a0f9063bb555">get_grid_size_pix</a> (vector&lt; vector&lt; vector&lt; Point2f &gt; &gt; &gt; all_corner_points, Size grid_size, int center_cam_id)</td></tr>
-<tr class="separator:ad683e2c82824ca18f0d4a0f9063bb555"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d6263082d189692b0664c613b74767f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d4d/processing__refocusing_8cpp.html#a2d6263082d189692b0664c613b74767f">T_from_P</a> (Mat P, Mat &amp;H, double z, double scale, Size img_size)</td></tr>
-<tr class="separator:a2d6263082d189692b0664c613b74767f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a39b3139e492760fa97569f3f2f8bc44f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d4d/processing__refocusing_8cpp.html#a39b3139e492760fa97569f3f2f8bc44f">refocus_img</a> (vector&lt; vector&lt; Mat &gt; &gt; refocusing_imgs, vector&lt; Mat &gt; P_mats, double pix_per_phys, double z, int method)</td></tr>
 <tr class="separator:a39b3139e492760fa97569f3f2f8bc44f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90ff608a2881f2d8812a0679d5b4dfb9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d4d/processing__refocusing_8cpp.html#a90ff608a2881f2d8812a0679d5b4dfb9">get_P_mats</a> (vector&lt; Mat &gt; cameraMats, vector&lt; vector&lt; Mat &gt; &gt; rvecs, vector&lt; vector&lt; Mat &gt; &gt; tvecs, vector&lt; Mat &gt; &amp;P_mats)</td></tr>
@@ -106,38 +102,6 @@ Functions</h2></td></tr>
 <tr class="separator:acb7c4143b72b05fc9d4c19b741661276"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="ad683e2c82824ca18f0d4a0f9063bb555"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double get_grid_size_pix </td>
-          <td>(</td>
-          <td class="paramtype">vector&lt; vector&lt; vector&lt; Point2f &gt; &gt; &gt;&#160;</td>
-          <td class="paramname"><em>all_corner_points</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Size&#160;</td>
-          <td class="paramname"><em>grid_size</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>center_cam_id</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="acb7c4143b72b05fc9d4c19b741661276"></a>
 <div class="memitem">
 <div class="memproto">
@@ -264,54 +228,10 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a2d6263082d189692b0664c613b74767f"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void T_from_P </td>
-          <td>(</td>
-          <td class="paramtype">Mat&#160;</td>
-          <td class="paramname"><em>P</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Mat &amp;&#160;</td>
-          <td class="paramname"><em>H</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>z</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>scale</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Size&#160;</td>
-          <td class="paramname"><em>img_size</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Mar 9 2013 14:17:59 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

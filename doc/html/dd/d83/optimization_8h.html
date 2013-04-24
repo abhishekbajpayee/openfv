@@ -69,7 +69,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -99,7 +99,13 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d86/classalignProblem.html">alignProblem</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d5b/structpinholeReprojectionError.html">pinholeReprojectionError</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d56/structpinholeReprojectionError2.html">pinholeReprojectionError2</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/deb/structalignmentError.html">alignmentError</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d3f/classbaProblem__ref.html">baProblem_ref</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -114,18 +120,122 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a5f16760b72e9bb9e281a2a5c85463423"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d83/optimization_8h.html#a5f16760b72e9bb9e281a2a5c85463423">BA_pinhole</a> (<a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;ba_problem, string ba_file, Size img_size, char *argv)</td></tr>
-<tr class="separator:a5f16760b72e9bb9e281a2a5c85463423"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afff561738b91ea01d3ba822754a48693"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d83/optimization_8h.html#afff561738b91ea01d3ba822754a48693">BA_pinhole</a> (<a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;ba_problem, string ba_file, Size img_size)</td></tr>
+<tr class="separator:afff561738b91ea01d3ba822754a48693"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6023ee69ffa94d1365623aabe0d3b40f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d83/optimization_8h.html#a6023ee69ffa94d1365623aabe0d3b40f">BA_pinhole2</a> (<a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;ba_problem, string ba_file, Size img_size, char *argv)</td></tr>
+<tr class="separator:a6023ee69ffa94d1365623aabe0d3b40f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ab8ebab3bd5a91176a6f4122ac9f1fa"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d83/optimization_8h.html#a5ab8ebab3bd5a91176a6f4122ac9f1fa">BA_align</a> (<a class="el" href="../../d6/d86/classalignProblem.html">alignProblem</a> &amp;align_problem, string align_file)</td></tr>
+<tr class="separator:a5ab8ebab3bd5a91176a6f4122ac9f1fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d9a000d1a1b6e036fdbd38f264ff4ec"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d83/optimization_8h.html#a2d9a000d1a1b6e036fdbd38f264ff4ec">fit_plane</a> (<a class="el" href="../../d9/d32/classleastSquares.html">leastSquares</a> &amp;ls_problem, string filename, vector&lt; Mat &gt; points)</td></tr>
 <tr class="separator:a2d9a000d1a1b6e036fdbd38f264ff4ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f16760b72e9bb9e281a2a5c85463423"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d83/optimization_8h.html#a5f16760b72e9bb9e281a2a5c85463423">BA_pinhole</a> (<a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;ba_problem, string ba_file, Size img_size, char *argv)</td></tr>
+<tr class="separator:a5f16760b72e9bb9e281a2a5c85463423"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d511ddd4a41b6fb9f1af4be14e24e23"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d83/optimization_8h.html#a3d511ddd4a41b6fb9f1af4be14e24e23">fit_plane</a> (<a class="el" href="../../d9/d32/classleastSquares.html">leastSquares</a> &amp;ls_problem, string filename, char *argv, vector&lt; Mat &gt; points)</td></tr>
+<tr class="separator:a3d511ddd4a41b6fb9f1af4be14e24e23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a5ab8ebab3bd5a91176a6f4122ac9f1fa"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double BA_align </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d6/d86/classalignProblem.html">alignProblem</a> &amp;&#160;</td>
+          <td class="paramname"><em>align_problem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>align_file</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="afff561738b91ea01d3ba822754a48693"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double BA_pinhole </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;&#160;</td>
+          <td class="paramname"><em>ba_problem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>ba_file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Size&#160;</td>
+          <td class="paramname"><em>img_size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a5f16760b72e9bb9e281a2a5c85463423"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">double BA_pinhole </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;&#160;</td>
+          <td class="paramname"><em>ba_problem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>ba_file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Size&#160;</td>
+          <td class="paramname"><em>img_size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>argv</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a6023ee69ffa94d1365623aabe0d3b40f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double BA_pinhole2 </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;&#160;</td>
           <td class="paramname"><em>ba_problem</em>, </td>
@@ -190,10 +300,48 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a3d511ddd4a41b6fb9f1af4be14e24e23"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double fit_plane </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d9/d32/classleastSquares.html">leastSquares</a> &amp;&#160;</td>
+          <td class="paramname"><em>ls_problem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>argv</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">vector&lt; Mat &gt;&#160;</td>
+          <td class="paramname"><em>points</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Mar 9 2013 14:17:59 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

@@ -69,7 +69,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -95,23 +95,20 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a96aee1792da1246ba789efea82733e19"><td class="memItemLeft" align="right" valign="top">vector&lt; string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#a96aee1792da1246ba789efea82733e19">read_cam_names</a> (string path)</td></tr>
-<tr class="memdesc:a96aee1792da1246ba789efea82733e19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to read camera names.  <a href="#a96aee1792da1246ba789efea82733e19">More...</a><br/></td></tr>
-<tr class="separator:a96aee1792da1246ba789efea82733e19"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b763d5760b62c11bd0320c3b543b682"><td class="memItemLeft" align="right" valign="top">vector&lt; vector&lt; Mat &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#a5b763d5760b62c11bd0320c3b543b682">read_calib_imgs</a> (string path, vector&lt; string &gt; cam_names)</td></tr>
-<tr class="separator:a5b763d5760b62c11bd0320c3b543b682"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa15b2fb805db857c0a5bc0b84a417b53"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#aa15b2fb805db857c0a5bc0b84a417b53">disp_M</a> (Mat M)</td></tr>
 <tr class="separator:aa15b2fb805db857c0a5bc0b84a417b53"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a85fb9c7b10335f197c98d03a849f2d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#a8a85fb9c7b10335f197c98d03a849f2d">write_point_data</a> (vector&lt; vector&lt; vector&lt; Point2f &gt; &gt; &gt; all_corner_points, vector&lt; Mat &gt; cameraMats, vector&lt; vector&lt; Mat &gt; &gt; rvecs, vector&lt; vector&lt; Mat &gt; &gt; tvecs, vector&lt; Mat &gt; dist_coeffs, string filename)</td></tr>
-<tr class="separator:a8a85fb9c7b10335f197c98d03a849f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb3a6d6f47334cf6380dfc5c19ce759e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#adb3a6d6f47334cf6380dfc5c19ce759e">write_ba_result</a> (<a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;ba_problem, string filename)</td></tr>
 <tr class="separator:adb3a6d6f47334cf6380dfc5c19ce759e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf8de2e249af632f5ac1670d57d9ffdf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#adf8de2e249af632f5ac1670d57d9ffdf">write_ba_matlab</a> (<a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;ba_problem, vector&lt; Mat &gt; translations, vector&lt; Mat &gt; P_mats)</td></tr>
 <tr class="separator:adf8de2e249af632f5ac1670d57d9ffdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab19fe9763eadb2a2606d99328f0850a7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#ab19fe9763eadb2a2606d99328f0850a7">write_align_data</a> (string in_file, string out_file, vector&lt; Mat &gt; cam_locations)</td></tr>
-<tr class="separator:ab19fe9763eadb2a2606d99328f0850a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35ea4daf5bd112113842f0dc181693ee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#a35ea4daf5bd112113842f0dc181693ee">write_align_data</a> (vector&lt; Mat &gt; rvecs, vector&lt; Mat &gt; tvecs, string align_file)</td></tr>
+<tr class="separator:a35ea4daf5bd112113842f0dc181693ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82a449069521198a98753dc8264887d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#a82a449069521198a98753dc8264887d5">write_aligned</a> (<a class="el" href="../../d6/d86/classalignProblem.html">alignProblem</a> align_problem, string aligned_file)</td></tr>
+<tr class="separator:a82a449069521198a98753dc8264887d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5f8b8901c748b5b305451d5e3ad903b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#ac5f8b8901c748b5b305451d5e3ad903b">write_calib_result</a> (<a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> ba_problem, vector&lt; string &gt; cam_names, Size img_size, double pix_per_phys, string path)</td></tr>
 <tr class="separator:ac5f8b8901c748b5b305451d5e3ad903b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab51d8243b7eca616971ad8d65738ac2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d01/io__calibrate_8cpp.html#ab51d8243b7eca616971ad8d65738ac2c">write_align_data</a> (<a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;ba_problem, string filename, vector&lt; vector&lt; Mat &gt; &gt; translations_new, char *argv)</td></tr>
+<tr class="separator:ab51d8243b7eca616971ad8d65738ac2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="aa15b2fb805db857c0a5bc0b84a417b53"></a>
@@ -130,21 +127,27 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5b763d5760b62c11bd0320c3b543b682"></a>
+<a class="anchor" id="a35ea4daf5bd112113842f0dc181693ee"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">vector&lt; vector&lt;Mat&gt; &gt; read_calib_imgs </td>
+          <td class="memname">void write_align_data </td>
           <td>(</td>
-          <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>path</em>, </td>
+          <td class="paramtype">vector&lt; Mat &gt;&#160;</td>
+          <td class="paramname"><em>rvecs</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">vector&lt; string &gt;&#160;</td>
-          <td class="paramname"><em>cam_names</em>&#160;</td>
+          <td class="paramtype">vector&lt; Mat &gt;&#160;</td>
+          <td class="paramname"><em>tvecs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>align_file</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -156,45 +159,59 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a96aee1792da1246ba789efea82733e19"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">vector&lt;string&gt; read_cam_names </td>
-          <td>(</td>
-          <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>path</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Function to read camera names. </p>
-
-</div>
-</div>
-<a class="anchor" id="ab19fe9763eadb2a2606d99328f0850a7"></a>
+<a class="anchor" id="ab51d8243b7eca616971ad8d65738ac2c"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void write_align_data </td>
           <td>(</td>
-          <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>in_file</em>, </td>
+          <td class="paramtype"><a class="el" href="../../d0/d13/classbaProblem.html">baProblem</a> &amp;&#160;</td>
+          <td class="paramname"><em>ba_problem</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>out_file</em>, </td>
+          <td class="paramname"><em>filename</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">vector&lt; Mat &gt;&#160;</td>
-          <td class="paramname"><em>cam_locations</em>&#160;</td>
+          <td class="paramtype">vector&lt; vector&lt; Mat &gt; &gt;&#160;</td>
+          <td class="paramname"><em>translations_new</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>argv</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a82a449069521198a98753dc8264887d5"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void write_aligned </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../d6/d86/classalignProblem.html">alignProblem</a>&#160;</td>
+          <td class="paramname"><em>align_problem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>aligned_file</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -308,60 +325,10 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8a85fb9c7b10335f197c98d03a849f2d"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void write_point_data </td>
-          <td>(</td>
-          <td class="paramtype">vector&lt; vector&lt; vector&lt; Point2f &gt; &gt; &gt;&#160;</td>
-          <td class="paramname"><em>all_corner_points</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">vector&lt; Mat &gt;&#160;</td>
-          <td class="paramname"><em>cameraMats</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">vector&lt; vector&lt; Mat &gt; &gt;&#160;</td>
-          <td class="paramname"><em>rvecs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">vector&lt; vector&lt; Mat &gt; &gt;&#160;</td>
-          <td class="paramname"><em>tvecs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">vector&lt; Mat &gt;&#160;</td>
-          <td class="paramname"><em>dist_coeffs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">string&#160;</td>
-          <td class="paramname"><em>filename</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Mar 9 2013 14:17:59 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

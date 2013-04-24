@@ -61,10 +61,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="../../files.html"><span>File&#160;List</span></a></li>
-<<<<<<< HEAD
       <li><a href="../../globals.html"><span>File&#160;Members</span></a></li>
-=======
->>>>>>> origin/master
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -72,11 +69,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<<<<<<< HEAD
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
-=======
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a></div>
->>>>>>> origin/master
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Macros</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -95,11 +88,7 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <div class="title">processing_refocusing.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<<<<<<< HEAD
 <a href="../../d0/d19/processing__refocusing_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef REFOCUSING_PROC_LIB</span></div>
-=======
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef REFOCUSING_PROC_LIB</span></div>
->>>>>>> origin/master
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define REFOCUSING_PROC_LIB</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;std_include.h&quot;</span></div>
@@ -107,37 +96,27 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">using namespace </span>cv;</div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">using namespace </span>std;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
-<<<<<<< HEAD
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keywordtype">double</span> <a class="code" href="../../d2/d4d/processing__refocusing_8cpp.html#ad683e2c82824ca18f0d4a0f9063bb555">get_grid_size_pix</a>(vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; all_corner_points, Size grid_size, <span class="keywordtype">int</span> center_cam_id);</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d2/d4d/processing__refocusing_8cpp.html#a2d6263082d189692b0664c613b74767f">T_from_P</a>(Mat P_mats, Mat &amp;H, <span class="keywordtype">double</span> z, <span class="keywordtype">double</span> scale, Size img_size);</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d2/d4d/processing__refocusing_8cpp.html#a39b3139e492760fa97569f3f2f8bc44f">refocus_img</a>(vector&lt; vector&lt;Mat&gt; &gt; refocusing_imgs, vector&lt;Mat&gt; P_mats, <span class="keywordtype">double</span> pix_per_phys, <span class="keywordtype">double</span> z, <span class="keywordtype">int</span> method);</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d2/d4d/processing__refocusing_8cpp.html#a90ff608a2881f2d8812a0679d5b4dfb9">get_P_mats</a>(vector&lt;Mat&gt; cameraMats, vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, vector&lt;Mat&gt; &amp;P_mats);</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d2/d4d/processing__refocusing_8cpp.html#acb7c4143b72b05fc9d4c19b741661276">get_H_mats</a>(vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, vector&lt; vector&lt;Mat&gt; &gt; translations, <span class="keywordtype">double</span> scale, vector&lt;Mat&gt; &amp;H_mats);</div>
-=======
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keywordtype">double</span> get_grid_size_pix(vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; all_corner_points, Size grid_size, <span class="keywordtype">int</span> center_cam_id);</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keywordtype">void</span> T_from_P(Mat P_mats, Mat &amp;H, <span class="keywordtype">double</span> z, <span class="keywordtype">double</span> scale, Size img_size);</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keywordtype">void</span> refocus_img(vector&lt; vector&lt;Mat&gt; &gt; refocusing_imgs, vector&lt;Mat&gt; P_mats, <span class="keywordtype">double</span> pix_per_phys, <span class="keywordtype">double</span> z);</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keywordtype">void</span> get_P_mats(vector&lt;Mat&gt; cameraMats, vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, vector&lt;Mat&gt; &amp;P_mats);</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">void</span> get_H_mats(vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, vector&lt; vector&lt;Mat&gt; &gt; translations, <span class="keywordtype">double</span> scale, vector&lt;Mat&gt; &amp;H_mats);</div>
->>>>>>> origin/master
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d3/d62/tools_8cpp.html#a2d6263082d189692b0664c613b74767f">T_from_P</a>(Mat P_mats, Mat &amp;H, <span class="keywordtype">double</span> z, <span class="keywordtype">double</span> scale, Size img_size);</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d2/d4d/processing__refocusing_8cpp.html#a39b3139e492760fa97569f3f2f8bc44f">refocus_img</a>(vector&lt; vector&lt;Mat&gt; &gt; refocusing_imgs, vector&lt;Mat&gt; P_mats, <span class="keywordtype">double</span> pix_per_phys, <span class="keywordtype">double</span> z, <span class="keywordtype">int</span> method);</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;=======</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keywordtype">double</span> get_grid_size_pix(vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; all_corner_points, Size grid_size, <span class="keywordtype">int</span> center_cam_id);</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d3/d62/tools_8cpp.html#a2d6263082d189692b0664c613b74767f">T_from_P</a>(Mat P_mats, Mat &amp;H, <span class="keywordtype">double</span> z, <span class="keywordtype">double</span> scale, Size img_size);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d2/d4d/processing__refocusing_8cpp.html#a39b3139e492760fa97569f3f2f8bc44f">refocus_img</a>(vector&lt; vector&lt;Mat&gt; &gt; refocusing_imgs, vector&lt;Mat&gt; P_mats, <span class="keywordtype">double</span> pix_per_phys, <span class="keywordtype">double</span> z);</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/master</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
+<div class="line"><a name="l00021"></a><span class="lineno"><a class="code" href="../../d0/d19/processing__refocusing_8h.html#ac789a90c11ae0862978e574feda7c7af">   21</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d0/d19/processing__refocusing_8h.html#ac789a90c11ae0862978e574feda7c7af">get_P_mats</a>(vector&lt;Mat&gt; cameraMats, vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, vector&lt;Mat&gt; &amp;P_mats);</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keywordtype">void</span> <a class="code" href="../../d2/d4d/processing__refocusing_8cpp.html#acb7c4143b72b05fc9d4c19b741661276">get_H_mats</a>(vector&lt; vector&lt;Mat&gt; &gt; rvecs, vector&lt; vector&lt;Mat&gt; &gt; tvecs, vector&lt; vector&lt;Mat&gt; &gt; translations, <span class="keywordtype">double</span> scale, vector&lt;Mat&gt; &amp;H_mats);</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-<<<<<<< HEAD
-Generated on Sat Mar 9 2013 14:17:59 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
-=======
-Generated on Thu Feb 28 2013 14:44:20 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
->>>>>>> origin/master
+Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>
