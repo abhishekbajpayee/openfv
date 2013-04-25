@@ -20,23 +20,27 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
     int h = image.rows;
     int w = image.cols;
     int i_min = 0;
+    int count_thresh = 6;
     Point2f tmp_loc;
     
     for (int i=0; i<h; i++) {
         for (int j=0; j<w; j++) {
 
-            tmp_loc.x = i;
-            tmp_loc.y = j;
+            tmp_loc.x = j;
+            tmp_loc.y = i;
 
             Scalar intensity = image.at<uchar>(i,j);
             int I = intensity.val[0];
-            if (I>i_min && min_dist(tmp_loc, points_out)>window_) {
+
+            // Look for non zero value
+            if (I>i_min && min_dist(tmp_loc, points_out)>2*window_) {
                 
                 Point2f l_max;
                 l_max.x = j;
                 l_max.y = i;
                 double i_max = I;
 
+                // Move to local peak
                 for (int x=i-window_; x<=i+window_; x++) {
                     for (int y=j-window_; y<=j+window_; y++) {
                         
@@ -52,8 +56,22 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
                         
                     }
                 }
-                                
-                if (!point_in_list(l_max, points_out)) {
+                
+                // Find particle size in window
+                int count=0;
+                for (int x=l_max.y-1; x<=l_max.y+1; x++) {
+                    for (int y=l_max.x-1; y<=l_max.x+1; y++) {
+                        
+                        if (x<0 || x>=h || y<0 || y>=w) continue;
+
+                        Scalar intensity2 = image.at<uchar>(x,y);
+                        int I2 = intensity2.val[0];
+                        if (I2>i_min) count++;
+                        
+                    }
+                }
+                
+                if (!point_in_list(l_max, points_out) && min_dist(l_max, points_out)>window_ && count>=count_thresh) {
                     points_out.push_back(l_max);
                 }           
 
@@ -61,11 +79,11 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
 
         }
     }
-
+    
     /*
-    for (int i=0; i<points.size(); i++) {
-        points[i].x++;
-        points[i].y++;
+    for (int i=0; i<points_out.size(); i++) {
+        points_out[i].x++;
+        points_out[i].y++;
     }
     */
 
@@ -85,8 +103,8 @@ void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<Poi
         x_den=0;
         y_den=0;
 
-        for (int x=points_in[i].x-window_-1; x<points_in[i].x+window_; x++) {
-            for (int y=points_in[i].y-window_-1; y<points_in[i].y+window_; y++) {
+        for (int x=points_in[i].x-window_; x<=points_in[i].x+window_; x++) {
+            for (int y=points_in[i].y-window_; y<=points_in[i].y+window_; y++) {
 
                 if (x<0 || x>=w || y<0 || y>=h) continue;
                 
@@ -109,7 +127,7 @@ void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<Poi
 
 }
 
-int point_in_list(Point2f point, vector<Point2f> points) {
+int pLocalize::point_in_list(Point2f point, vector<Point2f> points) {
 
     int result=0;
 
@@ -124,7 +142,7 @@ int point_in_list(Point2f point, vector<Point2f> points) {
 
 }
 
-double min_dist(Point2f point, vector<Point2f> points) {
+double pLocalize::min_dist(Point2f point, vector<Point2f> points) {
 
     double m_dist = 100.0;
     double dist;
@@ -138,14 +156,25 @@ double min_dist(Point2f point, vector<Point2f> points) {
 
 }
 
-void draw_points(Mat image, Mat &drawn, vector<Point2f> points) {
+void pLocalize::draw_points(Mat image, Mat &drawn, vector<Point2f> points) {
 
     cvtColor(image, drawn, CV_GRAY2RGB);
 
     for (int i=0; i<points.size(); i++) {
+        
+    }
+
+    for (int i=0; i<points.size(); i++) {
         //points[i].x = points[i].x*10;
         //points[i].y = points[i].y*10;
-        circle(drawn, points[i], 3.0, Scalar(255,0,0));
+        circle(drawn, points[i], 5.0, Scalar(0,0,255));
     }
+
+}
+
+void pLocalize::draw_point(Mat image, Mat &drawn, Point2f point) {
+
+    cvtColor(image, drawn, CV_GRAY2RGB);
+    circle(drawn, point, 5.0, Scalar(0,0,255));
 
 }

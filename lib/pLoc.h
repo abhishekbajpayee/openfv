@@ -32,6 +32,7 @@ class pLocalize {
     void refine_subpixel(Mat image, vector<Point2f> points_in, vector<Point2f> &points_out);
 
     void draw_points(Mat image, Mat &drawn, vector<Point2f> points);
+    void draw_point(Mat image, Mat &drawn, Point2f point);
 
  private:
 

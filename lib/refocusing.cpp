@@ -149,13 +149,16 @@ void saRefocus::GPUrefocus(double z, double thresh, int live) {
     gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
 
     Mat refocused_host_(refocused);
-    refocused_host_ /= 255.0;
+    //refocused_host_ /= 255.0;
 
     if (live) {
+        refocused_host_ /= 255.0;
         char title[50];
         sprintf(title, "z = %f, thresh = %f", z, thresh);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
+
+    refocused_host_.convertTo(result, CV_8U);
 
 }
