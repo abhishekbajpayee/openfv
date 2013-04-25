@@ -2089,6 +2089,8 @@ lib/std_include.h
 lib/pLoc.h
 std_include.h
 lib/std_include.h
+typedefs.h
+lib/typedefs.h
 
 lib/refocusing.h
 std_include.h

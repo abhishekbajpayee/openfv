@@ -10,6 +10,7 @@
 // -------------------------------------------------------
 
 #include "std_include.h"
+#include "typedefs.h"
 #include "pLoc.h"
 
 using namespace std;
@@ -89,19 +90,20 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
 
 }
 
-void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<Point2f> &points_out) {
-
+void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out) {
+    
     int h = image.rows;
     int w = image.cols;
 
-    double x_num, x_den, y_num, y_den, x_spix, y_spix;
+    double x_num, x_den, y_num, i_sum;
+    int count;
 
     for (int i=0; i<points_in.size(); i++) {
         
         x_num=0;
         y_num=0;
-        x_den=0;
-        y_den=0;
+        i_sum=0;
+        count=0;
 
         for (int x=points_in[i].x-window_; x<=points_in[i].x+window_; x++) {
             for (int y=points_in[i].y-window_; y<=points_in[i].y+window_; y++) {
@@ -112,15 +114,16 @@ void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<Poi
                 int i_xy = intensity.val[0];
                 x_num = x_num + double(i_xy)*(x+0.5);
                 y_num = y_num + double(i_xy)*(y+0.5);
-                x_den = x_den + double(i_xy);
-                y_den = y_den + double(i_xy);
+                i_sum = i_sum + double(i_xy);
+                if (i_xy>0) count++;
 
             }
         }
 
-        Point2f point;
-        point.x = x_num/x_den;
-        point.y = y_num/y_den;
+        particle2d point;
+        point.x = x_num/i_sum;
+        point.y = y_num/i_sum;
+        point.I = i_sum/double(count);
         points_out.push_back(point);
 
     }

@@ -570,6 +570,7 @@ lib/CMakeFiles/lib.dir/optimization.cpp.o: include/std_include.h
 
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/pLoc.cpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/pLoc.h
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/typedefs.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/Eigen/Cholesky
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/Eigen/Core
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/Eigen/Dense

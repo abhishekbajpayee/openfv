@@ -13,6 +13,7 @@
 #define LOCALIZATION_LIBRARY
 
 #include "std_include.h"
+#include "typedefs.h"
 
 using namespace std;
 using namespace cv;
@@ -28,8 +29,13 @@ class pLocalize {
  pLocalize(int window):
     window_(window) {}
 
+    void find_particles_3d();
+
     void find_particles(Mat image, vector<Point2f> &points_out);
-    void refine_subpixel(Mat image, vector<Point2f> points_in, vector<Point2f> &points_out);
+    void refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out);
+
+    void find_clusters();
+    void clean_clusters();
 
     void draw_points(Mat image, Mat &drawn, vector<Point2f> points);
     void draw_point(Mat image, Mat &drawn, Point2f point);
