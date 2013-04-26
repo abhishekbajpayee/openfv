@@ -568,8 +568,11 @@ lib/CMakeFiles/lib.dir/optimization.cpp.o: /usr/local/include/opencv2/objdetect/
 lib/CMakeFiles/lib.dir/optimization.cpp.o: /usr/local/include/opencv2/video/tracking.hpp
 lib/CMakeFiles/lib.dir/optimization.cpp.o: include/std_include.h
 
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/calibration.h
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/optimization.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/pLoc.cpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/pLoc.h
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/refocusing.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: lib/typedefs.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/Eigen/Cholesky
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/Eigen/Core
@@ -799,9 +802,13 @@ lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/glog/vlog_is_on.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv/cv.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv/highgui.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/calib3d/calib3d.hpp
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/contrib/contrib.hpp
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/contrib/retina.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/core/core.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/core/core_c.h
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/core/devmem2d.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/core/eigen.hpp
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/core/gpumat.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/core/internal.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/core/mat.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/core/operations.hpp
@@ -840,15 +847,22 @@ lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/flann/result_set.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/flann/sampling.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/flann/saving.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/flann/timer.h
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/gpu/gpu.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/highgui/highgui.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/highgui/highgui_c.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/imgproc/imgproc.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/imgproc/imgproc_c.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/imgproc/types_c.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/legacy/compat.hpp
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/ml/ml.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/nonfree/features2d.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/objdetect/objdetect.hpp
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/opencv.hpp
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/photo/photo.hpp
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/photo/photo_c.h
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/video/background_segm.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/video/tracking.hpp
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/opencv2/video/video.hpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: include/std_include.h
 
 lib/CMakeFiles/lib.dir/refocusing.cpp.o: lib/calibration.h

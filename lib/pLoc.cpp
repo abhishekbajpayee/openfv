@@ -10,11 +10,148 @@
 // -------------------------------------------------------
 
 #include "std_include.h"
+#include "refocusing.h"
 #include "typedefs.h"
 #include "pLoc.h"
 
 using namespace std;
 using namespace cv;
+
+void pLocalize::run() {
+    
+    find_particles_3d();
+    find_clusters();
+    collapse_clusters();
+
+}
+    
+
+void pLocalize::find_particles_3d() {
+
+    particle2d particle;
+    vector<Point2f> points;
+    vector<particle2d> particles;
+
+    cout<<"\nSEARCHING FOR PARTICLES THROUGH VOLUME...\n";
+    
+    for (float i=zmin_; i<=zmax_; i += dz_) {
+        
+        refocus_.GPUrefocus(i, thresh_, 0);
+        Mat image = refocus_.result;
+        find_particles(image, points);
+        refine_subpixel(image, points, particles);
+        //draw_points(image, result, points);
+        //imshow("result", result);
+        //waitKey(0);
+        for (int j=0; j<particles.size(); j++) {
+            particle.x = particles[j].x/refocus_.scale();
+            particle.y = particles[j].y/refocus_.scale();
+            particle.z = i;
+            particle.I = particles[j].I;
+            particles3D_.push_back(particle);
+        }
+        cout<<"at z = "<<i<<endl;
+        points.clear();
+        particles.clear();
+        
+    }
+
+    cout<<"\nSEARCH COMPLETE!\n";
+
+}
+
+void pLocalize::find_clusters() {
+
+    cout<<"\nClustering found particles...";
+
+    while(particles3D_.size()) {
+
+        double x = particles3D_[0].x;
+        double y = particles3D_[0].y;
+        double z = particles3D_[0].z;
+
+        double xydist, zdist;
+        double xythresh = 0.5;
+        double zthresh = 1.0;
+
+        vector<int> used;
+
+        vector<particle2d> single_particle;
+        single_particle.push_back(particles3D_[0]);
+        for (int i=1; i<particles3D_.size(); i++) {
+            xydist = sqrt( pow((particles3D_[i].x-x), 2) + pow((particles3D_[i].y-y), 2) );
+            zdist = abs( particles3D_[i].z -z );
+            if (xydist<xythresh && zdist<zthresh) {
+                single_particle.push_back(particles3D_[i]);
+                used.push_back(i);
+            }
+        }
+        
+        // The tricky delete loop
+        for (int i=used.size()-1; i>=0; i--) {
+            particles3D_.erase(particles3D_.begin()+used[i]);
+        }
+        particles3D_.erase(particles3D_.begin());
+        
+        clusters_.push_back(single_particle);
+        single_particle.clear();
+        used.clear();
+
+    }
+
+    cout<<"done!\n";
+    cout<<clusters_.size()<<" clusters found.\n";
+
+    clean_clusters();
+
+}
+
+void pLocalize::clean_clusters() {
+
+    cout<<"\nCleaning clusters...";
+
+    for (int i=clusters_.size(); i>=0; i--) {
+        cout<<clusters_[i].size()<<endl;
+        if (clusters_[i].size() < cluster_size_) clusters_.erase(clusters_.begin()+i);
+    }
+
+    cout<<"done!\n";
+
+}
+
+void pLocalize::collapse_clusters() {
+
+    cout<<"Collapsing clusters to 3D particles...";
+
+    double xsum, ysum, zsum, den;
+    Point3f point;
+
+    for (int i=0; i<clusters_.size(); i++) {
+        
+        xsum = 0;
+        ysum = 0;
+        zsum = 0;
+        den = clusters_[i].size();
+
+        for (int j=0; j<clusters_[i].size(); j++) {
+            
+            xsum += clusters_[i][j].x;
+            ysum += clusters_[i][j].y;
+            zsum += clusters_[i][j].z;
+
+        }
+
+        point.x = xsum/den;
+        point.y = ysum/den;
+        point.z = zsum/den;
+        
+        particles_.push_back(point);
+
+    }
+
+    cout<<"done!\n";
+
+}
 
 void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
 
@@ -80,13 +217,6 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
 
         }
     }
-    
-    /*
-    for (int i=0; i<points_out.size(); i++) {
-        points_out[i].x++;
-        points_out[i].y++;
-    }
-    */
 
 }
 
