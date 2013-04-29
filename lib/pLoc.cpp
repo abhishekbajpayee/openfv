@@ -44,8 +44,8 @@ void pLocalize::find_particles_3d() {
         //imshow("result", result);
         //waitKey(0);
         for (int j=0; j<particles.size(); j++) {
-            particle.x = particles[j].x/refocus_.scale();
-            particle.y = particles[j].y/refocus_.scale();
+            particle.x = (particles[j].x - refocus_.img_size().width*0.5)/refocus_.scale();
+            particle.y = (particles[j].y - refocus_.img_size().height*0.5)/refocus_.scale();
             particle.z = i;
             particle.I = particles[j].I;
             particles3D_.push_back(particle);

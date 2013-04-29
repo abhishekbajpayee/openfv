@@ -34,6 +34,7 @@ class saRefocus {
 
     int num_cams() { return num_cams_; }
     double scale() { return scale_; }
+    Size img_size() { return img_size_; }
 
     void read_imgs(string path);
 

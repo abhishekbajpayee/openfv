@@ -14,14 +14,14 @@ int main(int argc, char** argv) {
     // Camera Calibration Section
     clock_t begin = clock();
 
-    string calib_path("../experiment/calibration_rect/"); // Folder where calibration images lie
+    string calib_path("../../experiment/calibration_rect/"); // Folder where calibration images lie
     Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
     
     multiCamCalibration calibration(calib_path, grid_size, grid_size_phys);
     calibration.run();
 
-    string refoc_path("../experiment/piv_sim_500/");
+    string refoc_path("../../experiment/piv_sim_10/");
 
     saRefocus refocus(calibration.refocusing_params());
     refocus.read_imgs(refoc_path);
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     cout<<particles.size()<<" particles found."<<endl;
 
     ofstream file;
-    file.open("matlab/particles.txt");
+    file.open("matlab/particles10.txt");
     for (int i=0; i<particles.size(); i++) {
         file<<particles[i].x<<"\t";
         file<<particles[i].y<<"\t";
