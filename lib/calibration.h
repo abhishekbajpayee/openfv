@@ -49,6 +49,8 @@ class multiCamCalibration {
     void write_calib_results();
     void load_calib_results();
 
+    void write_calib_results_matlab();
+
  private:
 
     void get_grid_size_pix();

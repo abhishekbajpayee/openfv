@@ -47,6 +47,12 @@ double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size) {
                                  ba_problem.mutable_camera_for_observation(i),
                                  ba_problem.mutable_point_for_observation(i),
                                  ba_problem.mutable_plane_for_observation(i));
+
+        if (ba_problem.point_index()[i]==120 || ba_problem.point_index()[i]==125 || ba_problem.point_index()[i]==144) {
+            cout<<"setting point "<<ba_problem.point_index()[i]<<" constant\n";
+            problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
+        }
+
     }
     
     // Make Ceres automatically detect the bundle structure. Note that the
@@ -56,7 +62,11 @@ double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size) {
     options.linear_solver_type = ceres::DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = 50;
-    options.num_threads = 16;
+    
+    int threads = omp_get_num_procs();
+    options.num_threads = threads;
+    cout<<"\nSolver using "<<threads<<" threads.\n\n";
+
     options.gradient_tolerance = 1E-12;
     options.function_tolerance = 1E-8;
     

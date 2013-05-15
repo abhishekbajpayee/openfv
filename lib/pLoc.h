@@ -34,7 +34,12 @@ class pLocalize {
 
     void run();
 
-    void find_particles_3d();
+    void find_particles_all_frames();
+    void find_particles_3d(int frame);
+    
+    void z_resolution();
+    void crop_focus();
+
     void find_clusters();
     void clean_clusters();
     void collapse_clusters();
@@ -42,6 +47,7 @@ class pLocalize {
     void find_particles(Mat image, vector<Point2f> &points_out);
     void refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out);
 
+    void write_all_particles_to_file(string path);
     void draw_points(Mat image, Mat &drawn, vector<Point2f> points);
     void draw_point(Mat image, Mat &drawn, Point2f point);
 
@@ -60,6 +66,7 @@ class pLocalize {
     vector<particle2d> particles3D_;
     vector< vector<particle2d> > clusters_;
     vector<Point3f> particles_;
+    vector< vector<Point3f> > particles_all_;
 
     saRefocus refocus_;
 

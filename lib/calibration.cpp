@@ -15,7 +15,7 @@
 
 void multiCamCalibration::initialize() {
 
-    ba_file_ = string("temp/ba_data.txt");
+    ba_file_ = string("../temp/ba_data.txt");
     result_dir_ = string("calibration_results");
     
     run_calib_flag = 0;
@@ -143,6 +143,7 @@ void multiCamCalibration::read_calib_imgs() {
         
         sort(img_names.begin(), img_names.end());
         for (int i=0; i<img_names.size(); i++) {
+            cout<<img_names[i]<<endl;
             image = imread(img_names[i], 0);
             calib_imgs_sub.push_back(image);
         }
@@ -295,14 +296,28 @@ void multiCamCalibration::write_BA_data() {
         file<<0<<"\t"<<0<<endl;
     }
     
-    double width = 25;
-    double height = 20;
+    double width = 50;
+    double height = 50;
     // add back projected point guesses here
+    double z = 0;
     for (int i=0; i<num_points; i++) {
-        file<<(double(rand()%50)-(width*0.5))<<"\t";
-        file<<(double(rand()%50)-(height*0.5))<<"\t";
-        file<<(rand()%50)<<"\t";
-        file<<endl;
+        if (i==120) {
+            file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
+            file<<double(-grid_size_.height*grid_size_phys_*0.5)<<"\t";
+            file<<z<<"\t"<<endl;
+        } else if (i==125) {
+            file<<double(grid_size_.width*grid_size_phys_*0.5)<<"\t";
+            file<<double(-grid_size_.height*grid_size_phys_*0.5)<<"\t";
+            file<<z<<"\t"<<endl;
+        } else if (i==144) {
+            file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
+            file<<double(grid_size_.height*grid_size_phys_*0.5)<<"\t";
+            file<<z<<"\t"<<endl;
+        } else {
+            file<<(double(rand()%50)-(width*0.5))<<"\t";
+            file<<(double(rand()%50)-(height*0.5))<<"\t";
+            file<<(rand()%50)<<"\t"<<endl;
+        }
     }
 
     /*
@@ -551,6 +566,94 @@ void multiCamCalibration::load_calib_results() {
     file.close();
 
     cout<<"\nCALIBRATION RESULTS LOADED!\n";
+
+}
+
+// Write BA results to files so Matlab can read them and plot world points and
+// camera locations
+void multiCamCalibration::write_calib_results_matlab() {
+
+    ofstream file, file1, file2, file3, file4, file5;
+    file.open("../matlab/world_points.txt");
+    file1.open("../matlab/camera_points.txt");
+    file2.open("../matlab/plane_params.txt");
+    file3.open("../matlab/P_mats.txt");
+    file4.open("../matlab/Rt.txt");
+    file5.open("../matlab/f.txt");
+
+    int* cameras = ba_problem_.camera_index();
+    int* points = ba_problem_.point_index();
+    int num_observations = ba_problem_.num_observations();
+    const double* observations = ba_problem_.observations();
+
+    int num_cameras = ba_problem_.num_cameras();
+    double* camera_params = ba_problem_.mutable_cameras();
+
+    int num_points = ba_problem_.num_points();
+    double* world_points = ba_problem_.mutable_points();
+
+    int num_planes = ba_problem_.num_planes();
+    double* plane_params = ba_problem_.mutable_planes();
+
+    for (int i=0; i<num_points; i++) {
+        for (int j=0; j<3; j++) {
+            file<<world_points[(i*3)+j]<<"\t";
+        }
+        file<<endl;
+    }
+
+    for (int i=0; i<num_planes; i++) {
+        for (int j=0; j<4; j++) {
+            file2<<plane_params[(i*4)+j]<<"\t";
+        }
+        file2<<endl;
+    }
+
+    for (int i=0; i<num_cameras; i++) {
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<4; k++) {
+                file3<<refocusing_params_.P_mats[i].at<double>(j,k)<<"\t";
+            }
+            file3<<endl;
+        }
+    }
+
+    Mat_<double> rvec = Mat_<double>::zeros(1,3);
+    Mat_<double> tvec = Mat_<double>::zeros(3,1);
+    for (int i=0; i<num_cameras; i++) {
+        
+        file5<<camera_params[(i*9)+6]<<endl;
+
+        for (int j=0; j<3; j++) {
+            rvec.at<double>(0,j) = camera_params[(i*9)+j];
+            tvec.at<double>(j,0) = camera_params[(i*9)+j+3];
+        }
+        
+        Mat R;
+        Rodrigues(rvec, R);
+
+        Mat_<double> translation = Mat_<double>::zeros(1,3);
+        translation = -R*tvec;
+        for (int j=0; j<3; j++) {
+            file1<<translation(j,0)<<"\t";
+        }
+        file1<<endl;
+        
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<3; k++) {
+                file4<<R.at<double>(j,k)<<"\t";
+            }
+            file4<<tvec.at<double>(j,0)<<endl;
+        }
+
+    }
+
+    file.close();
+    file1.close();
+    file2.close();
+    file3.close();
+    file4.close();
+    file5.close();
 
 }
 

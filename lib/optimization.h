@@ -234,10 +234,10 @@ pinholeReprojectionError(double observed_x, double observed_y, double cx, double
         
         // Compute final projected point position.
         const T& focal = camera[6];
-        T predicted_x = (focal * distortion * xp) + px;
-        T predicted_y = (focal * distortion * yp) + py;
-        //T predicted_x = (focal * xp) + px;
-        //T predicted_y = (focal * yp) + py;
+        //T predicted_x = (focal * distortion * xp) + px;
+        //T predicted_y = (focal * distortion * yp) + py;
+        T predicted_x = (focal * xp) + px;
+        T predicted_y = (focal * yp) + py;
 
         // The error is the squared euclidian distance between the predicted and observed position.
         residuals[0] = predicted_x - T(observed_x);

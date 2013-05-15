@@ -35,6 +35,8 @@ ctime
 -
 sys/stat.h
 -
+omp.h
+-
 ceres/ceres.h
 -
 ceres/rotation.h

@@ -29,11 +29,13 @@ void saRefocus::read_imgs(string path) {
 
     Mat image, fimage;
 
+    vector<string> img_names;
+
     cout<<"\nREADING IMAGES TO REFOCUS...\n\n";
 
     for (int i=0; i<num_cams_; i++) {
 
-        cout<<"Camera "<<i+1<<" of "<<num_cams_<<"...";
+        cout<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
 
         string path_tmp;
         vector<Mat> refocusing_imgs_sub;
@@ -41,18 +43,24 @@ void saRefocus::read_imgs(string path) {
         path_tmp = path+cam_names_[i]+"/"+img_prefix;
 
         dir = opendir(path_tmp.c_str());
-
         while(ent = readdir(dir)) {
             temp_name = ent->d_name;
             if (temp_name.compare(dir1)) {
                 if (temp_name.compare(dir2)) {
                     string path_img = path_tmp+temp_name;
-                    image = imread(path_img, 0);
-                    image.convertTo(fimage, CV_32F);
-                    refocusing_imgs_sub.push_back(fimage.clone());
+                    img_names.push_back(path_img);
                 }
             }
         }
+
+        sort(img_names.begin(), img_names.end());
+        for (int i=0; i<img_names.size(); i++) {
+            //cout<<i<<": "<<img_names[i]<<endl;
+            image = imread(img_names[i], 0);
+            image.convertTo(fimage, CV_32F);
+            refocusing_imgs_sub.push_back(fimage.clone());
+        }
+        img_names.clear();
 
         imgs.push_back(refocusing_imgs_sub);
         path_tmp = "";
@@ -69,29 +77,32 @@ void saRefocus::GPUliveView() {
 
     initializeGPU();
 
+    int frame = 0;
+
     namedWindow("Result", CV_WINDOW_AUTOSIZE);       
-    GPUrefocus(z, thresh, 1);
+    GPUrefocus(z, thresh, 1, frame);
     
     double dz = 0.5;
     double dthresh = 5;
 
     while( 1 ){
         int key = cvWaitKey(10);
+        //cout<<(key & 255)<<endl;
         if( (key & 255)==83 ) {
             z += dz;
-            GPUrefocus(z, thresh, 1);
+            GPUrefocus(z, thresh, 1, frame);
         } else if( (key & 255)==81 ) {
             z -= dz;
-            GPUrefocus(z, thresh, 1);
+            GPUrefocus(z, thresh, 1, frame);
         } else if( (key & 255)==82 ) {
             if (thresh<255) { 
                 thresh += dthresh; 
-                GPUrefocus(z, thresh, 1); 
+                GPUrefocus(z, thresh, 1, frame); 
             }
         } else if( (key & 255)==84 ) {
             if (thresh>0) { 
                 thresh -= dthresh; 
-                GPUrefocus(z, thresh, 1); 
+                GPUrefocus(z, thresh, 1, frame); 
             }
         } else if( (key & 255)==27 ) {
             break;
@@ -100,9 +111,9 @@ void saRefocus::GPUliveView() {
 
 }
 
-// TODO: Right now this function only uploads first time step
-//       so change to upload more time steps so this can be controlled
-//       from outside
+// TODO: This function prints free memory on GPU and then
+//       calls uploadToGPU() which uploads either a given
+//       frame or all frames to GPU depending on frame_
 void saRefocus::initializeGPU() {
 
     cout<<endl<<"INITIALIZING GPU FOR VISUALIZATION..."<<endl;
@@ -113,37 +124,71 @@ void saRefocus::initializeGPU() {
     cout<<"---"<<gpuDevice.name()<<"---"<<endl;
     cout<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
     cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
-    
-    int t=0;
-    cout<<"Uploading images to GPU..."<<endl;
-    for (int i=0; i<num_cams_; i++) {
-        temp.upload(imgs[i][t]);
-        array.push_back(temp.clone());
+
+    uploadToGPU();
+
+}
+
+// TODO: Right now this function just starts uploading images
+//       without checking if there is enough free memory on GPU
+//       or not.
+void saRefocus::uploadToGPU() {
+
+    gpu::DeviceInfo gpuDevice(gpu::getDevice());
+    double free_mem_GPU = gpuDevice.freeMemory()/pow(1024.0,2);
+    cout<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
+
+    double factor = 0.9;
+
+    if (frame_>=0) {
+
+        cout<<"Uploading "<<(frame_+1)<<"th frame to GPU..."<<endl;
+        for (int i=0; i<num_cams_; i++) {
+            temp.upload(imgs[i][frame_]);
+            array.push_back(temp.clone());
+        }
+        array_all.push_back(array);
+
+    } else if (frame_==-1) {
+        
+        cout<<"Uploading all frame to GPU..."<<endl;
+        for (int i=0; i<imgs[0].size(); i++) {
+            for (int j=0; j<num_cams_; j++) {
+                temp.upload(imgs[j][i]);
+                array.push_back(temp.clone());
+            }
+            array_all.push_back(array);
+            array.clear();
+        }
+        
+    } else {
+        cout<<"Invalid frame value to visualize!"<<endl;
     }
-    cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
+
+    cout<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
 
 }
 
 
-void saRefocus::GPUrefocus(double z, double thresh, int live) {
+void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
-    Scalar fact = Scalar(1/double(array.size()));
+    Scalar fact = Scalar(1/double(array_all[frame].size()));
 
     Mat H, trans;
     T_from_P(P_mats_[0], H, z, scale_, img_size_);
-    gpu::warpPerspective(array[0], temp, H, array[0].size());
+    gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
     gpu::multiply(temp, fact, temp2);
-    
+
     refocused = temp2.clone();
-    
+
     for (int i=1; i<num_cams_; i++) {
         
         T_from_P(P_mats_[i], H, z, scale_, img_size_);
         
-        gpu::warpPerspective(array[i], temp, H, img_size_);
+        gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
         gpu::multiply(temp, fact, temp2);
         gpu::add(refocused, temp2, refocused);        
-        
+
     }
     
     gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
@@ -156,6 +201,8 @@ void saRefocus::GPUrefocus(double z, double thresh, int live) {
         char title[50];
         sprintf(title, "z = %f, thresh = %f", z, thresh);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
+        //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
+        //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
 

@@ -1,5 +1,4 @@
 #include "std_include.h"
-//#include "lib_include.h"
 
 #include "calibration.h"
 #include "refocusing.h"
@@ -10,49 +9,52 @@ using namespace cv;
 using namespace std;
 
 int main(int argc, char** argv) {
-    
-    // Camera Calibration Section
-    clock_t begin = clock();
 
-    string calib_path("../../experiment/calibration_rect/"); // Folder where calibration images lie
+    // Camera Calibration Section
+    
+    string calib_path("../../experiment/calibration_full/"); // Folder where calibration images lie
     Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
-    
+
+    double wall_timer;
+    wall_timer = omp_get_wtime();
+
     multiCamCalibration calibration(calib_path, grid_size, grid_size_phys);
     calibration.run();
+    //calibration.write_calib_results_matlab();
 
-    string refoc_path("../../experiment/piv_sim_10/");
-
-    saRefocus refocus(calibration.refocusing_params());
+    int frame = -1;
+    string refoc_path("../../experiment/vortex_ring/");
+    saRefocus refocus(calibration.refocusing_params(), frame);
     refocus.read_imgs(refoc_path);
-    //refocus.GPUliveView(); 
     
-    refocus.initializeGPU();
+    int live = 0;
+    if (live) {
+        refocus.GPUliveView(); 
+    } else {
+        refocus.initializeGPU();
+        
+        int window = 2;
+        int cluster_size = 10;
+        double zmin = -50.0; //-20
+        double zmax = 50.0; //40
+        double dz = 0.1;
+        double thresh = 90.0; //100.0
+        pLocalize localizer(window, zmin, zmax, dz, thresh, cluster_size, refocus);
 
-    int window = 2;
-    int cluster_size = 10;
-    double zmin = -20.0; //-20
-    double zmax = 40.0; //40
-    double dz = 0.1;
-    double thresh = 100.0;
-    pLocalize localizer(window, zmin, zmax, dz, thresh, cluster_size, refocus);
-    localizer.run();
+        //localizer.z_resolution();
+        //localizer.crop_focus();
+        
+        //localizer.run();
+        localizer.find_particles_all_frames();
 
-    vector<Point3f> particles = localizer.detected_particles();
+        string particle_file("../temp/vortex_particles.txt");
+        localizer.write_all_particles_to_file(particle_file);
 
-    cout<<particles.size()<<" particles found."<<endl;
-
-    ofstream file;
-    file.open("matlab/particles10.txt");
-    for (int i=0; i<particles.size(); i++) {
-        file<<particles[i].x<<"\t";
-        file<<particles[i].y<<"\t";
-        file<<particles[i].z<<endl;
     }
-    file.close();
+
+    cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;
     
-    clock_t end = clock();
-    cout<<endl<<"TIME TAKEN: "<<(float(end-begin)/CLOCKS_PER_SEC)<<" seconds"<<endl;
     return 1;
 
 }

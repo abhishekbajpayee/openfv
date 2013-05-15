@@ -1,0 +1,31 @@
+import numpy as np
+import subprocess
+import os
+
+import sys
+sys.path.append("/home/ab9/Blender/modules")
+
+import ptv
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+num = 500
+box = 50
+
+R = 12.5
+Z = 0
+T = 50.0
+r = 5.0
+dt = 0.1
+
+points = ptv.generate_points(num,box,box,box)
+print "x"
+print(points[0])
+print "y"
+print(points[1])
+print "z"
+print(points[2])
+
+points2 = ptv.advance_vortex_flow(points,R,Z,T,r,dt)
+

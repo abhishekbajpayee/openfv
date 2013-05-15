@@ -14,5 +14,7 @@
 #include <ctime>
 #include <sys/stat.h>
 
+#include <omp.h>
+
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>

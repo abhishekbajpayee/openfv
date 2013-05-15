@@ -168,6 +168,12 @@ OpenCV_LIB_DIR_DBG:PATH=/usr/local/lib
 //Path where release OpenCV libraries are located
 OpenCV_LIB_DIR_OPT:PATH=/usr/local/lib
 
+//C++ compiler flags for OpenMP parallization
+OpenMP_CXX_FLAGS:STRING=-fopenmp
+
+//C compiler flags for OpenMP parallization
+OpenMP_C_FLAGS:STRING=-fopenmp
+
 //Dependencies for the target
 lib_LIB_DEPENDS:STATIC=debug;/usr/local/lib/libopencv_calib3d.so;debug;/usr/local/lib/libopencv_contrib.so;debug;/usr/local/lib/libopencv_core.so;debug;/usr/local/lib/libopencv_features2d.so;debug;/usr/local/lib/libopencv_flann.so;debug;/usr/local/lib/libopencv_gpu.so;debug;/usr/local/lib/libopencv_highgui.so;debug;/usr/local/lib/libopencv_imgproc.so;debug;/usr/local/lib/libopencv_legacy.so;debug;/usr/local/lib/libopencv_ml.so;debug;/usr/local/lib/libopencv_nonfree.so;debug;/usr/local/lib/libopencv_objdetect.so;debug;/usr/local/lib/libopencv_photo.so;debug;/usr/local/lib/libopencv_stitching.so;debug;/usr/local/lib/libopencv_ts.so;debug;/usr/local/lib/libopencv_video.so;debug;/usr/local/lib/libopencv_videostab.so;optimized;/usr/local/lib/libopencv_calib3d.so;optimized;/usr/local/lib/libopencv_contrib.so;optimized;/usr/local/lib/libopencv_core.so;optimized;/usr/local/lib/libopencv_features2d.so;optimized;/usr/local/lib/libopencv_flann.so;optimized;/usr/local/lib/libopencv_gpu.so;optimized;/usr/local/lib/libopencv_highgui.so;optimized;/usr/local/lib/libopencv_imgproc.so;optimized;/usr/local/lib/libopencv_legacy.so;optimized;/usr/local/lib/libopencv_ml.so;optimized;/usr/local/lib/libopencv_nonfree.so;optimized;/usr/local/lib/libopencv_objdetect.so;optimized;/usr/local/lib/libopencv_photo.so;optimized;/usr/local/lib/libopencv_stitching.so;optimized;/usr/local/lib/libopencv_ts.so;optimized;/usr/local/lib/libopencv_video.so;optimized;/usr/local/lib/libopencv_videostab.so;
 
@@ -301,6 +307,8 @@ CMAKE_UNAME:INTERNAL=/bin/uname
 CMAKE_USE_RELATIVE_PATHS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Details about finding OpenMP
+FIND_PACKAGE_MESSAGE_DETAILS_OpenMP:INTERNAL=[-fopenmp][-fopenmp][v()]
 //ADVANCED property for variable: OpenCV_3RDPARTY_LIB_DIR_DBG
 OpenCV_3RDPARTY_LIB_DIR_DBG-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OpenCV_3RDPARTY_LIB_DIR_OPT
@@ -311,4 +319,10 @@ OpenCV_CONFIG_PATH-ADVANCED:INTERNAL=1
 OpenCV_LIB_DIR_DBG-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OpenCV_LIB_DIR_OPT
 OpenCV_LIB_DIR_OPT-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OpenMP_CXX_FLAGS
+OpenMP_CXX_FLAGS-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OpenMP_C_FLAGS
+OpenMP_C_FLAGS-ADVANCED:INTERNAL=1
+//Test OpenMP_FLAG_DETECTED
+OpenMP_FLAG_DETECTED:INTERNAL=1
 

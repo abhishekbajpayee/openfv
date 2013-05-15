@@ -1,29 +1,18 @@
-[x, y, z] = textread('particles.txt');
-[xb, yb, zb] = textread('piv_sim_500.txt');
+clear all;
 
-xo = mean(x);
-yo = mean(y);
-zo = mean(z);
-x = x-xo;
-y = y-yo;
-z = z-29.5;
+[x, y, z] = textread('particle_sim/particles_500.txt');
+[xb, yb, zb] = textread('particle_sim/piv_sim_500.txt')
 
-xo = mean(xb);
-yo = mean(yb);
-zo = mean(zb);
-xb = xb-xo;
-yb = yb-yo;
-zb = zb+1000;
+x = x/max(x);
+y = y/max(y);
+z = z/max(z);
+xb = xb/max(xb);
+yb = yb/max(yb);
+zb = zb/max(zb);
 
 figure;
-scatter3(xb, yb, zb, 'b+');
+scatter3(-xb, yb, zb, 'b+');
 hold on;
-scatter3(x, -y, -z, 'r+');
+scatter3(x, y, z, 'r+');
 
-axis equal;
-
-view(0,90);
-
-%%
-
-%%
+%axis([-1,1,-1,1,0,1]);
