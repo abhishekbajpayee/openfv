@@ -229,6 +229,30 @@ tools.cpp.s:
 	cd /home/ab9/projects/sa-ptv/bin && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/tools.cpp.s
 .PHONY : tools.cpp.s
 
+tracking.o: tracking.cpp.o
+.PHONY : tracking.o
+
+# target to build an object file
+tracking.cpp.o:
+	cd /home/ab9/projects/sa-ptv/bin && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/tracking.cpp.o
+.PHONY : tracking.cpp.o
+
+tracking.i: tracking.cpp.i
+.PHONY : tracking.i
+
+# target to preprocess a source file
+tracking.cpp.i:
+	cd /home/ab9/projects/sa-ptv/bin && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/tracking.cpp.i
+.PHONY : tracking.cpp.i
+
+tracking.s: tracking.cpp.s
+.PHONY : tracking.s
+
+# target to generate assembly for a file
+tracking.cpp.s:
+	cd /home/ab9/projects/sa-ptv/bin && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/tracking.cpp.s
+.PHONY : tracking.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -253,6 +277,9 @@ help:
 	@echo "... tools.o"
 	@echo "... tools.i"
 	@echo "... tools.s"
+	@echo "... tracking.o"
+	@echo "... tracking.i"
+	@echo "... tracking.s"
 .PHONY : help
 
 

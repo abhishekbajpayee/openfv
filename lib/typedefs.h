@@ -27,4 +27,16 @@ struct particle2d {
     int size;
 };
 
+// Data type to store the bounds of a volume
+// in which particles in a given frame are
+// contained
+struct volume {
+    double x1;
+    double x2;
+    double y1;
+    double y2;
+    double z1;
+    double z2;
+};
+
 #endif

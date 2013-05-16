@@ -3,6 +3,7 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/lib.dir/calibration.cpp.o"
   "CMakeFiles/lib.dir/refocusing.cpp.o"
   "CMakeFiles/lib.dir/pLoc.cpp.o"
+  "CMakeFiles/lib.dir/tracking.cpp.o"
   "CMakeFiles/lib.dir/tools.cpp.o"
   "liblib.pdb"
   "liblib.a"

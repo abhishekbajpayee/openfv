@@ -103,4 +103,12 @@ Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P) {
 
 }
 
+double dist(Point3f p1, Point3f p2) {
+
+    double distance = sqrt(pow(p2.x-p1.x,2) + pow(p2.y-p1.y,2) + pow(p2.z-p1.z,2));
+    
+    return(distance);
+
+}
+
 #endif

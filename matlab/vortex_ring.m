@@ -8,7 +8,7 @@ visualize = 0;
 XP = [];
 
 size = 150;
-num = 1500;
+num = 50;
 
 for i=1:num
     
@@ -35,15 +35,22 @@ dt = 1/fps;
 T = 100;
 
 if (write)
-    file = fopen('vortex_points.txt','w');
+    file = fopen('vortex_points_rare.txt','w');
 end
 
 for i=1:frames
     
     zplane = zplane + vz*dt;
     XP2 = synthetic_3d_vort_ring_generator(XP,R,zplane,T,r,dt);
-    XP = XP2;
 
+    distance = sqrt( (XP2(1,:)-XP(1,:))*(XP2(1,:)-XP(1,:))' + ...
+               (XP2(2,:)-XP(2,:))*(XP2(2,:)-XP(2,:))' + ...
+               (XP2(3,:)-XP(3,:))*(XP2(3,:)-XP(3,:))' );
+           
+    max(distance)
+    
+    XP = XP2;
+    
     if (write)
         for j=1:num
             fprintf(file,'%f\t%f\t%f\n',XP2(1,j),XP2(2,j),XP2(3,j));

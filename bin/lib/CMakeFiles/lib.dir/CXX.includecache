@@ -42,14 +42,6 @@ ceres/ceres.h
 ceres/rotation.h
 -
 
-/home/ab9/projects/sa-ptv/lib/calibration.cpp
-calibration.h
-/home/ab9/projects/sa-ptv/lib/calibration.h
-optimization.h
-/home/ab9/projects/sa-ptv/lib/optimization.h
-tools.h
-/home/ab9/projects/sa-ptv/lib/tools.h
-
 /home/ab9/projects/sa-ptv/lib/calibration.h
 std_include.h
 /home/ab9/projects/sa-ptv/lib/std_include.h
@@ -58,43 +50,9 @@ optimization.h
 typedefs.h
 /home/ab9/projects/sa-ptv/lib/typedefs.h
 
-/home/ab9/projects/sa-ptv/lib/optimization.cpp
-std_include.h
-/home/ab9/projects/sa-ptv/lib/std_include.h
-optimization.h
-/home/ab9/projects/sa-ptv/lib/optimization.h
-
 /home/ab9/projects/sa-ptv/lib/optimization.h
 std_include.h
 /home/ab9/projects/sa-ptv/lib/std_include.h
-
-/home/ab9/projects/sa-ptv/lib/pLoc.cpp
-std_include.h
-/home/ab9/projects/sa-ptv/lib/std_include.h
-refocusing.h
-/home/ab9/projects/sa-ptv/lib/refocusing.h
-typedefs.h
-/home/ab9/projects/sa-ptv/lib/typedefs.h
-pLoc.h
-/home/ab9/projects/sa-ptv/lib/pLoc.h
-
-/home/ab9/projects/sa-ptv/lib/pLoc.h
-std_include.h
-/home/ab9/projects/sa-ptv/lib/std_include.h
-refocusing.h
-/home/ab9/projects/sa-ptv/lib/refocusing.h
-typedefs.h
-/home/ab9/projects/sa-ptv/lib/typedefs.h
-
-/home/ab9/projects/sa-ptv/lib/refocusing.cpp
-std_include.h
-/home/ab9/projects/sa-ptv/lib/std_include.h
-calibration.h
-/home/ab9/projects/sa-ptv/lib/calibration.h
-refocusing.h
-/home/ab9/projects/sa-ptv/lib/refocusing.h
-tools.h
-/home/ab9/projects/sa-ptv/lib/tools.h
 
 /home/ab9/projects/sa-ptv/lib/refocusing.h
 std_include.h
@@ -108,15 +66,29 @@ opencv2/opencv.hpp
 opencv2/gpu/gpu.hpp
 -
 
-/home/ab9/projects/sa-ptv/lib/tools.cpp
+/home/ab9/projects/sa-ptv/lib/tools.h
 std_include.h
 /home/ab9/projects/sa-ptv/lib/std_include.h
+
+/home/ab9/projects/sa-ptv/lib/tracking.cpp
+std_include.h
+/home/ab9/projects/sa-ptv/lib/std_include.h
+refocusing.h
+/home/ab9/projects/sa-ptv/lib/refocusing.h
+tracking.h
+/home/ab9/projects/sa-ptv/lib/tracking.h
+typedefs.h
+/home/ab9/projects/sa-ptv/lib/typedefs.h
 tools.h
 /home/ab9/projects/sa-ptv/lib/tools.h
 
-/home/ab9/projects/sa-ptv/lib/tools.h
+/home/ab9/projects/sa-ptv/lib/tracking.h
 std_include.h
 /home/ab9/projects/sa-ptv/lib/std_include.h
+refocusing.h
+/home/ab9/projects/sa-ptv/lib/refocusing.h
+typedefs.h
+/home/ab9/projects/sa-ptv/lib/typedefs.h
 
 /home/ab9/projects/sa-ptv/lib/typedefs.h
 std_include.h

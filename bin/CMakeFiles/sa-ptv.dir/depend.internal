@@ -8,6 +8,7 @@ CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o
  ../lib/pLoc.h
  ../lib/refocusing.h
  ../lib/tools.h
+ ../lib/tracking.h
  ../lib/typedefs.h
  /home/ab9/projects/sa-ptv/sa-ptv.cpp
  /usr/local/include/Eigen/Cholesky

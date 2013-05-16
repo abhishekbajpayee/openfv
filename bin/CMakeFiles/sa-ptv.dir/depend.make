@@ -7,6 +7,7 @@ CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: ../lib/optimization.h
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: ../lib/pLoc.h
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: ../lib/refocusing.h
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: ../lib/tools.h
+CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: ../lib/tracking.h
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: ../lib/typedefs.h
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: ../sa-ptv.cpp
 CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o: /usr/local/include/Eigen/Cholesky

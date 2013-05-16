@@ -10,3 +10,5 @@ bool dirExists(string dirPath);
 int matrixMean(vector<Mat> mats_in, Mat &mat_out);
 
 Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P);
+
+double dist(Point3f p1, Point3f p2);

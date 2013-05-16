@@ -78,6 +78,14 @@ opencv2/gpu/gpu.hpp
 std_include.h
 ../lib/std_include.h
 
+../lib/tracking.h
+std_include.h
+../lib/std_include.h
+refocusing.h
+../lib/refocusing.h
+typedefs.h
+../lib/typedefs.h
+
 ../lib/typedefs.h
 std_include.h
 ../lib/std_include.h
@@ -91,6 +99,8 @@ refocusing.h
 /home/ab9/projects/sa-ptv/refocusing.h
 pLoc.h
 /home/ab9/projects/sa-ptv/pLoc.h
+tracking.h
+/home/ab9/projects/sa-ptv/tracking.h
 tools.h
 /home/ab9/projects/sa-ptv/tools.h
 

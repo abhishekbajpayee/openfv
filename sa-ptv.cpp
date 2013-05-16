@@ -3,6 +3,7 @@
 #include "calibration.h"
 #include "refocusing.h"
 #include "pLoc.h"
+#include "tracking.h"
 #include "tools.h"
 
 using namespace cv;
@@ -26,13 +27,13 @@ int main(int argc, char** argv) {
     int frame = -1;
     string refoc_path("../../experiment/vortex_ring/");
     saRefocus refocus(calibration.refocusing_params(), frame);
-    refocus.read_imgs(refoc_path);
+    //refocus.read_imgs(refoc_path);
     
     int live = 0;
     if (live) {
         refocus.GPUliveView(); 
     } else {
-        refocus.initializeGPU();
+        //refocus.initializeGPU();
         
         int window = 2;
         int cluster_size = 10;
@@ -46,10 +47,14 @@ int main(int argc, char** argv) {
         //localizer.crop_focus();
         
         //localizer.run();
-        localizer.find_particles_all_frames();
+        //localizer.find_particles_all_frames();
 
         string particle_file("../temp/vortex_particles.txt");
-        localizer.write_all_particles_to_file(particle_file);
+        //localizer.write_all_particles_to_file(particle_file);
+        
+        pTracking tracker(refocus);
+        tracker.read_points(particle_file);
+        tracker.track();
 
     }
 
