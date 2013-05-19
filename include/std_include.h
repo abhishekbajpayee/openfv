@@ -18,3 +18,5 @@
 
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
+
+#include <python2.7/Python.h>

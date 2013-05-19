@@ -161,9 +161,32 @@ lib/CMakeFiles/lib.dir/tracking.cpp.o.provides: lib/CMakeFiles/lib.dir/tracking.
 
 lib/CMakeFiles/lib.dir/tracking.cpp.o.provides.build: lib/CMakeFiles/lib.dir/tracking.cpp.o
 
+lib/CMakeFiles/lib.dir/visualize.cpp.o: lib/CMakeFiles/lib.dir/flags.make
+lib/CMakeFiles/lib.dir/visualize.cpp.o: ../lib/visualize.cpp
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/bin/CMakeFiles $(CMAKE_PROGRESS_6)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object lib/CMakeFiles/lib.dir/visualize.cpp.o"
+	cd /home/ab9/projects/sa-ptv/bin/lib && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lib.dir/visualize.cpp.o -c /home/ab9/projects/sa-ptv/lib/visualize.cpp
+
+lib/CMakeFiles/lib.dir/visualize.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/lib.dir/visualize.cpp.i"
+	cd /home/ab9/projects/sa-ptv/bin/lib && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ab9/projects/sa-ptv/lib/visualize.cpp > CMakeFiles/lib.dir/visualize.cpp.i
+
+lib/CMakeFiles/lib.dir/visualize.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/lib.dir/visualize.cpp.s"
+	cd /home/ab9/projects/sa-ptv/bin/lib && /usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ab9/projects/sa-ptv/lib/visualize.cpp -o CMakeFiles/lib.dir/visualize.cpp.s
+
+lib/CMakeFiles/lib.dir/visualize.cpp.o.requires:
+.PHONY : lib/CMakeFiles/lib.dir/visualize.cpp.o.requires
+
+lib/CMakeFiles/lib.dir/visualize.cpp.o.provides: lib/CMakeFiles/lib.dir/visualize.cpp.o.requires
+	$(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/visualize.cpp.o.provides.build
+.PHONY : lib/CMakeFiles/lib.dir/visualize.cpp.o.provides
+
+lib/CMakeFiles/lib.dir/visualize.cpp.o.provides.build: lib/CMakeFiles/lib.dir/visualize.cpp.o
+
 lib/CMakeFiles/lib.dir/tools.cpp.o: lib/CMakeFiles/lib.dir/flags.make
 lib/CMakeFiles/lib.dir/tools.cpp.o: ../lib/tools.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/bin/CMakeFiles $(CMAKE_PROGRESS_6)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/bin/CMakeFiles $(CMAKE_PROGRESS_7)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object lib/CMakeFiles/lib.dir/tools.cpp.o"
 	cd /home/ab9/projects/sa-ptv/bin/lib && /usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/lib.dir/tools.cpp.o -c /home/ab9/projects/sa-ptv/lib/tools.cpp
 
@@ -191,6 +214,7 @@ lib_OBJECTS = \
 "CMakeFiles/lib.dir/refocusing.cpp.o" \
 "CMakeFiles/lib.dir/pLoc.cpp.o" \
 "CMakeFiles/lib.dir/tracking.cpp.o" \
+"CMakeFiles/lib.dir/visualize.cpp.o" \
 "CMakeFiles/lib.dir/tools.cpp.o"
 
 # External object files for target lib
@@ -201,6 +225,7 @@ lib/liblib.a: lib/CMakeFiles/lib.dir/calibration.cpp.o
 lib/liblib.a: lib/CMakeFiles/lib.dir/refocusing.cpp.o
 lib/liblib.a: lib/CMakeFiles/lib.dir/pLoc.cpp.o
 lib/liblib.a: lib/CMakeFiles/lib.dir/tracking.cpp.o
+lib/liblib.a: lib/CMakeFiles/lib.dir/visualize.cpp.o
 lib/liblib.a: lib/CMakeFiles/lib.dir/tools.cpp.o
 lib/liblib.a: lib/CMakeFiles/lib.dir/build.make
 lib/liblib.a: lib/CMakeFiles/lib.dir/link.txt
@@ -217,6 +242,7 @@ lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/calibration.cpp.o.requir
 lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/refocusing.cpp.o.requires
 lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/pLoc.cpp.o.requires
 lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/tracking.cpp.o.requires
+lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/visualize.cpp.o.requires
 lib/CMakeFiles/lib.dir/requires: lib/CMakeFiles/lib.dir/tools.cpp.o.requires
 .PHONY : lib/CMakeFiles/lib.dir/requires
 

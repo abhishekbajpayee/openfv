@@ -144,21 +144,6 @@ void pTracking::track() {
         }
 
         normalize_probabilites(Pij2,Pi2);
-        
-        /*
-        cout<<"\nprobs\n";
-        for (int i=0; i<Pij2[k].rows; i++) {
-            double sum = 0;
-            for (int j=0; j<Pij2[k].cols; j++) {
-                printf("%f ", Pij2[k].at<double>(i,j));
-                sum += Pij2[k].at<double>(i,j);
-            }
-            printf("%f --- ", Pi2[k].at<double>(i,0));
-            sum += Pi2[k].at<double>(i,0);
-            printf("%f\n", sum);
-        }
-        cout<<"diffsum: "<<diffsum<<"\n\n";
-        */
 
         update_probabilities(Pij, Pi, Pij2, Pi2);
 

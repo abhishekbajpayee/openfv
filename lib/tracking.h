@@ -34,10 +34,10 @@ class pTracking {
 
  private:
 
-    
+    void update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
     void normalize_probabilites(vector<Mat> &Pij, vector<Mat> &Pi);
     void build_probability_sets(vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
-    void build_relaxation_sets(int frame1, int frame2, vector< vector<int> > S_r, vector< vector<int> > S_c, double C, double D, double E, double F, vector< vector<Point2i> > &theta);
+    void build_relaxation_sets(int frame1, int frame2, vector< vector<int> > S_r, vector< vector<int> > S_c, double C, double D, double E, double F, vector< vector< vector< vector<Point2i> > > > &theta);
     vector< vector<int> > neighbor_set(int frame1, int frame2, double r);
     vector<int> points_in_region(int frame, Point3f center, double r);
 

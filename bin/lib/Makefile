@@ -253,6 +253,30 @@ tracking.cpp.s:
 	cd /home/ab9/projects/sa-ptv/bin && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/tracking.cpp.s
 .PHONY : tracking.cpp.s
 
+visualize.o: visualize.cpp.o
+.PHONY : visualize.o
+
+# target to build an object file
+visualize.cpp.o:
+	cd /home/ab9/projects/sa-ptv/bin && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/visualize.cpp.o
+.PHONY : visualize.cpp.o
+
+visualize.i: visualize.cpp.i
+.PHONY : visualize.i
+
+# target to preprocess a source file
+visualize.cpp.i:
+	cd /home/ab9/projects/sa-ptv/bin && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/visualize.cpp.i
+.PHONY : visualize.cpp.i
+
+visualize.s: visualize.cpp.s
+.PHONY : visualize.s
+
+# target to generate assembly for a file
+visualize.cpp.s:
+	cd /home/ab9/projects/sa-ptv/bin && $(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/visualize.cpp.s
+.PHONY : visualize.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -280,6 +304,9 @@ help:
 	@echo "... tracking.o"
 	@echo "... tracking.i"
 	@echo "... tracking.s"
+	@echo "... visualize.o"
+	@echo "... visualize.i"
+	@echo "... visualize.s"
 .PHONY : help
 
 

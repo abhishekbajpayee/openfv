@@ -3,6 +3,7 @@ add_library (lib optimization.cpp
 		 refocusing.cpp
                  pLoc.cpp
                  tracking.cpp
+                 visualize.cpp
 		 tools.cpp)
 
 find_package (OpenCV REQUIRED)

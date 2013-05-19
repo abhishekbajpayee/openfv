@@ -1,80 +1,99 @@
-#include "std_include"
+// -------------------------------------------------------
+// -------------------------------------------------------
+// Synthetic Aperture - Particle Tracking Velocimetry Code
+// --- Visualization Library ---
+// -------------------------------------------------------
+// Author: Abhishek Bajpayee
+//         Dept. of Mechanical Engineering
+//         Massachusetts Institute of Technology
+// -------------------------------------------------------
+// -------------------------------------------------------
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
-
+#include "std_include.h"
+#include "visualize.h"
 #include "tools.h"
 
 using namespace cv;
 using namespace std;
 
-void gpuRefocus::start() {
+void PyVisualize::line3d(Point3f p1, Point3f p2) {
 
-    initialize();
-
-    namedWindow("Result", CV_WINDOW_AUTOSIZE);       
-    refocus(z);
-    
-    while( 1 ){
-        int key = cvWaitKey(10);
-        if( (key & 255)==83 ) {
-            z += 0.5;
-            refocus(z);
-        } else if( (key & 255)==81 ) {
-            z -= 0.5;
-            refocus(z);
-        } else if( (key & 255)==27 ) {
-            break;
-        }
+    if (hold_==0) {
+        //PyRun_SimpleString("ax = fig.add_subplot(111, projection='3d')");
     }
+    
+    string call("ax.plot(");
+
+    stringstream sx,sy,sz;
+
+    sx<<"["<<p1.x<<","<<p2.x<<"]";
+    sy<<"["<<p1.y<<","<<p2.y<<"]";
+    sz<<"["<<p1.z<<","<<p2.z<<"]";
+
+    call += sx.str() + "," + sy.str() + "," + sz.str();
+    //call += ",s=" + size;
+    //call += ",c='" + color + "')";
+    call += ")";
+
+    PyRun_SimpleString(call.c_str());
 
 }
 
-void gpuRefocus::refocus(double z) {
+void PyVisualize::scatter3d(vector<Point3f> points, vector<int> indices, string size, string color) {
 
-    Scalar fact = Scalar(1/double(array.size()));
-
-    Mat H, trans;
-    T_from_P(P_mats[0], H, z, scale, img_size);
-    gpu::warpPerspective(array[0], temp, H, array[0].size());
-    gpu::multiply(temp, fact, temp2);
-    
-    refocused = temp2.clone();
-    
-    for (int i=1; i<array_host.size(); i++) {
-        
-        T_from_P(P_mats[i], H, z, scale, img_size);
-        
-        gpu::warpPerspective(array[i], temp, H, img_size);
-        gpu::multiply(temp, fact, temp2);
-        gpu::add(refocused, temp2, refocused);            
-        
+    if (hold_==0) {
+        //PyRun_SimpleString("ax = fig.add_subplot(111, projection='3d')");
     }
-    
-    Mat refocused_host(refocused);
-    refocused_host /= 255.0;
-    char title[20];
-    sprintf(title, "z = %f", z);
-    putText(refocused_host, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-    imshow("Result", refocused_host);
+
+    string call("ax.scatter(");
+
+    stringstream sx,sy,sz;
+
+    sx<<"["<<points[indices[0]].x;
+    sy<<"["<<points[indices[0]].y;
+    sz<<"["<<points[indices[0]].z;
+
+    for (int i=1; i<indices.size(); i++) {
+        sx<<","<<points[indices[i]].x;
+        sy<<","<<points[indices[i]].y;
+        sz<<","<<points[indices[i]].z;
+    }
+
+    sx<<"]";
+    sy<<"]";
+    sz<<"]";
+
+    call += sx.str() + "," + sy.str() + "," + sz.str();
+    call += ",s=" + size;
+    call += ",c='" + color + "')";
+
+    PyRun_SimpleString(call.c_str());
 
 }
 
-void gpuRefocus::initialize() {
+void PyVisualize::figure() {
 
-    cout<<endl<<"INITIALIZING GPU FOR VISUALIZATION..."<<endl;
-    cout<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
-    
-    gpu::DeviceInfo gpuDevice(gpu::getDevice());
-    
-    cout<<"---"<<gpuDevice.name()<<"---"<<endl;
-    cout<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
-    cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
-    cout<<"Cores: "<<gpuDevice.multiProcessorCount()<<endl;
-    
-    for (int i=0; i<array_host.size(); i++) {
-        temp.upload(array_host[i]);
-        array.push_back(temp.clone());
-    }
+    PyRun_SimpleString("fig = pl.figure()");
+    PyRun_SimpleString("ax = fig.add_subplot(111, projection='3d')");
+    figure_ = 1;
+
+}
+
+void PyVisualize::hold(int value) {
+
+    hold_ = value;
+
+}
+
+void PyVisualize::clear() {
+
+    PyRun_SimpleString("pl.close()");
+    hold_ = 0;
+
+}
+
+void PyVisualize::show() {
+
+    PyRun_SimpleString("pl.show()");
 
 }

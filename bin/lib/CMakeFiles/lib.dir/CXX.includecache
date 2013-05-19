@@ -41,6 +41,8 @@ ceres/ceres.h
 -
 ceres/rotation.h
 -
+python2.7/Python.h
+-
 
 /home/ab9/projects/sa-ptv/lib/calibration.h
 std_include.h
@@ -79,6 +81,8 @@ tracking.h
 /home/ab9/projects/sa-ptv/lib/tracking.h
 typedefs.h
 /home/ab9/projects/sa-ptv/lib/typedefs.h
+visualize.h
+/home/ab9/projects/sa-ptv/lib/visualize.h
 tools.h
 /home/ab9/projects/sa-ptv/lib/tools.h
 
@@ -93,6 +97,12 @@ typedefs.h
 /home/ab9/projects/sa-ptv/lib/typedefs.h
 std_include.h
 /home/ab9/projects/sa-ptv/lib/std_include.h
+
+/home/ab9/projects/sa-ptv/lib/visualize.h
+std_include.h
+/home/ab9/projects/sa-ptv/lib/std_include.h
+tools.h
+/home/ab9/projects/sa-ptv/lib/tools.h
 
 /usr/local/include/Eigen/Cholesky
 Core

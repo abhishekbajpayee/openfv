@@ -1,108 +1,50 @@
+// -------------------------------------------------------
+// -------------------------------------------------------
+// Synthetic Aperture - Particle Tracking Velocimetry Code
+// --- Visualization Library Header ---
+// -------------------------------------------------------
+// Author: Abhishek Bajpayee
+//         Dept. of Mechanical Engineering
+//         Massachusetts Institute of Technology
+// -------------------------------------------------------
+// -------------------------------------------------------
+
+#ifndef VISUALIZATION_LIBRARY
+#define VISUALIZATION_LIBRARY
+
 #include "std_include.h"
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
-
 #include "tools.h"
 
 using namespace cv;
 using namespace std;
 
-class gpuRefocus {
+class PyVisualize {
 
  public:
-
- gpuRefocus(vector<Mat> P_mats, vector<Mat> imgs, double scale, double z, Size img_size):
-    P_mats(P_mats), array_host(imgs), scale(scale), z(z), img_size(img_size) {}
-
-    ~gpuRefocus() {
-        //delete[] array_host;
-        //delete[] P_mats;
+    ~PyVisualize() {
+        Py_Exit(0);
     }
 
-    void start();
-    void refocus(double z);
-    void initialize();
+    PyVisualize() {
+        Py_Initialize();
+        PyRun_SimpleString("import pylab as pl");
+        PyRun_SimpleString("from mpl_toolkits.mplot3d import Axes3D");
+        hold_ = 0;
+        figure_ = 0;
+    }
+
+    void line3d(Point3f p1, Point3f p2);
+    void scatter3d(vector<Point3f> points, vector<int> indices, string size, string color);
+    void figure();
+    void hold(int value);
+    void clear();
+    void show();
 
  private:
 
-    vector<Mat> array_host;
-    vector<Mat> P_mats;
-    Mat refocused_host;
-    Mat den_host;
-
-    vector<gpu::GpuMat> array;
-    gpu::GpuMat temp;
-    gpu::GpuMat temp2;
-    gpu::GpuMat refocused;
-    
-    Size img_size;
-    double z;
-    double scale;
+    int hold_;
+    int figure_;
 
 };
 
-class cpuRefocus {
-
- public:
-
- cpuRefocus(vector<Mat> P_mats, vector<Mat> imgs, double scale, double z, Size img_size):
-    P_mats(P_mats), array(imgs), scale(scale), z(z), img_size(img_size) {}
-    
-    ~cpuRefocus() {
-        //delete[] array_host;
-        //delete[] P_mats;
-    }
-
-    void start() {
-
-        namedWindow("Result", CV_WINDOW_AUTOSIZE);
-        refocus(z);
-        
-        while( 1 ){
-            int key = cvWaitKey(10);
-            cout<<"z = "<<z<<endl;
-            if( (key & 255)==83 ) {
-                z += 0.5;
-                refocus(z);
-            } else if( (key & 255)==81 ) {
-                z -= 0.5;
-                refocus(z);
-            } else if( (key & 255)==27 ) {
-                break;
-            }
-        }
-
-    }
-
-    void refocus(double z) {
-
-        Mat H, trans;
-        T_from_P(P_mats[0], H, z, scale, img_size);
-        warpPerspective(array[0], trans, H, img_size);
-        trans /= 255.0;
-        refocused = trans.clone()/double(array.size());
-
-        for (int i=1; i<array.size(); i++) {
-            
-            Mat H, trans;
-            T_from_P(P_mats[i], H, z, scale, img_size);
-            warpPerspective(array[i], trans, H, img_size);
-            trans /= 255.0;
-            refocused += trans.clone()/double(array.size());
-        
-        }
-
-        imshow("Result", refocused);
-
-    }
-
- private:
-
-    vector<Mat> array;
-    vector<Mat> P_mats;
-    Mat refocused;
-    Size img_size;
-    double z, scale;
-
-};
+#endif

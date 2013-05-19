@@ -41,6 +41,8 @@ ceres/ceres.h
 -
 ceres/rotation.h
 -
+python2.7/Python.h
+-
 
 ../lib/calibration.h
 std_include.h
