@@ -53,6 +53,7 @@ class multiCamCalibration {
 
  private:
 
+    void calc_space_warp_factor();
     void get_grid_size_pix();
 
     string path_;
@@ -70,6 +71,7 @@ class multiCamCalibration {
     double grid_size_phys_;
     double grid_size_pix_;
     double pix_per_phys_;
+    double warp_factor_;
     
     vector<string> cam_names_;
     vector< vector<Mat> > calib_imgs_;

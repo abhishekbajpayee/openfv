@@ -1,0 +1,179 @@
+\hypertarget{classpLocalize}{\section{p\-Localize Class Reference}
+\label{dc/d52/classpLocalize}\index{p\-Localize@{p\-Localize}}
+}
+
+
+{\ttfamily \#include $<$p\-Loc.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classpLocalize_a3ce8450a0df2f8b9f29c12a81bed13c2}{$\sim$p\-Localize} ()
+\item 
+\hyperlink{classpLocalize_a8128f9e9d96089c828c07e9ab8421aef}{p\-Localize} (int window, double zmin, double zmax, double dz, double thresh, int cluster\-\_\-size, \hyperlink{classsaRefocus}{sa\-Refocus} refocus)
+\item 
+vector$<$ Point3f $>$ \hyperlink{classpLocalize_a9fd130c559d3a8898099c30e31f77771}{detected\-\_\-particles} ()
+\item 
+void \hyperlink{classpLocalize_a2f6b7bfcf42e3bb54b078a9b3428129a}{run} ()
+\item 
+void \hyperlink{classpLocalize_a80d8c3af8922b89126c6b09f2abaa9f3}{find\-\_\-particles\-\_\-all\-\_\-frames} ()
+\item 
+void \hyperlink{classpLocalize_a4cc93f868df86be24d561fe2696d073a}{find\-\_\-particles\-\_\-3d} (int frame)
+\item 
+void \hyperlink{classpLocalize_ab06316bae1ab16dc89bd112b917885d6}{z\-\_\-resolution} ()
+\item 
+void \hyperlink{classpLocalize_a9d17b81e6a0dd34934cc346bd9bd28ea}{crop\-\_\-focus} ()
+\item 
+void \hyperlink{classpLocalize_a63631962bf0b5e61a7bbfc9f6bed425d}{find\-\_\-clusters} ()
+\item 
+void \hyperlink{classpLocalize_a4fef0d0f6bbb23762eda12a34b996d88}{clean\-\_\-clusters} ()
+\item 
+void \hyperlink{classpLocalize_afe6e3a6ed7df1d57ba5d27bf32847db0}{collapse\-\_\-clusters} ()
+\item 
+void \hyperlink{classpLocalize_ad0b19ddc9f1bf90737c34ec1370e272d}{find\-\_\-particles} (Mat image, vector$<$ Point2f $>$ \&points\-\_\-out)
+\item 
+void \hyperlink{classpLocalize_a331d6a8b9d616de899133c7bbc8878f5}{refine\-\_\-subpixel} (Mat image, vector$<$ Point2f $>$ points\-\_\-in, vector$<$ \hyperlink{structparticle2d}{particle2d} $>$ \&points\-\_\-out)
+\item 
+void \hyperlink{classpLocalize_ad08e3078d7b3b0757122007a023f9602}{write\-\_\-all\-\_\-particles\-\_\-to\-\_\-file} (string path)
+\item 
+void \hyperlink{classpLocalize_a3080d5a6f17d628b785ad5ec9c36fa58}{draw\-\_\-points} (Mat image, Mat \&drawn, vector$<$ Point2f $>$ points)
+\item 
+void \hyperlink{classpLocalize_a7b8cf8185e3fe815855665b2d47fb777}{draw\-\_\-point} (Mat image, Mat \&drawn, Point2f point)
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classpLocalize_a3ce8450a0df2f8b9f29c12a81bed13c2}{\index{p\-Localize@{p\-Localize}!$\sim$p\-Localize@{$\sim$p\-Localize}}
+\index{$\sim$p\-Localize@{$\sim$p\-Localize}!pLocalize@{p\-Localize}}
+\subsubsection[{$\sim$p\-Localize}]{\setlength{\rightskip}{0pt plus 5cm}p\-Localize\-::$\sim$p\-Localize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{dc/d52/classpLocalize_a3ce8450a0df2f8b9f29c12a81bed13c2}
+\hypertarget{classpLocalize_a8128f9e9d96089c828c07e9ab8421aef}{\index{p\-Localize@{p\-Localize}!p\-Localize@{p\-Localize}}
+\index{p\-Localize@{p\-Localize}!pLocalize@{p\-Localize}}
+\subsubsection[{p\-Localize}]{\setlength{\rightskip}{0pt plus 5cm}p\-Localize\-::p\-Localize (
+\begin{DoxyParamCaption}
+\item[{int}]{window, }
+\item[{double}]{zmin, }
+\item[{double}]{zmax, }
+\item[{double}]{dz, }
+\item[{double}]{thresh, }
+\item[{int}]{cluster\-\_\-size, }
+\item[{{\bf sa\-Refocus}}]{refocus}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{dc/d52/classpLocalize_a8128f9e9d96089c828c07e9ab8421aef}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classpLocalize_a4fef0d0f6bbb23762eda12a34b996d88}{\index{p\-Localize@{p\-Localize}!clean\-\_\-clusters@{clean\-\_\-clusters}}
+\index{clean\-\_\-clusters@{clean\-\_\-clusters}!pLocalize@{p\-Localize}}
+\subsubsection[{clean\-\_\-clusters}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::clean\-\_\-clusters (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a4fef0d0f6bbb23762eda12a34b996d88}
+\hypertarget{classpLocalize_afe6e3a6ed7df1d57ba5d27bf32847db0}{\index{p\-Localize@{p\-Localize}!collapse\-\_\-clusters@{collapse\-\_\-clusters}}
+\index{collapse\-\_\-clusters@{collapse\-\_\-clusters}!pLocalize@{p\-Localize}}
+\subsubsection[{collapse\-\_\-clusters}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::collapse\-\_\-clusters (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_afe6e3a6ed7df1d57ba5d27bf32847db0}
+\hypertarget{classpLocalize_a9d17b81e6a0dd34934cc346bd9bd28ea}{\index{p\-Localize@{p\-Localize}!crop\-\_\-focus@{crop\-\_\-focus}}
+\index{crop\-\_\-focus@{crop\-\_\-focus}!pLocalize@{p\-Localize}}
+\subsubsection[{crop\-\_\-focus}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::crop\-\_\-focus (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a9d17b81e6a0dd34934cc346bd9bd28ea}
+\hypertarget{classpLocalize_a9fd130c559d3a8898099c30e31f77771}{\index{p\-Localize@{p\-Localize}!detected\-\_\-particles@{detected\-\_\-particles}}
+\index{detected\-\_\-particles@{detected\-\_\-particles}!pLocalize@{p\-Localize}}
+\subsubsection[{detected\-\_\-particles}]{\setlength{\rightskip}{0pt plus 5cm}vector$<$Point3f$>$ p\-Localize\-::detected\-\_\-particles (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{dc/d52/classpLocalize_a9fd130c559d3a8898099c30e31f77771}
+\hypertarget{classpLocalize_a7b8cf8185e3fe815855665b2d47fb777}{\index{p\-Localize@{p\-Localize}!draw\-\_\-point@{draw\-\_\-point}}
+\index{draw\-\_\-point@{draw\-\_\-point}!pLocalize@{p\-Localize}}
+\subsubsection[{draw\-\_\-point}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::draw\-\_\-point (
+\begin{DoxyParamCaption}
+\item[{Mat}]{image, }
+\item[{Mat \&}]{drawn, }
+\item[{Point2f}]{point}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a7b8cf8185e3fe815855665b2d47fb777}
+\hypertarget{classpLocalize_a3080d5a6f17d628b785ad5ec9c36fa58}{\index{p\-Localize@{p\-Localize}!draw\-\_\-points@{draw\-\_\-points}}
+\index{draw\-\_\-points@{draw\-\_\-points}!pLocalize@{p\-Localize}}
+\subsubsection[{draw\-\_\-points}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::draw\-\_\-points (
+\begin{DoxyParamCaption}
+\item[{Mat}]{image, }
+\item[{Mat \&}]{drawn, }
+\item[{vector$<$ Point2f $>$}]{points}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a3080d5a6f17d628b785ad5ec9c36fa58}
+\hypertarget{classpLocalize_a63631962bf0b5e61a7bbfc9f6bed425d}{\index{p\-Localize@{p\-Localize}!find\-\_\-clusters@{find\-\_\-clusters}}
+\index{find\-\_\-clusters@{find\-\_\-clusters}!pLocalize@{p\-Localize}}
+\subsubsection[{find\-\_\-clusters}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::find\-\_\-clusters (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a63631962bf0b5e61a7bbfc9f6bed425d}
+\hypertarget{classpLocalize_ad0b19ddc9f1bf90737c34ec1370e272d}{\index{p\-Localize@{p\-Localize}!find\-\_\-particles@{find\-\_\-particles}}
+\index{find\-\_\-particles@{find\-\_\-particles}!pLocalize@{p\-Localize}}
+\subsubsection[{find\-\_\-particles}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::find\-\_\-particles (
+\begin{DoxyParamCaption}
+\item[{Mat}]{image, }
+\item[{vector$<$ Point2f $>$ \&}]{points\-\_\-out}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_ad0b19ddc9f1bf90737c34ec1370e272d}
+\hypertarget{classpLocalize_a4cc93f868df86be24d561fe2696d073a}{\index{p\-Localize@{p\-Localize}!find\-\_\-particles\-\_\-3d@{find\-\_\-particles\-\_\-3d}}
+\index{find\-\_\-particles\-\_\-3d@{find\-\_\-particles\-\_\-3d}!pLocalize@{p\-Localize}}
+\subsubsection[{find\-\_\-particles\-\_\-3d}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::find\-\_\-particles\-\_\-3d (
+\begin{DoxyParamCaption}
+\item[{int}]{frame}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a4cc93f868df86be24d561fe2696d073a}
+\hypertarget{classpLocalize_a80d8c3af8922b89126c6b09f2abaa9f3}{\index{p\-Localize@{p\-Localize}!find\-\_\-particles\-\_\-all\-\_\-frames@{find\-\_\-particles\-\_\-all\-\_\-frames}}
+\index{find\-\_\-particles\-\_\-all\-\_\-frames@{find\-\_\-particles\-\_\-all\-\_\-frames}!pLocalize@{p\-Localize}}
+\subsubsection[{find\-\_\-particles\-\_\-all\-\_\-frames}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::find\-\_\-particles\-\_\-all\-\_\-frames (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a80d8c3af8922b89126c6b09f2abaa9f3}
+\hypertarget{classpLocalize_a331d6a8b9d616de899133c7bbc8878f5}{\index{p\-Localize@{p\-Localize}!refine\-\_\-subpixel@{refine\-\_\-subpixel}}
+\index{refine\-\_\-subpixel@{refine\-\_\-subpixel}!pLocalize@{p\-Localize}}
+\subsubsection[{refine\-\_\-subpixel}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::refine\-\_\-subpixel (
+\begin{DoxyParamCaption}
+\item[{Mat}]{image, }
+\item[{vector$<$ Point2f $>$}]{points\-\_\-in, }
+\item[{vector$<$ {\bf particle2d} $>$ \&}]{points\-\_\-out}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a331d6a8b9d616de899133c7bbc8878f5}
+\hypertarget{classpLocalize_a2f6b7bfcf42e3bb54b078a9b3428129a}{\index{p\-Localize@{p\-Localize}!run@{run}}
+\index{run@{run}!pLocalize@{p\-Localize}}
+\subsubsection[{run}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::run (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_a2f6b7bfcf42e3bb54b078a9b3428129a}
+\hypertarget{classpLocalize_ad08e3078d7b3b0757122007a023f9602}{\index{p\-Localize@{p\-Localize}!write\-\_\-all\-\_\-particles\-\_\-to\-\_\-file@{write\-\_\-all\-\_\-particles\-\_\-to\-\_\-file}}
+\index{write\-\_\-all\-\_\-particles\-\_\-to\-\_\-file@{write\-\_\-all\-\_\-particles\-\_\-to\-\_\-file}!pLocalize@{p\-Localize}}
+\subsubsection[{write\-\_\-all\-\_\-particles\-\_\-to\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::write\-\_\-all\-\_\-particles\-\_\-to\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{string}]{path}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_ad08e3078d7b3b0757122007a023f9602}
+\hypertarget{classpLocalize_ab06316bae1ab16dc89bd112b917885d6}{\index{p\-Localize@{p\-Localize}!z\-\_\-resolution@{z\-\_\-resolution}}
+\index{z\-\_\-resolution@{z\-\_\-resolution}!pLocalize@{p\-Localize}}
+\subsubsection[{z\-\_\-resolution}]{\setlength{\rightskip}{0pt plus 5cm}void p\-Localize\-::z\-\_\-resolution (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{dc/d52/classpLocalize_ab06316bae1ab16dc89bd112b917885d6}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/ab9/projects/sa-\/ptv/lib/\hyperlink{pLoc_8h}{p\-Loc.\-h}\item 
+/home/ab9/projects/sa-\/ptv/lib/\hyperlink{pLoc_8cpp}{p\-Loc.\-cpp}\end{DoxyCompactItemize}

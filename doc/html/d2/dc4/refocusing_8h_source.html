@@ -119,47 +119,59 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    }</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="code" href="../../d7/d89/classsaRefocus.html#a0ffb104adab5ec118e861ee1ed5a1c52">   32</a></span>&#160; <a class="code" href="../../d7/d89/classsaRefocus.html">saRefocus</a>(<a class="code" href="../../d3/d46/structrefocusing__data.html">refocusing_data</a> refocusing_params):</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams) {}</div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="code" href="../../d7/d89/classsaRefocus.html#a1a0ef5c34008567ce8fd5934ca66c361">   32</a></span>&#160; <a class="code" href="../../d7/d89/classsaRefocus.html">saRefocus</a>(<a class="code" href="../../d3/d46/structrefocusing__data.html">refocusing_data</a> refocusing_params, <span class="keywordtype">int</span> frame, <span class="keywordtype">int</span> mult, <span class="keywordtype">double</span> mult_exp):</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), z(0), thresh(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) {}</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="comment">// Functions</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">void</span> read_imgs(<span class="keywordtype">string</span> path);</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keywordtype">void</span> startGPUsession();</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordtype">void</span> initializeGPU();</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordtype">void</span> GPUrefocus(<span class="keywordtype">double</span> z);</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="comment">// data types and private functions</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    vector&lt;Mat&gt; P_mats_;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    vector&lt;Mat&gt; P_mats_u_;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    vector&lt;string&gt; cam_names_;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    Size img_size_;</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordtype">double</span> scale_;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keywordtype">int</span> num_cams_;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordtype">double</span> z;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="comment">// Vector of vectors that stores images from all cameras and for all time steps</span></div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    vector&lt; vector&lt;Mat&gt; &gt; imgs;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    Mat refocused_host;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    vector&lt;gpu::GpuMat&gt; array;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    gpu::GpuMat temp;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    gpu::GpuMat temp2;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    gpu::GpuMat refocused;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    </div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="code" href="../../d7/d89/classsaRefocus.html#ad2fb90e82e73e5432ea36f77c4d92c63">   35</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="../../d7/d89/classsaRefocus.html#ad2fb90e82e73e5432ea36f77c4d92c63">num_cams</a>() { <span class="keywordflow">return</span> num_cams_; }</div>
+<div class="line"><a name="l00036"></a><span class="lineno"><a class="code" href="../../d7/d89/classsaRefocus.html#acac3d21a9b434f2176c8d438ed811659">   36</a></span>&#160;    <span class="keywordtype">double</span> <a class="code" href="../../d7/d89/classsaRefocus.html#acac3d21a9b434f2176c8d438ed811659">scale</a>() { <span class="keywordflow">return</span> scale_; }</div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="code" href="../../d7/d89/classsaRefocus.html#ac0256a7f546a631ae85ce90b90a2f8d9">   37</a></span>&#160;    Size <a class="code" href="../../d7/d89/classsaRefocus.html#ac0256a7f546a631ae85ce90b90a2f8d9">img_size</a>() { <span class="keywordflow">return</span> img_size_; }</div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="code" href="../../d7/d89/classsaRefocus.html#aea6a585af06af58407aedca16a85dda3">   38</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="../../d7/d89/classsaRefocus.html#aea6a585af06af58407aedca16a85dda3">num_frames</a>() { <span class="keywordflow">return</span> imgs[0].size(); }</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordtype">void</span> read_imgs(<span class="keywordtype">string</span> path);</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordtype">void</span> GPUliveView();</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordtype">void</span> initializeGPU();</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordtype">void</span> uploadToGPU();</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="keywordtype">void</span> GPUrefocus(<span class="keywordtype">double</span> z, <span class="keywordtype">double</span> thresh, <span class="keywordtype">int</span> live, <span class="keywordtype">int</span> frame);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
+<div class="line"><a name="l00047"></a><span class="lineno"><a class="code" href="../../d7/d89/classsaRefocus.html#a4ad8d70d80a2c9dd5c62de027708c6c4">   47</a></span>&#160;    Mat <a class="code" href="../../d7/d89/classsaRefocus.html#a4ad8d70d80a2c9dd5c62de027708c6c4">result</a>;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="comment">// data types and private functions</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    vector&lt;Mat&gt; P_mats_;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    vector&lt;Mat&gt; P_mats_u_;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    vector&lt;string&gt; cam_names_;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    Size img_size_;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">double</span> scale_;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordtype">int</span> num_cams_;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordtype">double</span> z;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordtype">double</span> thresh;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordtype">int</span> frame_;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keywordtype">double</span> mult_exp_;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    Mat refocused_host_;</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;};</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="comment">// Vector of vectors that stores images from all cameras and for all time steps</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    vector&lt; vector&lt;Mat&gt; &gt; imgs;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    vector&lt;gpu::GpuMat&gt; array;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    vector&lt; vector&lt;gpu::GpuMat&gt; &gt; array_all;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    gpu::GpuMat temp;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    gpu::GpuMat temp2;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    gpu::GpuMat refocused;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="keywordtype">int</span> frame_to_upload_;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keywordtype">int</span> mult_;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;};</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue May 21 2013 13:37:15 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

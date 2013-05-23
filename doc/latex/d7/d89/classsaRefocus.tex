@@ -10,15 +10,30 @@
 \item 
 \hyperlink{classsaRefocus_a26ed5105f23d8a55aad8fa9a0d40730d}{$\sim$sa\-Refocus} ()
 \item 
-\hyperlink{classsaRefocus_a0ffb104adab5ec118e861ee1ed5a1c52}{sa\-Refocus} (\hyperlink{structrefocusing__data}{refocusing\-\_\-data} refocusing\-\_\-params)
+\hyperlink{classsaRefocus_a1a0ef5c34008567ce8fd5934ca66c361}{sa\-Refocus} (\hyperlink{structrefocusing__data}{refocusing\-\_\-data} refocusing\-\_\-params, int frame, int mult, double mult\-\_\-exp)
+\item 
+int \hyperlink{classsaRefocus_ad2fb90e82e73e5432ea36f77c4d92c63}{num\-\_\-cams} ()
+\item 
+double \hyperlink{classsaRefocus_acac3d21a9b434f2176c8d438ed811659}{scale} ()
+\item 
+Size \hyperlink{classsaRefocus_ac0256a7f546a631ae85ce90b90a2f8d9}{img\-\_\-size} ()
+\item 
+int \hyperlink{classsaRefocus_aea6a585af06af58407aedca16a85dda3}{num\-\_\-frames} ()
 \item 
 void \hyperlink{classsaRefocus_a3d75da5d4cf776ea324413f9f138ef70}{read\-\_\-imgs} (string path)
 \item 
-void \hyperlink{classsaRefocus_a9e8c8607a12c3bafa2034091301a9bcd}{start\-G\-P\-Usession} ()
+void \hyperlink{classsaRefocus_ab0d935f4b3a4201c33bf51e39e14a128}{G\-P\-Ulive\-View} ()
 \item 
 void \hyperlink{classsaRefocus_a2a17871cc22d0b1aed028ad6052f20b4}{initialize\-G\-P\-U} ()
 \item 
-void \hyperlink{classsaRefocus_accfd127ad822c0458d30e840b44663ba}{G\-P\-Urefocus} (double z)
+void \hyperlink{classsaRefocus_a5968ccfa0a4f5d606666321ea68198e2}{upload\-To\-G\-P\-U} ()
+\item 
+void \hyperlink{classsaRefocus_a2aa40c035a83b39062cd0421eb200512}{G\-P\-Urefocus} (double z, double thresh, int live, int frame)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Mat \hyperlink{classsaRefocus_a4ad8d70d80a2c9dd5c62de027708c6c4}{result}
 \end{DoxyCompactItemize}
 
 
@@ -30,23 +45,43 @@ void \hyperlink{classsaRefocus_accfd127ad822c0458d30e840b44663ba}{G\-P\-Urefocus
 {}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d89/classsaRefocus_a26ed5105f23d8a55aad8fa9a0d40730d}
-\hypertarget{classsaRefocus_a0ffb104adab5ec118e861ee1ed5a1c52}{\index{sa\-Refocus@{sa\-Refocus}!sa\-Refocus@{sa\-Refocus}}
+\hypertarget{classsaRefocus_a1a0ef5c34008567ce8fd5934ca66c361}{\index{sa\-Refocus@{sa\-Refocus}!sa\-Refocus@{sa\-Refocus}}
 \index{sa\-Refocus@{sa\-Refocus}!saRefocus@{sa\-Refocus}}
 \subsubsection[{sa\-Refocus}]{\setlength{\rightskip}{0pt plus 5cm}sa\-Refocus\-::sa\-Refocus (
 \begin{DoxyParamCaption}
-\item[{{\bf refocusing\-\_\-data}}]{refocusing\-\_\-params}
+\item[{{\bf refocusing\-\_\-data}}]{refocusing\-\_\-params, }
+\item[{int}]{frame, }
+\item[{int}]{mult, }
+\item[{double}]{mult\-\_\-exp}
 \end{DoxyParamCaption}
-)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d89/classsaRefocus_a0ffb104adab5ec118e861ee1ed5a1c52}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d89/classsaRefocus_a1a0ef5c34008567ce8fd5934ca66c361}
 
 
 \subsection{Member Function Documentation}
-\hypertarget{classsaRefocus_accfd127ad822c0458d30e840b44663ba}{\index{sa\-Refocus@{sa\-Refocus}!G\-P\-Urefocus@{G\-P\-Urefocus}}
+\hypertarget{classsaRefocus_ab0d935f4b3a4201c33bf51e39e14a128}{\index{sa\-Refocus@{sa\-Refocus}!G\-P\-Ulive\-View@{G\-P\-Ulive\-View}}
+\index{G\-P\-Ulive\-View@{G\-P\-Ulive\-View}!saRefocus@{sa\-Refocus}}
+\subsubsection[{G\-P\-Ulive\-View}]{\setlength{\rightskip}{0pt plus 5cm}void sa\-Refocus\-::\-G\-P\-Ulive\-View (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d89/classsaRefocus_ab0d935f4b3a4201c33bf51e39e14a128}
+\hypertarget{classsaRefocus_a2aa40c035a83b39062cd0421eb200512}{\index{sa\-Refocus@{sa\-Refocus}!G\-P\-Urefocus@{G\-P\-Urefocus}}
 \index{G\-P\-Urefocus@{G\-P\-Urefocus}!saRefocus@{sa\-Refocus}}
 \subsubsection[{G\-P\-Urefocus}]{\setlength{\rightskip}{0pt plus 5cm}void sa\-Refocus\-::\-G\-P\-Urefocus (
 \begin{DoxyParamCaption}
-\item[{double}]{z}
+\item[{double}]{z, }
+\item[{double}]{thresh, }
+\item[{int}]{live, }
+\item[{int}]{frame}
 \end{DoxyParamCaption}
-)}}\label{d7/d89/classsaRefocus_accfd127ad822c0458d30e840b44663ba}
+)}}\label{d7/d89/classsaRefocus_a2aa40c035a83b39062cd0421eb200512}
+\hypertarget{classsaRefocus_ac0256a7f546a631ae85ce90b90a2f8d9}{\index{sa\-Refocus@{sa\-Refocus}!img\-\_\-size@{img\-\_\-size}}
+\index{img\-\_\-size@{img\-\_\-size}!saRefocus@{sa\-Refocus}}
+\subsubsection[{img\-\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}Size sa\-Refocus\-::img\-\_\-size (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d89/classsaRefocus_ac0256a7f546a631ae85ce90b90a2f8d9}
 \hypertarget{classsaRefocus_a2a17871cc22d0b1aed028ad6052f20b4}{\index{sa\-Refocus@{sa\-Refocus}!initialize\-G\-P\-U@{initialize\-G\-P\-U}}
 \index{initialize\-G\-P\-U@{initialize\-G\-P\-U}!saRefocus@{sa\-Refocus}}
 \subsubsection[{initialize\-G\-P\-U}]{\setlength{\rightskip}{0pt plus 5cm}void sa\-Refocus\-::initialize\-G\-P\-U (
@@ -54,6 +89,20 @@ void \hyperlink{classsaRefocus_accfd127ad822c0458d30e840b44663ba}{G\-P\-Urefocus
 {}
 \end{DoxyParamCaption}
 )}}\label{d7/d89/classsaRefocus_a2a17871cc22d0b1aed028ad6052f20b4}
+\hypertarget{classsaRefocus_ad2fb90e82e73e5432ea36f77c4d92c63}{\index{sa\-Refocus@{sa\-Refocus}!num\-\_\-cams@{num\-\_\-cams}}
+\index{num\-\_\-cams@{num\-\_\-cams}!saRefocus@{sa\-Refocus}}
+\subsubsection[{num\-\_\-cams}]{\setlength{\rightskip}{0pt plus 5cm}int sa\-Refocus\-::num\-\_\-cams (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d89/classsaRefocus_ad2fb90e82e73e5432ea36f77c4d92c63}
+\hypertarget{classsaRefocus_aea6a585af06af58407aedca16a85dda3}{\index{sa\-Refocus@{sa\-Refocus}!num\-\_\-frames@{num\-\_\-frames}}
+\index{num\-\_\-frames@{num\-\_\-frames}!saRefocus@{sa\-Refocus}}
+\subsubsection[{num\-\_\-frames}]{\setlength{\rightskip}{0pt plus 5cm}int sa\-Refocus\-::num\-\_\-frames (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d89/classsaRefocus_aea6a585af06af58407aedca16a85dda3}
 \hypertarget{classsaRefocus_a3d75da5d4cf776ea324413f9f138ef70}{\index{sa\-Refocus@{sa\-Refocus}!read\-\_\-imgs@{read\-\_\-imgs}}
 \index{read\-\_\-imgs@{read\-\_\-imgs}!saRefocus@{sa\-Refocus}}
 \subsubsection[{read\-\_\-imgs}]{\setlength{\rightskip}{0pt plus 5cm}void sa\-Refocus\-::read\-\_\-imgs (
@@ -61,13 +110,26 @@ void \hyperlink{classsaRefocus_accfd127ad822c0458d30e840b44663ba}{G\-P\-Urefocus
 \item[{string}]{path}
 \end{DoxyParamCaption}
 )}}\label{d7/d89/classsaRefocus_a3d75da5d4cf776ea324413f9f138ef70}
-\hypertarget{classsaRefocus_a9e8c8607a12c3bafa2034091301a9bcd}{\index{sa\-Refocus@{sa\-Refocus}!start\-G\-P\-Usession@{start\-G\-P\-Usession}}
-\index{start\-G\-P\-Usession@{start\-G\-P\-Usession}!saRefocus@{sa\-Refocus}}
-\subsubsection[{start\-G\-P\-Usession}]{\setlength{\rightskip}{0pt plus 5cm}void sa\-Refocus\-::start\-G\-P\-Usession (
+\hypertarget{classsaRefocus_acac3d21a9b434f2176c8d438ed811659}{\index{sa\-Refocus@{sa\-Refocus}!scale@{scale}}
+\index{scale@{scale}!saRefocus@{sa\-Refocus}}
+\subsubsection[{scale}]{\setlength{\rightskip}{0pt plus 5cm}double sa\-Refocus\-::scale (
 \begin{DoxyParamCaption}
 {}
 \end{DoxyParamCaption}
-)}}\label{d7/d89/classsaRefocus_a9e8c8607a12c3bafa2034091301a9bcd}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{d7/d89/classsaRefocus_acac3d21a9b434f2176c8d438ed811659}
+\hypertarget{classsaRefocus_a5968ccfa0a4f5d606666321ea68198e2}{\index{sa\-Refocus@{sa\-Refocus}!upload\-To\-G\-P\-U@{upload\-To\-G\-P\-U}}
+\index{upload\-To\-G\-P\-U@{upload\-To\-G\-P\-U}!saRefocus@{sa\-Refocus}}
+\subsubsection[{upload\-To\-G\-P\-U}]{\setlength{\rightskip}{0pt plus 5cm}void sa\-Refocus\-::upload\-To\-G\-P\-U (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{d7/d89/classsaRefocus_a5968ccfa0a4f5d606666321ea68198e2}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classsaRefocus_a4ad8d70d80a2c9dd5c62de027708c6c4}{\index{sa\-Refocus@{sa\-Refocus}!result@{result}}
+\index{result@{result}!saRefocus@{sa\-Refocus}}
+\subsubsection[{result}]{\setlength{\rightskip}{0pt plus 5cm}Mat sa\-Refocus\-::result}}\label{d7/d89/classsaRefocus_a4ad8d70d80a2c9dd5c62de027708c6c4}
 
 
 The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}

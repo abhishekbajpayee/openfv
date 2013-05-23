@@ -30,11 +30,14 @@ class pTracking {
 
     void read_points(string path);
 
-    void track();
+    void track_all();
+
+    vector<Point2i> track_frame(int f1, int f2);
 
  private:
 
-    void update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
+    vector<Point2i> find_matches(vector<Mat> Pij, vector< vector<int> > S_r, vector< vector<int> > S_c);
+    double update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
     void normalize_probabilites(vector<Mat> &Pij, vector<Mat> &Pi);
     void build_probability_sets(vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
     void build_relaxation_sets(int frame1, int frame2, vector< vector<int> > S_r, vector< vector<int> > S_c, double C, double D, double E, double F, vector< vector< vector< vector<Point2i> > > > &theta);

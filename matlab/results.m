@@ -14,8 +14,9 @@ planes = length(x)/30;
 
 figure;
 hold on;
-for i=1:2%planes
-    scatter3(x((i-1)*ppi+1:i*ppi),y((i-1)*ppi+1:i*ppi),z((i-1)*ppi+1:i*ppi),'b+');
+for i=1:1%planes
+    scatter3(x((i-1)*ppi+1:i*ppi),y((i-1)*ppi+1:i*ppi),z((i-1)*ppi+1:i*ppi),'bo');
+    plot3(x((i-1)*ppi+1:i*ppi),y((i-1)*ppi+1:i*ppi),z((i-1)*ppi+1:i*ppi),'b');
     %bz = (-pd(i)-pa(i)*bx-pb(i)*by)/pc(i);
     %mesh(bx,by,bz,'EdgeColor','black');
     %hold off;

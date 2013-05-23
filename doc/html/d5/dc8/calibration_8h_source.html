@@ -139,62 +139,64 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="../../d7/d7b/classmultiCamCalibration.html#a2a1ef9ac02e6c5f78b209630c3f36167">write_calib_results</a>();</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="../../d7/d7b/classmultiCamCalibration.html#aa7500cc391078215bbe37faaa9a8839f">load_calib_results</a>();</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="../../d7/d7b/classmultiCamCalibration.html#a9a9b59b20f7d44dcd7be2c1371ba60ec">write_calib_results_matlab</a>();</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordtype">void</span> get_grid_size_pix();</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; <span class="keyword">private</span>:</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">string</span> path_;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordtype">string</span> ba_file_;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordtype">string</span> result_dir_;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordtype">string</span> result_file_;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    </div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordtype">int</span> num_cams_;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keywordtype">int</span> num_imgs_;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keywordtype">int</span> center_cam_id_;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    Size grid_size_;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    Size img_size_;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keywordtype">double</span> grid_size_phys_;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keywordtype">double</span> grid_size_pix_;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordtype">double</span> pix_per_phys_;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    </div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    vector&lt;string&gt; cam_names_;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    vector&lt; vector&lt;Mat&gt; &gt; calib_imgs_;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    vector&lt; vector&lt;Point3f&gt; &gt; all_pattern_points_;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; all_corner_points_;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    vector&lt;Mat&gt; cameraMats_;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    vector&lt;Mat&gt; dist_coeffs_;</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    vector&lt; vector&lt;Mat&gt; &gt; rvecs_;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    vector&lt; vector&lt;Mat&gt; &gt; tvecs_;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    vector&lt;Mat&gt; rVecs_;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    vector&lt;Mat&gt; tVecs_;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    vector&lt;Mat&gt; K_mats_;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    vector&lt;Mat&gt; dist_mats_;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <a class="code" href="../../d3/d46/structrefocusing__data.html">refocusing_data</a> refocusing_params_;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">void</span> get_grid_size_pix();</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordtype">string</span> path_;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordtype">string</span> ba_file_;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordtype">string</span> result_dir_;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordtype">string</span> result_file_;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keywordtype">int</span> num_cams_;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keywordtype">int</span> num_imgs_;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <span class="keywordtype">int</span> center_cam_id_;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    Size grid_size_;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    Size img_size_;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordtype">double</span> grid_size_phys_;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <span class="keywordtype">double</span> grid_size_pix_;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <span class="keywordtype">double</span> pix_per_phys_;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    vector&lt;string&gt; cam_names_;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    vector&lt; vector&lt;Mat&gt; &gt; calib_imgs_;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    vector&lt; vector&lt;Point3f&gt; &gt; all_pattern_points_;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    vector&lt; vector&lt; vector&lt;Point2f&gt; &gt; &gt; all_corner_points_;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    vector&lt;Mat&gt; cameraMats_;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    vector&lt;Mat&gt; dist_coeffs_;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    vector&lt; vector&lt;Mat&gt; &gt; rvecs_;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    vector&lt; vector&lt;Mat&gt; &gt; tvecs_;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    vector&lt;Mat&gt; rVecs_;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    vector&lt;Mat&gt; tVecs_;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    vector&lt;Mat&gt; K_mats_;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    vector&lt;Mat&gt; dist_mats_;</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <a class="code" href="../../d0/d13/classbaProblem.html">baProblem</a> ba_problem_;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keywordtype">double</span> total_reproj_error_;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordtype">double</span> avg_reproj_error_;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="comment">// Option flags</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keywordtype">int</span> solveForDistortion; <span class="comment">// TODO: NOT IMPLEMENTED</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="keywordtype">int</span> squareGrid; <span class="comment">// TODO: NOT IMPLEMENTED</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keywordtype">int</span> saveCornerImgs; <span class="comment">// TODO: NOT IMPLEMENTED</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="keywordtype">int</span> show_corners_flag;</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    <span class="keywordtype">int</span> run_calib_flag;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keywordtype">int</span> results_just_saved_flag;</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keywordtype">int</span> load_results_flag;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    </div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;};</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <a class="code" href="../../d3/d46/structrefocusing__data.html">refocusing_data</a> refocusing_params_;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <a class="code" href="../../d0/d13/classbaProblem.html">baProblem</a> ba_problem_;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keywordtype">double</span> total_reproj_error_;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keywordtype">double</span> avg_reproj_error_;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="comment">// Option flags</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keywordtype">int</span> solveForDistortion; <span class="comment">// TODO: NOT IMPLEMENTED</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="keywordtype">int</span> squareGrid; <span class="comment">// TODO: NOT IMPLEMENTED</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    <span class="keywordtype">int</span> saveCornerImgs; <span class="comment">// TODO: NOT IMPLEMENTED</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keywordtype">int</span> show_corners_flag;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keywordtype">int</span> run_calib_flag;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <span class="keywordtype">int</span> results_just_saved_flag;</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    <span class="keywordtype">int</span> load_results_flag;</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    </div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;};</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    </div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Apr 24 2013 16:10:18 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue May 21 2013 13:37:15 for Synthetic Aperture Particle Tracking Velocimetry by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="../../doxygen.png" alt="doxygen"/>
 </a> 1.8.3.1
 </small></address>

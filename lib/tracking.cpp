@@ -27,7 +27,7 @@ void pTracking::read_points(string path) {
     ifstream file;
     file.open(path.c_str());
 
-    cout<<"\nReading points to track...\n";
+    cout<<"\nReading points to track...";
     
     int num_frames = 30;
 
@@ -65,17 +65,36 @@ void pTracking::read_points(string path) {
 
     }
 
-    cout<<"done!\n";
+    cout<<"done!"<<endl;
 
 }
 
-void pTracking::track() {
+void pTracking::track_all() {
 
     PyVisualize vis;
 
-    int f1, f2;
-    f1 = 0;
-    f2 = 1;
+    vector<Point2i> matches;
+    vector< vector<Point2i> > all_matches;
+
+    vis.figure();
+
+    for (int i=0; i<all_points_.size()-1; i++) {
+        matches = track_frame(i, i+1);
+        all_matches.push_back(matches);
+        //vis.figure();
+        for (int j=0; j<matches.size(); j++) {
+            if (matches[j].y >= 0) vis.line3d(all_points_[i][matches[j].x], all_points_[i+1][matches[j].y]);
+        }
+        //vis.show();
+        //vis.clear();
+        matches.clear();
+    }
+
+    vis.show();
+
+}
+
+vector<Point2i> pTracking::track_frame(int f1, int f2) {
 
     double A, B, C, D, E, F;
     A = 0.3;
@@ -93,23 +112,26 @@ void pTracking::track() {
     n1 = all_points_[f1].size();
     n2 = all_points_[f2].size();
 
-    cout<<"Neighbor sets...\n";
+    //cout<<"Neighbor sets...\n";
     vector< vector<int> > S_r = neighbor_set(f1, f1, R_n);
     vector< vector<int> > S_c = neighbor_set(f1, f2, R_s);
 
     vector<Mat> Pij, Pi, Pij2, Pi2;
-    cout<<"Probability sets...\n";
+    //cout<<"Probability sets...\n";
     build_probability_sets(S_r, S_c, Pij, Pi, Pij2, Pi2);
 
-    cout<<"Relaxation sets...\n";
+    //cout<<"Relaxation sets...\n";
     vector< vector< vector< vector<Point2i> > > > theta;
     build_relaxation_sets(f1, f2, S_r, S_c, C, D, E, F, theta);
     
-    cout<<"Solving...\n";
+    cout<<"Matching "<<f1<<" and "<<f2<<" | ";
 
-    int N = 20;
+    // Number of iterations for relaxation optimization
+    int N = 100;
 
-    for (int n=0; n<N; n++) {
+    double diff;
+    int n;
+    for (n=0; n<N; n++) {
 
         for (int k=0; k<Pij.size(); k++) {
 
@@ -124,47 +146,30 @@ void pTracking::track() {
                     double newval = (Pij[k].at<double>(i,j))*(A + (B*sum));
                     Pij2[k].at<double>(i,j) = newval;
 
-                    int draw=0;
-                    if (draw) {
-                        vis.figure();
-                        vis.scatter3d(all_points_[f1], S_r[k], "20", "r");
-                        vis.hold(1);
-                        vis.scatter3d(all_points_[f2], S_c[k], "20", "b");
-                        vis.line3d(all_points_[f1][S_r[k][i]], all_points_[f2][S_c[k][j]]);
-                        for (int l=0; l<theta[k][i][j].size(); l++) {
-                            vis.line3d(all_points_[f1][S_r[k][theta[k][i][j][l].x]], all_points_[f2][S_c[k][theta[k][i][j][l].y]]);
-                        }
-                        vis.show();
-                        vis.clear();
-                    }
-
                 }
             }
 
         }
 
         normalize_probabilites(Pij2,Pi2);
-        
-        /*
-        cout<<"\nprobs\n";
-        for (int i=0; i<Pij2[k].rows; i++) {
-            double sum = 0;
-            for (int j=0; j<Pij2[k].cols; j++) {
-                printf("%f ", Pij2[k].at<double>(i,j));
-                sum += Pij2[k].at<double>(i,j);
-            }
-            printf("%f --- ", Pi2[k].at<double>(i,0));
-            sum += Pi2[k].at<double>(i,0);
-            printf("%f\n", sum);
-        }
-        cout<<"diffsum: "<<diffsum<<"\n\n";
-        */
+        diff = update_probabilities(Pij, Pi, Pij2, Pi2);
 
-        update_probabilities(Pij, Pi, Pij2, Pi2);
+        if (diff<0.1) break;
 
     }
 
+    cout<<"Final difference: "<<diff<<" | "<<n+1<<" iterations"<<endl;
+
+    vector<Point2i> matches = find_matches(Pij, S_r, S_c);
+
+    return(matches);
+
+}
+
+vector<Point2i> pTracking::find_matches(vector<Mat> Pij, vector< vector<int> > S_r, vector< vector<int> > S_c) {
+
     vector<Point2i> matches;
+    
     for (int i=0; i<Pij.size(); i++) {
         for (int j=0; j<S_r[i].size(); j++) {
 
@@ -184,20 +189,32 @@ void pTracking::track() {
         }
     }
 
-    vis.figure();
-    for (int i=0; i<matches.size(); i++) {
-        if (matches[i].y>=0) vis.line3d(all_points_[f1][matches[i].x], all_points_[f2][matches[i].y]);
-    }
-    vis.show();
+    return(matches);
 
 }
 
-void pTracking::update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2) {
+double pTracking::update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2) {
+
+    Mat diffpij, diffpi;
+    double difftotal = 0;
+    Scalar diffsum;
 
     for (int i=0; i<Pij.size(); i++) {
+        //diffpij = Pij2[i].clone()-Pij[i].clone();
+        absdiff(Pij[i], Pij2[i], diffpij);
+        diffsum = sum(diffpij);
+        difftotal += diffsum.val[0];
+
         Pij[i] = Pij2[i].clone();
+
+        absdiff(Pi[i], Pi2[i], diffpi);
+        diffsum = sum(diffpi);
+        difftotal += diffsum.val[0];
+
         Pi[i] = Pi2[i].clone();
     }
+
+    return(difftotal);
 
 }
 

@@ -13,6 +13,7 @@ struct refocusing_data {
     double scale;
     Size img_size;
     int num_cams;
+    double warp_factor;
 };
 
 // Data type for a particle in 2D:

@@ -41,7 +41,7 @@ void saRefocus::read_imgs(string path) {
         vector<Mat> refocusing_imgs_sub;
 
         path_tmp = path+cam_names_[i]+"/"+img_prefix;
-
+        
         dir = opendir(path_tmp.c_str());
         while(ent = readdir(dir)) {
             temp_name = ent->d_name;
@@ -77,10 +77,10 @@ void saRefocus::GPUliveView() {
 
     initializeGPU();
 
-    int frame = 0;
+    active_frame_ = 0;
 
     namedWindow("Result", CV_WINDOW_AUTOSIZE);       
-    GPUrefocus(z, thresh, 1, frame);
+    GPUrefocus(z, thresh, 1, active_frame_);
     
     double dz = 0.5;
     double dthresh = 5;
@@ -90,19 +90,29 @@ void saRefocus::GPUliveView() {
         //cout<<(key & 255)<<endl;
         if( (key & 255)==83 ) {
             z += dz;
-            GPUrefocus(z, thresh, 1, frame);
+            GPUrefocus(z, thresh, 1, active_frame_);
         } else if( (key & 255)==81 ) {
             z -= dz;
-            GPUrefocus(z, thresh, 1, frame);
+            GPUrefocus(z, thresh, 1, active_frame_);
         } else if( (key & 255)==82 ) {
             if (thresh<255) { 
                 thresh += dthresh; 
-                GPUrefocus(z, thresh, 1, frame); 
+                GPUrefocus(z, thresh, 1, active_frame_); 
             }
         } else if( (key & 255)==84 ) {
             if (thresh>0) { 
                 thresh -= dthresh; 
-                GPUrefocus(z, thresh, 1, frame); 
+                GPUrefocus(z, thresh, 1, active_frame_); 
+            }
+        } else if( (key & 255)==46 ) {
+            if (active_frame_<array_all.size()) { 
+                active_frame_++; 
+                GPUrefocus(z, thresh, 1, active_frame_); 
+            }
+        } else if( (key & 255)==44 ) {
+            if (active_frame_<array_all.size()) { 
+                active_frame_--; 
+                GPUrefocus(z, thresh, 1, active_frame_); 
             }
         } else if( (key & 255)==27 ) {
             break;
@@ -172,12 +182,19 @@ void saRefocus::uploadToGPU() {
 
 void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
+    z *= warp_factor_;
+
     Scalar fact = Scalar(1/double(array_all[frame].size()));
 
     Mat H, trans;
     T_from_P(P_mats_[0], H, z, scale_, img_size_);
     gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
-    gpu::multiply(temp, fact, temp2);
+
+    if (mult_) {
+        gpu::pow(temp, mult_exp_, temp2);
+    } else {
+        gpu::multiply(temp, fact, temp2);
+    }
 
     refocused = temp2.clone();
 
@@ -186,8 +203,14 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
         T_from_P(P_mats_[i], H, z, scale_, img_size_);
         
         gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
-        gpu::multiply(temp, fact, temp2);
-        gpu::add(refocused, temp2, refocused);        
+
+        if (mult_) {
+            gpu::pow(temp, mult_exp_, temp2);
+            gpu::multiply(refocused, temp2, refocused);
+        } else {
+            gpu::multiply(temp, fact, temp2);
+            gpu::add(refocused, temp2, refocused);        
+        }
 
     }
     
@@ -199,7 +222,7 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
     if (live) {
         refocused_host_ /= 255.0;
         char title[50];
-        sprintf(title, "z = %f, thresh = %f", z, thresh);
+        sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
         //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));

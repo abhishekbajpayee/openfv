@@ -61,6 +61,7 @@ void multiCamCalibration::run() {
         initialize_cams();
         write_BA_data();
         run_BA();
+        calc_space_warp_factor();
         write_calib_results();
     }
 
@@ -352,7 +353,41 @@ void multiCamCalibration::run_BA() {
 
 }
 
-//TODO: FIX WRITING SO THAT CAN BE READ LATER
+void multiCamCalibration::calc_space_warp_factor() {
+
+    double* world_points = ba_problem_.mutable_points();
+
+    double total_dist = 0;
+    double dist_prev;
+    int ind1, ind2;
+
+    int count=0;
+    for (int i=0; i<num_imgs_; i++) {
+        for (int j=0; j<grid_size_.height-1; j++) {
+            for (int k=0; k<grid_size_.width-1; k++) {
+
+                ind1 = (i*grid_size_.width*grid_size_.height)+(j*grid_size_.width)+k;
+                
+                ind2 = ind1+1;
+                dist_prev = total_dist;
+                total_dist += sqrt( pow(world_points[3*ind2]-world_points[3*ind1],2)+pow(world_points[3*ind2+1]-world_points[3*ind1+1],2)+pow(world_points[3*ind2+2]-world_points[3*ind1+2],2) );
+                //cout<<total_dist-dist_prev<<endl;
+                
+                ind2 = ind1+grid_size_.width;
+                dist_prev = total_dist;
+                total_dist += sqrt( pow(world_points[3*ind2]-world_points[3*ind1],2)+pow(world_points[3*ind2+1]-world_points[3*ind1+1],2)+pow(world_points[3*ind2+2]-world_points[3*ind1+2],2) );
+                //cout<<total_dist-dist_prev<<endl;
+                
+                count += 2;
+
+            }
+        }
+    }
+
+    warp_factor_ = (total_dist/count)/grid_size_phys_;
+
+}
+
 void multiCamCalibration::write_calib_results() {
 
     char choice;
@@ -464,7 +499,7 @@ void multiCamCalibration::write_calib_results() {
 
         }
         
-        file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_;
+        file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_<<"\t"<<warp_factor_;
 
         file.close();
 
@@ -562,6 +597,7 @@ void multiCamCalibration::load_calib_results() {
     file>>refocusing_params_.img_size.width;
     file>>refocusing_params_.img_size.height;
     file>>refocusing_params_.scale;
+    file>>refocusing_params_.warp_factor;
 
     file.close();
 

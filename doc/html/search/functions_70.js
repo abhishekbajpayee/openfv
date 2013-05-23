@@ -4,5 +4,8 @@ var searchData=
   ['pinholereprojectionerror',['pinholeReprojectionError',['../d7/d5b/structpinholeReprojectionError.html#a2b39d76ebedd7164b5d37899f695d33b',1,'pinholeReprojectionError']]],
   ['pinholereprojectionerror2',['pinholeReprojectionError2',['../d7/d56/structpinholeReprojectionError2.html#ae493e3f3b52f9d7ead17ad02d9e7f978',1,'pinholeReprojectionError2']]],
   ['planeerror',['planeError',['../d5/d5f/structplaneError.html#a541059147fca58f0ae5a5f8250fa9c2e',1,'planeError']]],
-  ['point_5findex',['point_index',['../d0/d13/classbaProblem.html#a0dfa9d310b92564faee6c5a98a555f17',1,'baProblem']]]
+  ['plocalize',['pLocalize',['../dc/d52/classpLocalize.html#a8128f9e9d96089c828c07e9ab8421aef',1,'pLocalize']]],
+  ['point_5findex',['point_index',['../d0/d13/classbaProblem.html#a0dfa9d310b92564faee6c5a98a555f17',1,'baProblem']]],
+  ['ptracking',['pTracking',['../da/d74/classpTracking.html#a4d237c35903de72b1a66f71a264ff833',1,'pTracking']]],
+  ['pyvisualize',['PyVisualize',['../d9/d65/classPyVisualize.html#a642b1f0c54f5f4aabb934f5a9a4d6d6e',1,'PyVisualize']]]
 ];

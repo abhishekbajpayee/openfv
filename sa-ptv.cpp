@@ -17,19 +17,21 @@ int main(int argc, char** argv) {
     Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
 
-    double wall_timer;
-    wall_timer = omp_get_wtime();
+    //double wall_timer;
+    //wall_timer = omp_get_wtime();
 
     multiCamCalibration calibration(calib_path, grid_size, grid_size_phys);
     calibration.run();
-    //calibration.write_calib_results_matlab();
+    calibration.write_calib_results_matlab();
 
-    int frame = -1;
-    string refoc_path("../../experiment/vortex_ring/");
-    saRefocus refocus(calibration.refocusing_params(), frame);
-    //refocus.read_imgs(refoc_path);
+    int frame = 0;
+    int mult = 1;
+    double mult_exp = 1.0/9.0;
+    string refoc_path("../../experiment/calibration_full/");
+    saRefocus refocus(calibration.refocusing_params(), frame, mult, mult_exp);
+    refocus.read_imgs(refoc_path);
     
-    int live = 0;
+    int live = 1;
     if (live) {
         refocus.GPUliveView(); 
     } else {
@@ -54,11 +56,11 @@ int main(int argc, char** argv) {
         
         pTracking tracker(refocus);
         tracker.read_points(particle_file);
-        tracker.track();
+        tracker.track_all();
 
     }
 
-    cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;
+    //cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;
     
     return 1;
 
