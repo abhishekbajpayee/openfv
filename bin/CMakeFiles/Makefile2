@@ -50,13 +50,48 @@ CMAKE_SOURCE_DIR = /home/ab9/projects/sa-ptv
 CMAKE_BINARY_DIR = /home/ab9/projects/sa-ptv/bin
 
 #=============================================================================
+# Target rules for target CMakeFiles/refocus.dir
+
+# All Build rule for target.
+CMakeFiles/refocus.dir/all: lib/CMakeFiles/lib.dir/all
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/depend
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/bin/CMakeFiles  8
+	@echo "Built target refocus"
+.PHONY : CMakeFiles/refocus.dir/all
+
+# Include target in all.
+all: CMakeFiles/refocus.dir/all
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/refocus.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ab9/projects/sa-ptv/bin/CMakeFiles 8
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/refocus.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ab9/projects/sa-ptv/bin/CMakeFiles 0
+.PHONY : CMakeFiles/refocus.dir/rule
+
+# Convenience name for target.
+refocus: CMakeFiles/refocus.dir/rule
+.PHONY : refocus
+
+# clean rule for target.
+CMakeFiles/refocus.dir/clean:
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/clean
+.PHONY : CMakeFiles/refocus.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/refocus.dir/clean
+.PHONY : clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/sa-ptv.dir
 
 # All Build rule for target.
 CMakeFiles/sa-ptv.dir/all: lib/CMakeFiles/lib.dir/all
 	$(MAKE) -f CMakeFiles/sa-ptv.dir/build.make CMakeFiles/sa-ptv.dir/depend
 	$(MAKE) -f CMakeFiles/sa-ptv.dir/build.make CMakeFiles/sa-ptv.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/bin/CMakeFiles  8
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/bin/CMakeFiles  9
 	@echo "Built target sa-ptv"
 .PHONY : CMakeFiles/sa-ptv.dir/all
 

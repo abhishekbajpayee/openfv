@@ -79,6 +79,36 @@ void pLocalize::find_particles_3d(int frame) {
 
 }
 
+void pLocalize::save_refocus(int frame) {
+
+    cout<<"\nRefocusing images "<<frame<<"...\n";
+    string save_path("../../experiment/refocused/imgs/");
+
+    int counter=1;
+    for (float i=zmin_; i<=zmax_; i += dz_) {
+        
+        cout<<"z = "<<i<<"...";
+
+        refocus_.GPUrefocus(i, thresh_, 0, frame);
+        Mat image = refocus_.result;
+
+        char filename[15];
+        sprintf(filename, "z%di_%f.jpg", counter, i);
+        string filename_s(filename);
+
+        string fp = save_path+filename_s;
+        
+        cout<<"writing "<<filename<<endl;
+        imwrite(fp.c_str(), image);
+
+        counter++;
+
+    }
+
+    cout<<"Done!";
+
+}
+
 void pLocalize::z_resolution() {
     
     double zref = 5.0;

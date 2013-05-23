@@ -37,6 +37,7 @@ class pLocalize {
     void find_particles_all_frames();
     void find_particles_3d(int frame);
     
+    void save_refocus(int frame);
     void z_resolution();
     void crop_focus();
 

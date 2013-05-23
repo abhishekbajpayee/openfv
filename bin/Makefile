@@ -96,6 +96,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named refocus
+
+# Build rule for target.
+refocus: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 refocus
+.PHONY : refocus
+
+# fast build rule for target.
+refocus/fast:
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/build
+.PHONY : refocus/fast
+
+#=============================================================================
 # Target rules for targets named sa-ptv
 
 # Build rule for target.
@@ -120,6 +133,30 @@ lib: cmake_check_build_system
 lib/fast:
 	$(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/build
 .PHONY : lib/fast
+
+refocus.o: refocus.cpp.o
+.PHONY : refocus.o
+
+# target to build an object file
+refocus.cpp.o:
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/refocus.cpp.o
+.PHONY : refocus.cpp.o
+
+refocus.i: refocus.cpp.i
+.PHONY : refocus.i
+
+# target to preprocess a source file
+refocus.cpp.i:
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/refocus.cpp.i
+.PHONY : refocus.cpp.i
+
+refocus.s: refocus.cpp.s
+.PHONY : refocus.s
+
+# target to generate assembly for a file
+refocus.cpp.s:
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/refocus.cpp.s
+.PHONY : refocus.cpp.s
 
 sa-ptv.o: sa-ptv.cpp.o
 .PHONY : sa-ptv.o
@@ -153,8 +190,12 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... refocus"
 	@echo "... sa-ptv"
 	@echo "... lib"
+	@echo "... refocus.o"
+	@echo "... refocus.i"
+	@echo "... refocus.s"
 	@echo "... sa-ptv.o"
 	@echo "... sa-ptv.i"
 	@echo "... sa-ptv.s"
