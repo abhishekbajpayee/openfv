@@ -76,12 +76,12 @@ void pTracking::track_all() {
     vector<Point2i> matches;
     vector< vector<Point2i> > all_matches;
 
-    vis.figure();
+    vis.figure3d();
 
     for (int i=0; i<all_points_.size()-1; i++) {
         matches = track_frame(i, i+1);
         all_matches.push_back(matches);
-        //vis.figure();
+        //vis.figure3d();
         for (int j=0; j<matches.size(); j++) {
             if (matches[j].y >= 0) vis.line3d(all_points_[i][matches[j].x], all_points_[i+1][matches[j].y]);
         }

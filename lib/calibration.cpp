@@ -353,6 +353,8 @@ void multiCamCalibration::run_BA() {
 
 }
 
+// TODO: CHANGE THE CODE SO THAT THIS FUNCTION IS NOT NEEDED AND THE PHYSICAL
+//       GRID SIZE IS TAKEN INTO ACCOUNT DURING BUNDLE ADJUSTMENT
 void multiCamCalibration::calc_space_warp_factor() {
 
     double* world_points = ba_problem_.mutable_points();
@@ -385,6 +387,7 @@ void multiCamCalibration::calc_space_warp_factor() {
     }
 
     warp_factor_ = (total_dist/count)/grid_size_phys_;
+    refocusing_params_.warp_factor = warp_factor_;
 
 }
 

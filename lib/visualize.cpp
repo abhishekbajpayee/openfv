@@ -16,24 +16,32 @@
 using namespace cv;
 using namespace std;
 
-void PyVisualize::line3d(Point3f p1, Point3f p2) {
+// ACTUAL PLOTTING FUNCTIONS
 
-    if (hold_==0) {
-        //PyRun_SimpleString("ax = fig.add_subplot(111, projection='3d')");
-    }
+void PyVisualize::plot(vector<double> x, vector<double> y, string args) {
     
+    string sx, sy;
+    string_from_vdouble(x, sx);
+    string_from_vdouble(y, sy);
+
+    string call("pl.plot(");
+    call += sx + "," + sy + ",'" + args + "')";
+
+    PyRun_SimpleString(call.c_str());
+
+}
+
+void PyVisualize::line3d(Point3f p1, Point3f p2) {
+    
+    vector<Point3f> points;
+    points.push_back(p1);
+    points.push_back(p2);
+    vector<string> strs;
+    
+    string_from_vPoint3f(points, strs);
+
     string call("ax.plot(");
-
-    stringstream sx,sy,sz;
-
-    sx<<"["<<p1.x<<","<<p2.x<<"]";
-    sy<<"["<<p1.y<<","<<p2.y<<"]";
-    sz<<"["<<p1.z<<","<<p2.z<<"]";
-
-    call += sx.str() + "," + sy.str() + "," + sz.str();
-    //call += ",s=" + size;
-    //call += ",c='" + color + "')";
-    call += ")";
+    call += strs[0] + "," + strs[1] + "," + strs[2] + ")";
 
     PyRun_SimpleString(call.c_str());
 
@@ -41,11 +49,38 @@ void PyVisualize::line3d(Point3f p1, Point3f p2) {
 
 void PyVisualize::scatter3d(vector<Point3f> points, vector<int> indices, string size, string color) {
 
-    if (hold_==0) {
-        //PyRun_SimpleString("ax = fig.add_subplot(111, projection='3d')");
-    }
+    vector<string> strs;
+    string_from_vPoint3f(points, indices, strs);
 
     string call("ax.scatter(");
+    call += strs[0] + "," + strs[1] + "," + strs[2];
+    call += ",s=" + size;
+    call += ",c='" + color + "')";
+
+    PyRun_SimpleString(call.c_str());
+
+}
+
+// STRING CONSTRUCTION FUNCTIONS
+
+void PyVisualize::string_from_vdouble(vector<double> p, string &str) {
+
+    stringstream sp;
+
+    sp<<"["<<p[0];
+
+    for (int i=1; i<p.size(); i++) {
+        sp<<","<<p[i];
+    }
+
+    sp<<"]";
+
+    str = sp.str();
+
+}
+    
+
+void PyVisualize::string_from_vPoint3f(vector<Point3f> points, vector<int> indices, vector<string> &strs) {
 
     stringstream sx,sy,sz;
 
@@ -63,15 +98,71 @@ void PyVisualize::scatter3d(vector<Point3f> points, vector<int> indices, string 
     sy<<"]";
     sz<<"]";
 
-    call += sx.str() + "," + sy.str() + "," + sz.str();
-    call += ",s=" + size;
-    call += ",c='" + color + "')";
+    strs.push_back(sx.str());
+    strs.push_back(sy.str());
+    strs.push_back(sz.str());
 
+}
+
+void PyVisualize::string_from_vPoint3f(vector<Point3f> points, vector<string> &strs) {
+
+    stringstream sx,sy,sz;
+
+    sx<<"["<<points[0].x;
+    sy<<"["<<points[0].y;
+    sz<<"["<<points[0].z;
+
+    for (int i=1; i<points.size(); i++) {
+        sx<<","<<points[i].x;
+        sy<<","<<points[i].y;
+        sz<<","<<points[i].z;
+    }
+
+    sx<<"]";
+    sy<<"]";
+    sz<<"]";
+
+    strs.push_back(sx.str());
+    strs.push_back(sy.str());
+    strs.push_back(sz.str());
+
+}
+
+// PLOTTING TOOLS
+
+void PyVisualize::xlabel(string label) {
+
+    string call("pl.xlabel('");
+    call += label + "')";
     PyRun_SimpleString(call.c_str());
 
 }
 
-void PyVisualize::figure() {
+void PyVisualize::ylabel(string label) {
+
+    string call("pl.ylabel('");
+    call += label + "')";
+    PyRun_SimpleString(call.c_str());
+
+}
+
+void PyVisualize::zlabel(string label) {
+
+    string call("pl.zlabel('");
+    call += label + "')";
+    PyRun_SimpleString(call.c_str());
+
+}
+
+void PyVisualize::title(string label) {
+
+    string call("pl.title('");
+    call += label + "')";
+    PyRun_SimpleString(call.c_str());
+
+}
+
+void PyVisualize::figure3d() {
 
     PyRun_SimpleString("fig = pl.figure()");
     PyRun_SimpleString("ax = fig.add_subplot(111, projection='3d')");

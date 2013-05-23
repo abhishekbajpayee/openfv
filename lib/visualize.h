@@ -33,9 +33,19 @@ class PyVisualize {
         figure_ = 0;
     }
 
+    void plot(vector<double> x, vector<double> y, string args);
     void line3d(Point3f p1, Point3f p2);
     void scatter3d(vector<Point3f> points, vector<int> indices, string size, string color);
-    void figure();
+    
+    void string_from_vdouble(vector<double> p, string &str);
+    void string_from_vPoint3f(vector<Point3f> points, vector<int> indices, vector<string> &strs);
+    void string_from_vPoint3f(vector<Point3f> points, vector<string> &strs);
+
+    void xlabel(string label);
+    void ylabel(string label);
+    void zlabel(string label);
+    void title(string label);
+    void figure3d();
     void hold(int value);
     void clear();
     void show();

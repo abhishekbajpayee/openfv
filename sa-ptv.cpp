@@ -22,20 +22,20 @@ int main(int argc, char** argv) {
 
     multiCamCalibration calibration(calib_path, grid_size, grid_size_phys);
     calibration.run();
-    calibration.write_calib_results_matlab();
+    //calibration.write_calib_results_matlab();
 
     int frame = 0;
     int mult = 1;
     double mult_exp = 1.0/9.0;
     string refoc_path("../../experiment/calibration_full/");
     saRefocus refocus(calibration.refocusing_params(), frame, mult, mult_exp);
-    refocus.read_imgs(refoc_path);
+    //refocus.read_imgs(refoc_path);
     
-    int live = 1;
+    int live = 0;
     if (live) {
         refocus.GPUliveView(); 
     } else {
-        //refocus.initializeGPU();
+        refocus.initializeGPU();
         
         int window = 2;
         int cluster_size = 10;
@@ -45,20 +45,21 @@ int main(int argc, char** argv) {
         double thresh = 90.0; //100.0
         pLocalize localizer(window, zmin, zmax, dz, thresh, cluster_size, refocus);
 
-        //localizer.z_resolution();
+        localizer.z_resolution();
         //localizer.crop_focus();
         
         //localizer.run();
         //localizer.find_particles_all_frames();
 
-        string particle_file("../temp/vortex_particles.txt");
-        //localizer.write_all_particles_to_file(particle_file);
+        //localizer.write_all_particles_to_file(particle_file);        
         
-        pTracking tracker(refocus);
-        tracker.read_points(particle_file);
-        tracker.track_all();
 
     }
+
+    string particle_file("../temp/vortex_particles.txt");
+    pTracking tracker(refocus);
+    tracker.read_points(particle_file);
+    tracker.track_all();
 
     //cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;
     

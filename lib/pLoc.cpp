@@ -13,6 +13,7 @@
 #include "refocusing.h"
 #include "typedefs.h"
 #include "pLoc.h"
+#include "visualize.h"
 
 using namespace std;
 using namespace cv;
@@ -80,15 +81,19 @@ void pLocalize::find_particles_3d(int frame) {
 
 void pLocalize::z_resolution() {
     
-    ofstream file;
-    file.open("../matlab/zres.txt");
-
     double zref = 5.0;
+    double dz = 0.01;
+    double bounds = 1.0;
 
     refocus_.GPUrefocus(zref, thresh_, 0, 0);
     Mat base = refocus_.result.clone();
 
-    for (float i=zref-5.0; i<=zref+5.0; i += 0.05) {
+    vector<double> x;
+    vector<double> y;
+
+    PyVisualize vis;
+
+    for (float i=zref-bounds; i<=zref+bounds; i += dz) {
         
         refocus_.GPUrefocus(i, thresh_, 0, 0);
         Mat ref = refocus_.result.clone();
@@ -107,12 +112,13 @@ void pLocalize::z_resolution() {
         
         double cx = num/sqrt(den1*den2);
 
-        cout<<i<<endl;
-        file<<i<<"\t"<<cx<<endl;
+        x.push_back(i);
+        y.push_back(cx);
         
     }
     
-    file.close();
+    vis.plot(x,y,"b");
+    vis.show();
 
 }
 
