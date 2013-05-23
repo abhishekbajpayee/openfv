@@ -574,7 +574,9 @@ lib/CMakeFiles/lib.dir/pLoc.cpp.o: ../lib/optimization.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: ../lib/pLoc.cpp
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: ../lib/pLoc.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: ../lib/refocusing.h
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: ../lib/tools.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: ../lib/typedefs.h
+lib/CMakeFiles/lib.dir/pLoc.cpp.o: ../lib/visualize.h
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/Eigen/Cholesky
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/Eigen/Core
 lib/CMakeFiles/lib.dir/pLoc.cpp.o: /usr/local/include/Eigen/Dense

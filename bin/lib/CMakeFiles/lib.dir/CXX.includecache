@@ -44,14 +44,6 @@ ceres/rotation.h
 python2.7/Python.h
 -
 
-/home/ab9/projects/sa-ptv/lib/calibration.cpp
-calibration.h
-/home/ab9/projects/sa-ptv/lib/calibration.h
-optimization.h
-/home/ab9/projects/sa-ptv/lib/optimization.h
-tools.h
-/home/ab9/projects/sa-ptv/lib/tools.h
-
 /home/ab9/projects/sa-ptv/lib/calibration.h
 std_include.h
 /home/ab9/projects/sa-ptv/lib/std_include.h
@@ -73,6 +65,8 @@ typedefs.h
 /home/ab9/projects/sa-ptv/lib/typedefs.h
 pLoc.h
 /home/ab9/projects/sa-ptv/lib/pLoc.h
+visualize.h
+/home/ab9/projects/sa-ptv/lib/visualize.h
 
 /home/ab9/projects/sa-ptv/lib/pLoc.h
 std_include.h
