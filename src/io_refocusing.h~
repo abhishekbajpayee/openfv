@@ -1,6 +1,0 @@
-#include "stdinclude.h"
-
-using namespace cv;
-using namespace std;
-
-vector<Mat> read_P_mats(int num_cams, string filename);

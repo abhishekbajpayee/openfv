@@ -1,4 +1,18 @@
+# data output files in python and matlab folder
 python/data_files/
 matlab/data_files/
-bin/*.*
-temp/*.txt
+
+bin/*
+temp/*
+
+# emacs temp files
+*~
+
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
