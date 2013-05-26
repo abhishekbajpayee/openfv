@@ -1,5 +1,5 @@
 FILE(REMOVE_RECURSE
-  "CMakeFiles/refocus.dir/refocus.cpp.o"
+  "CMakeFiles/refocus.dir/src/refocus.cpp.o"
   "refocus.pdb"
   "refocus"
 )

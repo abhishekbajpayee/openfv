@@ -1,5 +1,5 @@
 FILE(REMOVE_RECURSE
-  "CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o"
+  "CMakeFiles/sa-ptv.dir/src/sa-ptv.cpp.o"
   "sa-ptv.pdb"
   "sa-ptv"
 )

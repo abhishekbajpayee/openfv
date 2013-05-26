@@ -12,7 +12,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/lib")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 
 # subdirectories
-add_subdirectory (lib)
+add_subdirectory (src)
 
 find_package(OpenMP)
 if (OPENMP_FOUND)
@@ -20,8 +20,8 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-add_executable (sa-ptv sa-ptv.cpp)
-add_executable (refocus refocus.cpp)
+add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/sa-ptv.cpp)
+add_executable (refocus ${PROJECT_SOURCE_DIR}/src/refocus.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp)
 

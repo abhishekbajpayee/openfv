@@ -11,7 +11,7 @@ SET(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/CMakeCCompiler.cmake"
   "CMakeFiles/CMakeCXXCompiler.cmake"
   "CMakeFiles/CMakeSystem.cmake"
-  "../lib/CMakeLists.txt"
+  "../src/CMakeLists.txt"
   "/usr/local/share/OpenCV/OpenCVConfig-version.cmake"
   "/usr/local/share/OpenCV/OpenCVConfig.cmake"
   "/usr/share/cmake-2.8/Modules/CMakeCInformation.cmake"
@@ -44,12 +44,12 @@ SET(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 SET(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
-  "lib/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "src/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 SET(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/refocus.dir/DependInfo.cmake"
   "CMakeFiles/sa-ptv.dir/DependInfo.cmake"
-  "lib/CMakeFiles/lib.dir/DependInfo.cmake"
+  "src/CMakeFiles/lib.dir/DependInfo.cmake"
   )

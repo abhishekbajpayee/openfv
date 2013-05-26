@@ -46,37 +46,37 @@ include CMakeFiles/refocus.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/refocus.dir/flags.make
 
-CMakeFiles/refocus.dir/refocus.cpp.o: CMakeFiles/refocus.dir/flags.make
-CMakeFiles/refocus.dir/refocus.cpp.o: ../refocus.cpp
+CMakeFiles/refocus.dir/src/refocus.cpp.o: CMakeFiles/refocus.dir/flags.make
+CMakeFiles/refocus.dir/src/refocus.cpp.o: ../src/refocus.cpp
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/ab9/projects/sa-ptv/bin/CMakeFiles $(CMAKE_PROGRESS_1)
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/refocus.dir/refocus.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/refocus.dir/refocus.cpp.o -c /home/ab9/projects/sa-ptv/refocus.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/refocus.dir/src/refocus.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/refocus.dir/src/refocus.cpp.o -c /home/ab9/projects/sa-ptv/src/refocus.cpp
 
-CMakeFiles/refocus.dir/refocus.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/refocus.dir/refocus.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ab9/projects/sa-ptv/refocus.cpp > CMakeFiles/refocus.dir/refocus.cpp.i
+CMakeFiles/refocus.dir/src/refocus.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/refocus.dir/src/refocus.cpp.i"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/ab9/projects/sa-ptv/src/refocus.cpp > CMakeFiles/refocus.dir/src/refocus.cpp.i
 
-CMakeFiles/refocus.dir/refocus.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/refocus.dir/refocus.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ab9/projects/sa-ptv/refocus.cpp -o CMakeFiles/refocus.dir/refocus.cpp.s
+CMakeFiles/refocus.dir/src/refocus.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/refocus.dir/src/refocus.cpp.s"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/ab9/projects/sa-ptv/src/refocus.cpp -o CMakeFiles/refocus.dir/src/refocus.cpp.s
 
-CMakeFiles/refocus.dir/refocus.cpp.o.requires:
-.PHONY : CMakeFiles/refocus.dir/refocus.cpp.o.requires
+CMakeFiles/refocus.dir/src/refocus.cpp.o.requires:
+.PHONY : CMakeFiles/refocus.dir/src/refocus.cpp.o.requires
 
-CMakeFiles/refocus.dir/refocus.cpp.o.provides: CMakeFiles/refocus.dir/refocus.cpp.o.requires
-	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/refocus.cpp.o.provides.build
-.PHONY : CMakeFiles/refocus.dir/refocus.cpp.o.provides
+CMakeFiles/refocus.dir/src/refocus.cpp.o.provides: CMakeFiles/refocus.dir/src/refocus.cpp.o.requires
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/src/refocus.cpp.o.provides.build
+.PHONY : CMakeFiles/refocus.dir/src/refocus.cpp.o.provides
 
-CMakeFiles/refocus.dir/refocus.cpp.o.provides.build: CMakeFiles/refocus.dir/refocus.cpp.o
+CMakeFiles/refocus.dir/src/refocus.cpp.o.provides.build: CMakeFiles/refocus.dir/src/refocus.cpp.o
 
 # Object files for target refocus
 refocus_OBJECTS = \
-"CMakeFiles/refocus.dir/refocus.cpp.o"
+"CMakeFiles/refocus.dir/src/refocus.cpp.o"
 
 # External object files for target refocus
 refocus_EXTERNAL_OBJECTS =
 
-refocus: CMakeFiles/refocus.dir/refocus.cpp.o
+refocus: CMakeFiles/refocus.dir/src/refocus.cpp.o
 refocus: /usr/local/lib/libopencv_calib3d.so
 refocus: /usr/local/lib/libopencv_contrib.so
 refocus: /usr/local/lib/libopencv_core.so
@@ -94,7 +94,7 @@ refocus: /usr/local/lib/libopencv_stitching.so
 refocus: /usr/local/lib/libopencv_ts.so
 refocus: /usr/local/lib/libopencv_video.so
 refocus: /usr/local/lib/libopencv_videostab.so
-refocus: lib/liblib.a
+refocus: src/liblib.a
 refocus: /usr/local/lib/libopencv_calib3d.so
 refocus: /usr/local/lib/libopencv_contrib.so
 refocus: /usr/local/lib/libopencv_core.so
@@ -121,7 +121,7 @@ refocus: CMakeFiles/refocus.dir/link.txt
 CMakeFiles/refocus.dir/build: refocus
 .PHONY : CMakeFiles/refocus.dir/build
 
-CMakeFiles/refocus.dir/requires: CMakeFiles/refocus.dir/refocus.cpp.o.requires
+CMakeFiles/refocus.dir/requires: CMakeFiles/refocus.dir/src/refocus.cpp.o.requires
 .PHONY : CMakeFiles/refocus.dir/requires
 
 CMakeFiles/refocus.dir/clean:

@@ -131,56 +131,56 @@ lib: cmake_check_build_system
 
 # fast build rule for target.
 lib/fast:
-	$(MAKE) -f lib/CMakeFiles/lib.dir/build.make lib/CMakeFiles/lib.dir/build
+	$(MAKE) -f src/CMakeFiles/lib.dir/build.make src/CMakeFiles/lib.dir/build
 .PHONY : lib/fast
 
-refocus.o: refocus.cpp.o
-.PHONY : refocus.o
+src/refocus.o: src/refocus.cpp.o
+.PHONY : src/refocus.o
 
 # target to build an object file
-refocus.cpp.o:
-	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/refocus.cpp.o
-.PHONY : refocus.cpp.o
+src/refocus.cpp.o:
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/src/refocus.cpp.o
+.PHONY : src/refocus.cpp.o
 
-refocus.i: refocus.cpp.i
-.PHONY : refocus.i
+src/refocus.i: src/refocus.cpp.i
+.PHONY : src/refocus.i
 
 # target to preprocess a source file
-refocus.cpp.i:
-	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/refocus.cpp.i
-.PHONY : refocus.cpp.i
+src/refocus.cpp.i:
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/src/refocus.cpp.i
+.PHONY : src/refocus.cpp.i
 
-refocus.s: refocus.cpp.s
-.PHONY : refocus.s
+src/refocus.s: src/refocus.cpp.s
+.PHONY : src/refocus.s
 
 # target to generate assembly for a file
-refocus.cpp.s:
-	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/refocus.cpp.s
-.PHONY : refocus.cpp.s
+src/refocus.cpp.s:
+	$(MAKE) -f CMakeFiles/refocus.dir/build.make CMakeFiles/refocus.dir/src/refocus.cpp.s
+.PHONY : src/refocus.cpp.s
 
-sa-ptv.o: sa-ptv.cpp.o
-.PHONY : sa-ptv.o
+src/sa-ptv.o: src/sa-ptv.cpp.o
+.PHONY : src/sa-ptv.o
 
 # target to build an object file
-sa-ptv.cpp.o:
-	$(MAKE) -f CMakeFiles/sa-ptv.dir/build.make CMakeFiles/sa-ptv.dir/sa-ptv.cpp.o
-.PHONY : sa-ptv.cpp.o
+src/sa-ptv.cpp.o:
+	$(MAKE) -f CMakeFiles/sa-ptv.dir/build.make CMakeFiles/sa-ptv.dir/src/sa-ptv.cpp.o
+.PHONY : src/sa-ptv.cpp.o
 
-sa-ptv.i: sa-ptv.cpp.i
-.PHONY : sa-ptv.i
+src/sa-ptv.i: src/sa-ptv.cpp.i
+.PHONY : src/sa-ptv.i
 
 # target to preprocess a source file
-sa-ptv.cpp.i:
-	$(MAKE) -f CMakeFiles/sa-ptv.dir/build.make CMakeFiles/sa-ptv.dir/sa-ptv.cpp.i
-.PHONY : sa-ptv.cpp.i
+src/sa-ptv.cpp.i:
+	$(MAKE) -f CMakeFiles/sa-ptv.dir/build.make CMakeFiles/sa-ptv.dir/src/sa-ptv.cpp.i
+.PHONY : src/sa-ptv.cpp.i
 
-sa-ptv.s: sa-ptv.cpp.s
-.PHONY : sa-ptv.s
+src/sa-ptv.s: src/sa-ptv.cpp.s
+.PHONY : src/sa-ptv.s
 
 # target to generate assembly for a file
-sa-ptv.cpp.s:
-	$(MAKE) -f CMakeFiles/sa-ptv.dir/build.make CMakeFiles/sa-ptv.dir/sa-ptv.cpp.s
-.PHONY : sa-ptv.cpp.s
+src/sa-ptv.cpp.s:
+	$(MAKE) -f CMakeFiles/sa-ptv.dir/build.make CMakeFiles/sa-ptv.dir/src/sa-ptv.cpp.s
+.PHONY : src/sa-ptv.cpp.s
 
 # Help Target
 help:
@@ -193,12 +193,12 @@ help:
 	@echo "... refocus"
 	@echo "... sa-ptv"
 	@echo "... lib"
-	@echo "... refocus.o"
-	@echo "... refocus.i"
-	@echo "... refocus.s"
-	@echo "... sa-ptv.o"
-	@echo "... sa-ptv.i"
-	@echo "... sa-ptv.s"
+	@echo "... src/refocus.o"
+	@echo "... src/refocus.i"
+	@echo "... src/refocus.s"
+	@echo "... src/sa-ptv.o"
+	@echo "... src/sa-ptv.i"
+	@echo "... src/sa-ptv.s"
 .PHONY : help
 
 

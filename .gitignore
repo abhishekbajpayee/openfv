@@ -1,0 +1,4 @@
+python/data_files/
+matlab/data_files/
+bin/
+temp/*.txt
