@@ -1,3 +1,0 @@
-/home/ab9/projects/sa-ptv/bin/src/CMakeFiles/lib.dir
-/home/ab9/projects/sa-ptv/bin/CMakeFiles/refocus.dir
-/home/ab9/projects/sa-ptv/bin/CMakeFiles/sa-ptv.dir
