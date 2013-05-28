@@ -20,14 +20,14 @@ int main(int argc, char** argv) {
     //double wall_timer;
     //wall_timer = omp_get_wtime();
 
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys);
+    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0);
     calibration.run();
     //calibration.write_calib_results_matlab();
 
     int frame = 0;
     int mult = 1;
     double mult_exp = 1.0/9.0;
-    string refoc_path("../../experiment/piv_sims_small/piv_sim_500/");
+    string refoc_path("../../experiment/particle_single/");
     saRefocus refocus(calibration.refocusing_params(), frame, mult, mult_exp);
     refocus.read_imgs(refoc_path);
     

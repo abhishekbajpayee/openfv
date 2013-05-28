@@ -16,7 +16,7 @@ using namespace cv;
 using namespace std;
 
 // Pinhole bundle adjustment function
-double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size) {
+double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<int> const_points) {
 
     cout<<"\nRUNNING BUNDLE ADJUSTMENT TO CALIBRATE CAMERAS...\n";
     //google::InitGoogleLogging(argv);
@@ -48,9 +48,11 @@ double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size) {
                                  ba_problem.mutable_point_for_observation(i),
                                  ba_problem.mutable_plane_for_observation(i));
 
-        if (ba_problem.point_index()[i]==120 || ba_problem.point_index()[i]==125 || ba_problem.point_index()[i]==144) {
-            cout<<"setting point "<<ba_problem.point_index()[i]<<" constant\n";
-            problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
+        for (int j=0; j<const_points.size(); j++) {
+            if (ba_problem.point_index()[i]==const_points[j]) {
+                cout<<"Setting point "<<ba_problem.point_index()[i]<<" constant"<<endl;
+                problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
+            }
         }
 
     }

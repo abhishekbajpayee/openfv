@@ -598,16 +598,12 @@ planeError(double x, double y, double z)
 
 // FUNCTION DEFINITIONS
 
-double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size);
+double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<int> const_points);
 
 double BA_pinhole2(baProblem &ba_problem, string ba_file, Size img_size, char* argv);
 
 double BA_align(alignProblem &align_problem, string align_file);
 
 double fit_plane(leastSquares &ls_problem, string filename, vector<Mat> points);
-
-double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, char* argv);
-
-double fit_plane(leastSquares &ls_problem, string filename, char* argv, vector<Mat> points);
 
 #endif

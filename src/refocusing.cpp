@@ -224,8 +224,8 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
         char title[50];
         sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
-        //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
+        line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
+        line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
 

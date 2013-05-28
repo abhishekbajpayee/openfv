@@ -198,9 +198,9 @@ void pLocalize::z_resolution() {
 
 void pLocalize::crop_focus() {
 
-    string imgpath("../cropped/thresh_150/");
+    string imgpath("../../cropped/mult/");
 
-    for (float i=-2.0; i<=2.0; i += 0.1) {
+    for (float i=-2.0; i<=2.0; i += 0.5) {
 
         refocus_.GPUrefocus(i, thresh_, 0, 0);
         Mat img = refocus_.result.clone();

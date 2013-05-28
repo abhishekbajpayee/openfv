@@ -23,8 +23,8 @@ class multiCamCalibration {
         //
     }
 
- multiCamCalibration(string path, Size grid_size, double grid_size_phys):
-    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys) {}
+ multiCamCalibration(string path, Size grid_size, double grid_size_phys, int dummy_mode):
+    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode) {}
     
     // Functions to access calibration data
     int num_cams() { return num_cams_; }
@@ -64,6 +64,7 @@ class multiCamCalibration {
     int num_cams_;
     int num_imgs_;
     int center_cam_id_;
+    int origin_image_id_;
     
     Size grid_size_;
     Size img_size_;
@@ -86,6 +87,8 @@ class multiCamCalibration {
     vector<Mat> tVecs_;
     vector<Mat> K_mats_;
     vector<Mat> dist_mats_;
+    
+    vector<int> const_points_;
 
     refocusing_data refocusing_params_;
 
@@ -101,6 +104,7 @@ class multiCamCalibration {
     int run_calib_flag;
     int results_just_saved_flag;
     int load_results_flag;
+    int dummy_mode_;
     
 };
     

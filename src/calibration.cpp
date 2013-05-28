@@ -43,8 +43,6 @@ void multiCamCalibration::initialize() {
     }
     if (!result_dir_found) run_calib_flag = 1;
 
-    center_cam_id_ = 4; // TODO
-
     show_corners_flag = 0;
     results_just_saved_flag = 0;
 
@@ -102,6 +100,15 @@ void multiCamCalibration::read_cam_names() {
     
     for (int i=0; i<cam_names_.size(); i++) cout<<"Camera "<<i+1<<": "<<cam_names_[i]<<endl;
 
+    if (dummy_mode_) {
+        int id;
+        cout<<"Enter the center camera number: ";
+        cin>>id;
+        center_cam_id_ = id-1;
+    } else {
+        center_cam_id_ = 4;
+    }
+
     num_cams_ = cam_names_.size();
     refocusing_params_.num_cams = num_cams_;
 
@@ -143,12 +150,27 @@ void multiCamCalibration::read_calib_imgs() {
         }
         
         sort(img_names.begin(), img_names.end());
-        for (int i=0; i<img_names.size(); i++) {
-            cout<<img_names[i]<<endl;
-            image = imread(img_names[i], 0);
+        for (int j=0; j<img_names.size(); j++) {
+            if (i==0) {
+                cout<<endl<<j<<": "<<img_names[j];
+            }
+            image = imread(img_names[j], 0);
             calib_imgs_sub.push_back(image);
         }
         img_names.clear();
+
+        if (dummy_mode_) {
+            if (i==0) {
+                int id;
+                cout<<endl<<"Enter the image with grid to be used to define origin: ";
+                cin>>id;
+                origin_image_id_ = id;
+            }
+        } else {
+            if (i==0) {
+                origin_image_id_ = 5;
+            }
+        }
 
         calib_imgs_.push_back(calib_imgs_sub);
         path_tmp = "";
@@ -218,6 +240,7 @@ void multiCamCalibration::find_corners() {
 
 }
 
+// TODO: NOT GENERAL. THIS INITIALIZES CAMERAS SO THAT THEY ARE CORRECT FOR BLENDER.
 void multiCamCalibration::initialize_cams() {
 
     vector<Point3f> pattern_points;
@@ -301,16 +324,23 @@ void multiCamCalibration::write_BA_data() {
     double height = 50;
     // add back projected point guesses here
     double z = 0;
+    int op1 = (origin_image_id_)*grid_size_.width*grid_size_.height;
+    int op2 = op1+grid_size_.width-1;
+    int op3 = op1+(grid_size_.width*(grid_size_.height-1));
+    const_points_.push_back(op1);
+    const_points_.push_back(op2);
+    const_points_.push_back(op3);
+    
     for (int i=0; i<num_points; i++) {
-        if (i==120) {
+        if (i==op1) {
             file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
             file<<double(-grid_size_.height*grid_size_phys_*0.5)<<"\t";
             file<<z<<"\t"<<endl;
-        } else if (i==125) {
+        } else if (i==op2) {
             file<<double(grid_size_.width*grid_size_phys_*0.5)<<"\t";
             file<<double(-grid_size_.height*grid_size_phys_*0.5)<<"\t";
             file<<z<<"\t"<<endl;
-        } else if (i==144) {
+        } else if (i==op3) {
             file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
             file<<double(grid_size_.height*grid_size_phys_*0.5)<<"\t";
             file<<z<<"\t"<<endl;
@@ -347,7 +377,7 @@ void multiCamCalibration::write_BA_data() {
 
 void multiCamCalibration::run_BA() {
 
-    total_reproj_error_ = BA_pinhole(ba_problem_, ba_file_, img_size_);
+    total_reproj_error_ = BA_pinhole(ba_problem_, ba_file_, img_size_, const_points_);
     avg_reproj_error_ = total_reproj_error_/double(ba_problem_.num_observations());
     cout<<"FINAL TOTAL REPROJECTION ERROR: "<<total_reproj_error_<<endl;
 

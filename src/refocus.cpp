@@ -44,7 +44,8 @@ int main(int argc, char** argv) {
     Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
 
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys);
+    int dummy_mode = 1;
+    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, dummy_mode);
     calibration.run();
     //calibration.write_calib_results_matlab();
 
