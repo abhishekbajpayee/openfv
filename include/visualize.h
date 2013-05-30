@@ -34,6 +34,7 @@ class PyVisualize {
     }
 
     void plot(vector<double> x, vector<double> y, string args);
+    void plot3d(vector<Point3f> points, string args);
     void line3d(Point3f p1, Point3f p2);
     void scatter3d(vector<Point3f> points, vector<int> indices, string size, string color);
     

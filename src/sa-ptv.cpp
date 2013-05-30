@@ -27,41 +27,35 @@ int main(int argc, char** argv) {
     int frame = 0;
     int mult = 1;
     double mult_exp = 1.0/9.0;
-    string refoc_path("../../experiment/particle_single/");
+    string refoc_path(argv[1]);
+    //string refoc_path("../../experiment/binary_cylinder/");
     saRefocus refocus(calibration.refocusing_params(), frame, mult, mult_exp);
     refocus.read_imgs(refoc_path);
     
-    int live = 0;
+    int live = 1;
     if (live) {
-        refocus.GPUliveView(); 
+        refocus.GPUliveView();
     } else {
         refocus.initializeGPU();
         
         int window = 2;
         int cluster_size = 10;
-        double zmin = -20.0; //-20
-        double zmax = 20.0; //40
+        double zmin = -30.0; //-20
+        double zmax = 30.0; //40
         double dz = 0.1;
         double thresh = 90.0; //100.0
         pLocalize localizer(window, zmin, zmax, dz, thresh, cluster_size, refocus);
 
         //localizer.z_resolution();
-        localizer.crop_focus();
+        //localizer.crop_focus();
         
         //localizer.run();
+        //localizer.write_particles_to_file("../matlab/data_files/particle_sim/particles_grid_mult.txt");
         //localizer.find_particles_all_frames();
 
         //localizer.write_all_particles_to_file(particle_file);        
         
 
-    }
-
-    int track = 0;
-    if (track) {
-        string particle_file("../temp/vortex_particles.txt");
-        pTracking tracker(refocus);
-        tracker.read_points(particle_file);
-        tracker.track_all();
     }
 
     //cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;

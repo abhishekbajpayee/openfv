@@ -49,6 +49,7 @@ class pLocalize {
     void refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out);
 
     void write_all_particles_to_file(string path);
+    void write_particles_to_file(string path);
     void draw_points(Mat image, Mat &drawn, vector<Point2f> points);
     void draw_point(Mat image, Mat &drawn, Point2f point);
 

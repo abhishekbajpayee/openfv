@@ -10,7 +10,7 @@
 // -------------------------------------------------------
 
 #include "std_include.h"
-#include "refocusing.h"
+//#include "refocusing.h"
 #include "tracking.h"
 #include "typedefs.h"
 #include "visualize.h"
@@ -19,13 +19,13 @@
 using namespace std;
 using namespace cv;
 
-void pTracking::read_points(string path) {
+void pTracking::read_points() {
     
     Point3f point;
     volume vol;
 
     ifstream file;
-    file.open(path.c_str());
+    file.open(path_.c_str());
 
     cout<<"\nReading points to track...";
     
@@ -76,21 +76,71 @@ void pTracking::track_all() {
     vector<Point2i> matches;
     vector< vector<Point2i> > all_matches;
 
-    vis.figure3d();
+    //vis.figure3d();
 
     for (int i=0; i<all_points_.size()-1; i++) {
+    //for (int i=0; i<2; i++) {
         matches = track_frame(i, i+1);
         all_matches.push_back(matches);
+        cout<<matches.size()<<endl;
         //vis.figure3d();
+        /*
         for (int j=0; j<matches.size(); j++) {
-            if (matches[j].y >= 0) vis.line3d(all_points_[i][matches[j].x], all_points_[i+1][matches[j].y]);
+            if (matches[j].y >= 0) {
+                if (j%5==0) {
+                    vis.line3d(all_points_[i][matches[j].x], all_points_[i+1][matches[j].y]);
+                }
+            }
         }
+        */
         //vis.show();
         //vis.clear();
         matches.clear();
     }
 
-    vis.show();
+    vector<int> path;
+    vector< vector<int> > all_paths;
+    for (int i=0; i<all_points_[0].size(); i++) {
+        
+        path.push_back(i);
+        
+        int j=0;
+        int p1=i;
+        while(j < all_matches.size()) {
+            if (all_matches[j][p1].y > -1) {
+                path.push_back(all_matches[j][p1].y);
+                p1 = all_matches[j][p1].y;
+                j++;
+            } else {
+                break;
+            }
+        }
+
+        if (path.size()==all_points_.size()) {
+            all_paths.push_back(path);
+            //cout<<path.size()<<endl;
+        }
+
+        path.clear();
+
+    }
+    cout<<"full: "<<all_paths.size()<<endl;
+    /*
+    for (int i=0; i<all_paths.size(); i++) {
+        if (i%3==0) {
+        vector<Point3f> points;
+        for (int j=0; j<all_paths[i].size(); j++) {
+            points.push_back(all_points_[j][all_paths[i][j]]);
+        }
+        vis.plot3d(points, "k");
+        points.clear();
+        }
+    }
+    */
+    //vis.xlabel("x [mm]");
+    //vis.ylabel("y [mm]");
+    //vis.zlabel("z [mm]");
+    //vis.show();
 
 }
 

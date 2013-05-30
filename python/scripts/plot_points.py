@@ -47,6 +47,20 @@ plt.ylim((0.4,1.05))
 plt.xlabel('Normalized depth [ ]')
 plt.ylabel('Normalized Intensity [ ]')
 '''
+line = np.array([0,1000])
 
+x = np.array([100,250,500,750,1000])
+t50 = np.array([116,354,962,1561,3431])
+t90 = np.array([100,248,499,748,998])
+t150 = np.array([0,8,15,23,72])
 
+mult = np.array([100,248,497,310,987])
+
+plt.plot(line,line,'-', x,t50,'--s', x,t90,'--s', x,t150,'--s', x,mult,'--s', markersize=5)
+
+plt.ylim((0,1000))
+plt.xlim((0,1000))
+plt.xlabel('Number of particles seeded')
+plt.ylabel('Number of particles detected')
+plt.legend(('Actual Number','Additive (T=50)','Additive (T=90)','Additive (T=150)','Multiplicative'),loc=0)
 plt.show()

@@ -31,6 +31,18 @@ void PyVisualize::plot(vector<double> x, vector<double> y, string args) {
 
 }
 
+void PyVisualize::plot3d(vector<Point3f> points, string args) {
+    
+    vector<string> strs;
+    string_from_vPoint3f(points, strs);
+
+    string call("pl.plot(");
+    call += strs[0] + "," + strs[1] + "," + strs[2] + ",'" + args + "')";
+
+    PyRun_SimpleString(call.c_str());
+
+}
+
 void PyVisualize::line3d(Point3f p1, Point3f p2) {
     
     vector<Point3f> points;
@@ -41,7 +53,7 @@ void PyVisualize::line3d(Point3f p1, Point3f p2) {
     string_from_vPoint3f(points, strs);
 
     string call("ax.plot(");
-    call += strs[0] + "," + strs[1] + "," + strs[2] + ")";
+    call += strs[0] + "," + strs[1] + "," + strs[2] + ",'k',linewidth=0.5)";
 
     PyRun_SimpleString(call.c_str());
 

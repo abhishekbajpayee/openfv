@@ -22,8 +22,6 @@ void pLocalize::run() {
     
     int frame = 0;
     find_particles_3d(frame);
-    find_clusters();
-    collapse_clusters();
 
 }   
 
@@ -440,6 +438,22 @@ void pLocalize::write_all_particles_to_file(string path) {
             file<<particles_all_[i][j].y<<endl;
             file<<particles_all_[i][j].z<<endl;
         }
+    }
+
+    file.close();
+
+}
+
+void pLocalize::write_particles_to_file(string path) {
+
+    ofstream file;
+    file.open(path.c_str());
+
+    for (int i=0; i<particles_.size(); i++) {
+        file<<particles_[i].x<<"\t";
+        file<<particles_[i].y<<"\t";
+        file<<particles_[i].z<<endl;
+        cout<<i<<endl;
     }
 
     file.close();

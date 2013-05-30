@@ -22,11 +22,16 @@ endif()
 
 add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/sa-ptv.cpp)
 add_executable (refocus ${PROJECT_SOURCE_DIR}/src/refocus.cpp)
+add_executable (track ${PROJECT_SOURCE_DIR}/src/track.cpp)
+add_executable (liveRefocus ${PROJECT_SOURCE_DIR}/src/liveRefocus.cpp)
+add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/calibrate.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp)
 
 set (PYTHON_LIB python2.7)
 
 target_link_libraries (sa-ptv ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
-
 target_link_libraries (refocus ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
+target_link_libraries (track ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
+target_link_libraries (liveRefocus ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
+target_link_libraries (calibrate ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})

@@ -26,9 +26,9 @@ class pTracking {
 
     }
 
- pTracking(saRefocus refocus): refocus_(refocus) {}
+ pTracking(string particle_file): path_(particle_file) {}
 
-    void read_points(string path);
+    void read_points();
 
     void track_all();
 
@@ -44,11 +44,13 @@ class pTracking {
     vector< vector<int> > neighbor_set(int frame1, int frame2, double r);
     vector<int> points_in_region(int frame, Point3f center, double r);
 
+    string path_;
+
     vector<Point3f> points_;
     vector< vector<Point3f> > all_points_;
     vector<volume> vols_;
 
-    saRefocus refocus_;
+    //saRefocus refocus_;
 
 };
 
