@@ -121,6 +121,52 @@ void saRefocus::GPUliveView() {
 
 }
 
+void saRefocus::CPUliveView() {
+
+    active_frame_ = 0;
+
+    namedWindow("Result", CV_WINDOW_AUTOSIZE);       
+    CPUrefocus(z, thresh, 1, active_frame_);
+    
+    double dz = 0.5;
+    double dthresh = 5;
+
+    while( 1 ){
+        int key = cvWaitKey(10);
+        //cout<<(key & 255)<<endl;
+        if( (key & 255)==83 ) {
+            z += dz;
+            CPUrefocus(z, thresh, 1, active_frame_);
+        } else if( (key & 255)==81 ) {
+            z -= dz;
+            CPUrefocus(z, thresh, 1, active_frame_);
+        } else if( (key & 255)==82 ) {
+            if (thresh<255) { 
+                thresh += dthresh; 
+                CPUrefocus(z, thresh, 1, active_frame_); 
+            }
+        } else if( (key & 255)==84 ) {
+            if (thresh>0) { 
+                thresh -= dthresh; 
+                CPUrefocus(z, thresh, 1, active_frame_); 
+            }
+        } else if( (key & 255)==46 ) {
+            if (active_frame_<array_all.size()) { 
+                active_frame_++; 
+                CPUrefocus(z, thresh, 1, active_frame_); 
+            }
+        } else if( (key & 255)==44 ) {
+            if (active_frame_<array_all.size()) { 
+                active_frame_--; 
+                CPUrefocus(z, thresh, 1, active_frame_); 
+            }
+        } else if( (key & 255)==27 ) {
+            break;
+        }
+    }
+
+}
+
 // TODO: This function prints free memory on GPU and then
 //       calls uploadToGPU() which uploads either a given
 //       frame or all frames to GPU depending on frame_
@@ -217,6 +263,58 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
     gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
 
     Mat refocused_host_(refocused);
+    //refocused_host_ /= 255.0;
+
+    if (live) {
+        refocused_host_ /= 255.0;
+        char title[50];
+        sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
+        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
+        line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
+        line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
+        imshow("Result", refocused_host_);
+    }
+
+    refocused_host_.convertTo(result, CV_8U);
+
+}
+
+void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
+
+    z *= warp_factor_;
+
+    Scalar fact = Scalar(1/double(imgs.size()));
+
+    Mat H, trans;
+    T_from_P(P_mats_[0], H, z, scale_, img_size_);
+    warpPerspective(imgs[0][frame], cputemp, H, img_size_);
+
+    if (mult_) {
+        pow(cputemp, mult_exp_, cputemp2);
+    } else {
+        multiply(cputemp, fact, cputemp2);
+    }
+
+    cpurefocused = cputemp2.clone();
+
+    for (int i=1; i<num_cams_; i++) {
+        
+        T_from_P(P_mats_[i], H, z, scale_, img_size_);
+        
+        warpPerspective(imgs[i][frame], cputemp, H, img_size_);
+
+        if (mult_) {
+            pow(cputemp, mult_exp_, cputemp2);
+            multiply(cpurefocused, cputemp2, cpurefocused);
+        } else {
+            multiply(cputemp, fact, cputemp2);
+            add(cpurefocused, cputemp2, cpurefocused);        
+        }
+    }
+    
+    threshold(cpurefocused, cpurefocused, thresh, 0, THRESH_TOZERO);
+
+    Mat refocused_host_(cpurefocused);
     //refocused_host_ /= 255.0;
 
     if (live) {

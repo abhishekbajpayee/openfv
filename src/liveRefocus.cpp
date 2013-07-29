@@ -14,9 +14,9 @@ int main(int argc, char** argv) {
 
     // Camera Calibration Section
     
-    if (argc != 5) {
+    if (argc != 6) {
         cout<<endl<<"Invalid number of arguments!"<<endl;
-        cout<<"Usage: liveRefocus [calibration path] [refocusing path] [frame to upload (-1 for all)] [mult/add flag (0 for add)]"<<endl<<endl;
+        cout<<"Usage: liveRefocus [calibration path] [refocusing path] [frame to upload (-1 for all)] [mult/add flag (0 for add)] [use CPU or GPU (1 for GPU)]"<<endl<<endl;
         return 0;
     }
 
@@ -33,13 +33,22 @@ int main(int argc, char** argv) {
     stringstream smult(argv[4]);
     int mult;
     smult>>mult;
+    
+    stringstream smethod(argv[5]);
+    int method;
+    smethod>>method;
 
     double mult_exp = 1.0/9.0;
 
     string refoc_path(argv[2]);
     saRefocus refocus(calibration.refocusing_params(), frame, mult, mult_exp);
     refocus.read_imgs(refoc_path);
-    refocus.GPUliveView();
+
+    if (method) {
+        refocus.GPUliveView();
+    } else {
+        refocus.CPUliveView();
+    }
 
     cout<<"DONE!"<<endl;
 

@@ -40,9 +40,11 @@ class saRefocus {
     void read_imgs(string path);
 
     void GPUliveView();
+    void CPUliveView();
     void initializeGPU();
     void uploadToGPU();
     void GPUrefocus(double z, double thresh, int live, int frame);
+    void CPUrefocus(double z, double thresh, int live, int frame);
 
     Mat result;
 
@@ -67,6 +69,9 @@ class saRefocus {
 
     // Vector of vectors that stores images from all cameras and for all time steps
     vector< vector<Mat> > imgs;
+    Mat cputemp;
+    Mat cputemp2;
+    Mat cpurefocused;
 
     vector<gpu::GpuMat> array;
     vector< vector<gpu::GpuMat> > array_all;
