@@ -5,14 +5,14 @@ import numpy.linalg as la
 
 # all units in mm
 
-p = np.array([0,0,10.0])
-c = np.array([-5.0,5.0,-5.0])
+p = np.array([0,0,5.0])
+c = np.array([5.0,5.0,-10.0])
 
 t = 5 # assume glass of t thickness lies at z = 0 depth t in positive z direction
 
 n1 = 1.00 # air
 n2 = 1.50 # glass
-n3 = 1.00 # water
+n3 = 1.33 # water
 
 # initial guess for ray of intersection using a straight line
 
@@ -21,7 +21,7 @@ pc = p-c
 n = (p-c)/d
 
 b = np.array([ c[0] + pc[0]*-c[2]/pc[2], c[1] + pc[1]*-c[2]/pc[2], 0 ])
-a = np.array([ c[0] + pc[0]*(t-c[2])/pc[2], c[1] + pc[1]*(t-c[2])/pc[2], -t ]) 
+a = np.array([ c[0] + pc[0]*(-t-c[2])/pc[2], c[1] + pc[1]*(-t-c[2])/pc[2], -t ]) 
 print(a)
 
 fig = plt.figure()
