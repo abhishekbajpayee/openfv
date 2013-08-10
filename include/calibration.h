@@ -23,8 +23,8 @@ class multiCamCalibration {
         //
     }
 
- multiCamCalibration(string path, Size grid_size, double grid_size_phys, int dummy_mode):
-    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode) {}
+ multiCamCalibration(string path, Size grid_size, double grid_size_phys, int dummy_mode, int refractive):
+    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive) {}
     
     // Functions to access calibration data
     int num_cams() { return num_cams_; }
@@ -44,9 +44,12 @@ class multiCamCalibration {
     void initialize_cams();
 
     void write_BA_data();
+    void write_BA_data_ref();
     void run_BA();
+    void run_BA_ref();
 
     void write_calib_results();
+    void write_calib_results_ref();
     void load_calib_results();
 
     void write_calib_results_matlab();
@@ -93,6 +96,7 @@ class multiCamCalibration {
     refocusing_data refocusing_params_;
 
     baProblem ba_problem_;
+    baProblem_ref ba_problem_ref_;
     double total_reproj_error_;
     double avg_reproj_error_;
 
@@ -105,6 +109,7 @@ class multiCamCalibration {
     int results_just_saved_flag;
     int load_results_flag;
     int dummy_mode_;
+    int refractive_;
     
 };
     

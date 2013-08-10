@@ -58,6 +58,7 @@ void saRefocus::read_imgs(string path) {
             //cout<<i<<": "<<img_names[i]<<endl;
             image = imread(img_names[i], 0);
             image.convertTo(fimage, CV_32F);
+            //image.convertTo(fimage, CV_8U);
             refocusing_imgs_sub.push_back(fimage.clone());
         }
         img_names.clear();
@@ -211,6 +212,7 @@ void saRefocus::uploadToGPU() {
         for (int i=0; i<imgs[0].size(); i++) {
             for (int j=0; j<num_cams_; j++) {
                 temp.upload(imgs[j][i]);
+                //gpu::Canny(temp, temp2, 100, 200);
                 array.push_back(temp.clone());
             }
             array_all.push_back(array);

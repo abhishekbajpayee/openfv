@@ -20,7 +20,11 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+# prototyping executables
 add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/sa-ptv.cpp)
+add_executable (testing ${PROJECT_SOURCE_DIR}/src/testing.cpp)
+
+# release files
 add_executable (refocus ${PROJECT_SOURCE_DIR}/src/refocus.cpp)
 add_executable (track ${PROJECT_SOURCE_DIR}/src/track.cpp)
 add_executable (liveRefocus ${PROJECT_SOURCE_DIR}/src/liveRefocus.cpp)
@@ -31,6 +35,7 @@ set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp)
 set (PYTHON_LIB python2.7)
 
 target_link_libraries (sa-ptv ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
+target_link_libraries (testing ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
 target_link_libraries (refocus ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
 target_link_libraries (track ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
 target_link_libraries (liveRefocus ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})

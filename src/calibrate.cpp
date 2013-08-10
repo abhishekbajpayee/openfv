@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     ps>>grid_size_phys;
 
     // Uses dummy mode
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 1);
+    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 1, 0);
     calibration.run();
 
     cout<<"DONE!"<<endl;

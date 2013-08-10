@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     string calib_path(argv[1]); // Folder where calibration images lie
     Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0);
+    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, 0);
     calibration.run();
 
     stringstream sframe(argv[3]);
