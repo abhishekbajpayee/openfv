@@ -53,6 +53,7 @@ class multiCamCalibration {
     void load_calib_results();
 
     void write_calib_results_matlab();
+    void write_calib_results_matlab_ref();
 
  private:
 

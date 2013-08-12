@@ -666,6 +666,7 @@ void multiCamCalibration::write_calib_results() {
 
 }
 
+// TODO: Convert P mats to ones that can be used for refractive reprojection
 void multiCamCalibration::write_calib_results_ref() {
 
     char choice;
@@ -908,6 +909,94 @@ void multiCamCalibration::write_calib_results_matlab() {
 
     int num_planes = ba_problem_.num_planes();
     double* plane_params = ba_problem_.mutable_planes();
+
+    for (int i=0; i<num_points; i++) {
+        for (int j=0; j<3; j++) {
+            file<<world_points[(i*3)+j]<<"\t";
+        }
+        file<<endl;
+    }
+
+    for (int i=0; i<num_planes; i++) {
+        for (int j=0; j<4; j++) {
+            file2<<plane_params[(i*4)+j]<<"\t";
+        }
+        file2<<endl;
+    }
+
+    for (int i=0; i<num_cameras; i++) {
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<4; k++) {
+                file3<<refocusing_params_.P_mats[i].at<double>(j,k)<<"\t";
+            }
+            file3<<endl;
+        }
+    }
+
+    Mat_<double> rvec = Mat_<double>::zeros(1,3);
+    Mat_<double> tvec = Mat_<double>::zeros(3,1);
+    for (int i=0; i<num_cameras; i++) {
+        
+        file5<<camera_params[(i*9)+6]<<endl;
+
+        for (int j=0; j<3; j++) {
+            rvec.at<double>(0,j) = camera_params[(i*9)+j];
+            tvec.at<double>(j,0) = camera_params[(i*9)+j+3];
+        }
+        
+        Mat R;
+        Rodrigues(rvec, R);
+
+        Mat_<double> translation = Mat_<double>::zeros(1,3);
+        translation = -R*tvec;
+        for (int j=0; j<3; j++) {
+            file1<<translation(j,0)<<"\t";
+        }
+        file1<<endl;
+        
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<3; k++) {
+                file4<<R.at<double>(j,k)<<"\t";
+            }
+            file4<<tvec.at<double>(j,0)<<endl;
+        }
+
+    }
+
+    file.close();
+    file1.close();
+    file2.close();
+    file3.close();
+    file4.close();
+    file5.close();
+
+}
+
+// Write BA results to files so Matlab can read them and plot world points and
+// camera locations for refractive calibration
+void multiCamCalibration::write_calib_results_matlab_ref() {
+
+    ofstream file, file1, file2, file3, file4, file5;
+    file.open("../matlab/world_points.txt");
+    file1.open("../matlab/camera_points.txt");
+    file2.open("../matlab/plane_params.txt");
+    file3.open("../matlab/P_mats.txt");
+    file4.open("../matlab/Rt.txt");
+    file5.open("../matlab/f.txt");
+
+    int* cameras = ba_problem_ref_.camera_index();
+    int* points = ba_problem_ref_.point_index();
+    int num_observations = ba_problem_ref_.num_observations();
+    const double* observations = ba_problem_ref_.observations();
+
+    int num_cameras = ba_problem_ref_.num_cameras();
+    double* camera_params = ba_problem_ref_.mutable_cameras();
+
+    int num_points = ba_problem_ref_.num_points();
+    double* world_points = ba_problem_ref_.mutable_points();
+
+    int num_planes = ba_problem_ref_.num_planes();
+    double* plane_params = ba_problem_ref_.mutable_planes();
 
     for (int i=0; i<num_points; i++) {
         for (int j=0; j<3; j++) {

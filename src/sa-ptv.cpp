@@ -12,17 +12,22 @@ using namespace std;
 int main(int argc, char** argv) {
 
     // Camera Calibration Section
-    //string calib_path(argv[1]);
-    string calib_path("../../calibrations/real_refractive/"); // Folder where calibration images lie
-    Size grid_size = Size(5,5); // Format (horizontal_corners, vertical_corners)
+    string calib_path(argv[1]);
+    //string calib_path("../../calibrations/refractive/"); // Folder where calibration images lie
+    Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
 
     //double wall_timer;
     //wall_timer = omp_get_wtime();
 
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, 1);
+    stringstream sref(argv[2]);
+    int ref;
+    sref>>ref; // 1 for refractive
+
+    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, ref);
     calibration.run();
-    //calibration.write_calib_results_matlab();
+    calibration.write_calib_results_matlab_ref();
+    
     /*
     int frame = 0;
     int mult = 1;
@@ -60,6 +65,7 @@ int main(int argc, char** argv) {
 
     //cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;
     */
+
     return 1;
 
 }

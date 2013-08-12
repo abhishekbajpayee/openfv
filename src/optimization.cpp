@@ -48,12 +48,14 @@ double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<i
                                  ba_problem.mutable_point_for_observation(i),
                                  ba_problem.mutable_plane_for_observation(i));
 
+        /*
         for (int j=0; j<const_points.size(); j++) {
             if (ba_problem.point_index()[i]==const_points[j]) {
                 cout<<"Setting point "<<ba_problem.point_index()[i]<<" constant"<<endl;
                 problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
             }
         }
+        */
 
     }
     
@@ -134,7 +136,7 @@ double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, v
     ceres::Solver::Options options;
     options.linear_solver_type = ceres::DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
-    options.max_num_iterations = 50;
+    options.max_num_iterations = 100;
     
     int threads = omp_get_num_procs();
     options.num_threads = threads;
