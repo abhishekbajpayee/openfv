@@ -5,6 +5,7 @@
 #include "pLoc.h"
 #include "tracking.h"
 #include "tools.h"
+#include "optimization.h"
 
 using namespace cv;
 using namespace std;
@@ -13,20 +14,26 @@ int main(int argc, char** argv) {
 
     // Camera Calibration Section
     string calib_path(argv[1]);
-    //string calib_path("../../calibrations/refractive/"); // Folder where calibration images lie
-    Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
+    Size grid_size = Size(5,9); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
-
-    //double wall_timer;
-    //wall_timer = omp_get_wtime();
 
     stringstream sref(argv[2]);
     int ref;
     sref>>ref; // 1 for refractive
 
     multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, ref);
+    calibration.read_calib_imgs_avi();
+    /*
     calibration.run();
-    calibration.write_calib_results_matlab_ref();
+    if (ref) {
+        calibration.write_calib_results_matlab_ref();
+    } else {
+        calibration.write_calib_results_matlab();
+    }
+    /*
+    vector<int> const_pts;
+    baProblem_ref ba_problem;
+    BA_refractive(ba_problem, "../temp/ba_data.txt", Size(1292,964), const_pts);
     
     /*
     int frame = 0;

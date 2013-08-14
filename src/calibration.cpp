@@ -126,6 +126,77 @@ void multiCamCalibration::read_cam_names() {
 
 }
 
+void multiCamCalibration::read_calib_imgs_avi() {
+
+    DIR *dir;
+    struct dirent *ent;
+
+    string dir1(".");
+    string dir2("..");
+    string temp_name;
+
+    vector<string> img_names;
+
+    dir = opendir(path_.c_str());
+    while(ent = readdir(dir)) {
+        temp_name = ent->d_name;
+        if (temp_name.compare(dir1)) {
+            if (temp_name.compare(dir2)) {
+                if (temp_name.compare(temp_name.size()-3,3,"avi") == 0) {
+                    string path_img = path_+temp_name;
+                    img_names.push_back(path_img);
+                }
+            }
+        }
+    }
+
+    //grid_view(img_names);
+
+    vector<VideoCapture> caps;
+    for (int i=0; i<img_names.size(); i++) {
+        VideoCapture cap(img_names[i]);
+        caps.push_back(cap);
+    }
+
+    cout<<"Counting frames in sequence...";
+    VideoCapture temp(img_names[0]);
+    Mat grid;
+    int frames=0;
+    while (temp.read(grid)) {
+        frames++;
+        //imshow("frame", grid);
+        //if (waitKey(30)>=0) break;
+        //cout<<frames<<endl;
+    }
+    cout<<"done!"<<endl;
+
+    cout<<"Reading images..."<<endl;
+    for (int i=0; i<img_names.size(); i++) {
+        
+        vector<Mat> calib_imgs_sub;
+
+        cout<<"SEQUENCE "<<i+1<<"...";
+        for (int j=0; j<frames; j++) {
+            Mat image;
+            if (j>50 && j%10==0) {
+                caps[i]>>image;
+                calib_imgs_sub.push_back(image);
+            }
+        }
+        calib_imgs_.push_back(calib_imgs_sub);
+        cout<<"done! --- "<<calib_imgs_sub.size()<<endl;
+
+    }
+
+    num_cams_ = img_names.size();
+    num_imgs_ = calib_imgs_[0].size();
+    img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
+
+    show_corners_flag=1;
+    find_corners();
+
+}
+
 void multiCamCalibration::read_calib_imgs() {
 
     DIR *dir;
@@ -219,8 +290,8 @@ void multiCamCalibration::find_corners() {
             bool found = findChessboardCorners(scene, grid_size_, points, CV_CALIB_CB_ADAPTIVE_THRESH);
             
             if (found) {
-                //cvtColor(scene, scene_gray, CV_RGB2GRAY);
-                cornerSubPix(scene, points, Size(20, 20), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+                cvtColor(scene, scene_gray, CV_RGB2GRAY);
+                cornerSubPix(scene_gray, points, Size(20, 20), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
                 corner_points.push_back(points);
                 
                 if (show_corners_flag) {
@@ -1062,6 +1133,42 @@ void multiCamCalibration::write_calib_results_matlab_ref() {
     file3.close();
     file4.close();
     file5.close();
+
+}
+
+void multiCamCalibration::grid_view(vector<string> img_names) {
+
+    vector<VideoCapture> caps;
+    for (int i=0; i<img_names.size(); i++) {
+        VideoCapture cap(img_names[i]);
+        caps.push_back(cap);
+    }
+
+    VideoCapture temp(img_names[0]);
+    Mat grid;
+    int frames=0;
+    while (temp.read(grid)) {
+        frames++;
+    }
+
+    for (int k=0; k<frames; k++) {
+
+        for (int i=0; i<3; i++) {
+            for (int j=0; j<3; j++) {
+                Mat img;
+                caps[i*3+j]>>img;
+                Mat small;
+                resize(img, small, Size(img.cols/3,img.rows/3));
+                small.copyTo(grid.colRange(i*grid.cols/3,i*grid.cols/3+grid.cols/3).rowRange(j*grid.rows/3,j*grid.rows/3+grid.rows/3));
+            }
+        }
+        
+        imshow("frame", grid);
+        if(waitKey(30) >= 0) break;
+
+        cout<<k<<endl;
+
+    }
 
 }
 

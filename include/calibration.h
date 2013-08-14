@@ -37,6 +37,8 @@ class multiCamCalibration {
     void initialize();
     void run();
     
+    void read_calib_imgs_avi();
+
     void read_cam_names();
     void read_calib_imgs();
 
@@ -54,6 +56,8 @@ class multiCamCalibration {
 
     void write_calib_results_matlab();
     void write_calib_results_matlab_ref();
+
+    void grid_view(vector<string> img_names);
 
  private:
 
