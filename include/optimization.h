@@ -170,6 +170,30 @@ pinholeReprojectionError(double observed_x, double observed_y, double cx, double
     
 };
 
+// Grid physical size constraint
+struct gridPhysSizeError {
+    gridPhysSizeError(double grid_phys_size, int gridx, int gridy)
+    : grid_phys_size(grid_phys_size), gridx(gridx), gridy(gridy) {}
+    template <typename T>
+    bool operator()(const T* const p1,
+                    const T* const p2,
+                    const T* const p3,
+                    T* residuals) const {
+        
+        residuals[0] = sqrt(pow(p1[0]-p2[0],2) + pow(p1[1]-p2[1],2) + pow(p1[2]-p2[2],2)) 
+            - T((gridx-1)*grid_phys_size);
+        residuals[0] += sqrt(pow(p1[0]-p3[0],2) + pow(p1[1]-p3[1],2) + pow(p1[2]-p3[2],2)) 
+            - T((gridy-1)*grid_phys_size);
+        
+        return true;
+    }
+    
+    double grid_phys_size;
+    int gridx;
+    int gridy;
+    
+};
+
 // Read a refractive Bundle Adjustment dataset
 class baProblem_ref {
  
@@ -292,7 +316,7 @@ class refractiveReprojectionError {
  public:
 
  refractiveReprojectionError(double observed_x, double observed_y, double cx, double cy, int num_cams, double t, double n1, double n2, double n3)
-     : observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams), t_(t), n1_(n1), n2_(n2), n3_(n3) {}
+     : observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams), t_(t), n1_(n1), n2_(n2), n3_(n3) { }
     
     template <typename T>
         bool operator()(const T* const camera,
@@ -311,7 +335,6 @@ class refractiveReprojectionError {
                 c[i] += -R[i*1 + j*3]*camera[j+3];
             }
         }
-        //cout<<"c: ("<<c[0]<<", "<<c[1]<<", "<<c[2]<<")\n";
 
         // All the refraction stuff
         T* a = new T[3];
@@ -319,9 +342,6 @@ class refractiveReprojectionError {
         a[0] = c[0] + (point[0]-c[0])*(T(-t_)-c[2])/(point[2]-c[2]);
         a[1] = c[1] + (point[1]-c[1])*(T(-t_)-c[2])/(point[2]-c[2]);
         a[2] = T(-t_);
-        //cout<<"t "<<t_<<endl;
-        //cout<<"n1 "<<n1_<<endl;
-        //cout<<"a: ("<<a[0]<<", "<<a[1]<<", "<<a[2]<<")\n";
         b[0] = c[0] + (point[0]-c[0])*(-c[2])/(point[2]-c[2]);
         b[1] = c[1] + (point[1]-c[1])*(-c[2])/(point[2]-c[2]);
         b[2] = T(0);
@@ -334,7 +354,7 @@ class refractiveReprojectionError {
         T rb = sqrt( pow(b[0]-c[0],2) + pow(b[1]-c[1],2) );
         T da = a[2]-c[2];
         T db = b[2]-a[2];
-
+        
         T f, g, dfdra, dfdrb, dgdra, dgdrb;
         
         // Newton Raphson loop to solve for Snell's law
@@ -361,17 +381,14 @@ class refractiveReprojectionError {
 
             ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
             rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
-            //cout<<"val: "<<ra<<endl;
 
         }
         
         a[0] = ra*cos(phi) + c[0];
         a[1] = ra*sin(phi) + c[1];
-        //cout<<"a: ("<<a[0]<<", "<<a[1]<<", "<<a[2]<<")\n";
         
         // Continuing projecting point a to camera
         T p[3];
-        //ceres::AngleAxisRotatePoint(camera, point, p);
         ceres::AngleAxisRotatePoint(camera, a, p);
 
         // camera[3,4,5] are the translation.
@@ -413,6 +430,10 @@ class refractiveReprojectionError {
     
 };
 
+
+
+// Not used stuff
+/*
 class leastSquares {
  public:
     ~leastSquares() {
@@ -500,15 +521,12 @@ planeError(double x, double y, double z)
     double x, y, z;
     
 };
-
-
+*/
 
 // FUNCTION DEFINITIONS
 
 double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<int> const_points);
 
 double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, vector<int> const_points);
-
-double fit_plane(leastSquares &ls_problem, string filename, vector<Mat> points);
 
 #endif

@@ -286,7 +286,7 @@ void multiCamCalibration::initialize_cams() {
         //calibrateCamera(all_pattern_points_, all_corner_points_[i], img_size_, A, dist_coeff, rvec, tvec, CV_CALIB_FIX_ASPECT_RATIO);
         cout<<"done!\n";
 
-        cout<<A<<endl;
+        //cout<<A<<endl;
 
         cameraMats_.push_back(A);
         dist_coeffs_.push_back(dist_coeff);
@@ -437,6 +437,7 @@ void multiCamCalibration::write_BA_data_ref() {
     const_points_.push_back(op3);
     
     for (int i=0; i<num_points; i++) {
+        /*
         if (i==op1) {
             file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
             file<<double(-grid_size_.height*grid_size_phys_*0.5)<<"\t";
@@ -454,6 +455,10 @@ void multiCamCalibration::write_BA_data_ref() {
             file<<(double(rand()%50)-(height*0.5))<<"\t";
             file<<(rand()%50)+z<<"\t"<<endl;
         }
+        */
+        file<<(double(rand()%50)-(width*0.5))<<"\t";
+        file<<(double(rand()%50)-(height*0.5))<<"\t";
+        file<<(rand()%50)+z<<"\t"<<endl;
     }
 
     /*
@@ -475,11 +480,11 @@ void multiCamCalibration::write_BA_data_ref() {
         file<<endl;
     }
 
-    // thickness and all that
+    // thickness and refractive indices
     file<<5.0<<endl;
     file<<1.0<<endl;
-    file<<1.517<<endl;
     file<<1.0<<endl;
+    file<<1.3<<endl;
 
     file.close();
     cout<<"DONE!\n";

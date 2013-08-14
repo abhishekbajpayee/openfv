@@ -11,6 +11,7 @@
 
 #include "std_include.h"
 #include "optimization.h"
+#include "visualize.h"
 
 using namespace cv;
 using namespace std;
@@ -32,7 +33,9 @@ double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<i
     // Create residuals for each observation in the bundle adjustment problem. The
     // parameters for cameras and points are added automatically.
     ceres::Problem problem;
+
     for (int i = 0; i < ba_problem.num_observations(); ++i) {
+
         // Each Residual block takes a point and a camera as input and outputs a 2
         // dimensional residual. Internally, the cost function stores the observed
         // image location and compares the reprojection against the observation.
@@ -59,6 +62,21 @@ double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<i
 
     }
     
+    // Adding constraint for grid physical size
+    for (int i=0; i<ba_problem.num_planes(); i++) {
+
+        ceres::CostFunction* cost_function2 = 
+            new ceres::NumericDiffCostFunction<gridPhysSizeError, ceres::CENTRAL, 1, 3, 3, 3>
+            (new gridPhysSizeError(5, 6, 5));
+
+        problem.AddResidualBlock(cost_function2,
+                                 NULL,
+                                 ba_problem.mutable_points() + 90*i + 0,
+                                 ba_problem.mutable_points() + 90*i + 3*5,
+                                 ba_problem.mutable_points() + 90*i + 3*24);
+
+    }
+
     // Make Ceres automatically detect the bundle structure. Note that the
     // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
     // for standard bundle adjustment problems.
@@ -94,6 +112,10 @@ double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, v
         return 1;
     }
 
+    int gridx = 6;
+    int gridy = 5;
+    double phys = 5.0;
+
     ba_problem.cx = img_size.width*0.5;
     ba_problem.cy = img_size.height*0.5;
     
@@ -101,7 +123,7 @@ double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, v
     // parameters for cameras and points are added automatically.
     ceres::Problem problem;
     for (int i = 0; i < ba_problem.num_observations(); ++i) {
-    //for (int i = 0; i < 2; ++i) {
+
         // Each Residual block takes a point and a camera as input and outputs a 2
         // dimensional residual. Internally, the cost function stores the observed
         // image location and compares the reprojection against the observation.
@@ -129,7 +151,24 @@ double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, v
         */
 
     }
-    
+
+    /*
+    // Adding constraint for grid physical size
+    for (int i=0; i<ba_problem.num_planes(); i++) {
+
+        ceres::CostFunction* cost_function2 = 
+            new ceres::NumericDiffCostFunction<gridPhysSizeError, ceres::CENTRAL, 1, 3, 3, 3>
+            (new gridPhysSizeError(phys, gridx, gridy));
+
+        problem.AddResidualBlock(cost_function2,
+                                 NULL,
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 0,
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx-1),
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)));
+
+    }
+    */
+
     // Make Ceres automatically detect the bundle structure. Note that the
     // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
     // for standard bundle adjustment problems.
@@ -151,50 +190,5 @@ double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, v
     cout<<"BUNDLE ADJUSTMENT COMPLETE!\n\n";
 
     return double(summary.final_cost);
-
-}
-
-double fit_plane(leastSquares &ls_problem, string filename, vector<Mat> points) {
-
-    cout<<"\nFITTING PLANE TO CAMERA LOCATIONS...\n";
-
-    if (!ls_problem.LoadFile(filename.c_str())) {
-        std::cerr << "ERROR: unable to open file " << filename << "\n";
-        return 1;
-    }
-
-    // Create residuals for each observation in the bundle adjustment problem. The
-    // parameters for cameras and points are added automatically.
-    ceres::Problem problem;
-    for (int i=0; i < points.size(); ++i) {
-        
-        ceres::CostFunction* cost_function =
-            new ceres::AutoDiffCostFunction<planeError, 1, 4>
-            (new planeError(points[i].at<double>(0,0),
-                            points[i].at<double>(0,1),
-                            points[i].at<double>(0,2)));
-        
-        problem.AddResidualBlock(cost_function,
-                                 NULL,
-                                 ls_problem.mutable_params());
-
-    }
-    
-    // Make Ceres automatically detect the bundle structure. Note that the
-    // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
-    // for standard bundle adjustment problems.
-    ceres::Solver::Options options;
-    options.linear_solver_type = ceres::DENSE_NORMAL_CHOLESKY;
-    options.minimizer_progress_to_stdout = true;
-    options.max_num_iterations = 50;
-    options.num_threads = 16;
-    options.gradient_tolerance = 1E-12;
-    options.function_tolerance = 1E-8;
-    
-    ceres::Solver::Summary summary;
-    ceres::Solve(options, &problem, &summary);
-    cout<<summary.FullReport()<<"\n";
-    cout<<"ROTATION MATRIX CALCULATED!\n";
-    return summary.final_cost;
 
 }

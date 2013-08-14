@@ -73,6 +73,20 @@ void PyVisualize::scatter3d(vector<Point3f> points, vector<int> indices, string 
 
 }
 
+void PyVisualize::scatter3d(vector<Point3f> points, string size, string color) {
+
+    vector<string> strs;
+    string_from_vPoint3f(points, strs);
+
+    string call("ax.scatter(");
+    call += strs[0] + "," + strs[1] + "," + strs[2];
+    call += ",s=" + size;
+    call += ",c='" + color + "')";
+
+    PyRun_SimpleString(call.c_str());
+
+}
+
 // STRING CONSTRUCTION FUNCTIONS
 
 void PyVisualize::string_from_vdouble(vector<double> p, string &str) {
