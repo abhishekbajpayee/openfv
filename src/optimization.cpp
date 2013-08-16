@@ -133,7 +133,7 @@ double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, v
                                              ba_problem.observations()[2 * i + 1],
                                              ba_problem.cx, ba_problem.cy, 
                                              ba_problem.num_cameras(),
-                                             ba_problem.t(), ba_problem.n1(), ba_problem.n2(), ba_problem.n3() ));
+                                             ba_problem.t(), ba_problem.n1(), ba_problem.n2(), ba_problem.n3(), ba_problem.z0() ));
         
         problem.AddResidualBlock(cost_function,
                                  NULL,
@@ -152,7 +152,7 @@ double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, v
 
     }
 
-    /*
+    
     // Adding constraint for grid physical size
     for (int i=0; i<ba_problem.num_planes(); i++) {
 
@@ -167,18 +167,18 @@ double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, v
                                  ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)));
 
     }
-    */
+    
 
     // Make Ceres automatically detect the bundle structure. Note that the
     // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
     // for standard bundle adjustment problems.
     ceres::Solver::Options options;
-    options.linear_solver_type = ceres::DENSE_SCHUR;
+    options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;//DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = 100;
     
     int threads = omp_get_num_procs();
-    options.num_threads = threads;
+    options.num_threads = 1;//threads;
     cout<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;

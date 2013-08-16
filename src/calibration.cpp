@@ -290,8 +290,8 @@ void multiCamCalibration::find_corners() {
             bool found = findChessboardCorners(scene, grid_size_, points, CV_CALIB_CB_ADAPTIVE_THRESH);
             
             if (found) {
-                cvtColor(scene, scene_gray, CV_RGB2GRAY);
-                cornerSubPix(scene_gray, points, Size(20, 20), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+                //cvtColor(scene, scene_gray, CV_RGB2GRAY);
+                cornerSubPix(scene, points, Size(20, 20), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
                 corner_points.push_back(points);
                 
                 if (show_corners_flag) {
@@ -496,8 +496,8 @@ void multiCamCalibration::write_BA_data_ref() {
         file<<0<<"\t"<<0<<endl;
     }
     
-    double width = 50;
-    double height = 50;
+    int width = 25;
+    int height = 20;
     // add back projected point guesses here
     double z = 30;
     int op1 = (origin_image_id_)*grid_size_.width*grid_size_.height;
@@ -506,7 +506,7 @@ void multiCamCalibration::write_BA_data_ref() {
     const_points_.push_back(op1);
     const_points_.push_back(op2);
     const_points_.push_back(op3);
-    
+    /*
     for (int i=0; i<num_points; i++) {
         /*
         if (i==op1) {
@@ -526,22 +526,22 @@ void multiCamCalibration::write_BA_data_ref() {
             file<<(double(rand()%50)-(height*0.5))<<"\t";
             file<<(rand()%50)+z<<"\t"<<endl;
         }
-        */
-        file<<(double(rand()%50)-(width*0.5))<<"\t";
-        file<<(double(rand()%50)-(height*0.5))<<"\t";
-        file<<(rand()%50)+z<<"\t"<<endl;
+        
+        file<<(double(rand()%width)-(width*0.5))<<"\t";
+        file<<(double(rand()%height)-(height*0.5))<<"\t";
+        file<<(rand()%100)<<"\t"<<endl;
     }
-
-    /*
-    for (int k=0; k<9; k++) {
+    */
+    
+    for (int k=0; k<num_imgs_; k++) {
     for (int i=0; i<6; i++) {
         for (int j=0; j<5; j++) {
-            file<<(5*i)-25<<endl<<(5*j)-20<<endl<<(5*k)-20<<endl;
+            file<<(5*i)<<endl<<(5*j)<<endl<<(10*k)<<endl;
             //file2<<(5*i)-25<<endl<<(5*j)-20<<endl<<(5*k)-20<<endl;
         }
     }
     }
-    */
+    
 
     param = 1;
     for (int i=0; i<imgs_per_cam; i++) {
@@ -556,6 +556,7 @@ void multiCamCalibration::write_BA_data_ref() {
     file<<1.0<<endl;
     file<<1.0<<endl;
     file<<1.3<<endl;
+    file<<100-72.5<<endl;
 
     file.close();
     cout<<"DONE!\n";

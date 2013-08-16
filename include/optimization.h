@@ -226,10 +226,11 @@ class baProblem_ref {
     int* camera_index()                { return camera_index_;                   }
     int* point_index()                 { return point_index_;                    }
 
-    double t()                         { return t_; }
+    double t()                         { return t_;  }
     double n1()                        { return n1_; }
     double n2()                        { return n2_; }
     double n3()                        { return n3_; }
+    double z0()                        { return z0_; }
     
     double* mutable_camera_for_observation(int i) {
         return mutable_cameras() + camera_index_[i] * 9;
@@ -277,6 +278,7 @@ class baProblem_ref {
         FscanfOrDie(fptr, "%lf", &n1_);
         FscanfOrDie(fptr, "%lf", &n2_);
         FscanfOrDie(fptr, "%lf", &n3_);
+        FscanfOrDie(fptr, "%lf", &z0_);
 
         return true;
     }
@@ -306,7 +308,7 @@ class baProblem_ref {
     double* observations_;
     double* parameters_;
 
-    double t_, n1_, n2_, n3_;
+    double t_, n1_, n2_, n3_, z0_;
 
 };
 
@@ -315,8 +317,8 @@ class refractiveReprojectionError {
 
  public:
 
- refractiveReprojectionError(double observed_x, double observed_y, double cx, double cy, int num_cams, double t, double n1, double n2, double n3)
-     : observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams), t_(t), n1_(n1), n2_(n2), n3_(n3) { }
+ refractiveReprojectionError(double observed_x, double observed_y, double cx, double cy, int num_cams, double t, double n1, double n2, double n3, double z0)
+     : observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams), t_(t), n1_(n1), n2_(n2), n3_(n3), z0_(z0) { }
     
     template <typename T>
         bool operator()(const T* const camera,
@@ -339,12 +341,12 @@ class refractiveReprojectionError {
         // All the refraction stuff
         T* a = new T[3];
         T* b = new T[3];
-        a[0] = c[0] + (point[0]-c[0])*(T(-t_)-c[2])/(point[2]-c[2]);
-        a[1] = c[1] + (point[1]-c[1])*(T(-t_)-c[2])/(point[2]-c[2]);
-        a[2] = T(-t_);
-        b[0] = c[0] + (point[0]-c[0])*(-c[2])/(point[2]-c[2]);
-        b[1] = c[1] + (point[1]-c[1])*(-c[2])/(point[2]-c[2]);
-        b[2] = T(0);
+        a[0] = c[0] + (point[0]-c[0])*(T(-t_)-T(z0_)-c[2])/(point[2]-c[2]);
+        a[1] = c[1] + (point[1]-c[1])*(T(-t_)-T(z0_)-c[2])/(point[2]-c[2]);
+        a[2] = T(-t_)-T(z0_);
+        b[0] = c[0] + (point[0]-c[0])*(T(z0_)-c[2])/(point[2]-c[2]);
+        b[1] = c[1] + (point[1]-c[1])*(T(z0_)-c[2])/(point[2]-c[2]);
+        b[2] = T(z0_);
         
         T rp = sqrt( pow(point[0]-c[0],2) + pow(point[1]-c[1],2) );
         T dp = point[2]-b[2];
@@ -425,7 +427,7 @@ class refractiveReprojectionError {
 
     }
     
-    double observed_x, observed_y, cx, cy, t_, n1_, n2_, n3_;
+    double observed_x, observed_y, cx, cy, t_, n1_, n2_, n3_, z0_;
     int num_cams;
     
 };
