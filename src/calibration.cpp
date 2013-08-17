@@ -54,7 +54,7 @@ void multiCamCalibration::run() {
 
     if (run_calib_flag) {
         read_cam_names();
-        read_calib_imgs();
+        read_calib_imgs_mtiff();
         find_corners();
         initialize_cams();
         
@@ -126,7 +126,7 @@ void multiCamCalibration::read_cam_names() {
 
 }
 
-void multiCamCalibration::read_calib_imgs_avi() {
+void multiCamCalibration::read_calib_imgs_mtiff() {
 
     DIR *dir;
     struct dirent *ent;
@@ -142,7 +142,7 @@ void multiCamCalibration::read_calib_imgs_avi() {
         temp_name = ent->d_name;
         if (temp_name.compare(dir1)) {
             if (temp_name.compare(dir2)) {
-                if (temp_name.compare(temp_name.size()-3,3,"avi") == 0) {
+                if (temp_name.compare(temp_name.size()-3,3,"tif") == 0) {
                     string path_img = path_+temp_name;
                     img_names.push_back(path_img);
                 }
@@ -152,48 +152,58 @@ void multiCamCalibration::read_calib_imgs_avi() {
 
     //grid_view(img_names);
 
-    vector<VideoCapture> caps;
+    vector<TIFF*> tiffs;
     for (int i=0; i<img_names.size(); i++) {
-        VideoCapture cap(img_names[i]);
-        caps.push_back(cap);
+        TIFF* tiff = TIFFOpen(img_names[i].c_str(), "r");
+        tiffs.push_back(tiff);
     }
-
-    cout<<"Counting frames in sequence...";
-    VideoCapture temp(img_names[0]);
-    Mat grid;
-    int frames=0;
-    while (temp.read(grid)) {
-        frames++;
-        //imshow("frame", grid);
-        //if (waitKey(30)>=0) break;
-        //cout<<frames<<endl;
-    }
-    cout<<"done!"<<endl;
 
     cout<<"Reading images..."<<endl;
     for (int i=0; i<img_names.size(); i++) {
         
         vector<Mat> calib_imgs_sub;
+        int frame=0;
+        do {
 
-        cout<<"SEQUENCE "<<i+1<<"...";
-        for (int j=0; j<frames; j++) {
-            Mat image;
-            if (j>50 && j%10==0) {
-                caps[i]>>image;
-                calib_imgs_sub.push_back(image);
+            frame++;
+            Mat img;
+            uint32 c, r;
+            size_t npixels;
+            uint32* raster;
+            
+            if (frame>50 && frame%10==0)  {
+                TIFFGetField(tiffs[i], TIFFTAG_IMAGEWIDTH, &c);
+                TIFFGetField(tiffs[i], TIFFTAG_IMAGELENGTH, &r);
+                npixels = r * c;
+                raster = (uint32*) _TIFFmalloc(npixels * sizeof (uint32));
+                if (raster != NULL) {
+                    if (TIFFReadRGBAImageOriented(tiffs[i], c, r, raster, ORIENTATION_TOPLEFT, 0)) {
+                        img.create(r, c, CV_32F);
+                        for (int i=0; i<r; i++) {
+                            for (int j=0; j<c; j++) {
+                                img.at<float>(i,j) = TIFFGetR(raster[i*c+j])/255.0;
+                            }
+                        }
+                    }
+                    _TIFFfree(raster);
+                }
+                calib_imgs_sub.push_back(img);
             }
-        }
+            
+
+        } while(TIFFReadDirectory(tiffs[i]));
+
         calib_imgs_.push_back(calib_imgs_sub);
-        cout<<"done! --- "<<calib_imgs_sub.size()<<endl;
 
     }
 
     num_cams_ = img_names.size();
+    cout<<"num_cams: "<<num_cams_;
     num_imgs_ = calib_imgs_[0].size();
+    cout<<"num_imgs: "<<num_imgs_;
     img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
 
-    show_corners_flag=1;
-    find_corners();
+    cout<<"\nDONE READING IMAGES!\n\n";
 
 }
 
@@ -286,12 +296,13 @@ void multiCamCalibration::find_corners() {
         for (int j=0; j<imgs_temp.size(); j++) {
 
             //equalizeHist(imgs_temp[j], scene);
-            scene = imgs_temp[j];
+            scene = imgs_temp[j]*255.0;
+            scene.convertTo(scene, CV_8U);
             bool found = findChessboardCorners(scene, grid_size_, points, CV_CALIB_CB_ADAPTIVE_THRESH);
             
             if (found) {
                 //cvtColor(scene, scene_gray, CV_RGB2GRAY);
-                cornerSubPix(scene, points, Size(20, 20), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+                cornerSubPix(scene, points, Size(10, 10), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
                 corner_points.push_back(points);
                 
                 if (show_corners_flag) {
@@ -346,10 +357,10 @@ void multiCamCalibration::initialize_cams() {
         Mat_<double> A = Mat_<double>::zeros(3,3); 
         Mat_<double> dist_coeff;
         
-        A(0,0) = 9000; 
-        A(1,1) = 9000;
-        A(0,2) = 646; 
-        A(1,2) = 482;
+        A(0,0) = 5000; 
+        A(1,1) = 5000;
+        A(0,2) = 640; 
+        A(1,2) = 400;
         A(2,2) = 1;
         
         vector<Mat> rvec, tvec;
@@ -357,7 +368,7 @@ void multiCamCalibration::initialize_cams() {
         //calibrateCamera(all_pattern_points_, all_corner_points_[i], img_size_, A, dist_coeff, rvec, tvec, CV_CALIB_FIX_ASPECT_RATIO);
         cout<<"done!\n";
 
-        //cout<<A<<endl;
+        cout<<A<<endl;
 
         cameraMats_.push_back(A);
         dist_coeffs_.push_back(dist_coeff);

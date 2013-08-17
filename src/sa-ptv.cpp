@@ -22,8 +22,8 @@ int main(int argc, char** argv) {
     sref>>ref; // 1 for refractive
 
     multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, ref);
-    calibration.read_calib_imgs_avi();
-    /*
+    //calibration.read_calib_imgs_mtiff();
+    
     calibration.run();
     if (ref) {
         calibration.write_calib_results_matlab_ref();

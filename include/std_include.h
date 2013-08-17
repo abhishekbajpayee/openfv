@@ -16,6 +16,8 @@
 
 #include <omp.h>
 
+#include <tiffio.h>
+
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 

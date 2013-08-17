@@ -31,10 +31,10 @@ add_executable (liveRefocus ${PROJECT_SOURCE_DIR}/src/liveRefocus.cpp)
 add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/calibrate.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp)
-
 set (PYTHON_LIB python2.7)
+set (OTHER_LIBS tiff)
 
-target_link_libraries (sa-ptv ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
+target_link_libraries (sa-ptv ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB} ${OTHER_LIBS})
 target_link_libraries (testing ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
 target_link_libraries (refocus ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
 target_link_libraries (track ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})

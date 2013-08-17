@@ -16,6 +16,31 @@
 #include "optimization.h"
 #include "typedefs.h"
 
+class camCalibration {
+
+ public:
+    
+    ~camCalibration() {
+        //
+    }
+
+    camCalibration() {
+        //
+    }
+
+    // Function declarations
+    void calibrateCamera(vector< vector<Point2f> > corner_points, Size img_size, Mat &K, Mat &rvec, Mat &tvec);
+
+ protected:
+
+    // Inheritable stuff
+
+ private: 
+
+    // Private functions and variables
+
+};
+
 class multiCamCalibration {
  
  public:
@@ -37,7 +62,7 @@ class multiCamCalibration {
     void initialize();
     void run();
     
-    void read_calib_imgs_avi();
+    void read_calib_imgs_mtiff();
 
     void read_cam_names();
     void read_calib_imgs();
