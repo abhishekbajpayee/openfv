@@ -62,6 +62,7 @@ class multiCamCalibration {
     void initialize();
     void run();
     
+    void read_cam_names_mtiff();
     void read_calib_imgs_mtiff();
 
     void read_cam_names();
@@ -82,7 +83,7 @@ class multiCamCalibration {
     void write_calib_results_matlab();
     void write_calib_results_matlab_ref();
 
-    void grid_view(vector<string> img_names);
+    void grid_view();
 
  private:
 
@@ -109,7 +110,7 @@ class multiCamCalibration {
     
     vector<string> cam_names_;
     vector< vector<Mat> > calib_imgs_;
-    vector< vector<Point3f> > all_pattern_points_;
+    vector< vector< vector<Point3f> > > all_pattern_points_;
     vector< vector< vector<Point2f> > > all_corner_points_;
     vector<Mat> cameraMats_;
     vector<Mat> dist_coeffs_;
@@ -140,6 +141,7 @@ class multiCamCalibration {
     int load_results_flag;
     int dummy_mode_;
     int refractive_;
+    int structure_; // 0 = folders with tif images, 1 = multipage tif files
     
 };
     

@@ -74,6 +74,93 @@ void saRefocus::read_imgs(string path) {
 
 }
 
+void saRefocus::read_imgs_mtiff(string path) {
+    
+    DIR *dir;
+    struct dirent *ent;
+
+    string dir1(".");
+    string dir2("..");
+    string temp_name;
+
+    vector<string> img_names;
+
+    dir = opendir(path.c_str());
+    while(ent = readdir(dir)) {
+        temp_name = ent->d_name;
+        if (temp_name.compare(dir1)) {
+            if (temp_name.compare(dir2)) {
+                if (temp_name.compare(temp_name.size()-3,3,"tif") == 0) {
+                    string img_name = path+temp_name;
+                    img_names.push_back(img_name);
+                }
+            }
+        }
+    }
+
+    vector<TIFF*> tiffs;
+    for (int i=0; i<img_names.size(); i++) {
+        TIFF* tiff = TIFFOpen(img_names[i].c_str(), "r");
+        tiffs.push_back(tiff);
+    }
+
+    cout<<"Counting number of frames...";
+    int dircount = 0;
+    if (tiffs[0]) {
+	do {
+	    dircount++;
+	} while (TIFFReadDirectory(tiffs[0]));
+    }
+    cout<<"done! "<<dircount<<" frames found."<<endl<<endl;
+
+    cout<<"Reading images..."<<endl;
+    for (int i=0; i<cam_names_.size(); i++) {
+        
+        cout<<"Camera "<<i+1<<"...";
+
+        vector<Mat> refocusing_imgs_sub;
+
+        int frame=0;
+        int count=0;
+        int skip=50;
+        while (frame<dircount) {
+
+            Mat img;
+            uint32 c, r;
+            size_t npixels;
+            uint32* raster;
+            
+            TIFFSetDirectory(tiffs[i], frame);
+
+            TIFFGetField(tiffs[i], TIFFTAG_IMAGEWIDTH, &c);
+            TIFFGetField(tiffs[i], TIFFTAG_IMAGELENGTH, &r);
+            npixels = r * c;
+            raster = (uint32*) _TIFFmalloc(npixels * sizeof (uint32));
+            if (raster != NULL) {
+                if (TIFFReadRGBAImageOriented(tiffs[i], c, r, raster, ORIENTATION_TOPLEFT, 0)) {
+                    img.create(r, c, CV_32F);
+                    for (int i=0; i<r; i++) {
+                        for (int j=0; j<c; j++) {
+                            img.at<float>(i,j) = TIFFGetR(raster[i*c+j])/255.0;
+                        }
+                    }
+                }
+                _TIFFfree(raster);
+            }
+            refocusing_imgs_sub.push_back(img);
+            count++;
+            
+            frame += skip;
+
+        }
+
+        imgs.push_back(refocusing_imgs_sub);
+        cout<<"done! "<<count<<" frames read."<<endl;
+
+    }
+
+}
+
 void saRefocus::GPUliveView() {
 
     initializeGPU();
@@ -236,6 +323,7 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
     Mat H, trans;
     T_from_P(P_mats_[0], H, z, scale_, img_size_);
+    cout<<scale_<<endl;
     gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
 
     if (mult_) {
@@ -268,12 +356,12 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
     //refocused_host_ /= 255.0;
 
     if (live) {
-        refocused_host_ /= 255.0;
+        //refocused_host_ /= 255.0;
         char title[50];
         sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
-        line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
+        //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
+        //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
 
@@ -324,8 +412,8 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
         char title[50];
         sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
-        line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
+        //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
+        //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
 

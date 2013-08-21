@@ -30,7 +30,7 @@ class saRefocus {
     }
 
  saRefocus(refocusing_data refocusing_params, int frame, int mult, double mult_exp):
-    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z(0), thresh(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) {}
+    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z(0), thresh(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) { scale_ = 10.0; }
 
     int num_cams() { return num_cams_; }
     double scale() { return scale_; }
@@ -38,6 +38,7 @@ class saRefocus {
     int num_frames() { return imgs[0].size(); }
 
     void read_imgs(string path);
+    void read_imgs_mtiff(string path);
 
     void GPUliveView();
     void CPUliveView();
