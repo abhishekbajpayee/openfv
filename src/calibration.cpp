@@ -15,17 +15,21 @@
 
 void multiCamCalibration::initialize() {
 
+    // Standard directories and filenames
     ba_file_ = string("../temp/ba_data.txt");
     result_dir_ = string("calibration_results");
     
     run_calib_flag = 0;
     load_results_flag = 0;
+
     int result_dir_found = 0;
     DIR *dir;
     struct dirent *ent;
     string temp_name;
     dir = opendir(path_.c_str());
+
     int choice;
+
     while(ent = readdir(dir)) {
         temp_name = ent->d_name;
         if (!temp_name.compare(result_dir_)) {
@@ -43,9 +47,12 @@ void multiCamCalibration::initialize() {
     }
     if (!result_dir_found) run_calib_flag = 1;
 
-    structure_ = 1;
     show_corners_flag = 0;
     results_just_saved_flag = 0;
+
+    // Settings for optimization routines
+    pinhole_max_iterations = 50;
+    refractive_max_iterations = 100;
 
 }
 
@@ -55,7 +62,7 @@ void multiCamCalibration::run() {
 
     if (run_calib_flag) {
 
-        if (structure_) {
+        if (dir_struct_) {
             read_cam_names_mtiff();
             read_calib_imgs_mtiff();
         } else {
@@ -74,13 +81,20 @@ void multiCamCalibration::run() {
             run_BA();
         }
         
-        calc_space_warp_factor();
+        //calc_space_warp_factor();
 
         if (refractive_) {
             write_calib_results_ref();
         } else {
             write_calib_results();
         }
+
+        if (refractive_) {
+            write_calib_results_matlab_ref();
+        } else {
+            write_calib_results_matlab();
+        }
+        
     }
     
     if (load_results_flag) {
@@ -171,79 +185,6 @@ void multiCamCalibration::read_cam_names_mtiff() {
 
 }
 
-void multiCamCalibration::read_calib_imgs_mtiff() {
-
-    string img_path;
-
-    vector<TIFF*> tiffs;
-    for (int i=0; i<cam_names_.size(); i++) {
-        img_path = path_+cam_names_[i];
-        TIFF* tiff = TIFFOpen(img_path.c_str(), "r");
-        tiffs.push_back(tiff);
-    }
-
-    cout<<"Counting number of frames...";
-    int dircount = 0;
-    if (tiffs[0]) {
-	do {
-	    dircount++;
-	} while (TIFFReadDirectory(tiffs[0]));
-    }
-    cout<<"done! "<<dircount<<" frames found."<<endl<<endl;
-
-    cout<<"Reading images..."<<endl;
-    for (int i=0; i<cam_names_.size(); i++) {
-        
-        cout<<"Camera "<<i+1<<"...";
-
-        vector<Mat> calib_imgs_sub;
-
-        int frame=0;
-        int count=0;
-        int skip=280;
-        while (frame<dircount) {
-
-            Mat img;
-            uint32 c, r;
-            size_t npixels;
-            uint32* raster;
-            
-            TIFFSetDirectory(tiffs[i], frame);
-
-            TIFFGetField(tiffs[i], TIFFTAG_IMAGEWIDTH, &c);
-            TIFFGetField(tiffs[i], TIFFTAG_IMAGELENGTH, &r);
-            npixels = r * c;
-            raster = (uint32*) _TIFFmalloc(npixels * sizeof (uint32));
-            if (raster != NULL) {
-                if (TIFFReadRGBAImageOriented(tiffs[i], c, r, raster, ORIENTATION_TOPLEFT, 0)) {
-                    img.create(r, c, CV_32F);
-                    for (int i=0; i<r; i++) {
-                        for (int j=0; j<c; j++) {
-                            img.at<float>(i,j) = TIFFGetR(raster[i*c+j])/255.0;
-                        }
-                    }
-                }
-                _TIFFfree(raster);
-            }
-            calib_imgs_sub.push_back(img);
-            count++;
-            
-            frame += skip;
-
-        }
-
-        calib_imgs_.push_back(calib_imgs_sub);
-        cout<<"done! "<<count<<" frames read."<<endl;
-
-    }
-
-    num_imgs_ = calib_imgs_[0].size();
-    img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
-
-    cout<<"\nDONE READING IMAGES!\n\n";
-
-}
-
 void multiCamCalibration::read_calib_imgs() {
 
     DIR *dir;
@@ -312,6 +253,79 @@ void multiCamCalibration::read_calib_imgs() {
     num_imgs_ = calib_imgs_[0].size();
     img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
     refocusing_params_.img_size = img_size_;
+
+    cout<<"\nDONE READING IMAGES!\n\n";
+
+}
+
+void multiCamCalibration::read_calib_imgs_mtiff() {
+
+    string img_path;
+
+    vector<TIFF*> tiffs;
+    for (int i=0; i<cam_names_.size(); i++) {
+        img_path = path_+cam_names_[i];
+        TIFF* tiff = TIFFOpen(img_path.c_str(), "r");
+        tiffs.push_back(tiff);
+    }
+
+    cout<<"Counting number of frames...";
+    int dircount = 0;
+    if (tiffs[0]) {
+	do {
+	    dircount++;
+	} while (TIFFReadDirectory(tiffs[0]));
+    }
+    cout<<"done! "<<dircount<<" frames found."<<endl<<endl;
+
+    cout<<"Reading images..."<<endl;
+    for (int i=0; i<cam_names_.size(); i++) {
+        
+        cout<<"Camera "<<i+1<<"...";
+
+        vector<Mat> calib_imgs_sub;
+
+        int frame=0;
+        int count=0;
+        int skip=280;
+        while (frame<dircount) {
+
+            Mat img;
+            uint32 c, r;
+            size_t npixels;
+            uint32* raster;
+            
+            TIFFSetDirectory(tiffs[i], frame);
+
+            TIFFGetField(tiffs[i], TIFFTAG_IMAGEWIDTH, &c);
+            TIFFGetField(tiffs[i], TIFFTAG_IMAGELENGTH, &r);
+            npixels = r * c;
+            raster = (uint32*) _TIFFmalloc(npixels * sizeof (uint32));
+            if (raster != NULL) {
+                if (TIFFReadRGBAImageOriented(tiffs[i], c, r, raster, ORIENTATION_TOPLEFT, 0)) {
+                    img.create(r, c, CV_32F);
+                    for (int i=0; i<r; i++) {
+                        for (int j=0; j<c; j++) {
+                            img.at<float>(i,j) = TIFFGetR(raster[i*c+j])/255.0;
+                        }
+                    }
+                }
+                _TIFFfree(raster);
+            }
+            calib_imgs_sub.push_back(img);
+            count++;
+            
+            frame += skip;
+
+        }
+
+        calib_imgs_.push_back(calib_imgs_sub);
+        cout<<"done! "<<count<<" frames read."<<endl;
+
+    }
+
+    num_imgs_ = calib_imgs_[0].size();
+    img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
 
     cout<<"\nDONE READING IMAGES!\n\n";
 
@@ -407,10 +421,10 @@ void multiCamCalibration::initialize_cams() {
 
         vector<Mat> rvec, tvec;
 
-        A(0,0) = 5000;//i; 
-        A(1,1) = 5000;//i;
-        A(0,2) = 640; 
-        A(1,2) = 400;
+        A(0,0) = 9000;//i; 
+        A(1,1) = 9000;//i;
+        A(0,2) = img_size_.width*0.5;
+        A(1,2) = img_size_.height*0.5;
         A(2,2) = 1;
         
         //vector<Mat> rvec, tvec;
@@ -419,8 +433,6 @@ void multiCamCalibration::initialize_cams() {
         cout<<"done!\n";
 
         cout<<A<<endl;
-
-
 
         cameraMats_.push_back(A);
         dist_coeffs_.push_back(dist_coeff);
@@ -512,10 +524,16 @@ void multiCamCalibration::write_BA_data() {
 
     param = 1;
     for (int i=0; i<imgs_per_cam; i++) {
+        if (i==0) {
+            file<<0<<"\t"<<0<<"\t"<<1<<"\t"<<0<<endl;
+        } else {
+            
         for (int j=0; j<4; j++) {
             file<<param<<"\t";
         }
         file<<endl;
+
+        }
     }
 
     file.close();
@@ -553,8 +571,8 @@ void multiCamCalibration::write_BA_data_ref() {
             file<<tvecs_[i][0].at<double>(0,j)<<"\t";
         }
         
-        file<<cameraMats_[i].at<double>(0,0)<<"\t";
-        
+        //file<<cameraMats_[i].at<double>(0,0)<<"\t";
+        file<<9000.0<<"\t";
         //for (int j=0; j<2; j++) file<<dist_coeffs[i].at<double>(0,j)<<"\n";
         file<<0<<"\t"<<0<<endl;
     }
@@ -569,7 +587,7 @@ void multiCamCalibration::write_BA_data_ref() {
     const_points_.push_back(op1);
     const_points_.push_back(op2);
     const_points_.push_back(op3);
-    /*
+    
     for (int i=0; i<num_points; i++) {
         /*
         if (i==op1) {
@@ -589,13 +607,14 @@ void multiCamCalibration::write_BA_data_ref() {
             file<<(double(rand()%50)-(height*0.5))<<"\t";
             file<<(rand()%50)+z<<"\t"<<endl;
         }
-        
+        */
         file<<(double(rand()%width)-(width*0.5))<<"\t";
         file<<(double(rand()%height)-(height*0.5))<<"\t";
         file<<(rand()%100)<<"\t"<<endl;
     }
-    */
     
+    
+    /*
     for (int k=0; k<num_imgs_; k++) {
     for (int i=0; i<6; i++) {
         for (int j=0; j<5; j++) {
@@ -604,14 +623,17 @@ void multiCamCalibration::write_BA_data_ref() {
         }
     }
     }
+    */
     
 
     param = 1;
     for (int i=0; i<imgs_per_cam; i++) {
+            
         for (int j=0; j<4; j++) {
             file<<param<<"\t";
         }
         file<<endl;
+
     }
 
     // thickness and refractive indices
@@ -628,20 +650,220 @@ void multiCamCalibration::write_BA_data_ref() {
 
 void multiCamCalibration::run_BA() {
 
-    total_reproj_error_ = BA_pinhole(ba_problem_, ba_file_, img_size_, const_points_);
-    avg_reproj_error_ = total_reproj_error_/double(ba_problem_.num_observations());
-    cout<<"FINAL TOTAL REPROJECTION ERROR: "<<total_reproj_error_<<endl;
+    run_BA_pinhole(ba_problem_, ba_file_, img_size_, const_points_);
 
 }
 
 void multiCamCalibration::run_BA_ref() {
 
-    total_reproj_error_ = BA_refractive(ba_problem_ref_, ba_file_, img_size_, const_points_);
-    avg_reproj_error_ = total_reproj_error_/double(ba_problem_.num_observations());
-    cout<<"FINAL TOTAL REPROJECTION ERROR: "<<total_reproj_error_<<endl;
+    run_BA_refractive(ba_problem_ref_, ba_file_, img_size_, const_points_);
 
 }
 
+// Pinhole bundle adjustment function
+double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<int> const_points) {
+
+    cout<<"\nRUNNING PINHOLE BUNDLE ADJUSTMENT TO CALIBRATE CAMERAS...\n";
+    //google::InitGoogleLogging(argv);
+    
+    if (!ba_problem.LoadFile(ba_file.c_str())) {
+        std::cerr << "ERROR: unable to open file " << ba_file << "\n";
+        return 1;
+    }
+
+    ba_problem.cx = img_size.width*0.5;
+    ba_problem.cy = img_size.height*0.5;
+    
+    // Create residuals for each observation in the bundle adjustment problem. The
+    // parameters for cameras and points are added automatically.
+    ceres::Problem problem;
+
+    for (int i=0; i<ba_problem.num_observations(); i++) {
+
+        // Each Residual block takes a point and a camera as input and outputs a 2
+        // dimensional residual. Internally, the cost function stores the observed
+        // image location and compares the reprojection against the observation.
+        ceres::CostFunction* cost_function1 =
+            new ceres::AutoDiffCostFunction<pinholeReprojectionError, 2, 9, 3>
+            (new pinholeReprojectionError(ba_problem.observations()[2 * i + 0],
+                                          ba_problem.observations()[2 * i + 1],
+                                          ba_problem.cx, ba_problem.cy, ba_problem.num_cameras()));
+        
+        problem.AddResidualBlock(cost_function1,
+                                 NULL,
+                                 ba_problem.mutable_camera_for_observation(i),
+                                 ba_problem.mutable_point_for_observation(i));
+
+        ceres::CostFunction* cost_function2 =
+            new ceres::AutoDiffCostFunction<planeError, 1, 3, 4>
+            (new planeError(ba_problem.num_cameras()));
+
+        problem.AddResidualBlock(cost_function2,
+                                 NULL,
+                                 ba_problem.mutable_point_for_observation(i),
+                                 ba_problem.mutable_plane_for_observation(i));
+
+    }
+    
+    int gridx = grid_size_.width;
+    int gridy = grid_size_.height;
+
+    // Adding constraint for grid physical size
+    for (int i=0; i<ba_problem.num_planes(); i++) {
+
+        ceres::CostFunction* cost_function3 = 
+            new ceres::NumericDiffCostFunction<gridPhysSizeError, ceres::CENTRAL, 1, 3, 3, 3>
+            (new gridPhysSizeError(grid_size_phys_, gridx, gridy));
+
+        problem.AddResidualBlock(cost_function3,
+                                 NULL,
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 0,
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx-1),
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)));
+
+    }
+    
+    // fixing a plane to xy plane
+    
+    int i=0;
+
+    ceres::CostFunction* cost_function4 = 
+        new ceres::NumericDiffCostFunction<zError, ceres::CENTRAL, 1, 3, 3, 3, 3>
+        (new zError());
+    
+    problem.AddResidualBlock(cost_function4,
+                             NULL,
+                             ba_problem.mutable_points() + 3*gridx*gridy*i + 0,
+                             ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx-1),
+                             ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)),
+                             ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*gridy-1)); 
+
+    // Make Ceres automatically detect the bundle structure. Note that the
+    // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
+    // for standard bundle adjustment problems.
+    ceres::Solver::Options options;
+    options.linear_solver_type = ceres::DENSE_SCHUR;
+    options.minimizer_progress_to_stdout = true;
+    options.max_num_iterations = pinhole_max_iterations;
+    
+    int threads = omp_get_num_procs();
+    options.num_threads = threads;
+    cout<<"\nSolver using "<<threads<<" threads.\n\n";
+
+    options.gradient_tolerance = 1E-12;
+    options.function_tolerance = 1E-8;
+    
+    ceres::Solver::Summary summary;
+    ceres::Solve(options, &problem, &summary);
+    cout<<summary.FullReport()<<"\n";
+    cout<<"BUNDLE ADJUSTMENT COMPLETE!\n\n";
+
+    total_error_ = double(summary.final_cost);
+    avg_error_ = total_error_/ba_problem.num_observations(); // TODO: probably wrong but whatever
+    cout<<"Total Final Error:\t"<<total_error_<<endl;
+    cout<<"Average Final Error:\t"<<avg_error_<<endl;
+
+}
+
+// Refractivee bundle adjustment function
+double multiCamCalibration::run_BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, vector<int> const_points) {
+
+    cout<<"\nRUNNING REFRACTIVE BUNDLE ADJUSTMENT TO CALIBRATE CAMERAS...\n";
+    //google::InitGoogleLogging(argv);
+    
+    if (!ba_problem.LoadFile(ba_file.c_str())) {
+        std::cerr << "ERROR: unable to open file " << ba_file << "\n";
+        return 1;
+    }
+
+    ba_problem.cx = img_size.width*0.5;
+    ba_problem.cy = img_size.height*0.5;
+    
+    // Create residuals for each observation in the bundle adjustment problem. The
+    // parameters for cameras and points are added automatically.
+    ceres::Problem problem;
+    for (int i=0; i<ba_problem.num_observations(); i++) {
+
+        // Each Residual block takes a point and a camera as input and outputs a 2
+        // dimensional residual. Internally, the cost function stores the observed
+        // image location and compares the reprojection against the observation.
+        ceres::CostFunction* cost_function1 =
+            new ceres::NumericDiffCostFunction<refractiveReprojectionError, ceres::CENTRAL, 2, 9, 3>
+            (new refractiveReprojectionError(ba_problem.observations()[2 * i + 0],
+                                             ba_problem.observations()[2 * i + 1],
+                                             ba_problem.cx, ba_problem.cy, 
+                                             ba_problem.num_cameras(),
+                                             ba_problem.t(), ba_problem.n1(), ba_problem.n2(), ba_problem.n3(), ba_problem.z0() ));
+        
+        problem.AddResidualBlock(cost_function1,
+                                 NULL,
+                                 ba_problem.mutable_camera_for_observation(i),
+                                 ba_problem.mutable_point_for_observation(i));
+        
+        ceres::CostFunction* cost_function2 =
+            new ceres::AutoDiffCostFunction<planeError, 1, 3, 4>
+            (new planeError(ba_problem.num_cameras()));
+
+        problem.AddResidualBlock(cost_function2,
+                                 NULL,
+                                 ba_problem.mutable_point_for_observation(i),
+                                 ba_problem.mutable_plane_for_observation(i));
+
+        /*
+
+          problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
+
+        */
+
+    }
+
+    int gridx = grid_size_.width;
+    int gridy = grid_size_.height;
+    
+    // Adding constraint for grid physical size
+    for (int i=0; i<ba_problem.num_planes(); i++) {
+
+        ceres::CostFunction* cost_function3 = 
+            new ceres::NumericDiffCostFunction<gridPhysSizeError, ceres::CENTRAL, 1, 3, 3, 3>
+            (new gridPhysSizeError(grid_size_phys_, gridx, gridy));
+
+        problem.AddResidualBlock(cost_function3,
+                                 NULL,
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 0,
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx-1),
+                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)));
+
+    }
+    
+
+    // Make Ceres automatically detect the bundle structure. Note that the
+    // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
+    // for standard bundle adjustment problems.
+    ceres::Solver::Options options;
+    options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;//DENSE_SCHUR;
+    options.minimizer_progress_to_stdout = true;
+    options.max_num_iterations = refractive_max_iterations;
+    
+    int threads = omp_get_num_procs();
+    options.num_threads = threads;
+    cout<<"\nSolver using "<<threads<<" threads.\n\n";
+
+    options.gradient_tolerance = 1E-12;
+    options.function_tolerance = 1E-8;
+    
+    ceres::Solver::Summary summary;
+    ceres::Solve(options, &problem, &summary);
+    cout<<summary.FullReport()<<"\n";
+    cout<<"BUNDLE ADJUSTMENT COMPLETE!\n\n";
+
+    total_error_ = double(summary.final_cost);
+    avg_error_ = total_error_/ba_problem.num_observations();
+    cout<<"Total Final Error:\t"<<total_error_<<endl;
+    cout<<"Average Final Error:\t"<<avg_error_<<endl;
+
+}
+
+/*
 // TODO: CHANGE THE CODE SO THAT THIS FUNCTION IS NOT NEEDED AND THE PHYSICAL
 //       GRID SIZE IS TAKEN INTO ACCOUNT DURING BUNDLE ADJUSTMENT
 void multiCamCalibration::calc_space_warp_factor() {
@@ -684,6 +906,7 @@ void multiCamCalibration::calc_space_warp_factor() {
     refocusing_params_.warp_factor = warp_factor_;
 
 }
+*/
 
 void multiCamCalibration::write_calib_results() {
 
@@ -1335,3 +1558,5 @@ void multiCamCalibration::get_grid_size_pix() {
     cout<<"GRID SIZE: "<<grid_size_pix_<<" pixels\n";
 
 }
+
+//void calibrateCam(vector< vector<Point2f> >, 

@@ -48,8 +48,8 @@ class multiCamCalibration {
         //
     }
 
- multiCamCalibration(string path, Size grid_size, double grid_size_phys, int dummy_mode, int refractive):
-    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive) {}
+ multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int dir_struct):
+    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), dir_struct_(dir_struct) {}
     
     // Functions to access calibration data
     int num_cams() { return num_cams_; }
@@ -62,9 +62,11 @@ class multiCamCalibration {
     void initialize();
     void run();
     
+    // Functions to work with multipage tiff files
     void read_cam_names_mtiff();
     void read_calib_imgs_mtiff();
 
+    // Functions to work with normal directory structure
     void read_cam_names();
     void read_calib_imgs();
 
@@ -75,6 +77,9 @@ class multiCamCalibration {
     void write_BA_data_ref();
     void run_BA();
     void run_BA_ref();
+
+    double run_BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<int> const_points);
+    double run_BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, vector<int> const_points);
 
     void write_calib_results();
     void write_calib_results_ref();
@@ -129,7 +134,9 @@ class multiCamCalibration {
     baProblem ba_problem_;
     baProblem_ref ba_problem_ref_;
     double total_reproj_error_;
+    double total_error_;
     double avg_reproj_error_;
+    double avg_error_;
 
     // Option flags
     int solveForDistortion; // TODO: NOT IMPLEMENTED
@@ -141,7 +148,10 @@ class multiCamCalibration {
     int load_results_flag;
     int dummy_mode_;
     int refractive_;
-    int structure_; // 0 = folders with tif images, 1 = multipage tif files
+    int dir_struct_; // 0 = folders with tif images, 1 = multipage tif files
+
+    int pinhole_max_iterations;
+    int refractive_max_iterations;
     
 };
     

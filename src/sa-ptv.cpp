@@ -38,29 +38,25 @@ int main(int argc, char** argv) {
     
     // Camera Calibration Section
     string calib_path(argv[1]);
-    Size grid_size = Size(6,9); // Format (horizontal_corners, vertical_corners)
-    double grid_size_phys = 20;  // in [mm]
+    Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
+    double grid_size_phys = 5;  // in [mm]
 
     stringstream sref(argv[2]);
     int ref;
     sref>>ref; // 1 for refractive
 
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, ref);
+    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, ref, 0, 0);
     //calibration.grid_view();
     
     calibration.run();
-    /*
-    if (ref) {
-        calibration.write_calib_results_matlab_ref();
-    } else {
-        calibration.write_calib_results_matlab();
-    }
+    
     /*
     vector<int> const_pts;
     baProblem_ref ba_problem;
-    BA_refractive(ba_problem, "../temp/ba_data.txt", Size(1292,964), const_pts);
-    */
+    calibration.run_BA_refractive(ba_problem, "../temp/ba_data.txt", Size(1292,964), const_pts);
+    calibration.write_calib_results_matlab_ref();
 
+    /*
     int frame = 0;
     int mult = 0;
     double mult_exp = 1.0/9.0;
@@ -94,9 +90,9 @@ int main(int argc, char** argv) {
         
 
     }
-
-    //cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;
     
+    //cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;
+    */    
 
     return 1;
 

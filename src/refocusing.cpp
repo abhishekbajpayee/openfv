@@ -314,7 +314,6 @@ void saRefocus::uploadToGPU() {
 
 }
 
-
 void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
     z *= warp_factor_;
@@ -322,8 +321,7 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
     Scalar fact = Scalar(1/double(array_all[frame].size()));
 
     Mat H, trans;
-    T_from_P(P_mats_[0], H, z, scale_, img_size_);
-    cout<<scale_<<endl;
+    T_from_P(P_mats_u_[0], H, z, scale_, img_size_);
     gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
 
     if (mult_) {
@@ -336,7 +334,7 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
     for (int i=1; i<num_cams_; i++) {
         
-        T_from_P(P_mats_[i], H, z, scale_, img_size_);
+        T_from_P(P_mats_u_[i], H, z, scale_, img_size_);
         
         gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
 

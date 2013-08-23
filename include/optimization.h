@@ -9,6 +9,8 @@ using namespace std;
 // CLASS AND STRUCT DEFINITIONS
 
 // Read a Bundle Adjustment dataset
+
+// Container class for a pinhole bundle adjustment dataset
 class baProblem {
  
  public:
@@ -111,90 +113,7 @@ class baProblem {
     double* parameters_;
 };
 
-// Pinhole Reprojection Error function
-struct pinholeReprojectionError {
-pinholeReprojectionError(double observed_x, double observed_y, double cx, double cy, int num_cams)
-: observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams) {}
-    template <typename T>
-    bool operator()(const T* const camera,
-                    const T* const point,
-                    const T* const plane,
-                    T* residuals) const {
-        
-        // camera[0,1,2] are the angle-axis rotation.
-        T p[3];
-        ceres::AngleAxisRotatePoint(camera, point, p);
-        
-        // camera[3,4,5] are the translation.
-        p[0] += camera[3];
-        p[1] += camera[4];
-        p[2] += camera[5];
-        
-        // Compute the center of distortion.
-        T xp = p[0] / p[2];
-        T yp = p[1] / p[2];
-        
-        // Image principal points
-        T px = T(cx);
-        T py = T(cy);
-        
-        // Apply second and fourth order radial distortion.
-        const T& l1 = camera[7];
-        const T& l2 = camera[8];
-        T r2 = xp*xp + yp*yp;
-        T distortion = T(1.0) + r2  * (l1 + l2  * r2);
-        
-        // Compute final projected point position.
-        const T& focal = camera[6];
-        //T predicted_x = (focal * distortion * xp) + px;
-        //T predicted_y = (focal * distortion * yp) + py;
-        T predicted_x = (focal * xp) + px;
-        T predicted_y = (focal * yp) + py;
-
-        // The error is the squared euclidian distance between the predicted and observed position.
-        residuals[0] = predicted_x - T(observed_x);
-        residuals[1] = predicted_y - T(observed_y);
-
-        residuals[2] = plane[0]*point[0] + plane[1]*point[1] + plane[2]*point[2] + plane[3];
-        residuals[2] /= sqrt( pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2) );
-        residuals[2] /= T(num_cams);
-        
-        return true;
-    }
-    
-    double observed_x;
-    double observed_y;
-    double cx;
-    double cy;
-    int num_cams;
-    
-};
-
-// Grid physical size constraint
-struct gridPhysSizeError {
-    gridPhysSizeError(double grid_phys_size, int gridx, int gridy)
-    : grid_phys_size(grid_phys_size), gridx(gridx), gridy(gridy) {}
-    template <typename T>
-    bool operator()(const T* const p1,
-                    const T* const p2,
-                    const T* const p3,
-                    T* residuals) const {
-        
-        residuals[0] = sqrt(pow(p1[0]-p2[0],2) + pow(p1[1]-p2[1],2) + pow(p1[2]-p2[2],2)) 
-            - T((gridx-1)*grid_phys_size);
-        residuals[0] += sqrt(pow(p1[0]-p3[0],2) + pow(p1[1]-p3[1],2) + pow(p1[2]-p3[2],2)) 
-            - T((gridy-1)*grid_phys_size);
-        
-        return true;
-    }
-    
-    double grid_phys_size;
-    int gridx;
-    int gridy;
-    
-};
-
-// Read a refractive Bundle Adjustment dataset
+// Container class for a refractive bundle adjustment dataset
 class baProblem_ref {
  
  public:
@@ -312,6 +231,158 @@ class baProblem_ref {
 
 };
 
+// Pinhole Reprojection Error function
+class pinholeReprojectionError {
+
+ public:
+    
+ pinholeReprojectionError(double observed_x, double observed_y, double cx, double cy, int num_cams): 
+    observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams) {}
+    
+    template <typename T>
+    bool operator()(const T* const camera,
+                    const T* const point,
+                    T* residuals) const {
+        
+        // camera[0,1,2] are the angle-axis rotation.
+        T p[3];
+        ceres::AngleAxisRotatePoint(camera, point, p);
+        
+        // camera[3,4,5] are the translation.
+        p[0] += camera[3];
+        p[1] += camera[4];
+        p[2] += camera[5];
+        
+        // Compute the center of distortion.
+        T xp = p[0] / p[2];
+        T yp = p[1] / p[2];
+        
+        // Image principal points
+        T px = T(cx);
+        T py = T(cy);
+        
+        // Apply second and fourth order radial distortion.
+        const T& l1 = camera[7];
+        const T& l2 = camera[8];
+        T r2 = xp*xp + yp*yp;
+        T distortion = T(1.0) + r2  * (l1 + l2  * r2);
+        
+        // Compute final projected point position.
+        const T& focal = camera[6];
+        //T predicted_x = (focal * distortion * xp) + px;
+        //T predicted_y = (focal * distortion * yp) + py;
+        T predicted_x = (focal * xp) + px;
+        T predicted_y = (focal * yp) + py;
+
+        // The error is the squared euclidian distance between the predicted and observed position.
+        residuals[0] = predicted_x - T(observed_x);
+        residuals[1] = predicted_y - T(observed_y);
+        
+        return true;
+    }
+    
+    double observed_x;
+    double observed_y;
+    double cx;
+    double cy;
+    int num_cams;
+    
+};
+
+// Error of points from a plane in space
+class planeError {
+    
+ public:
+
+ planeError(int num_cams): num_cams(num_cams) {}
+
+    template <typename T>
+        bool operator()(const T* const point,
+                        const T* const plane,
+                        T* residuals) const {
+
+        residuals[0] = plane[0]*point[0] + plane[1]*point[1] + plane[2]*point[2] + plane[3];
+        residuals[0] /= sqrt( pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2) );
+        residuals[0] /= T(num_cams);
+
+        return true;
+
+    }
+
+ private:
+
+    int num_cams;
+
+};
+
+// Grid physical size constraint
+class gridPhysSizeError {
+    
+ public:
+ 
+ gridPhysSizeError(double grid_phys_size, int gridx, int gridy): 
+    grid_phys_size(grid_phys_size), gridx(gridx), gridy(gridy) {}
+    
+    template <typename T>
+        bool operator()(const T* const p1,
+                        const T* const p2,
+                        const T* const p3,
+                        T* residuals) const {
+        
+        residuals[0] = sqrt(pow(p1[0]-p2[0],2) + pow(p1[1]-p2[1],2) + pow(p1[2]-p2[2],2)) 
+            - T((gridx-1)*grid_phys_size);
+        residuals[0] += sqrt(pow(p1[0]-p3[0],2) + pow(p1[1]-p3[1],2) + pow(p1[2]-p3[2],2)) 
+            - T((gridy-1)*grid_phys_size);
+        
+        return true;
+    }
+
+ private:    
+    
+    double grid_phys_size;
+    int gridx;
+    int gridy;
+    
+};
+
+class zError {
+    
+ public:
+ 
+ zError() {}
+    
+    template <typename T>
+        bool operator()(const T* const p1,
+                        const T* const p2,
+                        const T* const p3,
+                        const T* const p4,
+                        T* residuals) const {
+        
+        residuals[0] = pow(p1[2]-T(0),2)+pow(p2[2]-T(0),2)+pow(p3[2]-T(0),2)+pow(p4[2]-T(0),2);
+        
+        return true;
+    }
+    
+};
+
+// xy plane constraint
+class xyPlaneError {
+    
+ public:
+ 
+ xyPlaneError() {}
+    
+    template <typename T>
+        bool operator()(const T* const plane,
+                        T* residuals) const {
+        
+        residuals[0] = pow(plane[0]-T(0),2)+pow(plane[1]-T(0),2)+pow(plane[2]-T(1),2)+pow(plane[3]-T(0),2);
+        
+        return true;
+    }
+    
+};
+
 // Refractive Reprojection Error function
 class refractiveReprojectionError {
 
@@ -323,7 +394,6 @@ class refractiveReprojectionError {
     template <typename T>
         bool operator()(const T* const camera,
                         const T* const point,
-                        const T* const plane,
                         T* residuals) const {
         
         // Inital guess for points on glass
@@ -418,10 +488,6 @@ class refractiveReprojectionError {
         // The error is the squared euclidian distance between the predicted and observed position.
         residuals[0] = predicted_x - T(observed_x);
         residuals[1] = predicted_y - T(observed_y);
-
-        residuals[2] = plane[0]*point[0] + plane[1]*point[1] + plane[2]*point[2] + plane[3];
-        residuals[2] /= sqrt( pow(plane[0],2) + pow(plane[1],2) + pow(plane[2],2) );
-        residuals[2] /= T(num_cams);
         
         return true;
 
@@ -432,103 +498,10 @@ class refractiveReprojectionError {
     
 };
 
-
-
-// Not used stuff
-/*
-class leastSquares {
- public:
-    ~leastSquares() {
-        delete[] parameters_;
-    }
-
-    double* mutable_params()          { return parameters_;                     }
-    int num_parameters()              { return num_parameters_;                 }
-    
-    bool LoadFile(const char* filename) {
-        FILE* fptr = fopen(filename, "r");
-        if (fptr == NULL) {
-            return false;
-        };
-        
-        FscanfOrDie(fptr, "%d", &num_parameters_);
-        
-        parameters_ = new double[num_parameters_];
-        
-        for (int i = 0; i < num_parameters_; ++i) {
-            FscanfOrDie(fptr, "%lf", parameters_ + i);
-        }
-        return true;
-    }
-    
- private:
-    template<typename T>
-        void FscanfOrDie(FILE *fptr, const char *format, T *value) {
-        int num_scanned = fscanf(fptr, format, value);
-        if (num_scanned != 1) {
-            LOG(FATAL) << "Invalid UW data file.";
-        }
-    }
-    
-    int num_parameters_;   
-    double* parameters_;
-};
-
-// Rotation Error function
-struct rotationError {
-rotationError(double x1, double y1, double z1, double x2, double y2, double z2)
-: x1(x1), y1(y1), z1(z1), x2(x2), y2(y2), z2(z2) {}
-
-    template <typename T>
-    bool operator()(const T* const params,
-                    T* residuals) const {
-        
-        // Applying rotation matrix
-        T r[3];
-        for (int i=0; i<3; i++) {
-            r[i] = params[(i*3)+0]*T(x2)+params[(i*3)+1]*T(y2)+params[(i*3)+2]*T(z2);
-        }
-
-        // The error is the euclidian distance between points
-        residuals[0] = pow(T(x2)-r[0], 2) + pow(T(y2)-r[1], 2) + pow(T(z2)-r[2], 2);
-        
-        return true;
-    }
-    
-    double x1, y1, z1, x2, y2, z2;
-    
-};
-
-// Plane Error function
-struct planeError {
-planeError(double x, double y, double z)
-: x(x), y(y), z(z) {}
-
-    template <typename T>
-    bool operator()(const T* const params,
-                    T* residuals) const {
-
-        // The error is normal distance from plane
-        residuals[0] = params[0]*T(x) + params[1]*T(y) + params[2]*T(z) + params[3];
-        residuals[0] /= sqrt(pow(params[0], 2) + pow(params[1], 2) + pow(params[2], 2));
-        
-        T den = sqrt(pow(params[0], 2) + pow(params[1], 2) + pow(params[2], 2));
-
-        // The error is square of deviation from plane equation
-        residuals[0] = (params[0]*T(x) + params[1]*T(y) + params[2]*T(z) + params[3])/den;
-        
-        return true;
-    }
-    
-    double x, y, z;
-    
-};
-*/
-
 // FUNCTION DEFINITIONS
 
-double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<int> const_points);
+//double BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<int> const_points);
 
-double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, vector<int> const_points);
+//double BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, vector<int> const_points);
 
 #endif
