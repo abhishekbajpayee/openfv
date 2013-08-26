@@ -72,6 +72,8 @@ class multiCamCalibration {
 
     void find_corners();
     void initialize_cams();
+    
+    void initialize_cams_ref();
 
     void write_BA_data();
     void write_BA_data_ref();

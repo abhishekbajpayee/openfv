@@ -71,12 +71,14 @@ void multiCamCalibration::run() {
         }
 
         find_corners();
-        initialize_cams();
         
         if (refractive_) {
+            initialize_cams();
+            //initialize_cams_ref();
             write_BA_data_ref();
             run_BA_ref();
         } else {
+            initialize_cams();
             write_BA_data();
             run_BA();
         }
@@ -391,6 +393,129 @@ void multiCamCalibration::find_corners() {
 
 }
 
+void multiCamCalibration::initialize_cams_ref() {
+
+    int cam=0;
+    double z = 27.5;
+
+    int points_per_img = grid_size_.width*grid_size_.height;
+    int num_imgs = calib_imgs_[cam].size();
+
+    double* points = new double[3*num_imgs*points_per_img];
+
+    double* camera = new double[9];
+    for (int j=0; j<9; j++) {
+        camera[j] = 0;
+    }
+    camera[6] = 9000;
+    camera[5] = -1000+z;
+
+    int origin=0;
+    for (int i=0; i<num_imgs; i++) {
+        for (int j=0; j<grid_size_.height; j++) {
+            for (int k=0; k<grid_size_.width; k++) {
+                if (i==origin) {
+                    points[3*(i*points_per_img+j*grid_size_.width+k)] = grid_size_phys_*(k - (grid_size_.width-1)*0.5);
+                    points[3*(i*points_per_img+j*grid_size_.width+k)+1] = grid_size_phys_*(j - (grid_size_.height-1)*0.5);
+                    points[3*(i*points_per_img+j*grid_size_.width+k)+2] = z;
+                } else {
+                    points[3*(i*points_per_img+j*grid_size_.width+k)] = (double(rand()%1)-0.5)*grid_size_phys_*grid_size_.width;
+                    points[3*(i*points_per_img+j*grid_size_.width+k)+1] = (double(rand()%1)-0.5)*grid_size_phys_*grid_size_.height;
+                    points[3*(i*points_per_img+j*grid_size_.width+k)+2] = z; // CHANGE?
+                }
+            }
+        }
+    }
+
+    double* planes = new double[num_imgs*4];
+    for (int i=0; i<num_imgs; i++) {
+        if (i==origin) {
+            planes[i*4] = 0;
+            planes[i*4+1] = 0;
+            planes[i*4+2] = 1;
+            planes[i*4+3] = 0;
+        } else {
+            planes[i*4] = 1;
+            planes[i*4+1] = 1;
+            planes[i*4+2] = 1;
+            planes[i*4+3] = 1;
+        }
+    }
+
+    ceres::Problem problem;
+    for (int i=0; i<num_imgs; i++) {
+        for (int j=0; j<points_per_img; j++) {
+
+            ceres::CostFunction* cost_function1 =
+                new ceres::NumericDiffCostFunction<refractiveReprojectionError, ceres::CENTRAL, 2, 9, 3>
+                (new refractiveReprojectionError(all_corner_points_[cam][i][j].x,
+                                                 all_corner_points_[cam][i][j].y,
+                                                 img_size_.width*0.5, img_size_.height*0.5, 
+                                                 1, 5.0, 1.0, 1.0, 1.3, 0 ));
+            
+            problem.AddResidualBlock(cost_function1,
+                                     NULL,
+                                     camera, points + 3*(i*points_per_img + j));
+
+            if (i==origin)
+                problem.SetParameterBlockConstant(points + 3*(i*points_per_img + j));
+       
+            ceres::CostFunction* cost_function2 =
+                new ceres::AutoDiffCostFunction<planeError, 1, 3, 4>
+                (new planeError(1));
+
+            problem.AddResidualBlock(cost_function2,
+                                     NULL,
+                                     points + 3*(i*points_per_img + j), planes + i*4);
+
+        /*
+
+          problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
+
+        */
+
+        }
+    }
+    
+    // Adding constraint for grid physical size
+    for (int i=0; i<num_imgs; i++) {
+        
+        ceres::CostFunction* cost_function3 = 
+            new ceres::NumericDiffCostFunction<gridPhysSizeError, ceres::CENTRAL, 1, 3, 3, 3>
+            (new gridPhysSizeError(grid_size_phys_, grid_size_.width, grid_size_.height));
+        
+        problem.AddResidualBlock(cost_function3,
+                                 NULL,
+                                 points + 3*(i*points_per_img) + 0,
+                                 points + 3*(i*points_per_img) + 3*(grid_size_.width-1),
+                                 points + 3*(i*points_per_img) + 3*(grid_size_.width*(grid_size_.height-1)));
+
+    }
+    
+
+    cout<<"Initializing Cam"<<endl;
+    ceres::Solver::Options options;
+    options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;//DENSE_SCHUR;
+    options.minimizer_progress_to_stdout = true;
+    options.max_num_iterations = refractive_max_iterations;
+    
+    int threads = omp_get_num_procs();
+    options.num_threads = threads;
+    cout<<"\nSolver using "<<threads<<" threads.\n\n";
+
+    options.gradient_tolerance = 1E-12;
+    options.function_tolerance = 1E-8;
+    
+    ceres::Solver::Summary summary;
+    ceres::Solve(options, &problem, &summary);
+    cout<<summary.FullReport()<<"\n";
+    
+    for (int i=0; i<9; i++) {
+        cout<<camera[i]<<endl;
+    }
+
+}
+
 // TODO: NOT GENERAL. THIS INITIALIZES CAMERAS SO THAT THEY ARE CORRECT FOR BLENDER.
 void multiCamCalibration::initialize_cams() {
 
@@ -571,46 +696,25 @@ void multiCamCalibration::write_BA_data_ref() {
             file<<tvecs_[i][0].at<double>(0,j)<<"\t";
         }
         
-        //file<<cameraMats_[i].at<double>(0,0)<<"\t";
-        file<<9000.0<<"\t";
+        file<<cameraMats_[i].at<double>(0,0)<<"\t";
+        //file<<9000.0<<"\t";
         //for (int j=0; j<2; j++) file<<dist_coeffs[i].at<double>(0,j)<<"\n";
         file<<0<<"\t"<<0<<endl;
     }
     
     int width = 25;
-    int height = 20;
+    int height = 25;
     // add back projected point guesses here
-    double z = 30;
-    int op1 = (origin_image_id_)*grid_size_.width*grid_size_.height;
-    int op2 = op1+grid_size_.width-1;
-    int op3 = op1+(grid_size_.width*(grid_size_.height-1));
-    const_points_.push_back(op1);
-    const_points_.push_back(op2);
-    const_points_.push_back(op3);
+    double z = 27.5;
+    
     
     for (int i=0; i<num_points; i++) {
-        /*
-        if (i==op1) {
-            file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
-            file<<double(-grid_size_.height*grid_size_phys_*0.5)<<"\t";
-            file<<z<<"\t"<<endl;
-        } else if (i==op2) {
-            file<<double(grid_size_.width*grid_size_phys_*0.5)<<"\t";
-            file<<double(-grid_size_.height*grid_size_phys_*0.5)<<"\t";
-            file<<z<<"\t"<<endl;
-        } else if (i==op3) {
-            file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
-            file<<double(grid_size_.height*grid_size_phys_*0.5)<<"\t";
-            file<<z<<"\t"<<endl;
-        } else {
-            file<<(double(rand()%50)-(width*0.5))<<"\t";
-            file<<(double(rand()%50)-(height*0.5))<<"\t";
-            file<<(rand()%50)+z<<"\t"<<endl;
-        }
-        */
+        
         file<<(double(rand()%width)-(width*0.5))<<"\t";
         file<<(double(rand()%height)-(height*0.5))<<"\t";
-        file<<(rand()%100)<<"\t"<<endl;
+        file<<double(rand()%100)<<"\t"<<endl;
+        //file<<0<<"\t"<<endl;
+
     }
     
     
@@ -641,7 +745,8 @@ void multiCamCalibration::write_BA_data_ref() {
     file<<1.0<<endl;
     file<<1.0<<endl;
     file<<1.3<<endl;
-    file<<100-72.5<<endl;
+    //file<<100-72.5<<endl;
+    file<<-27.5<<endl;
 
     file.close();
     cout<<"DONE!\n";

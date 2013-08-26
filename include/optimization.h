@@ -411,9 +411,9 @@ class refractiveReprojectionError {
         // All the refraction stuff
         T* a = new T[3];
         T* b = new T[3];
-        a[0] = c[0] + (point[0]-c[0])*(T(-t_)-T(z0_)-c[2])/(point[2]-c[2]);
-        a[1] = c[1] + (point[1]-c[1])*(T(-t_)-T(z0_)-c[2])/(point[2]-c[2]);
-        a[2] = T(-t_)-T(z0_);
+        a[0] = c[0] + (point[0]-c[0])*(T(-t_)+T(z0_)-c[2])/(point[2]-c[2]);
+        a[1] = c[1] + (point[1]-c[1])*(T(-t_)+T(z0_)-c[2])/(point[2]-c[2]);
+        a[2] = T(-t_)+T(z0_);
         b[0] = c[0] + (point[0]-c[0])*(T(z0_)-c[2])/(point[2]-c[2]);
         b[1] = c[1] + (point[1]-c[1])*(T(z0_)-c[2])/(point[2]-c[2]);
         b[2] = T(z0_);
@@ -430,18 +430,18 @@ class refractiveReprojectionError {
         T f, g, dfdra, dfdrb, dgdra, dgdrb;
         
         // Newton Raphson loop to solve for Snell's law
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<20; i++) {
 
             f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( T(n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
             g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( T(n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );
             
             dfdra = ( T(1.0)/sqrt(pow(ra,2)+pow(da,2)) )
                 - ( pow(ra,2)/pow(pow(ra,2)+pow(da,2),1.5) )
-                + ( T(n2_/n2_)/sqrt(pow(ra-rb,2)+pow(db,2)) )
+                + ( T(n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) )
                 - ( T(n2_/n1_)*(ra-rb)*(T(2)*ra-T(2)*rb)/(T(2)*pow(pow(ra-rb,2)+pow(db,2),1.5)) );
 
             dfdrb = ( T(n2_/n1_)*(ra-rb)*(T(2)*ra-T(2)*rb)/(T(2)*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
-                - ( T(n2_/n2_)/sqrt(pow(ra-rb,2)+pow(db,2)) );
+                - ( T(n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) );
 
             dgdra = ( (ra-rb)*(T(2)*ra-T(2)*rb)/(T(2)*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
                 - ( T(1.0)/sqrt(pow(ra-rb,2)+pow(db,2)) );
