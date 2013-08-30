@@ -733,9 +733,14 @@ void multiCamCalibration::write_BA_data_ref() {
     param = 1;
     for (int i=0; i<imgs_per_cam; i++) {
             
-        for (int j=0; j<4; j++) {
-            file<<param<<"\t";
+        for (int j=0; j<3; j++) {
+            file<<0<<"\t";
         }
+
+        file<<0<<"\t";
+        file<<0<<"\t";
+        file<<i*10.0<<"\t";
+
         file<<endl;
 
     }
@@ -893,18 +898,20 @@ double multiCamCalibration::run_BA_refractive(baProblem_ref &ba_problem, string 
         // dimensional residual. Internally, the cost function stores the observed
         // image location and compares the reprojection against the observation.
         ceres::CostFunction* cost_function1 =
-            new ceres::NumericDiffCostFunction<refractiveReprojectionError, ceres::CENTRAL, 2, 9, 3>
-            (new refractiveReprojectionError(ba_problem.observations()[2 * i + 0],
-                                             ba_problem.observations()[2 * i + 1],
-                                             ba_problem.cx, ba_problem.cy, 
-                                             ba_problem.num_cameras(),
-                                             ba_problem.t(), ba_problem.n1(), ba_problem.n2(), ba_problem.n3(), ba_problem.z0() ));
+            new ceres::NumericDiffCostFunction<refractiveReprojError, ceres::CENTRAL, 2, 9, 6>
+            (new refractiveReprojError(ba_problem.observations()[2 * i + 0],
+                                       ba_problem.observations()[2 * i + 1],
+                                       ba_problem.cx, ba_problem.cy, 
+                                       ba_problem.num_cameras(),
+                                       ba_problem.t(), ba_problem.n1(), ba_problem.n2(), ba_problem.n3(), ba_problem.z0(),
+                                       grid_size_.width, grid_size_.height, grid_size_phys_, ba_problem.point_index()[i] ));
         
         problem.AddResidualBlock(cost_function1,
                                  NULL,
                                  ba_problem.mutable_camera_for_observation(i),
-                                 ba_problem.mutable_point_for_observation(i));
+                                 ba_problem.mutable_plane_for_observation(i));
         
+        /*
         ceres::CostFunction* cost_function2 =
             new ceres::AutoDiffCostFunction<planeError, 1, 3, 4>
             (new planeError(ba_problem.num_cameras()));
@@ -913,7 +920,7 @@ double multiCamCalibration::run_BA_refractive(baProblem_ref &ba_problem, string 
                                  NULL,
                                  ba_problem.mutable_point_for_observation(i),
                                  ba_problem.mutable_plane_for_observation(i));
-
+        */
         /*
 
           problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
@@ -950,7 +957,7 @@ double multiCamCalibration::run_BA_refractive(baProblem_ref &ba_problem, string 
     options.max_num_iterations = refractive_max_iterations;
     
     int threads = omp_get_num_procs();
-    options.num_threads = threads;
+    options.num_threads = 1; //threads;
     cout<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;

@@ -158,7 +158,8 @@ class baProblem_ref {
         return mutable_points() + point_index_[i] * 3;
     }
     double* mutable_plane_for_observation(int i) {
-        return mutable_planes() + plane_index_[i] * 4;
+        //return mutable_planes() + plane_index_[i] * 4;
+        return mutable_planes() + plane_index_[i] * 6;
     }
     
     bool LoadFile(const char* filename) {
@@ -177,7 +178,8 @@ class baProblem_ref {
         plane_index_ = new int[num_observations_];
         observations_ = new double[2 * num_observations_];
         
-        num_parameters_ = (9 * num_cameras_) + (3 * num_points_) + (4 * num_planes_);
+        //num_parameters_ = (9 * num_cameras_) + (3 * num_points_) + (4 * num_planes_);
+        num_parameters_ = (9 * num_cameras_) + (3 * num_points_) + (6 * num_planes_);
         parameters_ = new double[num_parameters_];
         
         for (int i = 0; i < num_observations_; ++i) {
@@ -495,6 +497,136 @@ class refractiveReprojectionError {
     
     double observed_x, observed_y, cx, cy, t_, n1_, n2_, n3_, z0_;
     int num_cams;
+    
+};
+
+// Refractive Reprojection Error function for planes
+class refractiveReprojError {
+
+ public:
+
+ refractiveReprojError(double observed_x, double observed_y, double cx, double cy, int num_cams, double t, double n1, double n2, double n3, double z0, int gridx, int gridy, double grid_phys, int index)
+     : observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams), t_(t), n1_(n1), n2_(n2), n3_(n3), z0_(z0), gridx_(gridx), gridy_(gridy), grid_phys_(grid_phys), index_(index) { cout<<index_<<endl; }
+    
+    template <typename T>
+        bool operator()(const T* const camera,
+                        const T* const plane,
+                        T* residuals) const {
+        
+        // Inital guess for points on glass
+        T* R = new T[9];
+        ceres::AngleAxisToRotationMatrix(camera, R);
+
+        T c[3];
+        for (int i=0; i<3; i++) {
+            c[i] = T(0);
+            for (int j=0; j<3; j++) {
+                c[i] += -R[i*1 + j*3]*camera[j+3];
+            }
+        }
+
+        // Generate point on grid
+        int number = index_ - floor(index_/(gridx_*gridy_))*(gridx_*gridy_);
+        int j = floor(number/gridx_);
+        int i = number - j*gridx_;
+        
+        
+        
+        T* grid_point = new T[3];
+        grid_point[0] = T(i*grid_phys_); grid_point[1] = T(j*grid_phys_); grid_point[2] = T(0);
+        
+        // Move point to be on given grid plane
+        T point[3];
+        ceres::AngleAxisRotatePoint(plane, grid_point, point);
+        point[0] += plane[3]; point[1] += plane[4]; point[2] += plane[5]; 
+        
+        // Solve for refraction to reproject point into camera
+        T* a = new T[3];
+        T* b = new T[3];
+        a[0] = c[0] + (point[0]-c[0])*(T(-t_)+T(z0_)-c[2])/(point[2]-c[2]);
+        a[1] = c[1] + (point[1]-c[1])*(T(-t_)+T(z0_)-c[2])/(point[2]-c[2]);
+        a[2] = T(-t_)+T(z0_);
+        b[0] = c[0] + (point[0]-c[0])*(T(z0_)-c[2])/(point[2]-c[2]);
+        b[1] = c[1] + (point[1]-c[1])*(T(z0_)-c[2])/(point[2]-c[2]);
+        b[2] = T(z0_);
+        
+        T rp = sqrt( pow(point[0]-c[0],2) + pow(point[1]-c[1],2) );
+        T dp = point[2]-b[2];
+        T phi = atan2(point[1]-c[1],point[0]-c[0]);
+        
+        T ra = sqrt( pow(a[0]-c[0],2) + pow(a[1]-c[1],2) );
+        T rb = sqrt( pow(b[0]-c[0],2) + pow(b[1]-c[1],2) );
+        T da = a[2]-c[2];
+        T db = b[2]-a[2];
+        
+        T f, g, dfdra, dfdrb, dgdra, dgdrb;
+        
+        // Newton Raphson loop to solve for Snell's law
+        for (int iter=0; iter<20; iter++) {
+            
+            f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( T(n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
+            g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( T(n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );
+            
+            dfdra = ( T(1.0)/sqrt(pow(ra,2)+pow(da,2)) )
+                - ( pow(ra,2)/pow(pow(ra,2)+pow(da,2),1.5) )
+                + ( T(n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) )
+                - ( T(n2_/n1_)*(ra-rb)*(T(2)*ra-T(2)*rb)/(T(2)*pow(pow(ra-rb,2)+pow(db,2),1.5)) );
+            
+            dfdrb = ( T(n2_/n1_)*(ra-rb)*(T(2)*ra-T(2)*rb)/(T(2)*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+                - ( T(n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) );
+            
+            dgdra = ( (ra-rb)*(T(2)*ra-T(2)*rb)/(T(2)*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+                - ( T(1.0)/sqrt(pow(ra-rb,2)+pow(db,2)) );
+            
+            dgdrb = ( T(1.0)/sqrt(pow(ra-rb,2)+pow(db,2)) )
+                + ( T(n3_/n2_)/sqrt(pow(rb-rp,2)+pow(dp,2)) )
+                - ( (ra-rb)*(T(2)*ra-T(2)*rb)/(T(2)*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+                - ( T(n3_/n2_)*(rb-rp)*(T(2)*rb-T(2)*rp)/(T(2)*pow(pow(rb-rp,2)+pow(dp,2),1.5)) );
+            
+            ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
+            rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
+            
+                }
+        
+        a[0] = ra*cos(phi) + c[0];
+        a[1] = ra*sin(phi) + c[1];
+        
+        // Continuing projecting point a to camera
+        T p[3];
+        ceres::AngleAxisRotatePoint(camera, a, p);
+        
+        // camera[3,4,5] are the translation.
+        p[0] += camera[3]; p[1] += camera[4]; p[2] += camera[5];
+        
+        // Compute the center of distortion.
+        T xp = p[0] / p[2]; T yp = p[1] / p[2];
+        
+        // Image principal points
+        T px = T(cx); T py = T(cy);
+        
+        // Apply second and fourth order radial distortion.
+        const T& l1 = camera[7];
+        const T& l2 = camera[8];
+        T r2 = xp*xp + yp*yp;
+        T distortion = T(1.0) + r2  * (l1 + l2  * r2);
+        
+        // Compute final projected point position.
+        const T& focal = camera[6];
+        //T predicted_x = (focal * distortion * xp) + px;
+        //T predicted_y = (focal * distortion * yp) + py;
+        T predicted_x = (focal * xp) + px;
+        T predicted_y = (focal * yp) + py;
+        
+        // The error is the squared euclidian distance between the predicted and observed position.
+        residuals[0] = abs(predicted_x - T(observed_x));
+        residuals[1] = abs(predicted_y - T(observed_y));
+       
+        return true;
+                
+    }
+    
+    double observed_x, observed_y, cx, cy, t_, n1_, n2_, n3_, z0_, grid_phys_;
+    int num_cams, gridx_, gridy_, index_;
     
 };
 
