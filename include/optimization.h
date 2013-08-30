@@ -158,8 +158,7 @@ class baProblem_ref {
         return mutable_points() + point_index_[i] * 3;
     }
     double* mutable_plane_for_observation(int i) {
-        //return mutable_planes() + plane_index_[i] * 4;
-        return mutable_planes() + plane_index_[i] * 6;
+        return mutable_planes() + plane_index_[i] * 4;
     }
     
     bool LoadFile(const char* filename) {
@@ -178,8 +177,121 @@ class baProblem_ref {
         plane_index_ = new int[num_observations_];
         observations_ = new double[2 * num_observations_];
         
-        //num_parameters_ = (9 * num_cameras_) + (3 * num_points_) + (4 * num_planes_);
-        num_parameters_ = (9 * num_cameras_) + (3 * num_points_) + (6 * num_planes_);
+        num_parameters_ = (9 * num_cameras_) + (3 * num_points_) + (4 * num_planes_);
+        parameters_ = new double[num_parameters_];
+        
+        for (int i = 0; i < num_observations_; ++i) {
+            FscanfOrDie(fptr, "%d", camera_index_ + i);
+            FscanfOrDie(fptr, "%d", plane_index_ + i);
+            FscanfOrDie(fptr, "%d", point_index_ + i);
+            for (int j = 0; j < 2; ++j) {
+                FscanfOrDie(fptr, "%lf", observations_ + 2*i + j);
+            }
+        }
+        
+        for (int i = 0; i < num_parameters_; ++i) {
+            FscanfOrDie(fptr, "%lf", parameters_ + i);
+        }
+        
+        FscanfOrDie(fptr, "%lf", &t_);
+        FscanfOrDie(fptr, "%lf", &n1_);
+        FscanfOrDie(fptr, "%lf", &n2_);
+        FscanfOrDie(fptr, "%lf", &n3_);
+        FscanfOrDie(fptr, "%lf", &z0_);
+
+        return true;
+    }
+
+    double cx;
+    double cy;
+    double scale;
+
+ private:
+    template<typename T>
+        void FscanfOrDie(FILE *fptr, const char *format, T *value) {
+        int num_scanned = fscanf(fptr, format, value);
+        if (num_scanned != 1) {
+            LOG(FATAL) << "Invalid UW data file.";
+        }
+    }
+    
+    int num_cameras_;
+    int num_planes_;
+    int num_points_;
+    int* point_index_;
+    int* camera_index_;
+    int* plane_index_;
+    int num_observations_;
+    int num_parameters_;
+    
+    double* observations_;
+    double* parameters_;
+
+    double t_, n1_, n2_, n3_, z0_;
+
+};
+
+class baProblem_plane {
+ 
+ public:
+    ~baProblem_plane() {
+        delete[] point_index_;
+        delete[] camera_index_;
+        delete[] plane_index_;
+        delete[] observations_;
+        delete[] parameters_;
+    }
+
+    baProblem_plane() {
+        point_index_ = NULL;
+        camera_index_ = NULL;
+        plane_index_ = NULL;
+        observations_ = NULL;
+        parameters_ = NULL;
+    }
+
+    int num_observations()       const { return num_observations_;               }
+    const double* observations() const { return observations_;                   }
+    double* mutable_cameras()          { return parameters_;                     }
+    double* mutable_planes()           { return parameters_ + 9 * num_cameras_; }
+    
+    int num_cameras()                  { return num_cameras_;                    }
+    int num_planes()                   { return num_planes_;                     }
+    int num_points()                   { return num_points_;                     }
+    int* camera_index()                { return camera_index_;                   }
+    int* point_index()                 { return point_index_;                    }
+    int* plane_index()                 { return plane_index_;                    }
+
+    double t()                         { return t_;  }
+    double n1()                        { return n1_; }
+    double n2()                        { return n2_; }
+    double n3()                        { return n3_; }
+    double z0()                        { return z0_; }
+    
+    double* mutable_camera_for_observation(int i) {
+        return mutable_cameras() + camera_index_[i] * 9;
+    }
+    double* mutable_plane_for_observation(int i) {
+        return mutable_planes() + plane_index_[i] * 6;
+    }
+    
+    bool LoadFile(const char* filename) {
+        FILE* fptr = fopen(filename, "r");
+        if (fptr == NULL) {
+            return false;
+        };
+        
+        FscanfOrDie(fptr, "%d", &num_cameras_);
+        FscanfOrDie(fptr, "%d", &num_planes_);
+        FscanfOrDie(fptr, "%d", &num_points_);
+        FscanfOrDie(fptr, "%d", &num_observations_);
+        
+        camera_index_ = new int[num_observations_];
+        plane_index_ = new int[num_observations_];
+        point_index_ = new int[num_observations_];
+        observations_ = new double[2 * num_observations_];
+        
+        num_parameters_ = (9 * num_cameras_) + (6 * num_planes_);
         parameters_ = new double[num_parameters_];
         
         for (int i = 0; i < num_observations_; ++i) {
@@ -505,14 +617,14 @@ class refractiveReprojError {
 
  public:
 
- refractiveReprojError(double observed_x, double observed_y, double cx, double cy, int num_cams, double t, double n1, double n2, double n3, double z0, int gridx, int gridy, double grid_phys, int index)
-     : observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams), t_(t), n1_(n1), n2_(n2), n3_(n3), z0_(z0), gridx_(gridx), gridy_(gridy), grid_phys_(grid_phys), index_(index) { cout<<index_<<endl; }
+ refractiveReprojError(double observed_x, double observed_y, double cx, double cy, int num_cams, double t, double n1, double n2, double n3, double z0, int gridx, int gridy, double grid_phys, int index, int plane_id)
+     : observed_x(observed_x), observed_y(observed_y), cx(cx), cy(cy), num_cams(num_cams), t_(t), n1_(n1), n2_(n2), n3_(n3), z0_(z0), gridx_(gridx), gridy_(gridy), grid_phys_(grid_phys), index_(index), plane_id_(plane_id) { }
     
     template <typename T>
         bool operator()(const T* const camera,
                         const T* const plane,
                         T* residuals) const {
-        
+
         // Inital guess for points on glass
         T* R = new T[9];
         ceres::AngleAxisToRotationMatrix(camera, R);
@@ -526,7 +638,7 @@ class refractiveReprojError {
         }
 
         // Generate point on grid
-        int number = index_ - floor(index_/(gridx_*gridy_))*(gridx_*gridy_);
+        int number = index_ - plane_id_*(gridx_*gridy_);
         int j = floor(number/gridx_);
         int i = number - j*gridx_;
         
@@ -608,25 +720,23 @@ class refractiveReprojError {
         const T& l1 = camera[7];
         const T& l2 = camera[8];
         T r2 = xp*xp + yp*yp;
-        T distortion = T(1.0) + r2  * (l1 + l2  * r2);
+        //T distortion = T(1.0) + r2  * (l1 + l2  * r2);
         
         // Compute final projected point position.
         const T& focal = camera[6];
-        //T predicted_x = (focal * distortion * xp) + px;
-        //T predicted_y = (focal * distortion * yp) + py;
         T predicted_x = (focal * xp) + px;
         T predicted_y = (focal * yp) + py;
         
         // The error is the squared euclidian distance between the predicted and observed position.
-        residuals[0] = abs(predicted_x - T(observed_x));
-        residuals[1] = abs(predicted_y - T(observed_y));
+        residuals[0] = predicted_x - T(observed_x);
+        residuals[1] = predicted_y - T(observed_y);
        
         return true;
                 
     }
     
     double observed_x, observed_y, cx, cy, t_, n1_, n2_, n3_, z0_, grid_phys_;
-    int num_cams, gridx_, gridy_, index_;
+    int num_cams, gridx_, gridy_, index_, plane_id_;
     
 };
 

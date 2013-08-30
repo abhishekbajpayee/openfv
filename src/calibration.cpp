@@ -84,13 +84,13 @@ void multiCamCalibration::run() {
         }
         
         //calc_space_warp_factor();
-
+        
         if (refractive_) {
             write_calib_results_ref();
         } else {
             write_calib_results();
         }
-
+        
         if (refractive_) {
             write_calib_results_matlab_ref();
         } else {
@@ -339,6 +339,8 @@ void multiCamCalibration::find_corners() {
     vector< vector<Point2f> > corner_points;
     vector<Point2f> points;
     Mat scene, scene_gray, scene_drawn;
+
+    Mat_<double> found_mat = Mat_<double>::zeros(num_cams_, calib_imgs_[0].size());
     
     cout<<"\nFINDING CORNERS...\n\n";
     for (int i=0; i<num_cams_; i++) {
@@ -350,15 +352,16 @@ void multiCamCalibration::find_corners() {
         for (int j=0; j<imgs_temp.size(); j++) {
 
             //equalizeHist(imgs_temp[j], scene);
-            scene = imgs_temp[j]*255.0;
-            scene.convertTo(scene, CV_8U);
+            scene = imgs_temp[j];//*255.0;
+            //scene.convertTo(scene, CV_8U);
             bool found = findChessboardCorners(scene, grid_size_, points, CV_CALIB_CB_ADAPTIVE_THRESH);
             
             if (found) {
                 //cvtColor(scene, scene_gray, CV_RGB2GRAY);
                 cornerSubPix(scene, points, Size(10, 10), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
                 corner_points.push_back(points);
-                
+                found_mat(i,j) = 1;
+
                 if (show_corners_flag) {
                     scene_drawn = scene;
                     drawChessboardCorners(scene_drawn, grid_size_, points, found);
@@ -370,12 +373,20 @@ void multiCamCalibration::find_corners() {
                 
             } else {
                 not_found++;
+                
+                points.clear(); points.push_back(Point2f(0,0));
+                corner_points.push_back(points);
+
+                if (show_corners_flag) {
+                    namedWindow("Pattern not found!", CV_WINDOW_AUTOSIZE);
+                    imshow("Pattern not found!", scene);
+                }
                 //cout<<"pattern not found!\n";
             }
 
         }
 
-        all_corner_points_.push_back(corner_points);
+        all_corner_points_raw_.push_back(corner_points);
         corner_points.clear();
         cout<<"done! Corners not found in "<<not_found<<" image(s)"<<endl;
         if (not_found==imgs_temp.size()) {
@@ -383,6 +394,28 @@ void multiCamCalibration::find_corners() {
             exit(0);
         }
 
+    }
+
+    // Getting rid of unfound corners
+    Mat_<double> a = Mat_<double>::ones(1,num_cams_);
+    Mat b = (a*found_mat)/num_cams_;
+    int sum=0;
+    for (int i=0; i<b.cols; i++)
+        sum += floor(b.at<double>(0,i));
+
+    if (sum<3) {
+        cout<<"Not enough pictures from each camera with found corners!"<<endl;
+        exit(0);
+    }
+
+    for (int i=0; i<num_cams_; i++) {
+        for (int j=0; j<b.cols; j++) {
+            if (b.at<double>(0,j)==1.0) {
+                corner_points.push_back(all_corner_points_raw_[i][j]);
+            }
+        }
+        all_corner_points_.push_back(corner_points);
+        corner_points.clear();
     }
 
     get_grid_size_pix();
@@ -696,40 +729,12 @@ void multiCamCalibration::write_BA_data_ref() {
             file<<tvecs_[i][0].at<double>(0,j)<<"\t";
         }
         
-        file<<cameraMats_[i].at<double>(0,0)<<"\t";
-        //file<<9000.0<<"\t";
+        //file<<cameraMats_[i].at<double>(0,0)<<"\t";
+        file<<9000.0<<"\t";
         //for (int j=0; j<2; j++) file<<dist_coeffs[i].at<double>(0,j)<<"\n";
         file<<0<<"\t"<<0<<endl;
     }
     
-    int width = 25;
-    int height = 25;
-    // add back projected point guesses here
-    double z = 27.5;
-    
-    
-    for (int i=0; i<num_points; i++) {
-        
-        file<<(double(rand()%width)-(width*0.5))<<"\t";
-        file<<(double(rand()%height)-(height*0.5))<<"\t";
-        file<<double(rand()%100)<<"\t"<<endl;
-        //file<<0<<"\t"<<endl;
-
-    }
-    
-    
-    /*
-    for (int k=0; k<num_imgs_; k++) {
-    for (int i=0; i<6; i++) {
-        for (int j=0; j<5; j++) {
-            file<<(5*i)<<endl<<(5*j)<<endl<<(10*k)<<endl;
-            //file2<<(5*i)-25<<endl<<(5*j)-20<<endl<<(5*k)-20<<endl;
-        }
-    }
-    }
-    */
-    
-
     param = 1;
     for (int i=0; i<imgs_per_cam; i++) {
             
@@ -739,7 +744,7 @@ void multiCamCalibration::write_BA_data_ref() {
 
         file<<0<<"\t";
         file<<0<<"\t";
-        file<<i*10.0<<"\t";
+        file<<0<<"\t";
 
         file<<endl;
 
@@ -751,7 +756,7 @@ void multiCamCalibration::write_BA_data_ref() {
     file<<1.0<<endl;
     file<<1.3<<endl;
     //file<<100-72.5<<endl;
-    file<<-27.5<<endl;
+    file<<-100.0<<endl;
 
     file.close();
     cout<<"DONE!\n";
@@ -876,7 +881,7 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
 }
 
 // Refractivee bundle adjustment function
-double multiCamCalibration::run_BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, vector<int> const_points) {
+double multiCamCalibration::run_BA_refractive(baProblem_plane &ba_problem, string ba_file, Size img_size, vector<int> const_points) {
 
     cout<<"\nRUNNING REFRACTIVE BUNDLE ADJUSTMENT TO CALIBRATE CAMERAS...\n";
     //google::InitGoogleLogging(argv);
@@ -904,23 +909,14 @@ double multiCamCalibration::run_BA_refractive(baProblem_ref &ba_problem, string 
                                        ba_problem.cx, ba_problem.cy, 
                                        ba_problem.num_cameras(),
                                        ba_problem.t(), ba_problem.n1(), ba_problem.n2(), ba_problem.n3(), ba_problem.z0(),
-                                       grid_size_.width, grid_size_.height, grid_size_phys_, ba_problem.point_index()[i] ));
+                                       grid_size_.width, grid_size_.height, grid_size_phys_, 
+                                       ba_problem.point_index()[i], ba_problem.plane_index()[i] ));
         
         problem.AddResidualBlock(cost_function1,
                                  NULL,
                                  ba_problem.mutable_camera_for_observation(i),
                                  ba_problem.mutable_plane_for_observation(i));
         
-        /*
-        ceres::CostFunction* cost_function2 =
-            new ceres::AutoDiffCostFunction<planeError, 1, 3, 4>
-            (new planeError(ba_problem.num_cameras()));
-
-        problem.AddResidualBlock(cost_function2,
-                                 NULL,
-                                 ba_problem.mutable_point_for_observation(i),
-                                 ba_problem.mutable_plane_for_observation(i));
-        */
         /*
 
           problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
@@ -929,35 +925,16 @@ double multiCamCalibration::run_BA_refractive(baProblem_ref &ba_problem, string 
 
     }
 
-    int gridx = grid_size_.width;
-    int gridy = grid_size_.height;
-    
-    // Adding constraint for grid physical size
-    for (int i=0; i<ba_problem.num_planes(); i++) {
-
-        ceres::CostFunction* cost_function3 = 
-            new ceres::NumericDiffCostFunction<gridPhysSizeError, ceres::CENTRAL, 1, 3, 3, 3>
-            (new gridPhysSizeError(grid_size_phys_, gridx, gridy));
-
-        problem.AddResidualBlock(cost_function3,
-                                 NULL,
-                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 0,
-                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx-1),
-                                 ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)));
-
-    }
-    
-
     // Make Ceres automatically detect the bundle structure. Note that the
     // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
     // for standard bundle adjustment problems.
     ceres::Solver::Options options;
-    options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;//DENSE_SCHUR;
+    options.linear_solver_type = ceres::DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
-    options.max_num_iterations = refractive_max_iterations;
+    options.max_num_iterations = 100; //refractive_max_iterations;
     
     int threads = omp_get_num_procs();
-    options.num_threads = 1; //threads;
+    options.num_threads = threads-2;
     cout<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;
@@ -1451,8 +1428,7 @@ void multiCamCalibration::write_calib_results_matlab() {
 // camera locations for refractive calibration
 void multiCamCalibration::write_calib_results_matlab_ref() {
 
-    ofstream file, file1, file2, file3, file4, file5;
-    file.open("../matlab/world_points.txt");
+    ofstream file1, file2, file3, file4, file5;
     file1.open("../matlab/camera_points.txt");
     file2.open("../matlab/plane_params.txt");
     file3.open("../matlab/P_mats.txt");
@@ -1467,22 +1443,12 @@ void multiCamCalibration::write_calib_results_matlab_ref() {
     int num_cameras = ba_problem_ref_.num_cameras();
     double* camera_params = ba_problem_ref_.mutable_cameras();
 
-    int num_points = ba_problem_ref_.num_points();
-    double* world_points = ba_problem_ref_.mutable_points();
-
     int num_planes = ba_problem_ref_.num_planes();
     double* plane_params = ba_problem_ref_.mutable_planes();
-
-    for (int i=0; i<num_points; i++) {
-        for (int j=0; j<3; j++) {
-            file<<world_points[(i*3)+j]<<"\t";
-        }
-        file<<endl;
-    }
-
+    
     for (int i=0; i<num_planes; i++) {
-        for (int j=0; j<4; j++) {
-            file2<<plane_params[(i*4)+j]<<"\t";
+        for (int j=0; j<6; j++) {
+            file2<<plane_params[(i*6)+j]<<"\t";
         }
         file2<<endl;
     }
@@ -1526,7 +1492,6 @@ void multiCamCalibration::write_calib_results_matlab_ref() {
 
     }
 
-    file.close();
     file1.close();
     file2.close();
     file3.close();

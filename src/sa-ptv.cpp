@@ -38,8 +38,8 @@ int main(int argc, char** argv) {
     
     // Camera Calibration Section
     string calib_path(argv[1]);
-    Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
-    double grid_size_phys = 5;  // in [mm]
+    Size grid_size = Size(6,9); // Format (horizontal_corners, vertical_corners)
+    double grid_size_phys = 6;  // in [mm]
 
     stringstream sref(argv[2]);
     int ref;

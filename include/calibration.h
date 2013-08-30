@@ -81,7 +81,7 @@ class multiCamCalibration {
     void run_BA_ref();
 
     double run_BA_pinhole(baProblem &ba_problem, string ba_file, Size img_size, vector<int> const_points);
-    double run_BA_refractive(baProblem_ref &ba_problem, string ba_file, Size img_size, vector<int> const_points);
+    double run_BA_refractive(baProblem_plane &ba_problem, string ba_file, Size img_size, vector<int> const_points);
 
     void write_calib_results();
     void write_calib_results_ref();
@@ -119,6 +119,7 @@ class multiCamCalibration {
     vector< vector<Mat> > calib_imgs_;
     vector< vector< vector<Point3f> > > all_pattern_points_;
     vector< vector< vector<Point2f> > > all_corner_points_;
+    vector< vector< vector<Point2f> > > all_corner_points_raw_;
     vector<Mat> cameraMats_;
     vector<Mat> dist_coeffs_;
     vector< vector<Mat> > rvecs_;
@@ -134,7 +135,7 @@ class multiCamCalibration {
     refocusing_data refocusing_params_;
 
     baProblem ba_problem_;
-    baProblem_ref ba_problem_ref_;
+    baProblem_plane ba_problem_ref_;
     double total_reproj_error_;
     double total_error_;
     double avg_reproj_error_;
