@@ -16,6 +16,19 @@ struct refocusing_data {
     double warp_factor;
 };
 
+struct refocusing_data_ref {
+    vector<Mat> P_mats_u; // Unaligned P matrices
+    vector<Mat> P_mats;
+    vector<string> cam_names;
+    double scale;
+    Size img_size;
+    int num_cams;
+    int n1;
+    int n2;
+    int n3;
+    double zW;
+};
+
 // Data type for a particle in 2D:
 // carries 3D location, average intensity and size in pixels
 // TODO: consider making size a fractional where max intensity

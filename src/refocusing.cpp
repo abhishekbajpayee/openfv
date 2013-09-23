@@ -13,9 +13,58 @@
 #include "calibration.h"
 #include "refocusing.h"
 #include "tools.h"
+#include "cuda_lib.h"
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/gpu/gpu.hpp>
 
 using namespace std;
 using namespace cv;
+
+void saRefocus::read_calib_data(string path) {
+ 
+    ifstream file;
+
+    file.open(path.c_str());
+    cout<<"Loading calibration data...";
+
+    file>>num_cams_;
+
+    for (int n=0; n<num_cams_; n++) {
+        
+        Mat_<double> P_mat = Mat_<double>::zeros(3,4);
+        for (int i=0; i<3; i++) {
+            for (int j=0; j<4; j++) {
+                file>>P_mat(i,j);
+            }
+        }
+        P_mats_.push_back(P_mat);
+
+        Mat_<double> rvec = Mat_<double>::zeros(1,3);
+        Mat_<double> tvec = Mat_<double>::zeros(3,1);
+        Mat_<double> loc = Mat_<double>::zeros(3,1);
+        for (int i=0; i<3; i++)
+            file>>loc(i,0);
+        for (int i=0; i<3; i++)
+            file>>rvec(0,i);
+        
+        cam_locations_.push_back(loc);
+
+    }
+   
+    file>>zW_;
+    file>>t_;
+    file>>n1_;
+    file>>n2_;
+    file>>n3_;
+
+    file>>img_size_.width;
+    file>>img_size_.height;
+    file>>scale_;
+
+    cout<<"done!"<<endl;
+
+}
 
 void saRefocus::read_imgs(string path) {
 
@@ -114,7 +163,7 @@ void saRefocus::read_imgs_mtiff(string path) {
     cout<<"done! "<<dircount<<" frames found."<<endl<<endl;
 
     cout<<"Reading images..."<<endl;
-    for (int i=0; i<cam_names_.size(); i++) {
+    for (int i=0; i<img_names.size(); i++) {
         
         cout<<"Camera "<<i+1<<"...";
 
@@ -122,7 +171,7 @@ void saRefocus::read_imgs_mtiff(string path) {
 
         int frame=0;
         int count=0;
-        int skip=50;
+        int skip=1400;
         while (frame<dircount) {
 
             Mat img;
@@ -286,7 +335,7 @@ void saRefocus::uploadToGPU() {
 
     if (frame_>=0) {
 
-        cout<<"Uploading "<<(frame_+1)<<"th frame to GPU..."<<endl;
+        cout<<"Uploading frame "<<frame_<<" to GPU..."<<endl;
         for (int i=0; i<num_cams_; i++) {
             temp.upload(imgs[i][frame_]);
             array.push_back(temp.clone());
@@ -367,6 +416,118 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
 }
 
+void saRefocus::GPUrefocus_ref() {
+
+    Mat ptemp, pltemp;
+    for (int i=0; i<num_cams_; i++) {
+
+        P_mats_[i].convertTo(ptemp, CV_32FC1);
+        pmat.upload(ptemp);
+        P_mats_gpu.push_back(pmat.clone());
+
+        cam_locations_[i].convertTo(pltemp, CV_32FC1);
+        ploc.upload(pltemp);
+        cam_locations_gpu.push_back(ploc.clone());
+
+    }
+
+    Mat_<float> D = Mat_<float>::zeros(3,3);
+    D(0,0) = scale_;
+    D(1,1) = scale_;
+    D(0,2) = img_size_.width*0.5;
+    D(1,2) = img_size_.height*0.5;
+    D(2,2) = 1;
+
+    PixToPhys.upload(D.inv());
+
+    xmap.create(img_size_.height, img_size_.width, CV_32FC1);
+    ymap.create(img_size_.height, img_size_.width, CV_32FC1);
+
+    int i = 0;
+    cout<<"Calling CUDA kernel..."<<endl;
+    gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[i], cam_locations_gpu[i], 0.1);
+
+}
+
+void saRefocus::CPUrefocus_ref() {
+
+    double z = 0.1;
+
+    Mat_<double> x = Mat_<double>::zeros(img_size_.height, img_size_.width);
+    Mat_<double> y = Mat_<double>::zeros(img_size_.height, img_size_.width);
+    cout<<"Calculating map for cam "<<0<<endl;
+    calc_ref_refocus_map(cam_locations_[0], z, x, y, 0);
+    Mat res, xmap, ymap;
+    x.convertTo(xmap, CV_32FC1);
+    y.convertTo(ymap, CV_32FC1);
+    remap(imgs[0][0], res, xmap, ymap, INTER_LINEAR);
+
+    Mat refocused = res.clone()/9.0;
+
+    double wall_timer = omp_get_wtime();
+
+    for (int i=1; i<num_cams_; i++) {
+
+        cout<<"Calculating map for cam "<<i<<endl;
+        calc_ref_refocus_map(cam_locations_[i], z, x, y, i);
+        x.convertTo(xmap, CV_32FC1);
+        y.convertTo(ymap, CV_32FC1);
+
+        remap(imgs[i][0], res, xmap, ymap, INTER_LINEAR);
+
+        refocused += res.clone();
+        
+    }
+
+    cout<<"Time: "<<omp_get_wtime()-wall_timer<<endl;
+
+    imshow("result", refocused); waitKey(0);
+
+}
+
+void saRefocus::calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam) {
+
+    int width = img_size_.width;
+    int height = img_size_.height;
+
+    Mat_<double> D = Mat_<double>::zeros(3,3);
+    D(0,0) = scale_; D(1,1) = scale_;
+    D(0,2) = width*0.5;
+    D(1,2) = height*0.5;
+    D(2,2) = 1;
+    Mat Hinv = D.inv();
+
+    Mat_<double> X = Mat_<double>::zeros(3, height*width);
+    for (int i=0; i<width; i++) {
+        for (int j=0; j<height; j++) {
+            X(0,i*height+j) = i;
+            X(1,i*height+j) = j;
+            X(2,i*height+j) = 1;
+        }
+    }
+    X = Hinv*X;
+
+    for (int i=0; i<X.cols; i++)
+        X(2,i) = z;
+
+    cout<<"Refracting points"<<endl;
+    Mat_<double> X_out = Mat_<double>::zeros(4, height*width);
+    img_refrac(Xcam, X, X_out);
+
+    cout<<"Projecting to find final map"<<endl;
+    Mat_<double> proj = P_mats_[cam]*X_out;
+    for (int i=0; i<width; i++) {
+        for (int j=0; j<height; j++) {
+            int ind = i*height+j; // TODO: check this indexing
+            proj(0,ind) /= proj(2,ind);
+            proj(1,ind) /= proj(2,ind);
+            x(j,i) = proj(0,ind);
+            y(j,i) = proj(1,ind);
+        }
+    }
+
+}
+
 void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
 
     z *= warp_factor_;
@@ -416,5 +577,77 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
     }
 
     refocused_host_.convertTo(result, CV_8U);
+
+}
+
+void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out) {
+
+    double c[3];
+    for (int i=0; i<3; i++)
+        c[i] = Xcam.at<double>(0,i);
+
+    for (int n=0; n<X.cols; n++) {
+
+        double a[3];
+        double b[3];
+        double point[3];
+        for (int i=0; i<3; i++)
+            point[i] = X(i,n);
+
+        a[0] = c[0] + (point[0]-c[0])*(zW_-c[2])/(point[2]-c[2]);
+        a[1] = c[1] + (point[1]-c[1])*(zW_-c[2])/(point[2]-c[2]);
+        a[2] = zW_;
+        b[0] = c[0] + (point[0]-c[0])*(t_+zW_-c[2])/(point[2]-c[2]);
+        b[1] = c[1] + (point[1]-c[1])*(t_+zW_-c[2])/(point[2]-c[2]);
+        b[2] = t_+zW_;
+        
+        double rp = sqrt( pow(point[0]-c[0],2) + pow(point[1]-c[1],2) );
+        double dp = point[2]-b[2];
+        double phi = atan2(point[1]-c[1],point[0]-c[0]);
+
+        double ra = sqrt( pow(a[0]-c[0],2) + pow(a[1]-c[1],2) );
+        double rb = sqrt( pow(b[0]-c[0],2) + pow(b[1]-c[1],2) );
+        double da = a[2]-c[2];
+        double db = b[2]-a[2];
+        
+        double f, g, dfdra, dfdrb, dgdra, dgdrb;
+        
+        // Newton Raphson loop to solve for Snell's law
+        double tol=1E-8;
+        do {
+
+            f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( (n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
+            g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( (n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );
+            
+            dfdra = ( (1.0)/sqrt(pow(ra,2)+pow(da,2)) )
+                - ( pow(ra,2)/pow(pow(ra,2)+pow(da,2),1.5) )
+                + ( (n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) )
+                - ( (n2_/n1_)*(ra-rb)*(2*ra-2*rb)/(2*pow(pow(ra-rb,2)+pow(db,2),1.5)) );
+
+            dfdrb = ( (n2_/n1_)*(ra-rb)*(2*ra-2*rb)/(2*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+                - ( (n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) );
+
+            dgdra = ( (ra-rb)*(2*ra-2*rb)/(2*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+                - ( (1.0)/sqrt(pow(ra-rb,2)+pow(db,2)) );
+
+            dgdrb = ( (1.0)/sqrt(pow(ra-rb,2)+pow(db,2)) )
+                + ( (n3_/n2_)/sqrt(pow(rb-rp,2)+pow(dp,2)) )
+                - ( (ra-rb)*(2*ra-2*rb)/(2*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+                - ( (n3_/n2_)*(rb-rp)*(2*rb-2*rp)/(2*pow(pow(rb-rp,2)+pow(dp,2),1.5)) );
+
+            ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
+            rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
+
+        } while (f>tol || g >tol);
+        
+        a[0] = ra*cos(phi) + c[0];
+        a[1] = ra*sin(phi) + c[1];
+
+        X_out(0,n) = a[0];
+        X_out(1,n) = a[1];
+        X_out(2,n) = a[2];
+        X_out(3,n) = 1.0;
+
+    }
 
 }

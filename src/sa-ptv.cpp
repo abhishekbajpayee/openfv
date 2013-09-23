@@ -7,64 +7,46 @@
 #include "tools.h"
 #include "optimization.h"
 
+#include "cuda_lib.h"
+
 using namespace cv;
 using namespace std;
 
 int main(int argc, char** argv) {
     
     /*
-    VideoCapture cap(0);
-    Mat img;
-    Mat im2;
-
-    Size grid_size(6,9);
-    vector<Point2f> points;
-
-    while (true) {
-        cap>>img;
-        bool found = findChessboardCorners(img, grid_size, points, CV_CALIB_CB_ADAPTIVE_THRESH);
-        if (found) {
-            im2 = img;
-            drawChessboardCorners(im2, grid_size, points, found);
-            imshow("image", im2);
-        } else {
-            imshow("image", img);
-        }
-        if (waitKey(30)>=0)
-            break;
-    }
-    */
-
-    
     // Camera Calibration Section
     string calib_path(argv[1]);
     Size grid_size = Size(6,9); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 6;  // in [mm]
 
-    stringstream sref(argv[2]);
-    int ref;
-    sref>>ref; // 1 for refractive
+    //stringstream sref(argv[2]);
+    int ref = 1;
+    //sref>>ref; // 1 for refractive
 
     multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, ref, 0, 0);
     //calibration.grid_view();
     
     calibration.run();
-    
+    */
     /*
     vector<int> const_pts;
     baProblem_ref ba_problem;
     calibration.run_BA_refractive(ba_problem, "../temp/ba_data.txt", Size(1292,964), const_pts);
     calibration.write_calib_results_matlab_ref();
-
-    /*
+    */
+    
     int frame = 0;
     int mult = 0;
     double mult_exp = 1.0/9.0;
-    string refoc_path(argv[1]);
+    //string refoc_path(argv[1]);
     //string refoc_path("../../experiment/binary_cylinder/");
-    saRefocus refocus(calibration.refocusing_params(), frame, mult, mult_exp);
-    refocus.read_imgs_mtiff(refoc_path);
+    saRefocus refocus(string(argv[1]), frame, mult, mult_exp);
+    refocus.read_imgs_mtiff(string(argv[2]));
+    refocus.initializeGPU();
+    refocus.GPUrefocus_ref();
     
+    /*
     int live = 1;
     if (live) {
         refocus.GPUliveView();
