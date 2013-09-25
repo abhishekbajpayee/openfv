@@ -40,14 +40,10 @@ void saRefocus::read_calib_data(string path) {
         }
         P_mats_.push_back(P_mat);
 
-        Mat_<double> rvec = Mat_<double>::zeros(1,3);
-        Mat_<double> tvec = Mat_<double>::zeros(3,1);
         Mat_<double> loc = Mat_<double>::zeros(3,1);
         for (int i=0; i<3; i++)
             file>>loc(i,0);
-        for (int i=0; i<3; i++)
-            file>>rvec(0,i);
-        
+
         cam_locations_.push_back(loc);
 
     }
@@ -314,9 +310,9 @@ void saRefocus::initializeGPU() {
     
     gpu::DeviceInfo gpuDevice(gpu::getDevice());
     
-    cout<<"---"<<gpuDevice.name()<<"---"<<endl;
-    cout<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
-    cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
+    //cout<<"---"<<gpuDevice.name()<<"---"<<endl;
+    //cout<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
+    //cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
 
     uploadToGPU();
 
@@ -327,9 +323,9 @@ void saRefocus::initializeGPU() {
 //       or not.
 void saRefocus::uploadToGPU() {
 
-    gpu::DeviceInfo gpuDevice(gpu::getDevice());
-    double free_mem_GPU = gpuDevice.freeMemory()/pow(1024.0,2);
-    cout<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
+    //gpu::DeviceInfo gpuDevice(gpu::getDevice());
+    //double free_mem_GPU = gpuDevice.freeMemory()/pow(1024.0,2);
+    //cout<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
 
     double factor = 0.9;
 
@@ -359,7 +355,7 @@ void saRefocus::uploadToGPU() {
         cout<<"Invalid frame value to visualize!"<<endl;
     }
 
-    cout<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
+    //cout<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl;
 
 }
 
@@ -418,6 +414,8 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
 void saRefocus::GPUrefocus_ref() {
 
+    // -----------------------------------------------------//
+    cout<<"Uploading required data to GPU...";
     Mat ptemp, pltemp;
     for (int i=0; i<num_cams_; i++) {
 
@@ -432,20 +430,41 @@ void saRefocus::GPUrefocus_ref() {
     }
 
     Mat_<float> D = Mat_<float>::zeros(3,3);
-    D(0,0) = scale_;
-    D(1,1) = scale_;
-    D(0,2) = img_size_.width*0.5;
-    D(1,2) = img_size_.height*0.5;
+    D(0,0) = scale_; D(1,1) = scale_;
+    D(0,2) = img_size_.width*0.5; D(1,2) = img_size_.height*0.5;
     D(2,2) = 1;
+
+    Mat_<float> geom = Mat_<double>(1,5);
+    geom(0,0) = zW_; geom(0,1) = n1_; geom(0,2) = n2_; geom(0,3) = n3_; geom(0,4) = t_;
+    geom_gpu.upload(geom);
 
     PixToPhys.upload(D.inv());
 
     xmap.create(img_size_.height, img_size_.width, CV_32FC1);
     ymap.create(img_size_.height, img_size_.width, CV_32FC1);
+    cout<<"done!"<<endl;
+    // -----------------------------------------------------//
 
-    int i = 0;
-    cout<<"Calling CUDA kernel..."<<endl;
-    gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[i], cam_locations_gpu[i], 0.1);
+    // Refocusing an image:
+    double z = 0.1;
+    Scalar fact = Scalar(1/double(num_cams_));
+
+    temp.create(img_size_.height, img_size_.width, CV_32FC1);
+    temp2.create(img_size_.height, img_size_.width, CV_32FC1);
+    refocused.create(img_size_.height, img_size_.width, CV_32FC1);
+    
+    for (int i=0; i<num_cams_; i++) {
+
+        gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[i], cam_locations_gpu[i], geom_gpu, z);
+        gpu::remap(array_all[0][i], temp, xmap, ymap, INTER_LINEAR);
+        gpu::multiply(temp, fact, temp2);
+        gpu::add(refocused, temp2, refocused);
+
+    }
+    
+    
+    refocused.download(refocused_host_);
+    imshow("result", refocused_host_); waitKey(0);
 
 }
 

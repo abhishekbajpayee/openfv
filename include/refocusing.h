@@ -101,7 +101,7 @@ class saRefocus {
     vector<gpu::GpuMat> P_mats_gpu;
     vector<gpu::GpuMat> cam_locations_gpu;
     vector< vector<gpu::GpuMat> > array_all;
-    gpu::GpuMat temp, temp2, refocused, xmap, ymap, PixToPhys, pmat, ploc;
+    gpu::GpuMat temp, temp2, refocused, xmap, ymap, PixToPhys, pmat, ploc, geom_gpu;
     
     int frame_to_upload_;
     int mult_;

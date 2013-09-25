@@ -8,6 +8,9 @@
 #include "optimization.h"
 
 #include "cuda_lib.h"
+#include "cuda_profiler_api.h"
+
+#include "gperftools/profiler.h"
 
 using namespace cv;
 using namespace std;
@@ -44,8 +47,15 @@ int main(int argc, char** argv) {
     saRefocus refocus(string(argv[1]), frame, mult, mult_exp);
     refocus.read_imgs_mtiff(string(argv[2]));
     refocus.initializeGPU();
-    refocus.GPUrefocus_ref();
     
+    cudaProfilerStart();
+    refocus.GPUrefocus_ref();
+    cudaProfilerStop();
+
+    //ProfilerStart("profile");
+    //refocus.CPUrefocus_ref();
+    //ProfilerStop();
+
     /*
     int live = 1;
     if (live) {
