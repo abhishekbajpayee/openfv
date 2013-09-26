@@ -46,11 +46,7 @@ int main(int argc, char** argv) {
     //string refoc_path("../../experiment/binary_cylinder/");
     saRefocus refocus(string(argv[1]), frame, mult, mult_exp);
     refocus.read_imgs_mtiff(string(argv[2]));
-    refocus.initializeGPU();
-    
-    cudaProfilerStart();
-    refocus.GPUrefocus_ref();
-    cudaProfilerStop();
+    refocus.GPUliveView();
 
     //ProfilerStart("profile");
     //refocus.CPUrefocus_ref();

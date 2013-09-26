@@ -143,8 +143,10 @@ void saRefocus::read_imgs_mtiff(string path) {
         }
     }
 
+    sort(img_names.begin(), img_names.end());
     vector<TIFF*> tiffs;
     for (int i=0; i<img_names.size(); i++) {
+        cout<<img_names[i]<<endl;
         TIFF* tiff = TIFFOpen(img_names[i].c_str(), "r");
         tiffs.push_back(tiff);
     }
@@ -216,44 +218,60 @@ void saRefocus::GPUliveView() {
 
     active_frame_ = 0;
 
-    namedWindow("Result", CV_WINDOW_AUTOSIZE);       
-    GPUrefocus(z, thresh, 1, active_frame_);
+    namedWindow("Result", CV_WINDOW_AUTOSIZE);
+    if (REF_FLAG) {
+        GPUrefocus_ref(z, thresh, 1, active_frame_);
+    } else {
+        GPUrefocus(z, thresh, 1, active_frame_);
+    }
     
     double dz = 0.5;
     double dthresh = 5;
+    double tlimit = 255;
+    if (REF_FLAG) {
+        dthresh = 5.0/255;
+        tlimit = 1.0;
+    }
 
     while( 1 ){
         int key = cvWaitKey(10);
         //cout<<(key & 255)<<endl;
-        if( (key & 255)==83 ) {
-            z += dz;
-            GPUrefocus(z, thresh, 1, active_frame_);
-        } else if( (key & 255)==81 ) {
-            z -= dz;
-            GPUrefocus(z, thresh, 1, active_frame_);
-        } else if( (key & 255)==82 ) {
-            if (thresh<255) { 
-                thresh += dthresh; 
-                GPUrefocus(z, thresh, 1, active_frame_); 
+        
+        if ( (key & 255)!=255 ) {
+
+            if ( (key & 255)==83 ) {
+                z += dz;
+            } else if( (key & 255)==81 ) {
+                z -= dz;
+            } else if( (key & 255)==82 ) {
+                if (thresh<tlimit) { 
+                    thresh += dthresh; 
+                }
+            } else if( (key & 255)==84 ) {
+                if (thresh>0) { 
+                    thresh -= dthresh; 
+                }
+            } else if( (key & 255)==46 ) {
+                if (active_frame_<array_all.size()) { 
+                    active_frame_++; 
+                }
+            } else if( (key & 255)==44 ) {
+                if (active_frame_<array_all.size()) { 
+                    active_frame_--; 
+                }
+            } else if( (key & 255)==27 ) {
+                break;
             }
-        } else if( (key & 255)==84 ) {
-            if (thresh>0) { 
-                thresh -= dthresh; 
-                GPUrefocus(z, thresh, 1, active_frame_); 
+            
+            // Call refocus function
+            if(REF_FLAG) {
+                GPUrefocus_ref(z, thresh, 1, active_frame_);
+            } else {
+                GPUrefocus(z, thresh, 1, active_frame_);
             }
-        } else if( (key & 255)==46 ) {
-            if (active_frame_<array_all.size()) { 
-                active_frame_++; 
-                GPUrefocus(z, thresh, 1, active_frame_); 
-            }
-        } else if( (key & 255)==44 ) {
-            if (active_frame_<array_all.size()) { 
-                active_frame_--; 
-                GPUrefocus(z, thresh, 1, active_frame_); 
-            }
-        } else if( (key & 255)==27 ) {
-            break;
+
         }
+
     }
 
 }
@@ -419,34 +437,36 @@ void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
 }
 
-void saRefocus::GPUrefocus_ref() {
+void saRefocus::GPUrefocus_ref(double z, double thresh, int live, int frame) {
 
-    // Refocusing an image:
-    double z = 0.1;
     Scalar fact = Scalar(1/double(num_cams_));
+    Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
+    refocused.upload(blank);
 
-    //gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[0], cam_locations_gpu[0], geom_gpu, z);
-    //gpu::remap(array_all[0][0], temp, xmap, ymap, INTER_LINEAR);
-    //gpu::multiply(temp, fact, refocused);
-
-    double wall = omp_get_wtime();
+    //double wall = omp_get_wtime();
     for (int i=0; i<num_cams_; i++) {
 
-        //gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[i], cam_locations_gpu[i], geom_gpu, z);
+        gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[i], cam_locations_gpu[i], geom_gpu, z);
+        //gpu_calc_refocus_maps(xmaps, ymaps, PixToPhys, P_mats_gpu, cam_locations_gpu, geom_gpu, z);
 
-        gpu_calc_refocus_maps(xmaps, ymaps, PixToPhys, P_mats_gpu, cam_locations_gpu, geom_gpu, z);
-
-        //gpu::remap(array_all[0][i], temp, xmap, ymap, INTER_LINEAR);
-
-        //gpu::multiply(temp, fact, temp2);
-
-        //gpu::add(refocused, temp2, refocused);
+        gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
+        gpu::multiply(temp, fact, temp2);
+        gpu::add(refocused, temp2, refocused);
 
     }
-    cout<<"Time: "<<omp_get_wtime()-wall<<endl;
+    //cout<<"Time: "<<omp_get_wtime()-wall<<endl;
+
+    gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
+
+    refocused.download(refocused_host_);
     
-    //refocused.download(refocused_host_);
-    //imshow("result", refocused_host_); waitKey(0);
+    if (live) {
+        //refocused_host_ /= 255.0;
+        char title[50];
+        sprintf(title, "z = %f, thresh = %f, frame = %d", z, thresh, frame);
+        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
+        imshow("Result", refocused_host_);
+    }
 
 }
 
@@ -479,7 +499,8 @@ void saRefocus::uploadToGPU_ref() {
 
     Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
     xmap.upload(blank); ymap.upload(blank);
-    temp.upload(blank); temp2.upload(blank); refocused.upload(blank);
+    temp.upload(blank); temp2.upload(blank); 
+    //refocused.upload(blank);
 
     for (int i=0; i<9; i++) {
         xmaps.push_back(xmap.clone());
