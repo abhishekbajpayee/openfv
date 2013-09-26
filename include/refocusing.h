@@ -58,6 +58,7 @@ class saRefocus {
     void GPUrefocus(double z, double thresh, int live, int frame);
 
     void GPUrefocus_ref();
+    void uploadToGPU_ref();
     void CPUrefocus_ref();
 
     void calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam);
@@ -97,9 +98,9 @@ class saRefocus {
     Mat cpurefocused;
 
     vector<gpu::GpuMat> array;
-    vector<gpu::GpuMat> array_zW;
     vector<gpu::GpuMat> P_mats_gpu;
     vector<gpu::GpuMat> cam_locations_gpu;
+    vector<gpu::GpuMat> xmaps, ymaps;
     vector< vector<gpu::GpuMat> > array_all;
     gpu::GpuMat temp, temp2, refocused, xmap, ymap, PixToPhys, pmat, ploc, geom_gpu;
     

@@ -25,6 +25,8 @@ __global__ void add_kernel(float* a, float* b, float* c, float* exp);
 
 __global__ void calc_refocus_map_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2Df Hinv, DevMem2Df P, DevMem2Df PX, DevMem2Df geom, float z);
 
+__global__ void calc_refocus_maps_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2Df Hinv, DevMem2Df P, DevMem2Df PX, DevMem2Df geom, float z);
+
 __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_);
 
 __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_);
@@ -33,6 +35,8 @@ __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g, floa
 void warp_refractive();
 
 void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, GpuMat &Hinv, GpuMat &P, GpuMat &PX, GpuMat &geom, float z);
+
+void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, GpuMat &Hinv, vector<GpuMat> &P, vector<GpuMat> &PX, GpuMat &geom, float z);
 
 void add();
 

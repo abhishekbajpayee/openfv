@@ -75,6 +75,45 @@ __global__ void calc_refocus_map_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2D
 
 }
 
+__global__ void calc_refocus_maps_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2Df Hinv, DevMem2Df P, DevMem2Df PX, DevMem2Df geom, float z) {
+
+    /*
+
+      NOTES:
+      Can Hinv be applied even before entering CUDA part?
+      Read initial points from global coalesced memory from array
+
+    */
+
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = blockIdx.y * blockDim.y + threadIdx.y;
+
+    point p;
+    p.x = Hinv.ptr(0)[0]*j + Hinv.ptr(0)[1]*i + Hinv.ptr(0)[2];
+    p.y = Hinv.ptr(1)[0]*j + Hinv.ptr(1)[1]*i + Hinv.ptr(1)[2];
+    p.z = z;
+    
+    point Xcam;
+    Xcam.x = PX.ptr(0)[0]; Xcam.y = PX.ptr(1)[0]; Xcam.z = PX.ptr(2)[0];
+    
+    float zW = geom.ptr(0)[0];
+    float n1 = geom.ptr(0)[1];
+    float n2 = geom.ptr(0)[2];
+    float n3 = geom.ptr(0)[3];
+    float t = geom.ptr(0)[4];
+
+    float f, g;
+    point a = point_refrac_fast(Xcam, p, f, g, zW, n1, n2, n3, t);
+    
+    xmap.ptr(i)[j] = (P.ptr(0)[0]*a.x + P.ptr(0)[1]*a.y + P.ptr(0)[2]*a.z + P.ptr(0)[3])/
+        (P.ptr(2)[0]*a.x + P.ptr(2)[1]*a.y + P.ptr(2)[2]*a.z + P.ptr(2)[3]);
+    ymap.ptr(i)[j] = (P.ptr(1)[0]*a.x + P.ptr(1)[1]*a.y + P.ptr(1)[2]*a.z + P.ptr(1)[3])/
+        (P.ptr(2)[0]*a.x + P.ptr(2)[1]*a.y + P.ptr(2)[2]*a.z + P.ptr(2)[3]);
+
+    //printf("residuals %f, %f\n", f, g);
+
+}
+
 __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_) {
  
     float c[3];
@@ -215,14 +254,26 @@ __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g, floa
 
 void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, GpuMat &Hinv, GpuMat &P, GpuMat &PX, GpuMat &geom, float z) {
 
-    dim3 blocks(40, 25);
-    dim3 threads(32, 32);
+    dim3 blocks(80, 50);
+    dim3 threads(16, 16);
 
-    double wall = omp_get_wtime();
-    calc_refocus_map_kernel<<<blocks, threads>>>(xmap, ymap, Hinv, P, PX, geom, z);
+    if (!cudaGetLastError()) {
+        calc_refocus_map_kernel<<<blocks, threads>>>(xmap, ymap, Hinv, P, PX, geom, z);
+    } else {
+        std::cout<<cudaGetErrorString(cudaGetLastError())<<std::endl;
+    }
+
+}
+
+void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, GpuMat &Hinv, vector<GpuMat> &P, vector<GpuMat> &PX, GpuMat &geom, float z) {
+
+    dim3 blocks(80, 50);
+    dim3 threads(16, 16);
+
+    for (int i=0; i<1; i++)
+        calc_refocus_map_kernel<<<blocks, threads>>>(xmaps[i], ymaps[i], Hinv, P[i], PX[i], geom, z);
+
     cudaDeviceSynchronize();
-    //std::cout<<cudaGetErrorString(cudaGetLastError())<<std::endl;
-    std::cout<<"Time: "<<omp_get_wtime()-wall<<std::endl;
 
 }
 
