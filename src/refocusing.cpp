@@ -453,6 +453,11 @@ void saRefocus::GPUrefocus_ref() {
     temp2.create(img_size_.height, img_size_.width, CV_32FC1);
     refocused.create(img_size_.height, img_size_.width, CV_32FC1);
     
+    //gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[0], cam_locations_gpu[0], geom_gpu, z);
+    //gpu::remap(array_all[0][0], temp, xmap, ymap, INTER_LINEAR);
+    //gpu::multiply(temp, fact, refocused);
+
+    
     for (int i=0; i<num_cams_; i++) {
 
         gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[i], cam_locations_gpu[i], geom_gpu, z);

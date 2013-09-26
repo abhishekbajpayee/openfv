@@ -150,46 +150,54 @@ __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g, floa
     float pt[3];
     pt[0] = p.x; pt[1] = p.y; pt[2] = p.z;
 
-    a[0] = c[0] + (pt[0]-c[0])*(zW_-c[2])/(pt[2]-c[2]);
-    a[1] = c[1] + (pt[1]-c[1])*(zW_-c[2])/(pt[2]-c[2]);
-    a[2] = zW_;
-    b[0] = c[0] + (pt[0]-c[0])*(t_+zW_-c[2])/(pt[2]-c[2]);
-    b[1] = c[1] + (pt[1]-c[1])*(t_+zW_-c[2])/(pt[2]-c[2]);
-    b[2] = t_+zW_;
+    float ptx = pt[0]-c[0]; float pty = pt[1]-c[1]; float ptz = pt[2]-c[2];
+    float zWz = zW_-c[2];
+
+    a[0] = c[0] + (ptx*zWz)/ptz; a[1] = c[1] + (pty*zWz)/ptz; a[2] = zW_;
+    b[0] = c[0] + (ptx*zWz)/ptz; b[1] = c[1] + (pty*zWz)/ptz; b[2] = t_+zW_;
         
-    float rp = sqrt( (pt[0]-c[0])*(pt[0]-c[0]) + (pt[1]-c[1])*(pt[1]-c[1]) );
+    float rp = sqrt( (ptx*ptx) + (pty*pty) );
     float dp = pt[2]-b[2];
-    float phi = atan2(pt[1]-c[1],pt[0]-c[0]);
-    
-    float ra = sqrt( (a[0]-c[0])*(a[0]-c[0]) + (a[1]-c[1])*(a[1]-c[1]) );
-    float rb = sqrt( (b[0]-c[0])*(b[0]-c[0]) + (b[1]-c[1])*(b[1]-c[1]) );
-    float da = a[2]-c[2];
-    float db = b[2]-a[2];
+    float phi = atan2(pty,ptx);
+
+    float acx = a[0]-c[0]; float acy = a[1]-c[1]; float acz = a[2]-c[2];
+
+    float ra = sqrt( (acx*acx) + (acy*acy) );
+    float rb = sqrt( (b[0]-c[0])*(b[0]-c[0]) + (b[1]-c[1])*(b[1]-c[1]) ); // TODO
+    float da = acz;
+    float db = b[2]-a[2]; // TODO
     
     //float f, g; 
     float dfdra, dfdrb, dgdra, dgdrb;
-        
+    float rasq, dasq, dbsq, dpsq, rbra, rbrasq, rprb, rprbsq;
+    float n2n1 = n2_/n1_; float n3n2 = n3_/n2_;
+    dasq = da*da; dbsq = db*db; dpsq = dp*dp;
+
     // Newton Raphson loop to solve for Snell's law
     for (int i=0; i<10; i++) {
         
-        f = ( ra/sqrt((ra*ra)+(da*da)) ) - ( (n2_/n1_)*(rb-ra)/sqrt((rb-ra)*(rb-ra) + (db*db)) );
-        g = ( (rb-ra)/sqrt((rb-ra)*(rb-ra)+(db*db)) ) - ( (n3_/n2_)*(rp-rb)/sqrt((rp-rb)*(rp-rb)+(dp*dp)) );
+        rasq = ra*ra;
+        rbra = rb-ra; rbrasq = rbra*rbra;
+        rprb = rp-rb; rprbsq = rprb*rprb;
+
+        f = ( ra/sqrt(rasq+dasq) ) - ( (n2n1)*(rbra)/sqrt(rbrasq+dbsq) );
+        g = ( rbra/sqrt(rbrasq+dbsq) ) - ( (n3n2*rprb)/sqrt(rprbsq+dpsq) );
         
-        dfdra = ( 1.0/sqrt((ra*ra)+(da*da)) )
-            - ( (ra*ra)/__powf((ra*ra)+(da*da),1.5) )
-            + ( (n2_/n1_)/sqrt((ra-rb)*(ra-rb)+(db*db)) )
-            - ( (n2_/n1_)*(ra-rb)*(2*ra-2*rb)/(2*__powf((ra-rb)*(ra-rb)+(db*db),1.5)) );
+        dfdra = ( 1.0/sqrt(rasq+dasq) )
+            - ( rasq/__powf(rasq+dasq,1.5) )
+            + ( n2n1/sqrt(rbrasq+dbsq) )
+            - ( (n2n1*-rbra)*(2*ra-2*rb)/(2*__powf(rbrasq+dbsq,1.5)) );
         
-        dfdrb = ( (n2_/n1_)*(ra-rb)*(2*ra-2*rb)/(2*__powf((ra-rb)*(ra-rb)+(db*db),1.5)) )
-            - ( (n2_/n1_)/sqrt((ra-rb)*(ra-rb)+(db*db)) );
+        dfdrb = ( (n2n1*-rbra)*(2*ra-2*rb)/(2*__powf(rbrasq+dbsq,1.5)) )
+            - ( n2n1/sqrt(rbrasq+dbsq) );
         
-        dgdra = ( (ra-rb)*(2*ra-2*rb)/(2*__powf((ra-rb)*(ra-rb)+(db*db),1.5)) )
-            - ( (1.0)/sqrt((ra-rb)*(ra-rb)+(db*db)) );
+        dgdra = ( -rbra*(2*ra-2*rb)/(2*__powf(rbrasq+dbsq,1.5)) )
+            - ( 1.0/sqrt(rbrasq+dbsq) );
         
-        dgdrb = ( (1.0)/sqrt((ra-rb)*(ra-rb)+(db*db)) )
-            + ( (n3_/n2_)/sqrt((rb-rp)*(rb-rp)+(dp*dp)) )
-            - ( (ra-rb)*(2*ra-2*rb)/(2*__powf((ra-rb)*(ra-rb)+(db*db),1.5)) )
-            - ( (n3_/n2_)*(rb-rp)*(2*rb-2*rp)/(2*__powf((rb-rp)*(rb-rp)+(dp*dp),1.5)) );
+        dgdrb = ( 1.0/sqrt(rbrasq+dbsq) )
+            + ( n3n2/sqrt(rprbsq+dpsq) )
+            - ( -rbra*(2*ra-2*rb)/(2*__powf(rbrasq+dbsq,1.5)) )
+            - ( (n3n2*-rprb)*(2*rb-2*rp)/(2*__powf(rprbsq+dpsq,1.5)) );
         
         ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
         rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
