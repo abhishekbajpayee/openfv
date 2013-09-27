@@ -21,23 +21,17 @@ typedef struct {
 } point;
 
 // Kernels
-__global__ void add_kernel(float* a, float* b, float* c, float* exp);
-
-__global__ void calc_refocus_map_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2Df Hinv, DevMem2Df P, DevMem2Df PX, DevMem2Df geom, float z);
-
-__global__ void calc_refocus_maps_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2Df Hinv, DevMem2Df P, DevMem2Df PX, DevMem2Df geom, float z);
+__global__ void calc_refocus_map_kernel(DevMem2Df xmap, DevMem2Df ymap, float z, int n);
 
 __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_);
 
-__device__ point point_refrac_fast(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_);
+__device__ point point_refrac_fast(point Xcam, point p, float &f, float &g);
 
 // Host wrappers
-void warp_refractive();
+void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][12], float geom[5]);
 
-void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, GpuMat &Hinv, GpuMat &P, GpuMat &PX, GpuMat &geom, float z);
+void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i);
 
-void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, GpuMat &Hinv, vector<GpuMat> &P, vector<GpuMat> &PX, GpuMat &geom, float z);
-
-void add();
+void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z);
 
 #endif

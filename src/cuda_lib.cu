@@ -27,55 +27,18 @@
 using namespace cv;
 using namespace gpu;
 
-__global__ void add_kernel(float* a, float* b, float* c, float* exp) {
+// Constant variables on device
+__constant__ float Hinv[6];
+__constant__ float PX[9][3];
+__constant__ float P[9][12];
+__constant__ float zW_;
+__constant__ float n1_;
+__constant__ float n2_;
+__constant__ float n3_;
+__constant__ float t_;
 
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    for (int n=0; n<10; n++)
-        c[i] = __powf( sqrt(a[i] + b[i]), exp[n] );
 
-}
-
-__global__ void calc_refocus_map_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2Df Hinv, DevMem2Df P, DevMem2Df PX, DevMem2Df geom, float z) {
-
-    /*
-
-      NOTES:
-      Can Hinv be applied even before entering CUDA part?
-      Read initial points from global coalesced memory from array
-
-    */
-
-    int j = blockIdx.x * blockDim.x + threadIdx.x;
-    int i = blockIdx.y * blockDim.y + threadIdx.y;
-
-    point p;
-    p.x = Hinv.ptr(0)[0]*j + Hinv.ptr(0)[1]*i + Hinv.ptr(0)[2];
-    p.y = Hinv.ptr(1)[0]*j + Hinv.ptr(1)[1]*i + Hinv.ptr(1)[2];
-    p.z = z;
-    
-    point Xcam;
-    Xcam.x = PX.ptr(0)[0]; Xcam.y = PX.ptr(1)[0]; Xcam.z = PX.ptr(2)[0];
-    
-    float zW = geom.ptr(0)[0];
-    float n1 = geom.ptr(0)[1];
-    float n2 = geom.ptr(0)[2];
-    float n3 = geom.ptr(0)[3];
-    float t = geom.ptr(0)[4];
-
-    float f, g;
-    point a = point_refrac_fast(Xcam, p, f, g, zW, n1, n2, n3, t);
-    
-    xmap.ptr(i)[j] = (P.ptr(0)[0]*a.x + P.ptr(0)[1]*a.y + P.ptr(0)[2]*a.z + P.ptr(0)[3])/
-        (P.ptr(2)[0]*a.x + P.ptr(2)[1]*a.y + P.ptr(2)[2]*a.z + P.ptr(2)[3]);
-    ymap.ptr(i)[j] = (P.ptr(1)[0]*a.x + P.ptr(1)[1]*a.y + P.ptr(1)[2]*a.z + P.ptr(1)[3])/
-        (P.ptr(2)[0]*a.x + P.ptr(2)[1]*a.y + P.ptr(2)[2]*a.z + P.ptr(2)[3]);
-
-    //printf("residuals %f, %f\n", f, g);
-
-}
-
-__global__ void calc_refocus_maps_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2Df Hinv, DevMem2Df P, DevMem2Df PX, DevMem2Df geom, float z) {
+__global__ void calc_refocus_map_kernel(DevMem2Df xmap, DevMem2Df ymap, float z, int n) {
 
     /*
 
@@ -89,26 +52,18 @@ __global__ void calc_refocus_maps_kernel(DevMem2Df xmap, DevMem2Df ymap, DevMem2
     int i = blockIdx.y * blockDim.y + threadIdx.y;
 
     point p;
-    p.x = Hinv.ptr(0)[0]*j + Hinv.ptr(0)[1]*i + Hinv.ptr(0)[2];
-    p.y = Hinv.ptr(1)[0]*j + Hinv.ptr(1)[1]*i + Hinv.ptr(1)[2];
+    p.x = Hinv[0]*j + Hinv[1]*i + Hinv[2];
+    p.y = Hinv[3]*j + Hinv[4]*i + Hinv[5];
     p.z = z;
     
     point Xcam;
-    Xcam.x = PX.ptr(0)[0]; Xcam.y = PX.ptr(1)[0]; Xcam.z = PX.ptr(2)[0];
-    
-    float zW = geom.ptr(0)[0];
-    float n1 = geom.ptr(0)[1];
-    float n2 = geom.ptr(0)[2];
-    float n3 = geom.ptr(0)[3];
-    float t = geom.ptr(0)[4];
+    Xcam.x = PX[n][0]; Xcam.y = PX[n][1]; Xcam.z = PX[n][2];
 
     float f, g;
-    point a = point_refrac_fast(Xcam, p, f, g, zW, n1, n2, n3, t);
+    point a = point_refrac_fast(Xcam, p, f, g);
     
-    xmap.ptr(i)[j] = (P.ptr(0)[0]*a.x + P.ptr(0)[1]*a.y + P.ptr(0)[2]*a.z + P.ptr(0)[3])/
-        (P.ptr(2)[0]*a.x + P.ptr(2)[1]*a.y + P.ptr(2)[2]*a.z + P.ptr(2)[3]);
-    ymap.ptr(i)[j] = (P.ptr(1)[0]*a.x + P.ptr(1)[1]*a.y + P.ptr(1)[2]*a.z + P.ptr(1)[3])/
-        (P.ptr(2)[0]*a.x + P.ptr(2)[1]*a.y + P.ptr(2)[2]*a.z + P.ptr(2)[3]);
+    xmap.ptr(i)[j] = (P[n][0]*a.x + P[n][1]*a.y + P[n][2]*a.z + P[n][3])/(P[n][8]*a.x + P[n][9]*a.y + P[n][10]*a.z + P[n][11]);
+    ymap.ptr(i)[j] = (P[n][4]*a.x + P[n][5]*a.y + P[n][6]*a.z + P[n][7])/(P[n][8]*a.x + P[n][9]*a.y + P[n][10]*a.z + P[n][11]);
 
     //printf("residuals %f, %f\n", f, g);
 
@@ -179,7 +134,7 @@ __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_
 
 }
 
-__device__ point point_refrac_fast(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_) {
+__device__ point point_refrac_fast(point Xcam, point p, float &f, float &g) {
 
     float c[3];
     c[0] = Xcam.x; c[1] = Xcam.y; c[2] = Xcam.z;
@@ -252,87 +207,44 @@ __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g, floa
 
 }
 
-void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, GpuMat &Hinv, GpuMat &P, GpuMat &PX, GpuMat &geom, float z) {
+void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][12], float geom[5]) {
 
-    dim3 blocks(80, 50);
-    dim3 threads(16, 16);
+    cudaMemcpyToSymbol(Hinv, hinv, sizeof(float)*6);
 
-    if (!cudaGetLastError()) {
-        calc_refocus_map_kernel<<<blocks, threads>>>(xmap, ymap, Hinv, P, PX, geom, z);
-    } else {
-        std::cout<<cudaGetErrorString(cudaGetLastError())<<std::endl;
-    }
+    cudaMemcpyToSymbol(zW_, &geom[0], sizeof(float));
+    cudaMemcpyToSymbol(n1_, &geom[1], sizeof(float));
+    cudaMemcpyToSymbol(n2_, &geom[2], sizeof(float));
+    cudaMemcpyToSymbol(n3_, &geom[3], sizeof(float));
+    cudaMemcpyToSymbol(t_, &geom[4], sizeof(float));
+    
+    cudaMemcpyToSymbol(PX, locations, 9*3*sizeof(float));
+    cudaMemcpyToSymbol(P, pmats, 9*12*sizeof(float));
 
 }
 
-void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, GpuMat &Hinv, vector<GpuMat> &P, vector<GpuMat> &PX, GpuMat &geom, float z) {
+void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i) {
+
+    dim3 grid(80, 50); dim3 block(16, 16);
+    //dim3 grid(1, 1); dim3 block(1, 1);
+
+    if (!cudaGetLastError()) {
+        calc_refocus_map_kernel<<<grid, block>>>(xmap, ymap, z, i);
+    } else {
+        std::cout<<cudaGetErrorString(cudaGetLastError())<<std::endl;
+    }
+    cudaDeviceSynchronize();
+
+}
+
+void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z) {
 
     dim3 blocks(80, 50);
     dim3 threads(16, 16);
 
     for (int i=0; i<1; i++)
-        calc_refocus_map_kernel<<<blocks, threads>>>(xmaps[i], ymaps[i], Hinv, P[i], PX[i], geom, z);
+        calc_refocus_map_kernel<<<blocks, threads>>>(xmaps[i], ymaps[i], z, i);
 
     cudaDeviceSynchronize();
-
-}
-
-void add() {
-
-    int n=1;
-
-    int num = 1000000;
-    size_t size = num*sizeof(float);
-
-    float *a, *b, *h_exp;
-    float *d_a, *d_b, *d_c, *exp;
-
-    cudaMalloc(&exp, 10*sizeof(float));
-    h_exp = new float[10];
-    for (int i=0; i<10; i++)
-        h_exp[i] = 3;
-    cudaMemcpy(exp, h_exp, 10*sizeof(float), cudaMemcpyHostToDevice);
-
-    if (n) {
-        
-        a = new float[num];
-        b = new float[num];
-        for (int i=0; i<num; i++) {
-            a[i] = 2;
-            b[i] = 3;
-        }
-
-        cudaMalloc(&d_a, size); 
-        cudaMalloc(&d_b, size);
-        cudaMalloc(&d_c, size);
-        cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-        cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
-        
-        double wall = omp_get_wtime();
-        add_kernel<<<1000, 1000>>>(d_a, d_b, d_c, exp);
-        cudaDeviceSynchronize();
-        std::cout<<"Time: "<<omp_get_wtime()-wall<<std::endl;
-
-    } else {
-
-        a = new float[1];
-        b = new float[1];
-        a[0] = 2; b[0] = 3;
-
-        size = sizeof(float);
-        cudaMalloc(&d_a, size); 
-        cudaMalloc(&d_b, size);
-        cudaMalloc(&d_c, size);
-        cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-        cudaMemcpy(d_b, b, size, cudaMemcpyHostToDevice);
-
-        double wall = omp_get_wtime();
-        add_kernel<<<1, 1>>>(d_a, d_b, d_c, exp);
-        cudaDeviceSynchronize();
-        std::cout<<"Time: "<<omp_get_wtime()-wall<<std::endl;
-
-    }
-
 
 }
 

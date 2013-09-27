@@ -77,11 +77,16 @@ class saRefocus {
     Size img_size_;
     double scale_;
     int num_cams_;
-    double zW_;
-    double t_;
-    double n1_;
-    double n2_;
-    double n3_;
+    
+    // Scene geometry params
+    float geom[5];
+    /*
+    float zW_;
+    float n1_;
+    float n2_;
+    float n3_;
+    float t_;
+    */
 
     double z;
     double thresh;
@@ -101,7 +106,7 @@ class saRefocus {
     vector<gpu::GpuMat> cam_locations_gpu;
     vector<gpu::GpuMat> xmaps, ymaps;
     vector< vector<gpu::GpuMat> > array_all;
-    gpu::GpuMat temp, temp2, refocused, xmap, ymap, PixToPhys, pmat, ploc, geom_gpu;
+    gpu::GpuMat temp, temp2, refocused, xmap, ymap;
     
     int frame_to_upload_;
     int mult_;

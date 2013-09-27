@@ -47,12 +47,16 @@ void saRefocus::read_calib_data(string path) {
         cam_locations_.push_back(loc);
 
     }
+
+    file>>geom[0]; file>>geom[4]; file>>geom[1]; file>>geom[2]; file>>geom[3];
    
+    /*
     file>>zW_;
     file>>t_;
     file>>n1_;
     file>>n2_;
     file>>n3_;
+    */
 
     file>>img_size_.width;
     file>>img_size_.height;
@@ -443,19 +447,19 @@ void saRefocus::GPUrefocus_ref(double z, double thresh, int live, int frame) {
     Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
     refocused.upload(blank);
 
-    //double wall = omp_get_wtime();
+    double wall = omp_get_wtime();
+    
     for (int i=0; i<num_cams_; i++) {
 
-        gpu_calc_refocus_map(xmap, ymap, PixToPhys, P_mats_gpu[i], cam_locations_gpu[i], geom_gpu, z);
-        //gpu_calc_refocus_maps(xmaps, ymaps, PixToPhys, P_mats_gpu, cam_locations_gpu, geom_gpu, z);
-
+        gpu_calc_refocus_map(xmap, ymap, z, i);        
         gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
         gpu::multiply(temp, fact, temp2);
         gpu::add(refocused, temp2, refocused);
-
+        
     }
-    //cout<<"Time: "<<omp_get_wtime()-wall<<endl;
-
+    
+    cout<<"Time: "<<omp_get_wtime()-wall<<endl;
+    
     gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
 
     refocused.download(refocused_host_);
@@ -467,35 +471,35 @@ void saRefocus::GPUrefocus_ref(double z, double thresh, int live, int frame) {
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
-
+    
 }
 
 void saRefocus::uploadToGPU_ref() {
 
     cout<<"Uploading required data to GPU...";
-    Mat ptemp, pltemp;
-    for (int i=0; i<num_cams_; i++) {
-
-        P_mats_[i].convertTo(ptemp, CV_32FC1);
-        pmat.upload(ptemp);
-        P_mats_gpu.push_back(pmat.clone());
-
-        cam_locations_[i].convertTo(pltemp, CV_32FC1);
-        ploc.upload(pltemp);
-        cam_locations_gpu.push_back(ploc.clone());
-
-    }
 
     Mat_<float> D = Mat_<float>::zeros(3,3);
     D(0,0) = scale_; D(1,1) = scale_;
     D(0,2) = img_size_.width*0.5; D(1,2) = img_size_.height*0.5;
     D(2,2) = 1;
+    Mat Dinv = D.inv();
+    
+    float hinv[6];
+    hinv[0] = Dinv.at<float>(0,0); hinv[1] = Dinv.at<float>(0,1); hinv[2] = Dinv.at<float>(0,2);
+    hinv[3] = Dinv.at<float>(1,0); hinv[4] = Dinv.at<float>(1,1); hinv[5] = Dinv.at<float>(1,2);
 
-    Mat_<float> geom = Mat_<double>(1,5);
-    geom(0,0) = zW_; geom(0,1) = n1_; geom(0,2) = n2_; geom(0,3) = n3_; geom(0,4) = t_;
-    geom_gpu.upload(geom);
-
-    PixToPhys.upload(D.inv());
+    float locations[9][3];
+    float pmats[9][12];
+    for (int i=0; i<9; i++) {
+        for (int j=0; j<3; j++) {
+            locations[i][j] = cam_locations_[i].at<double>(j,0);
+            for (int k=0; k<4; k++) {
+                pmats[i][j*4+k] = P_mats_[i].at<double>(j,k);
+            }
+        }
+    }
+    
+    uploadRefractiveData(hinv, locations, pmats, geom);
 
     Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
     xmap.upload(blank); ymap.upload(blank);
@@ -557,7 +561,7 @@ void saRefocus::calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &
     D(0,2) = width*0.5;
     D(1,2) = height*0.5;
     D(2,2) = 1;
-    Mat Hinv = D.inv();
+    Mat hinv = D.inv();
 
     Mat_<double> X = Mat_<double>::zeros(3, height*width);
     for (int i=0; i<width; i++) {
@@ -567,7 +571,7 @@ void saRefocus::calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &
             X(2,i*height+j) = 1;
         }
     }
-    X = Hinv*X;
+    X = hinv*X;
 
     for (int i=0; i<X.cols; i++)
         X(2,i) = z;
@@ -643,6 +647,8 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
 }
 
 void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out) {
+
+    float zW_ = geom[0]; float n1_ = geom[1]; float n2_ = geom[2]; float n3_ = geom[3]; float t_ = geom[4];
 
     double c[3];
     for (int i=0; i<3; i++)
