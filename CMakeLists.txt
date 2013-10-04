@@ -23,7 +23,7 @@ if (OPENMP_FOUND)
 endif()
 
 # prototyping executables
-add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/sa-ptv.cpp)
+add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/execs/sa-ptv.cpp)
 #add_executable (testing ${PROJECT_SOURCE_DIR}/src/testing.cpp)
 
 # release files
