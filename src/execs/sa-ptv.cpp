@@ -10,7 +10,7 @@
 #include "cuda_lib.h"
 #include "cuda_profiler_api.h"
 
-#include "gperftools/profiler.h"
+//#include "gperftools/profiler.h"
 
 using namespace cv;
 using namespace std;

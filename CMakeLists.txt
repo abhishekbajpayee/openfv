@@ -34,7 +34,8 @@ add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/execs/sa-ptv.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp)
 set (PYTHON_LIB python2.7)
-set (OTHER_LIBS tiff -lprofiler)
+#set (OTHER_LIBS tiff -lprofiler)
+set (OTHER_LIBS tiff)
 set (CUSTOM_LIBS saptv cuda_saptv)
 
 target_link_libraries (sa-ptv ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${PYTHON_LIB} ${OTHER_LIBS})
