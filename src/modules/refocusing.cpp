@@ -19,8 +19,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
 
-#include "gperftools/profiler.h"
-
 using namespace std;
 using namespace cv;
 
