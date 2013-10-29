@@ -16,46 +16,19 @@ using namespace cv;
 using namespace std;
 
 int main(int argc, char** argv) {
-    
-    /*
-    // Camera Calibration Section
-    string calib_path(argv[1]);
-    Size grid_size = Size(6,9); // Format (horizontal_corners, vertical_corners)
-    double grid_size_phys = 6;  // in [mm]
-
-    //stringstream sref(argv[2]);
-    int ref = 1;
-    //sref>>ref; // 1 for refractive
-
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, ref, 0, 0);
-    //calibration.grid_view();
-    
-    calibration.run();
-    */
-    /*
-    vector<int> const_pts;
-    baProblem_ref ba_problem;
-    calibration.run_BA_refractive(ba_problem, "../temp/ba_data.txt", Size(1292,964), const_pts);
-    calibration.write_calib_results_matlab_ref();
-    */
-    
+        
     int frame = 0;
     int mult = 0;
     double mult_exp = 1.0/9.0;
-    //string refoc_path(argv[1]);
-    //string refoc_path("../../experiment/binary_cylinder/");
-    saRefocus refocus(string(argv[1]), frame, mult, mult_exp);
-    refocus.read_imgs_mtiff(string(argv[2]));
-    refocus.initializeGPU();
-    refocus.GPUrefocus_ref(0, 0, 1, 0);
-    waitKey(0);
-    //refocus.GPUliveView();
+
+    saRefocus refocus(string(argv[1]), frame, mult, mult_exp, 0); // last argument is CORNER_FLAG
+    refocus.read_imgs(string(argv[2]));
+    //refocus.read_imgs_mtiff(string(argv[2]));
 
     //ProfilerStart("profile");
-    //refocus.CPUrefocus_ref();
+    //refocus.GPUrefocus_ref_corner(0, 0, 0, 0);
     //ProfilerStop();
-
-    /*
+    
     int live = 1;
     if (live) {
         refocus.GPUliveView();
@@ -78,12 +51,9 @@ int main(int argc, char** argv) {
         //localizer.find_particles_all_frames();
 
         //localizer.write_all_particles_to_file(particle_file);        
-        
-
     }
     
-    //cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;
-    */    
+    //cout<<endl<<"TIME TAKEN: "<<(omp_get_wtime()-wall_timer)<<" seconds"<<endl;    
 
     return 1;
 

@@ -21,7 +21,7 @@ typedef struct {
 } point;
 
 // Kernels
-__global__ void calc_refocus_map_kernel(DevMem2Df xmap, DevMem2Df ymap, float z, int n);
+__global__ void calc_refocus_map_kernel(PtrStepSzf xmap, PtrStepSzf ymap, float z, int n);
 
 __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_);
 

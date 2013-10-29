@@ -31,9 +31,6 @@ void T_from_P(Mat P, Mat &H, double z, double scale, Size img_size) {
     D(1,2) = img_size.height*0.5;
     
     Mat T = D*A_inv;
-
-    Mat T_t;
-    transpose(T, T_t);
     
     H = T.clone();
 

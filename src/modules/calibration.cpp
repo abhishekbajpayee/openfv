@@ -1635,5 +1635,3 @@ void multiCamCalibration::get_grid_size_pix() {
     cout<<"GRID SIZE: "<<grid_size_pix_<<" pixels\n";
 
 }
-
-//void calibrateCam(vector< vector<Point2f> >, 

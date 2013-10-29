@@ -38,7 +38,7 @@ __constant__ float n3_;
 __constant__ float t_;
 
 
-__global__ void calc_refocus_map_kernel(DevMem2Df xmap, DevMem2Df ymap, float z, int n) {
+__global__ void calc_refocus_map_kernel(PtrStepSzf xmap, PtrStepSzf ymap, float z, int n) {
 
     /*
 
@@ -238,11 +238,10 @@ void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i) {
 
 void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z) {
 
-    dim3 blocks(80, 50);
-    dim3 threads(16, 16);
+    dim3 grid(80, 50); dim3 block(16, 16);
 
     for (int i=0; i<1; i++)
-        calc_refocus_map_kernel<<<blocks, threads>>>(xmaps[i], ymaps[i], z, i);
+        calc_refocus_map_kernel<<<grid, block>>>(xmaps[i], ymaps[i], z, i);
 
     cudaDeviceSynchronize();
 
