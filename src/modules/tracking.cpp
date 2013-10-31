@@ -29,7 +29,8 @@ void pTracking::read_points() {
 
     cout<<"\nReading points to track...";
     
-    int num_frames = 30;
+    int num_frames;
+    file>>num_frames;
 
     for (int i=0; i<num_frames; i++) {
 
@@ -76,26 +77,16 @@ void pTracking::track_all() {
     vector<Point2i> matches;
     vector< vector<Point2i> > all_matches;
 
-    //vis.figure3d();
+    vis.figure3d();
 
     for (int i=0; i<all_points_.size()-1; i++) {
-    //for (int i=0; i<2; i++) {
+
+        cout<<"Matching frames "<<i<<" and "<<i+1<<endl;
         matches = track_frame(i, i+1);
         all_matches.push_back(matches);
         cout<<matches.size()<<endl;
-        //vis.figure3d();
-        /*
-        for (int j=0; j<matches.size(); j++) {
-            if (matches[j].y >= 0) {
-                if (j%5==0) {
-                    vis.line3d(all_points_[i][matches[j].x], all_points_[i+1][matches[j].y]);
-                }
-            }
-        }
-        */
-        //vis.show();
-        //vis.clear();
         matches.clear();
+
     }
 
     vector<int> path;
@@ -125,7 +116,7 @@ void pTracking::track_all() {
 
     }
     cout<<"full: "<<all_paths.size()<<endl;
-    /*
+    
     for (int i=0; i<all_paths.size(); i++) {
         if (i%3==0) {
         vector<Point3f> points;
@@ -136,11 +127,11 @@ void pTracking::track_all() {
         points.clear();
         }
     }
-    */
-    //vis.xlabel("x [mm]");
-    //vis.ylabel("y [mm]");
-    //vis.zlabel("z [mm]");
-    //vis.show();
+    
+    vis.xlabel("x [mm]");
+    vis.ylabel("y [mm]");
+    vis.zlabel("z [mm]");
+    vis.show();
 
 }
 
@@ -155,22 +146,24 @@ vector<Point2i> pTracking::track_frame(int f1, int f2) {
     F = 0.05;
 
     double R_n, R_s;
-    R_n = 20.0;
-    R_s = 20.0;
+    R_n = 3.0;
+    R_s = 3.0;
 
     int n1, n2;
     n1 = all_points_[f1].size();
     n2 = all_points_[f2].size();
 
-    //cout<<"Neighbor sets...\n";
+    cout<<"Building Neighbor Sets...\n";
+    cout<<"Neighbor set sizes: ";
     vector< vector<int> > S_r = neighbor_set(f1, f1, R_n);
     vector< vector<int> > S_c = neighbor_set(f1, f2, R_s);
+    cout<<S_r.size()<<" and "<<S_c.size()<<endl;
 
     vector<Mat> Pij, Pi, Pij2, Pi2;
-    //cout<<"Probability sets...\n";
+    cout<<"Building Probability Sets...\n";
     build_probability_sets(S_r, S_c, Pij, Pi, Pij2, Pi2);
 
-    //cout<<"Relaxation sets...\n";
+    cout<<"Building Relaxation Sets...\n";
     vector< vector< vector< vector<Point2i> > > > theta;
     build_relaxation_sets(f1, f2, S_r, S_c, C, D, E, F, theta);
     
@@ -204,7 +197,7 @@ vector<Point2i> pTracking::track_frame(int f1, int f2) {
         normalize_probabilites(Pij2,Pi2);
         diff = update_probabilities(Pij, Pi, Pij2, Pi2);
 
-        if (diff<0.1) break;
+        if (diff<0.2) break;
 
     }
 
@@ -250,16 +243,20 @@ double pTracking::update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector
     Scalar diffsum;
 
     for (int i=0; i<Pij.size(); i++) {
-        //diffpij = Pij2[i].clone()-Pij[i].clone();
-        absdiff(Pij[i], Pij2[i], diffpij);
-        diffsum = sum(diffpij);
-        difftotal += diffsum.val[0];
 
+        if (Pij[i].rows>0 && Pij[i].cols>0) {
+            absdiff(Pij[i], Pij2[i], diffpij);
+            diffsum = sum(diffpij);
+            difftotal += diffsum.val[0];
+        }
+        
         Pij[i] = Pij2[i].clone();
 
-        absdiff(Pi[i], Pi2[i], diffpi);
-        diffsum = sum(diffpi);
-        difftotal += diffsum.val[0];
+        if (Pi[i].rows>0 && Pi[i].cols>0) {
+            absdiff(Pi[i], Pi2[i], diffpi);
+            diffsum = sum(diffpi);
+            difftotal += diffsum.val[0];
+        }
 
         Pi[i] = Pi2[i].clone();
     }
@@ -294,6 +291,8 @@ void pTracking::build_probability_sets(vector< vector<int> > S_r, vector< vector
         
         Mat_<double> Pij_single = Mat_<double>::zeros(S_r[i].size(), S_c[i].size());
         Mat_<double> Pi_single = Mat_<double>::zeros(S_r[i].size(), 1);
+
+        //printf("(%d,%d)", S_r[i].size(), S_c[i].size());
 
         for (int j=0; j<Pij_single.rows; j++) {
             for (int k=0; k<Pij_single.cols; k++) {
@@ -354,7 +353,9 @@ vector< vector<int> > pTracking::neighbor_set(int frame1, int frame2, double r) 
 
     for (int i=0; i<all_points_[frame1].size(); i++) {
         for (int j=0; j<all_points_[frame2].size(); j++) {
-            if (dist(all_points_[frame1][i], all_points_[frame2][j]) < r) indices.push_back(j);
+            if (dist(all_points_[frame1][i], all_points_[frame2][j]) < r) {
+                indices.push_back(j);
+            }
         }
         indices_all.push_back(indices);
         indices.clear();

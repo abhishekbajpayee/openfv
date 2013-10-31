@@ -45,16 +45,19 @@ void pLocalize::find_particles_3d(int frame) {
     vector<Point2f> points;
     vector<particle2d> particles;
 
-    cout<<"\nSearching for particles through volume at frame "<<frame<<"...\n";
+    cout<<"Searching for particles through volume at frame "<<frame<<"...";
 
     for (float i=zmin_; i<=zmax_; i += dz_) {
         
-        cout<<int((i-zmin_)*100.0/(zmax_-zmin_))<<endl;
+        //cout<<int((i-zmin_)*100.0/(zmax_-zmin_))<<endl;
+        //printf("%3d", int((i-zmin_)*100.0/(zmax_-zmin_)));
 
-        refocus_.GPUrefocus(i, thresh_, 0, frame);
+        //refocus_.GPUrefocus(i, thresh_, 0, frame);
+        refocus_.GPUrefocus_ref_corner(i, thresh_, 0, frame);
         Mat image = refocus_.result;
         
         find_particles(image, points);
+        
         refine_subpixel(image, points, particles);
         for (int j=0; j<particles.size(); j++) {
             particle.x = (particles[j].x - refocus_.img_size().width*0.5)/refocus_.scale();
@@ -66,6 +69,8 @@ void pLocalize::find_particles_3d(int frame) {
         points.clear();
         particles.clear();        
         
+        //printf("\b\b\b");
+
         //cout<<"\r";
 
     }
@@ -73,7 +78,7 @@ void pLocalize::find_particles_3d(int frame) {
     find_clusters();
     collapse_clusters();
 
-    cout<<"\nSearch Complete! "<<particles_.size()<<" particles found.\n";
+    cout<<"done! "<<particles_.size()<<" particles found.\n";
 
 }
 
@@ -431,11 +436,13 @@ void pLocalize::write_all_particles_to_file(string path) {
     ofstream file;
     file.open(path.c_str());
 
+    file<<particles_all_.size()<<endl;
+
     for (int i=0; i<particles_all_.size(); i++) {
         file<<particles_all_[i].size()<<endl;
         for (int j=0; j<particles_all_[i].size(); j++) {
-            file<<particles_all_[i][j].x<<endl;
-            file<<particles_all_[i][j].y<<endl;
+            file<<particles_all_[i][j].x<<"\t";
+            file<<particles_all_[i][j].y<<"\t";
             file<<particles_all_[i][j].z<<endl;
         }
     }
@@ -492,10 +499,6 @@ double pLocalize::min_dist(Point2f point, vector<Point2f> points) {
 void pLocalize::draw_points(Mat image, Mat &drawn, vector<Point2f> points) {
 
     cvtColor(image, drawn, CV_GRAY2RGB);
-
-    for (int i=0; i<points.size(); i++) {
-        
-    }
 
     for (int i=0; i<points.size(); i++) {
         //points[i].x = points[i].x*10;

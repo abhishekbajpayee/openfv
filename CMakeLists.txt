@@ -28,7 +28,7 @@ add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/execs/sa-ptv.cpp)
 
 # release files
 #add_executable (refocus ${PROJECT_SOURCE_DIR}/src/refocus.cpp)
-#add_executable (track ${PROJECT_SOURCE_DIR}/src/track.cpp)
+add_executable (track ${PROJECT_SOURCE_DIR}/src/execs/track.cpp)
 #add_executable (liveRefocus ${PROJECT_SOURCE_DIR}/src/liveRefocus.cpp)
 #add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/calibrate.cpp)
 
@@ -41,6 +41,6 @@ set (CUSTOM_LIBS saptv cuda_saptv)
 target_link_libraries (sa-ptv ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${PYTHON_LIB} ${OTHER_LIBS})
 #target_link_libraries (testing ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
 #target_link_libraries (refocus ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
-#target_link_libraries (track ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
-#target_link_libraries (liveRefocus ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
+target_link_libraries (track ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${PYTHON_LIB} ${OTHER_LIBS})
+#target_link_libraries (liveRefocus ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${PYTHON_LIB} ${OTHER_LIBS})
 #target_link_libraries (calibrate ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})

@@ -5,19 +5,19 @@
 #include "pLoc.h"
 #include "tracking.h"
 #include "tools.h"
+#include "optimization.h"
+
+#include "cuda_lib.h"
 
 using namespace cv;
 using namespace std;
 
 int main(int argc, char** argv) {
+        
+    pTracking track(argv[1]);
+    track.read_points();
+    track.track_all();  
 
-    string particle_file(argv[1]);
-    pTracking tracker(particle_file);
-    tracker.read_points();
-    tracker.track_all();
-
-    cout<<"DONE!"<<endl;
-    
-    return 1;
+    return 0;
 
 }

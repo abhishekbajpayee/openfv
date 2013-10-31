@@ -45,7 +45,7 @@ void saRefocus::read_calib_data(string path) {
             }
         }
         P_mats_.push_back(P_mat);
-        cout<<P_mat<<endl;
+        //cout<<P_mat<<endl;
 
         Mat_<double> loc = Mat_<double>::zeros(3,1);
         for (int i=0; i<3; i++)
@@ -167,30 +167,32 @@ void saRefocus::read_imgs_mtiff(string path) {
     cout<<"done! ("<<dircount<<" frames found.)"<<endl<<endl;
 
     cout<<"Reading images..."<<endl;
-    for (int i=0; i<img_names.size(); i++) {
+    for (int n=0; n<img_names.size(); n++) {
         
-        cout<<"Camera "<<i+1<<"...";
+        cout<<"Camera "<<n+1<<"...";
 
         vector<Mat> refocusing_imgs_sub;
 
         int frame=0;
         int count=0;
         int skip=1400;
-        while (frame<dircount) {
+        
+        for (int f=0; f<frames_.size(); f++) {
+            //while (frame<dircount) {
 
             Mat img;
             uint32 c, r;
             size_t npixels;
             uint32* raster;
             
-            TIFFSetDirectory(tiffs[i], frame);
+            TIFFSetDirectory(tiffs[n], frames_[f]);
 
-            TIFFGetField(tiffs[i], TIFFTAG_IMAGEWIDTH, &c);
-            TIFFGetField(tiffs[i], TIFFTAG_IMAGELENGTH, &r);
+            TIFFGetField(tiffs[n], TIFFTAG_IMAGEWIDTH, &c);
+            TIFFGetField(tiffs[n], TIFFTAG_IMAGELENGTH, &r);
             npixels = r * c;
             raster = (uint32*) _TIFFmalloc(npixels * sizeof (uint32));
             if (raster != NULL) {
-                if (TIFFReadRGBAImageOriented(tiffs[i], c, r, raster, ORIENTATION_TOPLEFT, 0)) {
+                if (TIFFReadRGBAImageOriented(tiffs[n], c, r, raster, ORIENTATION_TOPLEFT, 0)) {
                     img.create(r, c, CV_32F);
                     for (int i=0; i<r; i++) {
                         for (int j=0; j<c; j++) {
@@ -200,6 +202,8 @@ void saRefocus::read_imgs_mtiff(string path) {
                 }
                 _TIFFfree(raster);
             }
+            
+            //imshow("img", img); waitKey(0);
             refocusing_imgs_sub.push_back(img);
             count++;
             
@@ -239,7 +243,7 @@ void saRefocus::GPUliveView() {
         GPUrefocus(z, thresh, 1, active_frame_);
     }
     
-    double dz = 0.5;
+    double dz = 0.1;
     double dthresh = 5;
     double tlimit = 255;
     if (REF_FLAG) {
@@ -433,6 +437,49 @@ void saRefocus::uploadToGPU() {
 
 }
 
+void saRefocus::uploadToGPU_ref() {
+
+    cout<<"Uploading required data to GPU...";
+
+    Mat_<float> D = Mat_<float>::zeros(3,3);
+    D(0,0) = scale_; D(1,1) = scale_;
+    D(0,2) = img_size_.width*0.5; D(1,2) = img_size_.height*0.5;
+    D(2,2) = 1;
+    Mat Dinv = D.inv();
+    
+    float hinv[6];
+    hinv[0] = Dinv.at<float>(0,0); hinv[1] = Dinv.at<float>(0,1); hinv[2] = Dinv.at<float>(0,2);
+    hinv[3] = Dinv.at<float>(1,0); hinv[4] = Dinv.at<float>(1,1); hinv[5] = Dinv.at<float>(1,2);
+
+    float locations[9][3];
+    float pmats[9][12];
+    for (int i=0; i<9; i++) {
+        for (int j=0; j<3; j++) {
+            locations[i][j] = cam_locations_[i].at<double>(j,0);
+            for (int k=0; k<4; k++) {
+                pmats[i][j*4+k] = P_mats_[i].at<double>(j,k);
+            }
+        }
+    }
+    
+    uploadRefractiveData(hinv, locations, pmats, geom);
+
+    Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
+    xmap.upload(blank); ymap.upload(blank);
+    temp.upload(blank); temp2.upload(blank); 
+    //refocused.upload(blank);
+
+    for (int i=0; i<9; i++) {
+        xmaps.push_back(xmap.clone());
+        ymaps.push_back(ymap.clone());
+    }
+
+    cout<<"done!"<<endl;
+
+}
+
+// ---GPU Refocusing Functions Begin--- //
+
 void saRefocus::GPUrefocus(double z, double thresh, int live, int frame) {
 
     z *= warp_factor_;
@@ -519,44 +566,103 @@ void saRefocus::GPUrefocus_ref(double z, double thresh, int live, int frame) {
     
 }
 
-void saRefocus::uploadToGPU_ref() {
+void saRefocus::GPUrefocus_ref_corner(double z, double thresh, int live, int frame) {
 
-    cout<<"Uploading required data to GPU...";
+    Scalar fact = Scalar(1/double(num_cams_));
+    Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
+    refocused.upload(blank);    
 
-    Mat_<float> D = Mat_<float>::zeros(3,3);
-    D(0,0) = scale_; D(1,1) = scale_;
-    D(0,2) = img_size_.width*0.5; D(1,2) = img_size_.height*0.5;
-    D(2,2) = 1;
-    Mat Dinv = D.inv();
-    
-    float hinv[6];
-    hinv[0] = Dinv.at<float>(0,0); hinv[1] = Dinv.at<float>(0,1); hinv[2] = Dinv.at<float>(0,2);
-    hinv[3] = Dinv.at<float>(1,0); hinv[4] = Dinv.at<float>(1,1); hinv[5] = Dinv.at<float>(1,2);
+    //double wall_timer = omp_get_wtime();
+    //cout<<"Calculating image..."<<endl;
 
-    float locations[9][3];
-    float pmats[9][12];
-    for (int i=0; i<9; i++) {
-        for (int j=0; j<3; j++) {
-            locations[i][j] = cam_locations_[i].at<double>(j,0);
-            for (int k=0; k<4; k++) {
-                pmats[i][j*4+k] = P_mats_[i].at<double>(j,k);
-            }
+    Mat H;
+
+    for (int i=0; i<num_cams_; i++) {
+
+        calc_ref_refocus_H(cam_locations_[i], z, i, H);
+        gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
+        
+        // preprocessing area
+        //gpu::cvtColor(temp, temp, CV_8U);
+        //gpu::equalizeHist(temp, temp);
+        
+        gpu::multiply(temp, fact, temp2);
+        gpu::add(refocused, temp2, refocused);
+        
+    }
+
+    gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
+
+    Mat refocused_host_(refocused);
+
+    //cout<<"Time: "<<omp_get_wtime()-wall_timer<<endl;
+
+    if (live) {
+        //refocused_host_ /= 255.0;
+        char title[50];
+        sprintf(title, "z = %f, thresh = %f, frame = %d", z, thresh, frame);
+        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
+        imshow("Result", refocused_host_);
+    }
+
+    refocused_host_ *= 255.0;
+    refocused_host_.convertTo(result, CV_8U);
+
+}
+
+// ---GPU Refocusing Functions End--- //
+
+// ---CPU Refocusing Functions Begin--- //
+
+void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
+
+    z *= warp_factor_;
+
+    Scalar fact = Scalar(1/double(imgs.size()));
+
+    Mat H, trans;
+    T_from_P(P_mats_[0], H, z, scale_, img_size_);
+    warpPerspective(imgs[0][frame], cputemp, H, img_size_);
+
+    if (mult_) {
+        pow(cputemp, mult_exp_, cputemp2);
+    } else {
+        multiply(cputemp, fact, cputemp2);
+    }
+
+    cpurefocused = cputemp2.clone();
+
+    for (int i=1; i<num_cams_; i++) {
+        
+        T_from_P(P_mats_[i], H, z, scale_, img_size_);
+        
+        warpPerspective(imgs[i][frame], cputemp, H, img_size_);
+
+        if (mult_) {
+            pow(cputemp, mult_exp_, cputemp2);
+            multiply(cpurefocused, cputemp2, cpurefocused);
+        } else {
+            multiply(cputemp, fact, cputemp2);
+            add(cpurefocused, cputemp2, cpurefocused);        
         }
     }
     
-    uploadRefractiveData(hinv, locations, pmats, geom);
+    threshold(cpurefocused, cpurefocused, thresh, 0, THRESH_TOZERO);
 
-    Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
-    xmap.upload(blank); ymap.upload(blank);
-    temp.upload(blank); temp2.upload(blank); 
-    //refocused.upload(blank);
+    Mat refocused_host_(cpurefocused);
+    //refocused_host_ /= 255.0;
 
-    for (int i=0; i<9; i++) {
-        xmaps.push_back(xmap.clone());
-        ymaps.push_back(ymap.clone());
+    if (live) {
+        refocused_host_ /= 255.0;
+        char title[50];
+        sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
+        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
+        //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
+        //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
+        imshow("Result", refocused_host_);
     }
 
-    cout<<"done!"<<endl;
+    refocused_host_.convertTo(result, CV_8U);
 
 }
 
@@ -632,39 +738,7 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
 
 }
 
-void saRefocus::GPUrefocus_ref_corner(double z, double thresh, int live, int frame) {
-
-    Scalar fact = Scalar(1/double(num_cams_));
-    Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
-    refocused.upload(blank);    
-
-    //double wall_timer = omp_get_wtime();
-    cout<<"Calculating image..."<<endl;
-
-    Mat H;
-
-    for (int i=0; i<num_cams_; i++) {
-
-        calc_ref_refocus_H(cam_locations_[i], z, i, H);
-        gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
-        gpu::multiply(temp, fact, temp2);
-        gpu::add(refocused, temp2, refocused);
-        
-    }
-
-    Mat refocused_host_(refocused);
-
-    //cout<<"Time: "<<omp_get_wtime()-wall_timer<<endl;
-
-    if (live) {
-        //refocused_host_ /= 255.0;
-        char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z, thresh, frame);
-        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        imshow("Result", refocused_host_);
-    }
-
-}
+// ---CPU Refocusing Functions End--- //
 
 void saRefocus::calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam) {
 
@@ -750,59 +824,6 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
 
     H = findHomography(dp, sp, CV_RANSAC);
     H = D*H;
-
-}
-
-
-void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
-
-    z *= warp_factor_;
-
-    Scalar fact = Scalar(1/double(imgs.size()));
-
-    Mat H, trans;
-    T_from_P(P_mats_[0], H, z, scale_, img_size_);
-    warpPerspective(imgs[0][frame], cputemp, H, img_size_);
-
-    if (mult_) {
-        pow(cputemp, mult_exp_, cputemp2);
-    } else {
-        multiply(cputemp, fact, cputemp2);
-    }
-
-    cpurefocused = cputemp2.clone();
-
-    for (int i=1; i<num_cams_; i++) {
-        
-        T_from_P(P_mats_[i], H, z, scale_, img_size_);
-        
-        warpPerspective(imgs[i][frame], cputemp, H, img_size_);
-
-        if (mult_) {
-            pow(cputemp, mult_exp_, cputemp2);
-            multiply(cpurefocused, cputemp2, cpurefocused);
-        } else {
-            multiply(cputemp, fact, cputemp2);
-            add(cpurefocused, cputemp2, cpurefocused);        
-        }
-    }
-    
-    threshold(cpurefocused, cpurefocused, thresh, 0, THRESH_TOZERO);
-
-    Mat refocused_host_(cpurefocused);
-    //refocused_host_ /= 255.0;
-
-    if (live) {
-        refocused_host_ /= 255.0;
-        char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
-        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
-        //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
-        imshow("Result", refocused_host_);
-    }
-
-    refocused_host_.convertTo(result, CV_8U);
 
 }
 
