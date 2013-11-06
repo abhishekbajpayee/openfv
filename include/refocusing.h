@@ -32,18 +32,8 @@ class saRefocus {
 
  saRefocus(refocusing_data refocusing_params, int frame, int mult, double mult_exp):
     P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z(0), thresh(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) { }
-    
- saRefocus(string calib_file_path, int frame, int mult, double mult_exp, int corner_flag):
-    z(0), thresh(0), frame_(frame), mult_(mult), mult_exp_(mult_exp), CORNER_FLAG(corner_flag) { 
-        read_calib_data(calib_file_path);
-        REF_FLAG = 1;
-    }
 
- saRefocus(string calib_file_path, vector<int> frames, int frame, int mult, double mult_exp, int corner_flag):
-    z(0), thresh(0), frames_(frames), frame_(frame), mult_(mult), mult_exp_(mult_exp), CORNER_FLAG(corner_flag) { 
-        read_calib_data(calib_file_path);
-        REF_FLAG = 1;
-    }
+    saRefocus(refocus_settings settings);
 
     int num_cams() { return num_cams_; }
     double scale() { return scale_; }
@@ -53,13 +43,15 @@ class saRefocus {
     void read_calib_data(string path);
 
     void read_imgs(string path);
-    void read_imgs_mtiff(string path);
+    void read_imgs_mtiff(string path, vector<int> frames);
 
     void CPUliveView();
     void GPUliveView();
     void initializeGPU();
     void uploadToGPU();
     void uploadToGPU_ref();
+
+    void refocus(double z, double thresh, int frame);
 
     void GPUrefocus(double z, double thresh, int live, int frame);
     void GPUrefocus_ref(double z, double thresh, int live, int frame);
@@ -92,7 +84,7 @@ class saRefocus {
     double z;
     double thresh;
     int frame_;
-    vector<int> frames_;
+    //vector<int> frames_;
     double mult_exp_;
     double warp_factor_;
     int active_frame_;
@@ -113,8 +105,10 @@ class saRefocus {
     int frame_to_upload_;
     int mult_;
 
+    int GPU_FLAG;
     int REF_FLAG;
     int CORNER_FLAG; // Flag to use corner based homography fit method
+    int MTIFF_FLAG;
 
 };
 

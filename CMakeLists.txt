@@ -34,8 +34,8 @@ add_executable (track ${PROJECT_SOURCE_DIR}/src/execs/track.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp)
 set (PYTHON_LIB python2.7)
-#set (OTHER_LIBS tiff -lprofiler)
-set (OTHER_LIBS tiff)
+set (OTHER_LIBS tiff -lprofiler)
+#set (OTHER_LIBS tiff)
 set (CUSTOM_LIBS saptv cuda_saptv)
 
 target_link_libraries (sa-ptv ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${PYTHON_LIB} ${OTHER_LIBS})

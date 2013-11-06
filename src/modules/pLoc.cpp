@@ -18,6 +18,9 @@
 using namespace std;
 using namespace cv;
 
+pLocalize::pLocalize(localizer_settings s, saRefocus refocus):
+    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), cluster_size_(s.cluster_size), refocus_(refocus) {}
+
 void pLocalize::run() {
     
     int frame = 0;
@@ -52,11 +55,12 @@ void pLocalize::find_particles_3d(int frame) {
         //cout<<int((i-zmin_)*100.0/(zmax_-zmin_))<<endl;
         //printf("%3d", int((i-zmin_)*100.0/(zmax_-zmin_)));
 
-        //refocus_.GPUrefocus(i, thresh_, 0, frame);
-        refocus_.GPUrefocus_ref_corner(i, thresh_, 0, frame);
+        refocus_.refocus(i, thresh_, frame);
         Mat image = refocus_.result;
-        
+
         find_particles(image, points);
+        //find_particles_fast(image, points);
+        //Mat img; draw_points(image, img, points); imshow("img", img); waitKey(0);
         
         refine_subpixel(image, points, particles);
         for (int j=0; j<particles.size(); j++) {
@@ -390,6 +394,18 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
     }
 
 }
+
+/*
+void pLocalize::find_particles_fast(Mat image, vector<Point2f> &points_out) {
+
+    Mat s1(Mat::zeros(1,image.cols,CV_8UC1));
+           Mat s2;
+    reduce(image, s1, 0, CV_REDUCE_SUM, CV_8UC1); reduce(image, s2, 1, CV_REDUCE_SUM);
+
+    cout<<s1<<endl;
+
+}
+*/
 
 void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out) {
     

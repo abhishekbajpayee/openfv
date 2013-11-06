@@ -6,6 +6,24 @@
 using namespace std;
 using namespace cv;
 
+struct refocus_settings {
+
+    int mult; // 1 for Multiplicative
+    double mult_exp;
+    int gpu; // 1 for GPU
+    int ref; // 1 for refractive
+    int corner_method; // 1 to use corner method
+
+    string calib_file_path;
+
+    string images_path;
+    int mtiff; // 1 for using multipage tiffs
+    int start_frame;
+    int end_frame;
+    int upload_frame;
+
+};
+
 struct refocusing_data {
     vector<Mat> P_mats_u; // Unaligned P matrices
     vector<Mat> P_mats;
@@ -27,6 +45,15 @@ struct refocusing_data_ref {
     int n2;
     int n3;
     double zW;
+};
+
+struct localizer_settings {
+    
+    int window;
+    int cluster_size;
+    double zmin, zmax, dz;
+    double thresh;
+    
 };
 
 // Data type for a particle in 2D:

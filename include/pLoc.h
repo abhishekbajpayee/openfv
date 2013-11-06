@@ -27,8 +27,7 @@ class pLocalize {
 
     }
 
- pLocalize(int window, double zmin, double zmax, double dz, double thresh, int cluster_size, saRefocus refocus):
-    window_(window), zmin_(zmin), zmax_(zmax), dz_(dz), thresh_(thresh), cluster_size_(cluster_size), refocus_(refocus) {}
+    pLocalize(localizer_settings s, saRefocus refocus);
 
     vector<Point3f> detected_particles() { return particles_; }
 
@@ -46,6 +45,7 @@ class pLocalize {
     void collapse_clusters();
 
     void find_particles(Mat image, vector<Point2f> &points_out);
+    void find_particles_fast(Mat image, vector<Point2f> &points_out);
     void refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out);
 
     void write_all_particles_to_file(string path);
