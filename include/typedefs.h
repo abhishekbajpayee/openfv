@@ -6,6 +6,8 @@
 using namespace std;
 using namespace cv;
 
+const double pi = 3.14159;
+
 struct refocus_settings {
 
     int mult; // 1 for Multiplicative
@@ -78,6 +80,7 @@ struct volume {
     double y2;
     double z1;
     double z2;
+    double v;
 };
 
 #endif

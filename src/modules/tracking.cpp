@@ -21,10 +21,13 @@ using namespace cv;
 
 void pTracking::initialize() {
 
-    R_n = 5.0; // neighborhood threshold
-    R_s = 2.0; // maximum movement threshold
+    R_n = 5; // neighborhood threshold
+    R_s = 2; // maximum movement threshold
     N = 500;
     tol = 0.1;
+
+    V_n = (4/3)*pi*pow(R_n,3);
+    V_s = (4/3)*pi*pow(R_s,3);
 
 }
 
@@ -69,6 +72,10 @@ void pTracking::read_points() {
             points_.push_back(point);
         }
 
+        vol.v = (vol.x2-vol.x1)*(vol.y2-vol.y1)*(vol.z2-vol.z1);
+        double density = points_.size()/vol.v;
+        double complexity = 300*points_.size()*pow(density, 4)*pow(R_s*R_n,6);
+        cout<<"complexity: "<<complexity<<endl;
         all_points_.push_back(points_);
         vols_.push_back(vol);
         points_.clear();
@@ -85,12 +92,14 @@ void pTracking::track_all() {
 
     for (int i=0; i<all_points_.size()-1; i++) {
 
-        cout<<"Matching frames "<<i<<" and "<<i+1<<endl;
+        //cout<<"Matching frames "<<i<<" and "<<i+1<<endl;
         matches = track_frame(i, i+1);
         all_matches.push_back(matches);
         matches.clear();
 
     }
+
+    plot_complete_paths();
 
 }
 
@@ -108,17 +117,19 @@ vector<Point2i> pTracking::track_frame(int f1, int f2) {
     n1 = all_points_[f1].size();
     n2 = all_points_[f2].size();
 
-    cout<<"Neighbor Sets...";
+    //cout<<"Neighbor Sets...";
     vector< vector<int> > S_r = neighbor_set(f1, f1, R_n);
     vector< vector<int> > S_c = neighbor_set(f1, f2, R_s);
 
     vector<Mat> Pij, Pi, Pij2, Pi2;
-    cout<<"Probability Sets...";
+    //cout<<"Probability Sets...";
     build_probability_sets(S_r, S_c, Pij, Pi, Pij2, Pi2);
 
-    cout<<"Relaxation Sets...\n";
+    //cout<<"Relaxation Sets...\n";
     vector< vector< vector< vector<Point2i> > > > theta;
+    double t = omp_get_wtime();
     build_relaxation_sets(f1, f2, S_r, S_c, C, D, E, F, theta);
+    cout<<"Time: "<<omp_get_wtime()-t<<endl;
 
     double diff;
     int n;
@@ -149,11 +160,11 @@ vector<Point2i> pTracking::track_frame(int f1, int f2) {
 
     }
 
-    cout<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
+    //cout<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
 
     vector<Point2i> matches;
     int count = find_matches(Pij, S_r, S_c, matches);
-    cout<<count<<" matches found."<<endl;
+    //cout<<count<<" matches found."<<endl;
 
     return(matches);
 
@@ -363,8 +374,9 @@ void pTracking::plot_complete_paths() {
     }
     cout<<"full: "<<all_paths.size()<<endl;
     
+    int every = 3;
     for (int i=0; i<all_paths.size(); i++) {
-        if (i%1==0) {
+        if (i%every==1) {
         vector<Point3f> points;
         for (int j=0; j<all_paths[i].size(); j++) {
             points.push_back(all_points_[j][all_paths[i][j]]);

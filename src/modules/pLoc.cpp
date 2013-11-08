@@ -45,24 +45,24 @@ void pLocalize::find_particles_all_frames() {
 void pLocalize::find_particles_3d(int frame) {
 
     particle2d particle;
-    vector<Point2f> points;
+    vector<Point2f> points, points2;
     vector<particle2d> particles;
 
-    cout<<"Searching for particles through volume at frame "<<frame<<"...";
+    cout<<"Searching for particles through volume at frame "<<frame<<"..."<<endl;
 
     for (float i=zmin_; i<=zmax_; i += dz_) {
         
-        //cout<<int((i-zmin_)*100.0/(zmax_-zmin_))<<endl;
-        //printf("%3d", int((i-zmin_)*100.0/(zmax_-zmin_)));
+        cout<<"\r"<<1+int((i-zmin_)*100.0/(zmax_-zmin_))<<"%"<<flush;
 
         refocus_.refocus(i, thresh_, frame);
         Mat image = refocus_.result;
 
         find_particles(image, points);
-        //find_particles_fast(image, points);
-        //Mat img; draw_points(image, img, points); imshow("img", img); waitKey(0);
-        
+        //Mat img; draw_points(image, img, points); qimshow(img);
+
         refine_subpixel(image, points, particles);
+        //Mat img; draw_points(image, img, particles); qimshow(img);
+        
         for (int j=0; j<particles.size(); j++) {
             particle.x = (particles[j].x - refocus_.img_size().width*0.5)/refocus_.scale();
             particle.y = (particles[j].y - refocus_.img_size().height*0.5)/refocus_.scale();
@@ -71,18 +71,14 @@ void pLocalize::find_particles_3d(int frame) {
             particles3D_.push_back(particle);
         }
         points.clear();
-        particles.clear();        
-        
-        //printf("\b\b\b");
-
-        //cout<<"\r";
+        particles.clear();
 
     }
 
     find_clusters();
     collapse_clusters();
 
-    cout<<"done! "<<particles_.size()<<" particles found.\n";
+    cout<<"\rdone! "<<particles_.size()<<" particles found.\n";
 
 }
 
@@ -395,18 +391,6 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
 
 }
 
-/*
-void pLocalize::find_particles_fast(Mat image, vector<Point2f> &points_out) {
-
-    Mat s1(Mat::zeros(1,image.cols,CV_8UC1));
-           Mat s2;
-    reduce(image, s1, 0, CV_REDUCE_SUM, CV_8UC1); reduce(image, s2, 1, CV_REDUCE_SUM);
-
-    cout<<s1<<endl;
-
-}
-*/
-
 void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out) {
     
     int h = image.rows;
@@ -517,9 +501,17 @@ void pLocalize::draw_points(Mat image, Mat &drawn, vector<Point2f> points) {
     cvtColor(image, drawn, CV_GRAY2RGB);
 
     for (int i=0; i<points.size(); i++) {
-        //points[i].x = points[i].x*10;
-        //points[i].y = points[i].y*10;
         circle(drawn, points[i], 5.0, Scalar(0,0,255));
+    }
+
+}
+
+void pLocalize::draw_points(Mat image, Mat &drawn, vector<particle2d> points) {
+
+    cvtColor(image, drawn, CV_GRAY2RGB);
+
+    for (int i=0; i<points.size(); i++) {
+        circle(drawn, Point2f(points[i].x, points[i].y), 5.0, Scalar(0,0,255));
     }
 
 }

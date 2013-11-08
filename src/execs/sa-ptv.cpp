@@ -24,15 +24,15 @@ int main(int argc, char** argv) {
     settings.corner_method = 1;
     settings.calib_file_path = string(argv[1]);
     settings.images_path = string(argv[2]);
-    settings.mtiff = 0;
+    settings.mtiff = 1;
     settings.start_frame = 60;
-    settings.end_frame = 61;
-    settings.upload_frame = 0;
+    settings.end_frame = 64;
+    settings.upload_frame = -1;
     
-    string particle_file("../temp/particles_full_ref.txt");
+    string particle_file("../temp/particles_run2_ring.txt");
     
-    int find = 1;
-    int track = 0;
+    int find = 0;
+    int track = 1;
     int live = 0;
     
     if (find==1 || live ==1) {
@@ -48,12 +48,12 @@ int main(int argc, char** argv) {
             
             localizer_settings s2;
 
-            s2.window = 2;
+            s2.window = 1;
             s2.cluster_size = 10;
-            s2.zmin = 0.0; //-20
-            s2.zmax = 10.0; //40
+            s2.zmin = 20.0; //-20
+            s2.zmax = 60.0; //40
             s2.dz = 0.1;
-            s2.thresh = 50.0; //90.0; //100.0
+            s2.thresh = 30.0; //90.0; //100.0
             pLocalize localizer(s2, refocus);
             
             //localizer.z_resolution();

@@ -129,10 +129,9 @@ void saRefocus::read_imgs(string path) {
         for (int i=0; i<img_names.size(); i++) {
             cout<<i<<": "<<img_names[i]<<endl;
             image = imread(img_names[i], 0);
-            //image.convertTo(fimage, CV_32F);
-            //fimage /= 255.0;
-            //image.convertTo(fimage, CV_8U);
-            refocusing_imgs_sub.push_back(image.clone());
+            
+            Mat imgI; preprocess(image, imgI);
+            refocusing_imgs_sub.push_back(imgI.clone());
         }
         img_names.clear();
 
@@ -202,9 +201,8 @@ void saRefocus::read_imgs_mtiff(string path, vector<int> frames) {
         int skip=1400;
         
         for (int f=0; f<frames.size(); f++) {
-            //while (frame<dircount) {
 
-            Mat img, imgI;
+            Mat img, img2;
             uint32 c, r;
             size_t npixels;
             uint32* raster;
@@ -220,7 +218,6 @@ void saRefocus::read_imgs_mtiff(string path, vector<int> frames) {
                     img.create(r, c, CV_32F);
                     for (int i=0; i<r; i++) {
                         for (int j=0; j<c; j++) {
-                            //img.at<float>(i,j) = TIFFGetR(raster[i*c+j])/255.0;
                             img.at<float>(i,j) = TIFFGetR(raster[i*c+j]);
                         }
                     }
@@ -228,9 +225,11 @@ void saRefocus::read_imgs_mtiff(string path, vector<int> frames) {
                 _TIFFfree(raster);
             }
             
-            img.convertTo(imgI, CV_8U);
+            img.convertTo(img2, CV_8U);
+            Mat imgI; preprocess(img2, imgI);
+            
             //imshow("img to push", imgI); waitKey(0);
-            refocusing_imgs_sub.push_back(imgI);
+            refocusing_imgs_sub.push_back(imgI.clone());
             count++;
             
             frame += skip;
@@ -788,6 +787,37 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
 }
 
 // ---CPU Refocusing Functions End--- //
+
+void saRefocus::preprocess(Mat im1, Mat &im2) {
+
+    int xf = 20;
+    int yf = 20;
+
+    int xs = im1.cols/xf;
+    int ys = im1.rows/yf;
+
+    im2.create(im1.rows, im1.cols, CV_8U);
+
+    for (int i=0; i<xf; i++) {
+        for (int j=0; j<yf; j++) {
+            
+            Mat submat = im1(Rect(i*xs,j*ys,xs,ys)).clone();
+            Mat subf; submat.convertTo(subf, CV_32F);
+
+            double min, max;
+            
+            minMaxLoc(subf, &min, &max, NULL, NULL);
+            subf -+ min; subf /= max; subf *= 255;
+            subf.convertTo(submat, CV_8U);
+
+            submat.copyTo(im2(Rect(i*xs,j*ys,xs,ys)));
+
+        }
+    }
+
+    //imshow("img1", im1); imshow("img2", im2); waitKey(0);
+
+}
 
 void saRefocus::calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam) {
 

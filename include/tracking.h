@@ -60,7 +60,7 @@ class pTracking {
     
     vector< vector<Point2i> > all_matches;
 
-    double R_n, R_s;
+    double R_n, R_s, V_n, V_s;
     int N;
     double tol;
 

@@ -108,4 +108,13 @@ double dist(Point3f p1, Point3f p2) {
 
 }
 
+void qimshow(Mat image) {
+
+    namedWindow("Image", CV_WINDOW_AUTOSIZE);
+    imshow("Image", image);
+    waitKey(0);
+    destroyWindow("Image");
+
+}
+
 #endif
