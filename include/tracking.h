@@ -26,7 +26,7 @@ class pTracking {
 
     }
 
- pTracking(string particle_file): path_(particle_file) {
+ pTracking(string particle_file, double R_n, double R_s): path_(particle_file), R_s(R_s), R_n(R_n) {
         initialize();
     }
     
@@ -43,7 +43,7 @@ class pTracking {
  private:
 
     // Functions
-    int find_matches(vector<Mat> Pij, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches);
+    int find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches);
     double update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
     void normalize_probabilites(vector<Mat> &Pij, vector<Mat> &Pi);
     void build_probability_sets(vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);

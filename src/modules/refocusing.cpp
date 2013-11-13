@@ -798,6 +798,8 @@ void saRefocus::preprocess(Mat im1, Mat &im2) {
 
     im2.create(im1.rows, im1.cols, CV_8U);
 
+    GaussianBlur(im1, im1, Size(3,3), 0.5);
+
     for (int i=0; i<xf; i++) {
         for (int j=0; j<yf; j++) {
             
@@ -814,6 +816,8 @@ void saRefocus::preprocess(Mat im1, Mat &im2) {
 
         }
     }
+
+    //GaussianBlur(im2, im2, Size(3,3), 1.0);
 
     //imshow("img1", im1); imshow("img2", im2); waitKey(0);
 

@@ -62,7 +62,7 @@ void multiCamCalibration::run() {
 
     if (run_calib_flag) {
 
-        if (dir_struct_) {
+        if (mtiff_) {
             read_cam_names_mtiff();
             read_calib_imgs_mtiff();
         } else {

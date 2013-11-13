@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     string calib_path(argv[1]); // Folder where calibration images lie
     Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
     double grid_size_phys = 5;  // in [mm]
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, 0);
+    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, 0, 1);
     calibration.run();
 
     stringstream sframe(argv[3]);
@@ -40,9 +40,18 @@ int main(int argc, char** argv) {
 
     double mult_exp = 1.0/9.0;
 
-    string refoc_path(argv[2]);
-    saRefocus refocus(calibration.refocusing_params(), frame, mult, mult_exp);
-    refocus.read_imgs(refoc_path);
+    refocus_settings settings;
+    settings.gpu = 1;
+    settings.ref = 1;
+    settings.corner_method = 0;
+    settings.calib_file_path = string(argv[1]);
+    settings.images_path = string(argv[2]);
+    settings.mtiff = 1;
+    settings.start_frame = 30;
+    settings.end_frame = 33;
+    settings.upload_frame = -1;
+
+    saRefocus refocus(settings);
 
     if (method) {
         refocus.GPUliveView();

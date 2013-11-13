@@ -48,8 +48,8 @@ class multiCamCalibration {
         //
     }
 
- multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int dir_struct):
-    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), dir_struct_(dir_struct) {}
+ multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff):
+    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff) {}
     
     // Functions to access calibration data
     int num_cams() { return num_cams_; }
@@ -151,7 +151,7 @@ class multiCamCalibration {
     int load_results_flag;
     int dummy_mode_;
     int refractive_;
-    int dir_struct_; // 0 = folders with tif images, 1 = multipage tif files
+    int mtiff_; // 0 = folders with tif images, 1 = multipage tif files
 
     int pinhole_max_iterations;
     int refractive_max_iterations;

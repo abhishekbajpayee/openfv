@@ -21,8 +21,6 @@ using namespace cv;
 
 void pTracking::initialize() {
 
-    R_n = 5; // neighborhood threshold
-    R_s = 2; // maximum movement threshold
     N = 500;
     tol = 0.1;
 
@@ -90,7 +88,8 @@ void pTracking::track_all() {
 
     vector<Point2i> matches;
 
-    for (int i=0; i<all_points_.size()-1; i++) {
+    //for (int i=0; i<all_points_.size()-1; i++) {
+    for (int i=0; i<1; i++) {
 
         //cout<<"Matching frames "<<i<<" and "<<i+1<<endl;
         matches = track_frame(i, i+1);
@@ -98,8 +97,6 @@ void pTracking::track_all() {
         matches.clear();
 
     }
-
-    plot_complete_paths();
 
 }
 
@@ -160,27 +157,55 @@ vector<Point2i> pTracking::track_frame(int f1, int f2) {
 
     }
 
-    //cout<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
+    cout<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
 
     vector<Point2i> matches;
-    int count = find_matches(Pij, S_r, S_c, matches);
-    //cout<<count<<" matches found."<<endl;
+    int count = find_matches(Pij, Pi, S_r, S_c, matches);
+    cout<<count<<" matches found."<<endl;
 
     return(matches);
 
 }
 
-int pTracking::find_matches(vector<Mat> Pij, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches) {
+int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches) {
     
     int count = 0;
 
+    vector< vector<int> > zematch;
+    vector<int> container;
+    for (int i=0; i<Pij.size(); i++)
+        zematch.push_back(container);
+
     for (int i=0; i<Pij.size(); i++) {
+
+        for (int j=0; j<Pij[i].rows; j++) {
+            for (int k=0; k<Pij[i].cols; k++) {
+
+                if (Pij[i].at<double>(j,k)>0.99) {
+                    zematch[S_r[i][j]].push_back(S_c[i][k]);
+                }
+
+            }
+        }
+
+        /*
+        cout<<"-----"<<endl;
+        for (int x=0; x<S_r[i].size(); x++)
+            cout<<S_r[i][x]<<" ";
+        cout<<endl;
+        for (int x=0; x<S_c[i].size(); x++)
+            cout<<S_c[i][x]<<" ";
+        cout<<endl;
+        cout<<Pij[i]<<endl;
+        cout<<Pi[i]<<endl;
+        cout<<"-----"<<endl;
+        */
+        /*
         for (int j=0; j<S_r[i].size(); j++) {
 
             if (i == S_r[i][j]) {
                 int found = 0;
                 for (int k=0; k<S_c[i].size(); k++) {
-                    //cout<<Pij[i]<<endl;
                     if (Pij[i].at<double>(j,k)>0.99) {
                         matches.push_back(Point2i(i,S_c[i][k]));
                         found = 1;
@@ -193,7 +218,108 @@ int pTracking::find_matches(vector<Mat> Pij, vector< vector<int> > S_r, vector< 
             }
 
         }
+
+        */
+
     }
+
+    /*
+    for (int i=0; i<Pij.size(); i++) {
+        cout<<i<<" ---> ";
+        for (int k=0; k<zematch[i].size(); k++) {
+            cout<<zematch[i][k]<<", ";
+        }
+        cout<<endl;
+    }
+    */
+
+    int tiecount = 0;
+    for (int i=0; i<Pij.size(); i++) {
+        
+        /*
+        cout<<i<<" ?--> ";
+        for (int k=0; k<zematch[i].size(); k++) {
+            cout<<zematch[i][k]<<", ";
+        }
+        cout<<endl;
+        */
+        
+        vector<int> c;
+        vector<int> cf;
+
+        //cout<<i<<" ---> ";
+
+        if (zematch[i].size()==0) {
+            matches.push_back(Point2i(i,-1));
+            //cout<<"no match"<<endl;
+        } else if (zematch[i].size()==1) {
+            matches.push_back(Point2i(i,zematch[i][0]));
+            //cout<<zematch[i][0]<<endl;
+            count++;
+        } else {
+
+            for (int j=0; j<zematch[i].size(); j++) {
+
+                int counted=0;
+                for (int k=0; k<c.size(); k++) {
+                    if (zematch[i][j]==c[k]) {
+                        counted=1;
+                        cf[k]++;
+                    }
+                }
+                if (counted==0) {
+                    c.push_back(zematch[i][j]);
+                    cf.push_back(1);
+                }
+                
+            }
+
+            // Finding maximum occurence frequency
+            int modloc = 0;
+            int modf = cf[0];
+            for (int k=1; k<cf.size(); k++) {
+                if (cf[k]>modf) {
+                    modloc = k;
+                    modf = cf[k];
+                }
+            }
+
+            // Checking if multiple maxima exist
+            int tie = 0;
+            for (int k=0; k<cf.size(); k++) {
+                
+                if (k==modloc)
+                    continue;
+                
+                if (cf[k]==cf[modloc]) {
+                    tie=1;
+                    tiecount++;
+                    matches.push_back(Point2i(i,-2));
+                    //cout<<"tie"<<endl;
+                    break;
+                }
+
+            }
+
+            if (tie==0) {
+                matches.push_back(Point2i(i,c[modloc]));
+                //cout<<c[modloc]<<endl;
+                count++;
+            }
+
+        }
+        
+        /*
+        for (int k=0; k<c.size(); k++)
+            cout<<c[k]<<": "<<cf[k]<<", ";
+        cout<<endl;
+        */
+
+        c.clear(); cf.clear();
+
+    }
+
+    cout<<"Ties: "<<tiecount<<endl;
 
     return(count);
 
