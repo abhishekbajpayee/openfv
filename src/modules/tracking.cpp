@@ -88,8 +88,8 @@ void pTracking::track_all() {
 
     vector<Point2i> matches;
 
-    //for (int i=0; i<all_points_.size()-1; i++) {
-    for (int i=0; i<1; i++) {
+    for (int i=0; i<all_points_.size()-1; i++) {
+        //for (int i=0; i<5; i++) {
 
         //cout<<"Matching frames "<<i<<" and "<<i+1<<endl;
         matches = track_frame(i, i+1);
@@ -512,6 +512,31 @@ void pTracking::plot_complete_paths() {
         }
     }
     
+    vis.xlabel("x [mm]");
+    vis.ylabel("y [mm]");
+    vis.zlabel("z [mm]");
+    vis.show();
+
+}
+
+void pTracking::plot_all_paths() {
+
+    PyVisualize vis;
+
+    vis.figure3d();
+
+    for (int i=0; i<all_matches.size(); i++) {
+
+        for (int j=0; j<all_matches[i].size(); j++) {
+
+            if (all_matches[i][j].y >= 0) {
+                vis.line3d(all_points_[i][all_matches[i][j].x], all_points_[i+1][all_matches[i][j].y]);
+            }
+
+        }
+
+    }
+
     vis.xlabel("x [mm]");
     vis.ylabel("y [mm]");
     vis.zlabel("z [mm]");

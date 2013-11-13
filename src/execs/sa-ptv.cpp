@@ -26,18 +26,18 @@ int main(int argc, char** argv) {
     settings.images_path = string(argv[2]);
     settings.mtiff = 1;
     settings.start_frame = 20;
-    settings.end_frame = 120;
+    settings.end_frame = 50;
     settings.upload_frame = -1;
     
     //string particle_file("../temp/particles_run2_t70.txt");
     
     double window = 2;
-    double thresh = 70.0;
+    double thresh = 85.0;
     string date("11-08");
     string run("5");
 
     stringstream s;
-    s<<"../particle_files/particles_"; s<<date<<"_"; s<<"run"<<run<<"_"; s<<"w"<<window<<"_"; s<<"t"<<thresh<<".txt";
+    s<<"../particle_files/date"; s<<date<<"_"; s<<"run"<<run<<"_"; s<<"f"<<settings.start_frame<<"to"<<settings.end_frame<<"_"; s<<"w"<<window<<"_"; s<<"t"<<thresh<<".txt";
     string particle_file = s.str();
     cout<<particle_file<<endl;
 
@@ -60,8 +60,8 @@ int main(int argc, char** argv) {
 
             s2.window = window;
             s2.cluster_size = 10;
-            s2.zmin = 20.0; //-20
-            s2.zmax = 60.0; //40
+            s2.zmin = 0.0; //-20
+            s2.zmax = 80.0; //40
             s2.dz = 0.1;
             s2.thresh = thresh; //90.0; //100.0
             pLocalize localizer(s2, refocus);

@@ -37,6 +37,7 @@ class pTracking {
     vector<Point2i> track_frame(int f1, int f2);
 
     void plot_complete_paths();
+    void plot_all_paths();
 
     void write_quiver_data(int frame, string path);
 
