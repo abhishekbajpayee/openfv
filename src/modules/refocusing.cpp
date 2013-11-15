@@ -23,12 +23,16 @@ using namespace std;
 using namespace cv;
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.corner_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame) {
+    GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.corner_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult) {
 
     if (REF_FLAG) {
         read_calib_data(settings.calib_file_path);
     } else {
         // add stuff to read pinhole calib data here
+    }
+
+    if (mult_) {
+        mult_exp_ = settings.mult_exp;
     }
 
     if (MTIFF_FLAG) {
@@ -626,25 +630,37 @@ void saRefocus::GPUrefocus_ref_corner(double z, double thresh, int live, int fra
     refocused.upload(blank);
 
     Mat H;
+    calc_ref_refocus_H(cam_locations_[0], z, 0, H);
+    gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
 
-    for (int i=0; i<num_cams_; i++) {
+    if (mult_) {
+        gpu::pow(temp, mult_exp_, temp2);
+    } else {
+        gpu::multiply(temp, fact, temp2);
+    }
+
+    refocused = temp2.clone();
+
+    for (int i=1; i<num_cams_; i++) {
 
         calc_ref_refocus_H(cam_locations_[i], z, i, H);
         gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
-        
-        //preprocess();
 
-        // preprocessing area
-        //gpu::equalizeHist(temp, temp);
+        if (mult_) {
+            gpu::pow(temp, mult_exp_, temp2);
+            gpu::multiply(refocused, temp2, refocused);
+        } else {
+            gpu::multiply(temp, fact, temp2);
+            gpu::add(refocused, temp2, refocused);
+        }
 
-        gpu::multiply(temp, fact, temp2);
-        gpu::add(refocused, temp2, refocused);
-        
     }
 
     gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
 
     refocused.download(refocused_host_);
+
+    //imwrite("../temp/refocused1.jpg", refocused_host_);
 
     if (live) {
         //refocused_host_ /= 255.0;
@@ -788,38 +804,41 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
 
 // ---CPU Refocusing Functions End--- //
 
-void saRefocus::preprocess(Mat im1, Mat &im2) {
+void saRefocus::preprocess(Mat in, Mat &out) {
 
-    int xf = 20;
-    int yf = 20;
+    equalizeHist(in, in); qimshow(in);
 
-    int xs = im1.cols/xf;
-    int ys = im1.rows/yf;
+    threshold(in, in, 20, 0, THRESH_TOZERO); 
+    //qimshow(in);
 
-    im2.create(im1.rows, im1.cols, CV_8U);
+    Mat im2;
+    dynamicMinMax(in, im2, 40, 40); 
+    //qimshow(im2);
 
-    GaussianBlur(im1, im1, Size(3,3), 1.0);
+    //threshold(im2, im2, 150, 0, THRESH_TOZERO); 
+    //qimshow(im2);
+    
+    //Mat im3;
+    //dynamicMinMax(im2, im3, 40, 40);
+    //qimshow(im3);
 
-    for (int i=0; i<xf; i++) {
-        for (int j=0; j<yf; j++) {
-            
-            Mat submat = im1(Rect(i*xs,j*ys,xs,ys)).clone();
-            Mat subf; submat.convertTo(subf, CV_32F);
+    GaussianBlur(im2, im2, Size(3,3), 1.0);
+    //qimshow(im3);
+    
+    //threshold(im3, im3, 50, 0, THRESH_TOZERO);
+    //qimshow(im3);
 
-            double min, max;
-            
-            minMaxLoc(subf, &min, &max, NULL, NULL);
-            subf -+ min; subf /= max; subf *= 255;
-            subf.convertTo(submat, CV_8U);
+    Mat im3;
+    dynamicMinMax(im2, im3, 40, 40);
+    //qimshow(out);
 
-            submat.copyTo(im2(Rect(i*xs,j*ys,xs,ys)));
+    threshold(im3, im3, 100, 0, THRESH_TOZERO);
 
-        }
-    }
+    Mat im4;
+    dynamicMinMax(im3, out, 40, 40);
 
-    //GaussianBlur(im2, im2, Size(3,3), 1.0);
-
-    //imshow("img1", im1); imshow("img2", im2); waitKey(0);
+    imwrite("../temp/out.jpg", out);
+    imshow("img1", in); imshow("img2", out); waitKey(0);
 
 }
 
@@ -980,6 +999,37 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
         X_out(2,n) = a[2];
         X_out(3,n) = 1.0;
 
+    }
+
+}
+
+void saRefocus::dynamicMinMax(Mat in, Mat &out, int xf, int yf) {
+
+    int xs = in.cols/xf;
+    int ys = in.rows/yf;
+
+    if (xs*xf != in.cols || ys*yf != in.rows)
+        cout<<endl<<"Wrong divide factor. Does not lead to integer window sizes!"<<endl;
+
+    out.create(in.rows, in.cols, CV_8U);
+
+    for (int i=0; i<xf; i++) {
+        for (int j=0; j<yf; j++) {
+            
+            Mat submat = in(Rect(i*xs,j*ys,xs,ys)).clone();
+            Mat subf; submat.convertTo(subf, CV_32F);
+            SparseMat spsubf(subf);
+
+            double min, max;            
+            minMaxLoc(spsubf, &min, &max, NULL, NULL);
+            min--;
+            if (min>255.0) min = 0;
+            subf -+ min; subf /= max; subf *= 255;
+            subf.convertTo(submat, CV_8U);
+
+            submat.copyTo(out(Rect(i*xs,j*ys,xs,ys)));
+
+        }
     }
 
 }

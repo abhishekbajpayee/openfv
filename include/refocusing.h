@@ -66,11 +66,13 @@ class saRefocus {
     void uploadToGPU();
     void uploadToGPU_ref();
 
-    void preprocess(Mat im1, Mat &im2);
+    void preprocess(Mat in, Mat &out);
 
     void calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam);
     void calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H);
     void img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out);
+
+    void dynamicMinMax(Mat in, Mat &out, int xf, int yf);
 
     // data types and private functions
     vector<Mat> P_mats_;

@@ -17,6 +17,7 @@ int main(int argc, char** argv) {
     pTracking track(argv[1], 2.0, 2.0);
     track.read_points();
     track.track_all();
+    track.plot_all_paths();
     //track.plot_complete_paths();
     track.write_quiver_data(0, "../matlab/quiver.txt");
 

@@ -91,7 +91,6 @@ void pTracking::track_all() {
     for (int i=0; i<all_points_.size()-1; i++) {
         //for (int i=0; i<5; i++) {
 
-        //cout<<"Matching frames "<<i<<" and "<<i+1<<endl;
         matches = track_frame(i, i+1);
         all_matches.push_back(matches);
         matches.clear();
@@ -101,6 +100,8 @@ void pTracking::track_all() {
 }
 
 vector<Point2i> pTracking::track_frame(int f1, int f2) {
+
+    cout<<"Matching frames "<<f1<<" and "<<f2<<": ";
 
     double A, B, C, D, E, F;
     A = 0.3;
@@ -124,9 +125,9 @@ vector<Point2i> pTracking::track_frame(int f1, int f2) {
 
     //cout<<"Relaxation Sets...\n";
     vector< vector< vector< vector<Point2i> > > > theta;
-    double t = omp_get_wtime();
+    //double t = omp_get_wtime();
     build_relaxation_sets(f1, f2, S_r, S_c, C, D, E, F, theta);
-    cout<<"Time: "<<omp_get_wtime()-t<<endl;
+    //cout<<"Time: "<<omp_get_wtime()-t<<endl;
 
     double diff;
     int n;
@@ -157,19 +158,16 @@ vector<Point2i> pTracking::track_frame(int f1, int f2) {
 
     }
 
-    cout<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
+    //cout<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
 
     vector<Point2i> matches;
-    int count = find_matches(Pij, Pi, S_r, S_c, matches);
-    cout<<count<<" matches found."<<endl;
+    find_matches(Pij, Pi, S_r, S_c, matches);
 
     return(matches);
 
 }
 
-int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches) {
-    
-    int count = 0;
+void pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches) {
 
     vector< vector<int> > zematch;
     vector<int> container;
@@ -188,74 +186,18 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
             }
         }
 
-        /*
-        cout<<"-----"<<endl;
-        for (int x=0; x<S_r[i].size(); x++)
-            cout<<S_r[i][x]<<" ";
-        cout<<endl;
-        for (int x=0; x<S_c[i].size(); x++)
-            cout<<S_c[i][x]<<" ";
-        cout<<endl;
-        cout<<Pij[i]<<endl;
-        cout<<Pi[i]<<endl;
-        cout<<"-----"<<endl;
-        */
-        /*
-        for (int j=0; j<S_r[i].size(); j++) {
-
-            if (i == S_r[i][j]) {
-                int found = 0;
-                for (int k=0; k<S_c[i].size(); k++) {
-                    if (Pij[i].at<double>(j,k)>0.99) {
-                        matches.push_back(Point2i(i,S_c[i][k]));
-                        found = 1;
-                        count++;
-                        break;
-                    }   
-                }
-                if (!found) matches.push_back(Point2i(i,-1));
-                
-            }
-
-        }
-
-        */
-
     }
-
-    /*
-    for (int i=0; i<Pij.size(); i++) {
-        cout<<i<<" ---> ";
-        for (int k=0; k<zematch[i].size(); k++) {
-            cout<<zematch[i][k]<<", ";
-        }
-        cout<<endl;
-    }
-    */
 
     int tiecount = 0;
     for (int i=0; i<Pij.size(); i++) {
         
-        /*
-        cout<<i<<" ?--> ";
-        for (int k=0; k<zematch[i].size(); k++) {
-            cout<<zematch[i][k]<<", ";
-        }
-        cout<<endl;
-        */
-        
         vector<int> c;
         vector<int> cf;
 
-        //cout<<i<<" ---> ";
-
         if (zematch[i].size()==0) {
-            matches.push_back(Point2i(i,-1));
-            //cout<<"no match"<<endl;
+            //matches.push_back(Point2i(i,-1));
         } else if (zematch[i].size()==1) {
             matches.push_back(Point2i(i,zematch[i][0]));
-            //cout<<zematch[i][0]<<endl;
-            count++;
         } else {
 
             for (int j=0; j<zematch[i].size(); j++) {
@@ -294,8 +236,7 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
                 if (cf[k]==cf[modloc]) {
                     tie=1;
                     tiecount++;
-                    matches.push_back(Point2i(i,-2));
-                    //cout<<"tie"<<endl;
+                    //matches.push_back(Point2i(i,-2));
                     break;
                 }
 
@@ -303,25 +244,15 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
 
             if (tie==0) {
                 matches.push_back(Point2i(i,c[modloc]));
-                //cout<<c[modloc]<<endl;
-                count++;
             }
 
         }
-        
-        /*
-        for (int k=0; k<c.size(); k++)
-            cout<<c[k]<<": "<<cf[k]<<", ";
-        cout<<endl;
-        */
 
         c.clear(); cf.clear();
 
     }
 
-    cout<<"Ties: "<<tiecount<<endl;
-
-    return(count);
+    cout<<"Ties: "<<tiecount<<" Matches: "<<matches.size()<<endl;
 
 }
 

@@ -53,7 +53,7 @@ void pLocalize::find_particles_3d(int frame) {
     for (float i=zmin_; i<=zmax_; i += dz_) {
         
         cout<<"\r"<<1+int((i-zmin_)*100.0/(zmax_-zmin_))<<"%"<<flush;
-
+        //cout<<"\r"<<i<<flush;
         refocus_.refocus(i, thresh_, frame);
         Mat image = refocus_.result;
 
@@ -61,7 +61,7 @@ void pLocalize::find_particles_3d(int frame) {
         //Mat img; draw_points(image, img, points); qimshow(img);
 
         refine_subpixel(image, points, particles);
-        //Mat img; draw_points(image, img, particles); qimshow(img);
+        //Mat img; draw_points(image, img, particles); qimshow(img); cout<<"\r"<<i<<flush;
         
         for (int j=0; j<particles.size(); j++) {
             particle.x = (particles[j].x - refocus_.img_size().width*0.5)/refocus_.scale();
