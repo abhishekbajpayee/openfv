@@ -16,6 +16,17 @@ void batchFind::run() {
 
     read_config_file();
 
+    cout<<"JOB PRE RUN SUMMARY:"<<endl;
+    for (int i=0; i<n_; i++) {
+        cout<<i+1<<") ";
+        cout<<calib_paths[i]<<" ";
+        cout<<refoc_paths[i]<<" ";
+        cout<<threshs[i]<<endl;
+    }
+    cout<<"Press a key to run...";
+    string dump;
+    cin>>dump;
+
     for (int i=0; i<n_; i++) {
 
         refocus_settings settings;
