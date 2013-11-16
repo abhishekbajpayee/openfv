@@ -23,9 +23,11 @@ void batchFind::run() {
         cout<<refoc_paths[i]<<" ";
         cout<<threshs[i]<<endl;
     }
-    cout<<"Press a key to run...";
-    string dump;
-    cin>>dump;
+    cout<<"Run? (y/n)";
+    char ans;
+    cin>>ans;
+
+    if (ans=='y') {
 
     for (int i=0; i<n_; i++) {
 
@@ -80,6 +82,8 @@ void batchFind::run() {
         localizer.find_particles_all_frames();
         localizer.write_all_particles_to_file(particle_file);
         */
+
+    }
 
     }
 
