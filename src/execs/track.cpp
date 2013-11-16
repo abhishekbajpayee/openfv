@@ -13,13 +13,17 @@ using namespace cv;
 using namespace std;
 
 int main(int argc, char** argv) {
-        
-    pTracking track(argv[1], 2.0, 2.0);
+    
+    double rn = atof(argv[2]);
+    double rs = atof(argv[3]);
+
+    pTracking track(argv[1], rn, rs);
     track.read_points();
     track.track_all();
-    track.plot_all_paths();
+
+    //track.plot_all_paths();
     //track.plot_complete_paths();
-    track.write_quiver_data(0, "../matlab/quiver.txt");
+    track.write_quiver_data("../matlab/quiver.txt");
 
     return 0;
 

@@ -23,6 +23,7 @@ struct refocus_settings {
     int start_frame;
     int end_frame;
     int upload_frame;
+    int all_frames;
 
 };
 

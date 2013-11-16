@@ -27,6 +27,8 @@ void pTracking::initialize() {
     V_n = (4/3)*pi*pow(R_n,3);
     V_s = (4/3)*pi*pow(R_s,3);
 
+    cout<<"R_n: "<<R_n<<", R_s: "<<R_s<<endl;
+
 }
 
 void pTracking::read_points() {
@@ -37,7 +39,7 @@ void pTracking::read_points() {
     ifstream file;
     file.open(path_.c_str());
 
-    cout<<"\nReading points to track...";
+    //cout<<"Reading points to track...";
     
     int num_frames;
     file>>num_frames;
@@ -73,14 +75,14 @@ void pTracking::read_points() {
         vol.v = (vol.x2-vol.x1)*(vol.y2-vol.y1)*(vol.z2-vol.z1);
         double density = points_.size()/vol.v;
         double complexity = 300*points_.size()*pow(density, 4)*pow(R_s*R_n,6);
-        cout<<"complexity: "<<complexity<<endl;
+        //cout<<"complexity: "<<complexity<<endl;
         all_points_.push_back(points_);
         vols_.push_back(vol);
         points_.clear();
 
     }
 
-    cout<<"done!"<<endl;
+    //cout<<"done!"<<endl;
 
 }
 
@@ -96,12 +98,14 @@ void pTracking::track_all() {
         matches.clear();
 
     }
+    
+    //cout<<endl;
 
 }
 
 vector<Point2i> pTracking::track_frame(int f1, int f2) {
 
-    cout<<"Matching frames "<<f1<<" and "<<f2<<": ";
+    cout<<"Matching frames "<<f1<<" and "<<f2<<" | ";
 
     double A, B, C, D, E, F;
     A = 0.3;
@@ -252,8 +256,9 @@ void pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int
 
     }
 
-    cout<<"Ties: "<<tiecount<<" Matches: "<<matches.size()<<endl;
-
+    cout<<"Ties: "<<tiecount<<" Matches: "<<matches.size()<<" Ratio: "<<double(matches.size())/double(Pij.size())<<endl;
+    //cout<<double(matches.size())/double(Pij.size())<<" ";
+    
 }
 
 double pTracking::update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2) {
@@ -475,31 +480,38 @@ void pTracking::plot_all_paths() {
 
 }
 
-void pTracking::write_quiver_data(int frame, string path) {
-
-    cout<<all_points_.size()<<" "<<all_matches.size()<<endl;
+void pTracking::write_quiver_data(string path) {
 
     ofstream file;
     file.open(path.c_str());
 
-    for (int i=0; i<all_matches[frame].size(); i++) {
+    file<<all_matches.size()<<endl;
 
-        if (all_matches[frame][i].y > -1) {
+    for (int frame=0; frame<all_matches.size(); frame++) {
 
+        file<<all_matches[frame].size()<<endl;
+
+        for (int i=0; i<all_matches[frame].size(); i++) {
+            
             file<<all_points_[frame][all_matches[frame][i].x].x<<"\t";
             file<<all_points_[frame][all_matches[frame][i].x].y<<"\t";
             file<<all_points_[frame][all_matches[frame][i].x].z<<"\t";
-
+            
             double u = all_points_[frame+1][all_matches[frame][i].y].x - all_points_[frame][all_matches[frame][i].x].x;
             double v = all_points_[frame+1][all_matches[frame][i].y].y - all_points_[frame][all_matches[frame][i].x].y;
             double w = all_points_[frame+1][all_matches[frame][i].y].z - all_points_[frame][all_matches[frame][i].x].z;
             
             file<<u<<"\t"<<v<<"\t"<<w<<endl;
-
         }
 
     }
 
     file.close();
+
+}
+
+void pTracking::write_tracking_result() {
+
+    // 
 
 }

@@ -7,7 +7,8 @@ add_library (saptv modules/optimization.cpp
                    modules/pLoc.cpp
                    modules/tracking.cpp
                    modules/visualize.cpp
-		   modules/tools.cpp)
+		   modules/tools.cpp
+                   modules/batchProc.cpp)
 
 #add_library (saptv_shared SHARED modules/py_sa-ptv.cpp)
 

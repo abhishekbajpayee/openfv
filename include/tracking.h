@@ -39,7 +39,8 @@ class pTracking {
     void plot_complete_paths();
     void plot_all_paths();
 
-    void write_quiver_data(int frame, string path);
+    void write_quiver_data(string path);
+    void write_tracking_result();
 
  private:
 

@@ -36,11 +36,16 @@ saRefocus::saRefocus(refocus_settings settings):
     }
 
     if (MTIFF_FLAG) {
-        int begin = settings.start_frame;
-        int end = settings.end_frame;
         vector<int> frames;
-        for (int i=begin; i<=end; i++)
-            frames.push_back(i);
+        if (settings.all_frames) {
+            ALL_FRAME_FLAG = 1;
+        } else {
+            ALL_FRAME_FLAG = 0;
+            int begin = settings.start_frame;
+            int end = settings.end_frame;
+            for (int i=begin; i<=end; i++)
+                frames.push_back(i);
+        }
         read_imgs_mtiff(settings.images_path, frames);
     } else {
         read_imgs(settings.images_path);
@@ -192,6 +197,12 @@ void saRefocus::read_imgs_mtiff(string path, vector<int> frames) {
 	} while (TIFFReadDirectory(tiffs[0]));
     }
     cout<<"done! ("<<dircount<<" frames found.)"<<endl<<endl;
+
+    if (ALL_FRAME_FLAG) {
+        cout<<"READING ALL FRAMES..."<<endl;
+        for (int i=0; i<dircount; i++)
+            frames.push_back(i);
+    }
 
     cout<<"Reading images..."<<endl;
     for (int n=0; n<img_names.size(); n++) {
@@ -806,7 +817,7 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
 
 void saRefocus::preprocess(Mat in, Mat &out) {
 
-    equalizeHist(in, in); qimshow(in);
+    //equalizeHist(in, in);
 
     threshold(in, in, 20, 0, THRESH_TOZERO); 
     //qimshow(in);
@@ -837,8 +848,8 @@ void saRefocus::preprocess(Mat in, Mat &out) {
     Mat im4;
     dynamicMinMax(im3, out, 40, 40);
 
-    imwrite("../temp/out.jpg", out);
-    imshow("img1", in); imshow("img2", out); waitKey(0);
+    //imwrite("../temp/out.jpg", out);
+    //imshow("img1", in); imshow("img2", out); waitKey(0);
 
 }
 
