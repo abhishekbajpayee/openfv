@@ -21,8 +21,14 @@ void batchFind::run() {
         cout<<i+1<<") ";
         cout<<calib_paths[i]<<" ";
         cout<<refoc_paths[i]<<" ";
-        cout<<threshs[i]<<endl;
+        cout<<threshs[i]<<" ";
+        if (all_frame_flags[i]) {
+            cout<<"(all frames)"<<endl;
+        } else {
+            cout<<"(frame "<<frames[i].x<<" to "<<frames[i].y<<")"<<endl;
+        }
     }
+
     cout<<"Run? (y/n)";
     char ans;
     cin>>ans;
@@ -40,10 +46,13 @@ void batchFind::run() {
         settings.calib_file_path = calib_paths[i];
         settings.images_path = refoc_paths[i];
         settings.mtiff = 1;
-        settings.all_frames = 1;
-
-        settings.start_frame = 5;
-        settings.end_frame = 8;
+        if (all_frame_flags[i]) {
+            settings.all_frames = 1;
+        } else {
+            settings.all_frames = 0;
+            settings.start_frame = frames[i].x;
+            settings.end_frame = frames[i].y;
+        }
 
         settings.upload_frame = -1;
 
@@ -65,10 +74,9 @@ void batchFind::run() {
         cout<<particle_file<<endl;
 
         saRefocus refocus(settings);
-
+        /*
         refocus.initializeGPU();
 
-        /*
         localizer_settings s2;
         
         s2.window = window;
@@ -82,9 +90,8 @@ void batchFind::run() {
         localizer.find_particles_all_frames();
         localizer.write_all_particles_to_file(particle_file);
         */
-
     }
-
+    
     }
 
 }
@@ -98,6 +105,7 @@ void batchFind::read_config_file() {
 
     string str;
     double t;
+    int all, start, end;
 
     // read blank line
     getline(file, str);
@@ -107,15 +115,25 @@ void batchFind::read_config_file() {
         getline(file, str);
         getline(file, str);
         calib_paths.push_back(str);
-        cout<<str<<endl;
+        //cout<<str<<endl;
 
         getline(file, str);
         refoc_paths.push_back(str);
-        cout<<str<<endl;
+        //cout<<str<<endl;
 
         file>>t;
         threshs.push_back(t);
-        cout<<t<<endl;
+        //cout<<t<<endl;
+
+        file>>all;
+        all_frame_flags.push_back(all);
+        if (!all) {
+            file>>start;
+            file>>end;
+            frames.push_back(Point2i(start, end));
+        } else {
+            frames.push_back(Point2i(0, 0));
+        }
 
         // read blank line
         getline(file, str);

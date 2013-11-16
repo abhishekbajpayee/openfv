@@ -31,6 +31,8 @@ class batchFind {
     vector<string> calib_paths;
     vector<string> refoc_paths;
     vector<float> threshs;
+    vector<int> all_frame_flags;
+    vector<Point2i> frames;
 
     int n_;
 

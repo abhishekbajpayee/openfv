@@ -19,6 +19,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
+    
     batchFind job(argv[1]);
     job.run();
 
@@ -33,8 +34,8 @@ int main(int argc, char** argv) {
     settings.images_path = string(argv[2]);
     settings.mtiff = 1;
     settings.all_frames = 0;
-    settings.start_frame = 60;
-    settings.end_frame = 65;
+    settings.start_frame = 260;
+    settings.end_frame = 265;
     settings.upload_frame = -1;
     
     //string particle_file("../temp/particles_run2_t70.txt");
@@ -82,7 +83,6 @@ int main(int argc, char** argv) {
         
     }
     */
-
     return 1;
 
 }
