@@ -817,6 +817,7 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
 
 void saRefocus::preprocess(Mat in, Mat &out) {
 
+    /*
     //equalizeHist(in, in);
 
     threshold(in, in, 20, 0, THRESH_TOZERO); 
@@ -826,17 +827,7 @@ void saRefocus::preprocess(Mat in, Mat &out) {
     dynamicMinMax(in, im2, 40, 40); 
     //qimshow(im2);
 
-    //threshold(im2, im2, 150, 0, THRESH_TOZERO); 
-    //qimshow(im2);
-    
-    //Mat im3;
-    //dynamicMinMax(im2, im3, 40, 40);
-    //qimshow(im3);
-
     GaussianBlur(im2, im2, Size(3,3), 1.0);
-    //qimshow(im3);
-    
-    //threshold(im3, im3, 50, 0, THRESH_TOZERO);
     //qimshow(im3);
 
     Mat im3;
@@ -850,6 +841,9 @@ void saRefocus::preprocess(Mat in, Mat &out) {
 
     //imwrite("../temp/out.jpg", out);
     //imshow("img1", in); imshow("img2", out); waitKey(0);
+    */
+
+    out = in.clone();
 
 }
 

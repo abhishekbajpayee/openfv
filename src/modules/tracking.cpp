@@ -29,6 +29,13 @@ void pTracking::initialize() {
 
     cout<<"R_n: "<<R_n<<", R_s: "<<R_s<<endl;
 
+    A = 0.3;
+    B = 3.0;
+    C = 0.1;
+    D = 5.0;
+    E = 0; //1.0;
+    F = 0.1; //0.05;
+
 }
 
 void pTracking::read_points() {
@@ -86,34 +93,47 @@ void pTracking::read_points() {
 
 }
 
+void pTracking::track_frames(int start, int end) {
+    
+    offset = start;
+
+    vector<Point2i> matches;
+
+    for (int i=start; i<end; i++) {
+
+        int count;
+        matches = track_frame(i, i+1, count);
+        all_matches.push_back(matches);
+        match_counts.push_back(count);
+        matches.clear();
+
+    }
+
+
+}
+
 void pTracking::track_all() {
+
+    offset = 0;
 
     vector<Point2i> matches;
 
     for (int i=0; i<all_points_.size()-1; i++) {
         //for (int i=0; i<5; i++) {
 
-        matches = track_frame(i, i+1);
+        int count;
+        matches = track_frame(i, i+1, count);
         all_matches.push_back(matches);
+        match_counts.push_back(count);
         matches.clear();
 
     }
-    
-    //cout<<endl;
 
 }
 
-vector<Point2i> pTracking::track_frame(int f1, int f2) {
+vector<Point2i> pTracking::track_frame(int f1, int f2, int &count) {
 
     cout<<"Matching frames "<<f1<<" and "<<f2<<" | ";
-
-    double A, B, C, D, E, F;
-    A = 0.3;
-    B = 3.0;
-    C = 0.1;
-    D = 5.0;
-    E = 1.0;
-    F = 0.05;
 
     int n1, n2;
     n1 = all_points_[f1].size();
@@ -165,13 +185,13 @@ vector<Point2i> pTracking::track_frame(int f1, int f2) {
     //cout<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
 
     vector<Point2i> matches;
-    find_matches(Pij, Pi, S_r, S_c, matches);
+    count = find_matches(Pij, Pi, S_r, S_c, matches);
 
     return(matches);
 
 }
 
-void pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches) {
+int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches) {
 
     vector< vector<int> > zematch;
     vector<int> container;
@@ -192,6 +212,7 @@ void pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int
 
     }
 
+    int count = 0;
     int tiecount = 0;
     for (int i=0; i<Pij.size(); i++) {
         
@@ -199,9 +220,10 @@ void pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int
         vector<int> cf;
 
         if (zematch[i].size()==0) {
-            //matches.push_back(Point2i(i,-1));
+            matches.push_back(Point2i(i,-1));
         } else if (zematch[i].size()==1) {
             matches.push_back(Point2i(i,zematch[i][0]));
+            count++;
         } else {
 
             for (int j=0; j<zematch[i].size(); j++) {
@@ -240,7 +262,7 @@ void pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int
                 if (cf[k]==cf[modloc]) {
                     tie=1;
                     tiecount++;
-                    //matches.push_back(Point2i(i,-2));
+                    matches.push_back(Point2i(i,-2));
                     break;
                 }
 
@@ -248,6 +270,7 @@ void pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int
 
             if (tie==0) {
                 matches.push_back(Point2i(i,c[modloc]));
+                count++;
             }
 
         }
@@ -256,9 +279,10 @@ void pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int
 
     }
 
-    cout<<"Ties: "<<tiecount<<" Matches: "<<matches.size()<<" Ratio: "<<double(matches.size())/double(Pij.size())<<endl;
-    //cout<<double(matches.size())/double(Pij.size())<<" ";
+    cout<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
     
+    return(count);
+
 }
 
 double pTracking::update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2) {
@@ -355,8 +379,25 @@ void pTracking::build_relaxation_sets(int frame1, int frame2, vector< vector<int
 
                         dij_mag = dist(all_points_[frame1][S_r[n][i]], all_points_[frame2][S_c[n][j]]);
 
-                        if ( dist(dij, dkl) < (E+(F*dij_mag)) ) theta_single.push_back(Point2i(k,l));
+                        /*
+                        double thresh = 20;
+                        double ijmag = dist(dij, Point3f(0,0,0));
+                        double klmag = dist(dkl, Point3f(0,0,0));
+                        double ijkldot = dij.x*dkl.x + dij.y*dkl.y + dij.z*dkl.z;
+                        if ((acos(ijkldot/(ijmag*klmag))*180.0/3.14159)<thresh) {
+                            theta_single.push_back(Point2i(k,l));
+                            //cout<<dist(dij, dkl)<<" ";
+                            //cout<<dij_mag<<" ";
+                            //cout<<acos(ijkldot/(ijmag*klmag))*180.0/3.14159<<" ";
+                            //cout<<(dist(dij, dkl) < (E+(F*dij_mag)))<<endl;
+                        }
+                        */
 
+                        double thresh = E+(F*dij_mag);
+                        if ( dist(dij, dkl) < thresh ) {
+                            theta_single.push_back(Point2i(k,l));
+                        }
+                        
                     }
                 }
                 theta_j.push_back(theta_single);
@@ -426,7 +467,8 @@ void pTracking::plot_complete_paths() {
             }
         }
 
-        if (path.size()==all_points_.size()) {
+        //if (path.size()==all_points_.size()) {
+        if (path.size()>20) {
             all_paths.push_back(path);
             //cout<<path.size()<<endl;
         }
@@ -441,7 +483,7 @@ void pTracking::plot_complete_paths() {
         if (i%every==1) {
         vector<Point3f> points;
         for (int j=0; j<all_paths[i].size(); j++) {
-            points.push_back(all_points_[j][all_paths[i][j]]);
+            points.push_back(all_points_[j+offset][all_paths[i][j]]);
         }
         vis.plot3d(points, "k");
         points.clear();
@@ -466,7 +508,7 @@ void pTracking::plot_all_paths() {
         for (int j=0; j<all_matches[i].size(); j++) {
 
             if (all_matches[i][j].y >= 0) {
-                vis.line3d(all_points_[i][all_matches[i][j].x], all_points_[i+1][all_matches[i][j].y]);
+                vis.line3d(all_points_[offset+i][all_matches[i][j].x], all_points_[offset+i+1][all_matches[i][j].y]);
             }
 
         }
@@ -480,28 +522,38 @@ void pTracking::plot_all_paths() {
 
 }
 
-void pTracking::write_quiver_data(string path) {
+void pTracking::write_quiver_data() {
+    
+    string qpath("");
+    for (int i=0; i<path_.size()-4; i++) {
+        qpath += path_[i];
+    }
+    qpath += "_quiver.txt";
 
     ofstream file;
-    file.open(path.c_str());
+    file.open(qpath.c_str());
+
+    cout<<"Writing quiver data to: "<<qpath<<endl;
 
     file<<all_matches.size()<<endl;
 
     for (int frame=0; frame<all_matches.size(); frame++) {
 
-        file<<all_matches[frame].size()<<endl;
+        file<<match_counts[frame]<<endl;
 
         for (int i=0; i<all_matches[frame].size(); i++) {
             
-            file<<all_points_[frame][all_matches[frame][i].x].x<<"\t";
-            file<<all_points_[frame][all_matches[frame][i].x].y<<"\t";
-            file<<all_points_[frame][all_matches[frame][i].x].z<<"\t";
+            if (all_matches[frame][i].y > -1) {
+                file<<all_points_[offset+frame][all_matches[frame][i].x].x<<"\t";
+                file<<all_points_[offset+frame][all_matches[frame][i].x].y<<"\t";
+                file<<all_points_[offset+frame][all_matches[frame][i].x].z<<"\t";
             
-            double u = all_points_[frame+1][all_matches[frame][i].y].x - all_points_[frame][all_matches[frame][i].x].x;
-            double v = all_points_[frame+1][all_matches[frame][i].y].y - all_points_[frame][all_matches[frame][i].x].y;
-            double w = all_points_[frame+1][all_matches[frame][i].y].z - all_points_[frame][all_matches[frame][i].x].z;
+                double u = all_points_[offset+frame+1][all_matches[frame][i].y].x - all_points_[offset+frame][all_matches[frame][i].x].x;
+                double v = all_points_[offset+frame+1][all_matches[frame][i].y].y - all_points_[offset+frame][all_matches[frame][i].x].y;
+                double w = all_points_[offset+frame+1][all_matches[frame][i].y].z - all_points_[offset+frame][all_matches[frame][i].x].z;
             
-            file<<u<<"\t"<<v<<"\t"<<w<<endl;
+                file<<u<<"\t"<<v<<"\t"<<w<<endl;
+            }
         }
 
     }
@@ -513,5 +565,30 @@ void pTracking::write_quiver_data(string path) {
 void pTracking::write_tracking_result() {
 
     // 
+
+}
+
+void pTracking::write_all_paths(string path) {
+
+    ofstream file;
+    file.open(path.c_str());
+
+    file<<all_matches.size()<<endl;
+    
+    for (int i=0; i<all_matches.size(); i++) {
+        file<<match_counts[i]<<endl;
+        for (int j=0; j<all_matches[i].size(); j++) {
+            if (all_matches[i][j].y >= 0) {
+                file<<all_points_[offset+i][all_matches[i][j].x].x<<"\t";
+                file<<all_points_[offset+i][all_matches[i][j].x].y<<"\t";
+                file<<all_points_[offset+i][all_matches[i][j].x].z<<"\t";
+                file<<all_points_[offset+i+1][all_matches[i][j].y].x<<"\t";
+                file<<all_points_[offset+i+1][all_matches[i][j].y].y<<"\t";
+                file<<all_points_[offset+i+1][all_matches[i][j].y].z<<endl;
+            }
+        }
+    }
+
+    file.close();
 
 }

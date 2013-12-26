@@ -74,22 +74,20 @@ void batchFind::run() {
         cout<<particle_file<<endl;
 
         saRefocus refocus(settings);
-        /*
         refocus.initializeGPU();
 
         localizer_settings s2;
-        
         s2.window = window;
         s2.cluster_size = cluster;
         s2.zmin = -20.0;
         s2.zmax = 60.0;
         s2.dz = 0.1;
         s2.thresh = thresh;
-        pLocalize localizer(s2, refocus);
-        
+
+        pLocalize localizer(s2, refocus);        
         localizer.find_particles_all_frames();
         localizer.write_all_particles_to_file(particle_file);
-        */
+        
     }
     
     }

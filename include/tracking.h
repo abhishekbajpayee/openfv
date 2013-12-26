@@ -33,19 +33,21 @@ class pTracking {
     void initialize();
     void read_points();
 
+    void track_frames(int start, int end);
     void track_all();
-    vector<Point2i> track_frame(int f1, int f2);
+    vector<Point2i> track_frame(int f1, int f2, int &count);
 
     void plot_complete_paths();
     void plot_all_paths();
 
-    void write_quiver_data(string path);
+    void write_quiver_data();
     void write_tracking_result();
+    void write_all_paths(string path);
 
  private:
 
     // Functions
-    void find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches);
+    int find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches);
     double update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
     void normalize_probabilites(vector<Mat> &Pij, vector<Mat> &Pi);
     void build_probability_sets(vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
@@ -61,10 +63,13 @@ class pTracking {
     vector<volume> vols_;
     
     vector< vector<Point2i> > all_matches;
+    vector<int> match_counts;
 
     double R_n, R_s, V_n, V_s;
+    double A, B, C, D, E, F;
     int N;
     double tol;
+    int offset;
 
 };
 

@@ -19,29 +19,29 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-    
+    /*
     batchFind job(argv[1]);
     job.run();
-
-    /*
+    */
+    
     refocus_settings settings;
     settings.gpu = 1;
     settings.ref = 1;
     settings.mult = 0;
     settings.mult_exp = 1/9.0;
-    settings.corner_method = 1;
+    settings.corner_method = 0;
     settings.calib_file_path = string(argv[1]);
     settings.images_path = string(argv[2]);
-    settings.mtiff = 1;
+    settings.mtiff = 0;
     settings.all_frames = 0;
-    settings.start_frame = 260;
-    settings.end_frame = 265;
-    settings.upload_frame = -1;
+    settings.start_frame = 108;
+    settings.end_frame = 112;
+    settings.upload_frame = 0;
     
     //string particle_file("../temp/particles_run2_t70.txt");
     
     int window = 2;
-    double thresh = 65.0;
+    double thresh = 40.0;
     int cluster = 8;
 
     stringstream s;
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     string particle_file = s.str();
     cout<<particle_file<<endl;
 
-    int find = 1;
+    int find = 0;
     int live = !find;
 
     saRefocus refocus(settings);
@@ -62,19 +62,36 @@ int main(int argc, char** argv) {
     cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
 
     if (live) {
-        refocus.GPUliveView();
+        //refocus.GPUliveView();
+
+        
+        refocus.initializeGPU();
+        float zmin=-5;
+        float zmax=105;
+        for (float i=zmin; i<=zmax; i += 1.0) {
+            refocus.refocus(i, thresh, 0);
+            Mat image = refocus.result;
+            stringstream fn;
+            fn<<"../../stack/";
+            fn<<(i-zmin)<<".jpg";
+            imwrite(fn.str(), image);
+            cout<<i<<endl;
+        }
+        
+
     }
 
     if (find) {
+
         refocus.initializeGPU();
         
         localizer_settings s2;
         
         s2.window = window;
         s2.cluster_size = cluster;
-        s2.zmin = -20.0; //-20
-        s2.zmax = 60.0; //40
-        s2.dz = 0.1;
+        s2.zmin = -55.0; //-20
+        s2.zmax = 55.0; //40
+        s2.dz = 1.0;
         s2.thresh = thresh; //90.0; //100.0
         pLocalize localizer(s2, refocus);
         
@@ -82,7 +99,7 @@ int main(int argc, char** argv) {
         localizer.write_all_particles_to_file(particle_file);
         
     }
-    */
+    
     return 1;
 
 }
