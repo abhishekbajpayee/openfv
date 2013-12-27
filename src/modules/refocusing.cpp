@@ -929,7 +929,9 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
         sp.push_back(src); dp.push_back(dst);
     }
 
-    H = findHomography(dp, sp, CV_RANSAC);
+    //H = findHomography(dp, sp, CV_RANSAC);
+    H = findHomography(dp, sp, 0);
+
     H = D*H;
 
 }

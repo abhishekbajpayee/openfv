@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     settings.ref = 1;
     settings.mult = 0;
     settings.mult_exp = 1/9.0;
-    settings.corner_method = 0;
+    settings.corner_method = 1;
     settings.calib_file_path = string(argv[1]);
     settings.images_path = string(argv[2]);
     settings.mtiff = 0;
@@ -62,9 +62,13 @@ int main(int argc, char** argv) {
     cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
 
     if (live) {
-        //refocus.GPUliveView();
+        refocus.GPUliveView();
 
-        
+        /*
+        vector<int> comparams;
+        comparams.push_back(CV_IMWRITE_JPEG_QUALITY);
+        comparams.push_back(100);
+
         refocus.initializeGPU();
         float zmin=-5;
         float zmax=105;
@@ -74,10 +78,10 @@ int main(int argc, char** argv) {
             stringstream fn;
             fn<<"../../stack/";
             fn<<(i-zmin)<<".jpg";
-            imwrite(fn.str(), image);
+            imwrite(fn.str(), image, comparams);
             cout<<i<<endl;
         }
-        
+        */
 
     }
 
