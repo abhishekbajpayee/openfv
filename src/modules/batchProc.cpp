@@ -42,10 +42,10 @@ void batchFind::run() {
         settings.ref = 1;
         settings.mult = 0;
         settings.mult_exp = 1/9.0;
-        settings.corner_method = 1;
+        settings.corner_method = 0;
         settings.calib_file_path = calib_paths[i];
         settings.images_path = refoc_paths[i];
-        settings.mtiff = 1;
+        settings.mtiff = 0;
         if (all_frame_flags[i]) {
             settings.all_frames = 1;
         } else {
@@ -54,7 +54,7 @@ void batchFind::run() {
             settings.end_frame = frames[i].y;
         }
 
-        settings.upload_frame = -1;
+        settings.upload_frame = 0;
 
         int window = 2;
         double thresh = threshs[i];
