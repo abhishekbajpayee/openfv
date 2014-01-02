@@ -817,10 +817,10 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
 
 void saRefocus::preprocess(Mat in, Mat &out) {
 
-    /*
+    
     //equalizeHist(in, in);
-
-    threshold(in, in, 20, 0, THRESH_TOZERO); 
+    /*
+    threshold(in, in, 20, 0, THRESH_TOZERO);
     //qimshow(in);
 
     Mat im2;
@@ -841,6 +841,7 @@ void saRefocus::preprocess(Mat in, Mat &out) {
 
     //imwrite("../temp/out.jpg", out);
     //imshow("img1", in); imshow("img2", out); waitKey(0);
+    qimshow(out);
     */
 
     out = in.clone();

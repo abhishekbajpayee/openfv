@@ -1,10 +1,9 @@
 clear all;
 
-%load('/home/ab9/projects/calibrations/leah/calibration_results.mat');
-path = '/home/ab9/projects/calibrations/reconstruction/ref_reconstruction_good/';
+path = '/media/Elements/NN_Vortex_ring_11_21/';
 load([path, 'calibration_result/calibration_results.mat']);
 
-file = fopen([path,'calibration_result/calibration_results.txt'], 'w');
+file = fopen('calibration_results.txt', 'w');
 
 sizeP = size(P);
 fprintf(file, '%d\n', sizeP(3));
@@ -30,3 +29,5 @@ fprintf(file, '\n');
 fprintf(file, '%f\t%f\t%f\t%f\t%f\n', selfcal.Zw, selfcal.t, selfcal.n1, selfcal.n2, selfcal.n3);
 
 fprintf(file, '%d\t%d\t%f\n', selfcal.img_size_u, selfcal.img_size_v, calib_data.pixperphys);
+
+file.close();

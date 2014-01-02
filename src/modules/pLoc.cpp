@@ -75,6 +75,15 @@ void pLocalize::find_particles_3d(int frame) {
 
     }
 
+    ofstream file;
+    file.open("points.txt");
+    for (int i=0; i<particles3D_.size(); i++) {
+        file<<particles3D_[i].x<<"\t";
+        file<<particles3D_[i].y<<"\t";
+        file<<particles3D_[i].z<<"\n";
+    }
+    file.close();
+
     find_clusters();
     collapse_clusters();
 

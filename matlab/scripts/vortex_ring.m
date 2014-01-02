@@ -2,13 +2,13 @@
 
 clear all;
 
-write = 1;
-visualize = 0;
+write = 0;
+visualize = 1;
 
 XP = [];
 
 size = 150;
-num = 50;
+num = 250;
 
 for i=1:num
     

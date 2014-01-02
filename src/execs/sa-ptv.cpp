@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     
     int window = 2;
     double thresh = 40.0;
-    int cluster = 8;
+    int cluster = 15;
 
     stringstream s;
     s<<string(argv[2])<<"particles/";
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     string particle_file = s.str();
     cout<<particle_file<<endl;
 
-    int find = 0;
+    int find = 1;
     int live = !find;
 
     saRefocus refocus(settings);
@@ -62,26 +62,24 @@ int main(int argc, char** argv) {
     cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
 
     if (live) {
-        refocus.GPUliveView();
+        //refocus.GPUliveView();
 
-        /*
         vector<int> comparams;
         comparams.push_back(CV_IMWRITE_JPEG_QUALITY);
         comparams.push_back(100);
 
         refocus.initializeGPU();
-        float zmin=-5;
-        float zmax=105;
+        float zmin=20.0;
+        float zmax=40.0;
         for (float i=zmin; i<=zmax; i += 1.0) {
             refocus.refocus(i, thresh, 0);
             Mat image = refocus.result;
             stringstream fn;
-            fn<<"../../stack/";
+            fn<<"../../stack_orig/";
             fn<<(i-zmin)<<".jpg";
             imwrite(fn.str(), image, comparams);
             cout<<i<<endl;
         }
-        */
 
     }
 
@@ -93,14 +91,14 @@ int main(int argc, char** argv) {
         
         s2.window = window;
         s2.cluster_size = cluster;
-        s2.zmin = -55.0; //-20
-        s2.zmax = 55.0; //40
-        s2.dz = 1.0;
+        s2.zmin = -5.0; //-20
+        s2.zmax = 105.0; //40
+        s2.dz = 0.1;
         s2.thresh = thresh; //90.0; //100.0
         pLocalize localizer(s2, refocus);
         
         localizer.find_particles_all_frames();
-        localizer.write_all_particles_to_file(particle_file);
+        //localizer.write_all_particles_to_file(particle_file);
         
     }
     

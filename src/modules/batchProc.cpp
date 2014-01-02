@@ -42,7 +42,7 @@ void batchFind::run() {
         settings.ref = 1;
         settings.mult = 0;
         settings.mult_exp = 1/9.0;
-        settings.corner_method = 0;
+        settings.corner_method = 1;
         settings.calib_file_path = calib_paths[i];
         settings.images_path = refoc_paths[i];
         settings.mtiff = 0;
@@ -58,7 +58,7 @@ void batchFind::run() {
 
         int window = 2;
         double thresh = threshs[i];
-        int cluster = 8;
+        int cluster = 15;
 
         stringstream s;
         s<<refoc_paths[i]<<"particles/";
@@ -79,8 +79,8 @@ void batchFind::run() {
         localizer_settings s2;
         s2.window = window;
         s2.cluster_size = cluster;
-        s2.zmin = -20.0;
-        s2.zmax = 60.0;
+        s2.zmin = -5.0;
+        s2.zmax = 105.0;
         s2.dz = 0.1;
         s2.thresh = thresh;
 
