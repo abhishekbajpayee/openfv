@@ -19,10 +19,14 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-    /*
-    batchFind job(argv[1]);
-    job.run();
-    */
+    int batch = 0;
+
+    if (batch) {
+
+        batchFind job(argv[1]);
+        job.run();
+
+    } else {
     
     refocus_settings settings;
     settings.gpu = 1;
@@ -33,7 +37,7 @@ int main(int argc, char** argv) {
     settings.calib_file_path = string(argv[1]);
     settings.images_path = string(argv[2]);
     settings.mtiff = 0;
-    settings.all_frames = 0;
+    settings.all_frames = 1;
     settings.start_frame = 108;
     settings.end_frame = 112;
     settings.upload_frame = 0;
@@ -41,19 +45,23 @@ int main(int argc, char** argv) {
     //string particle_file("../temp/particles_run2_t70.txt");
     
     int window = 2;
-    double thresh = 40.0;
-    int cluster = 15;
+    double thresh = 30.0;
+    int cluster = 20;
 
     stringstream s;
     s<<string(argv[2])<<"particles/";
-    s<<"f"<<settings.start_frame<<"to"<<settings.end_frame<<"_";
+    if (settings.all_frames) {
+        s<<"f_all_";
+    } else {
+        s<<"f"<<settings.start_frame<<"to"<<settings.end_frame<<"_";
+    }
     s<<"w"<<window<<"_";
     s<<"t"<<thresh<<"_";
     s<<"c"<<cluster<<".txt";
     string particle_file = s.str();
     cout<<particle_file<<endl;
 
-    int find = 1;
+    int find = 0;
     int live = !find;
 
     saRefocus refocus(settings);
@@ -63,24 +71,27 @@ int main(int argc, char** argv) {
 
     if (live) {
         //refocus.GPUliveView();
-
+        
         vector<int> comparams;
         comparams.push_back(CV_IMWRITE_JPEG_QUALITY);
         comparams.push_back(100);
 
         refocus.initializeGPU();
-        float zmin=20.0;
-        float zmax=40.0;
-        for (float i=zmin; i<=zmax; i += 1.0) {
+        float zmin=-5.0;
+        float zmax=105.0;
+
+        double start = omp_get_wtime();
+        for (float i=zmin; i<=zmax; i += 0.1) {
             refocus.refocus(i, thresh, 0);
             Mat image = refocus.result;
             stringstream fn;
             fn<<"../../stack_orig/";
             fn<<(i-zmin)<<".jpg";
-            imwrite(fn.str(), image, comparams);
+            //imwrite(fn.str(), image, comparams);
             cout<<i<<endl;
         }
-
+        cout<<omp_get_wtime()-start<<endl;
+        
     }
 
     if (find) {
@@ -98,10 +109,11 @@ int main(int argc, char** argv) {
         pLocalize localizer(s2, refocus);
         
         localizer.find_particles_all_frames();
-        //localizer.write_all_particles_to_file(particle_file);
+        localizer.write_all_particles_to_file(particle_file);
         
     }
-    
+
+    }
     return 1;
 
 }
