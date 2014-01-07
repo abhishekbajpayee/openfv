@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     settings.ref = 1;
     settings.mult = 0;
     settings.mult_exp = 1/9.0;
-    settings.corner_method = 1;
+    settings.corner_method = 0;
     settings.calib_file_path = string(argv[1]);
     settings.images_path = string(argv[2]);
     settings.mtiff = 0;
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     
     int window = 2;
     double thresh = 30.0;
-    int cluster = 20;
+    int zmeth = 2;
 
     stringstream s;
     s<<string(argv[2])<<"particles/";
@@ -57,11 +57,11 @@ int main(int argc, char** argv) {
     }
     s<<"w"<<window<<"_";
     s<<"t"<<thresh<<"_";
-    s<<"c"<<cluster<<".txt";
+    s<<"zm"<<zmeth<<".txt";
     string particle_file = s.str();
     cout<<particle_file<<endl;
 
-    int find = 0;
+    int find = 1;
     int live = !find;
 
     saRefocus refocus(settings);
@@ -70,15 +70,15 @@ int main(int argc, char** argv) {
     cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
 
     if (live) {
-        //refocus.GPUliveView();
-        
+        refocus.GPUliveView();
+        /*
         vector<int> comparams;
         comparams.push_back(CV_IMWRITE_JPEG_QUALITY);
         comparams.push_back(100);
 
         refocus.initializeGPU();
         float zmin=-5.0;
-        float zmax=105.0;
+        float zmax=-4.9;
 
         double start = omp_get_wtime();
         for (float i=zmin; i<=zmax; i += 0.1) {
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
             cout<<i<<endl;
         }
         cout<<omp_get_wtime()-start<<endl;
-        
+        */
     }
 
     if (find) {
@@ -101,13 +101,13 @@ int main(int argc, char** argv) {
         localizer_settings s2;
         
         s2.window = window;
-        s2.cluster_size = cluster;
         s2.zmin = -5.0; //-20
         s2.zmax = 105.0; //40
-        s2.dz = 0.1;
+        s2.dz = 0.5;
         s2.thresh = thresh; //90.0; //100.0
+        s2.zmethod = zmeth;
         pLocalize localizer(s2, refocus);
-        
+
         localizer.find_particles_all_frames();
         localizer.write_all_particles_to_file(particle_file);
         

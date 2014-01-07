@@ -57,6 +57,7 @@ class pLocalize {
 
     int point_in_list(Point2f point, vector<Point2f> points);
     double min_dist(Point2f point, vector<Point2f> points);
+    double get_zloc(vector<particle2d> cluster);
 
     int window_;
     int cluster_size_;
@@ -64,6 +65,9 @@ class pLocalize {
     double zmax_;
     double dz_;
     double thresh_;
+    double zext_;
+
+    int zmethod_;
 
     vector<particle2d> particles3D_;
     vector< vector<particle2d> > clusters_;

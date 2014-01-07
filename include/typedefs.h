@@ -53,9 +53,9 @@ struct refocusing_data_ref {
 struct localizer_settings {
     
     int window;
-    int cluster_size;
     double zmin, zmax, dz;
     double thresh;
+    int zmethod;
     
 };
 

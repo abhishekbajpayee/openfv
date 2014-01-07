@@ -19,7 +19,14 @@ using namespace std;
 using namespace cv;
 
 pLocalize::pLocalize(localizer_settings s, saRefocus refocus):
-    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), cluster_size_(s.cluster_size), refocus_(refocus) {}
+    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), refocus_(refocus), zmethod_(s.zmethod) {
+    
+    zext_ = 3.3;
+
+    cluster_size_ = 0.9*(zext_/dz_);
+    //cout<<"Crit cluster size: "<<cluster_size_<<endl;
+
+}
 
 void pLocalize::run() {
     
@@ -62,7 +69,7 @@ void pLocalize::find_particles_3d(int frame) {
 
         refine_subpixel(image, points, particles);
         //Mat img; draw_points(image, img, particles); qimshow(img); cout<<"\r"<<i<<flush;
-        
+
         for (int j=0; j<particles.size(); j++) {
             particle.x = (particles[j].x - refocus_.img_size().width*0.5)/refocus_.scale();
             particle.y = (particles[j].y - refocus_.img_size().height*0.5)/refocus_.scale();
@@ -75,14 +82,18 @@ void pLocalize::find_particles_3d(int frame) {
 
     }
 
-    ofstream file;
-    file.open("points.txt");
-    for (int i=0; i<particles3D_.size(); i++) {
-        file<<particles3D_[i].x<<"\t";
-        file<<particles3D_[i].y<<"\t";
-        file<<particles3D_[i].z<<"\n";
+    int write_clusters=0;
+    if (write_clusters) {
+        ofstream file;
+        file.open("../../experiment/thesis/test_field_100/clusters/clusters_dz_01_t30_inv.txt");
+        for (int i=0; i<particles3D_.size(); i++) {
+            file<<particles3D_[i].x<<"\t";
+            file<<particles3D_[i].y<<"\t";
+            file<<particles3D_[i].z<<"\t";
+            file<<particles3D_[i].I<<"\n";
+        }
+        file.close();
     }
-    file.close();
 
     find_clusters();
     collapse_clusters();
@@ -171,17 +182,17 @@ void pLocalize::z_resolution() {
 
     
     ofstream file;
-    file.open("../py_scripts/cx_v_dz_add.txt");
+    file.open("../../cx_v_dz_t100.txt");
     
-    double t = 90.0;
+    double t = 40.0;
 
     double factor = 0.5;
     for (int i=0; i<10; i++) {
 
-        refocus_.GPUrefocus(zref, t, 0, 0);
+        refocus_.refocus(zref, thresh_, 0);
         Mat base = refocus_.result.clone();
 
-        refocus_.GPUrefocus(zref+dz, t, 0, 0);
+        refocus_.refocus(zref+dz, thresh_, 0);
         Mat ref = refocus_.result.clone();
 
         Mat numMat = ref.mul(base);
@@ -239,7 +250,7 @@ void pLocalize::find_clusters() {
 
         double xydist, zdist;
         double xythresh = 0.5;
-        double zthresh = 2.0;
+        double zthresh = zext_;
 
         vector<int> used;
 
@@ -290,39 +301,26 @@ void pLocalize::collapse_clusters() {
 
     //cout<<"Collapsing clusters to 3D particles...";
 
-    //ofstream file;
-
     double xsum, ysum, zsum, den;
     Point3f point;
 
     for (int i=0; i<clusters_.size(); i++) {
-        
-        //cout<<i<<endl;
-
-        //char filename[50];
-        //sprintf(filename, "../py_scripts/data_files/i_vs_z_mult_%d.txt", i);
-        //file.open(filename);
 
         xsum = 0;
         ysum = 0;
-        zsum = 0;
         den = clusters_[i].size();
 
-        //file<<clusters_[i].size()<<endl;
         for (int j=0; j<clusters_[i].size(); j++) {
             
             xsum += clusters_[i][j].x;
             ysum += clusters_[i][j].y;
-            zsum += clusters_[i][j].z;
-            //file<<clusters_[i][j].z<<"\t"<<clusters_[i][j].I<<endl;
 
         }
 
-        //file.close();
-
         point.x = xsum/den;
         point.y = ysum/den;
-        point.z = zsum/den;
+
+        point.z = get_zloc(clusters_[i]);
         
         particles_.push_back(point);
 
@@ -529,5 +527,103 @@ void pLocalize::draw_point(Mat image, Mat &drawn, Point2f point) {
 
     cvtColor(image, drawn, CV_GRAY2RGB);
     circle(drawn, point, 5.0, Scalar(0,0,255));
+
+}
+
+double pLocalize::get_zloc(vector<particle2d> cluster) {
+
+    double z;
+
+    switch (zmethod_) {
+        
+    case 1: { // mean method
+        
+        double den = cluster.size();
+        double zsum = 0;
+        for (int i=0; i<cluster.size(); i++)
+            zsum += cluster[i].z;
+        
+        z = zsum/den;
+        break;
+
+    }
+
+    case 2: { // poly2 fit
+
+        double* params = new double[3];
+        ceres::Problem problem;
+        for (int i=0; i<cluster.size(); i++) {
+
+            ceres::CostFunction* cost_function =
+                new ceres::AutoDiffCostFunction<poly2FitError, 1, 3>
+                (new poly2FitError(cluster[i].z, cluster[i].I));
+            
+            problem.AddResidualBlock(cost_function,
+                                     NULL,
+                                     params);
+
+        }
+        
+        ceres::Solver::Options options;
+        options.linear_solver_type = ceres::DENSE_QR;
+        //options.minimizer_progress_to_stdout = true;
+        //options.max_num_iterations = refractive_max_iterations;
+        
+        //int threads = omp_get_num_procs();
+        //options.num_threads = threads;
+        //cout<<"\nSolver using "<<threads<<" threads.\n\n";
+        
+        //options.gradient_tolerance = 1E-12;
+        //options.function_tolerance = 1E-8;
+        
+        ceres::Solver::Summary summary;
+        ceres::Solve(options, &problem, &summary);
+        //cout<<summary.FullReport()<<"\n";
+
+        z = -(params[1]/(2*params[0]));
+
+        break;
+
+    }
+
+    case 3:
+
+        double* params = new double[3];
+        ceres::Problem problem;
+        for (int i=0; i<cluster.size(); i++) {
+
+            ceres::CostFunction* cost_function =
+                new ceres::AutoDiffCostFunction<gaussFitError, 1, 3>
+                (new gaussFitError(cluster[i].z, cluster[i].I));
+            
+            problem.AddResidualBlock(cost_function,
+                                     NULL,
+                                     params);
+
+        }
+        
+        ceres::Solver::Options options;
+        options.linear_solver_type = ceres::DENSE_QR;
+        //options.minimizer_progress_to_stdout = true;
+        //options.max_num_iterations = refractive_max_iterations;
+        
+        //int threads = omp_get_num_procs();
+        //options.num_threads = threads;
+        //cout<<"\nSolver using "<<threads<<" threads.\n\n";
+        
+        //options.gradient_tolerance = 1E-12;
+        //options.function_tolerance = 1E-8;
+        
+        ceres::Solver::Summary summary;
+        ceres::Solve(options, &problem, &summary);
+        //cout<<summary.FullReport()<<"\n";
+
+        z = params[1];
+
+        break;
+
+    }
+
+    return(z);
 
 }

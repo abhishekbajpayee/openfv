@@ -893,6 +893,56 @@ void saRefocus::calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &
 
 void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H) {
 
+    /*
+    int width = img_size_.width;
+    int height = img_size_.height;
+
+    Mat_<double> D = Mat_<double>::zeros(3,3);
+    D(0,0) = scale_; D(1,1) = scale_;
+    D(0,2) = width*0.5;
+    D(1,2) = height*0.5;
+    D(2,2) = 1;
+    Mat hinv = D.inv();
+
+    Mat_<double> X = Mat_<double>::zeros(3, 4);
+    X(0,0) = 1;       X(1,0) = 1;
+    X(0,1) = width-1; X(1,1) = 1;
+    X(0,2) = width-1; X(1,2) = height-1;
+    X(0,3) = 1;       X(1,3) = height-1;
+    for (int i=0; i<X.cols; i++)
+        X(2,i) = 1.0;
+
+    Mat A = X.clone();
+    
+    X = hinv*X;
+
+    for (int i=0; i<X.cols; i++)
+        X(2,i) = z;
+
+    //cout<<"Refracting points"<<endl;
+    Mat_<double> X_out = Mat_<double>::zeros(4, 4);
+    img_refrac(Xcam, X, X_out);
+
+    //cout<<"Projecting to find final map"<<endl;
+    Mat_<double> proj = P_mats_[cam]*X_out;
+
+    Point2f src, dst;
+    vector<Point2f> sp, dp;
+    int i, j;
+
+    for (int i=0; i<A.cols; i++) {
+        src.x = A.at<double>(0,i); src.y = A.at<double>(1,i);
+        cout<<src.x<<", "<<src.y<<" -> ";
+        dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
+        cout<<dst.x<<", "<<dst.y<<endl;
+        sp.push_back(src); dp.push_back(dst);
+    }
+    
+    //H = findHomography(dp, sp, CV_RANSAC);
+    H = findHomography(dp, sp, 0);
+    */
+    
+    
     int width = img_size_.width;
     int height = img_size_.height;
 
@@ -932,8 +982,8 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
 
     //H = findHomography(dp, sp, CV_RANSAC);
     H = findHomography(dp, sp, 0);
-
     H = D*H;
+    
 
 }
 

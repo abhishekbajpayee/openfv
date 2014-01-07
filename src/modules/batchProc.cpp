@@ -58,7 +58,6 @@ void batchFind::run() {
 
         int window = 2;
         double thresh = threshs[i];
-        int cluster = 15;
 
         stringstream s;
         s<<refoc_paths[i]<<"particles/";
@@ -68,8 +67,7 @@ void batchFind::run() {
             s<<"f"<<settings.start_frame<<"to"<<settings.end_frame<<"_";
         }
         s<<"w"<<window<<"_";
-        s<<"t"<<thresh<<"_";
-        s<<"c"<<cluster<<".txt";
+        s<<"t"<<thresh<<".txt";
         string particle_file = s.str();
         cout<<particle_file<<endl;
 
@@ -78,7 +76,6 @@ void batchFind::run() {
 
         localizer_settings s2;
         s2.window = window;
-        s2.cluster_size = cluster;
         s2.zmin = -5.0;
         s2.zmax = 105.0;
         s2.dz = 0.1;
