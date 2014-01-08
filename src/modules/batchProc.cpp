@@ -22,6 +22,7 @@ void batchFind::run() {
         cout<<calib_paths[i]<<" ";
         cout<<refoc_paths[i]<<" ";
         cout<<threshs[i]<<" ";
+        cout<<zms[i]<<" ";
         if (all_frame_flags[i]) {
             cout<<"(all frames)"<<endl;
         } else {
@@ -45,7 +46,7 @@ void batchFind::run() {
         settings.corner_method = 1;
         settings.calib_file_path = calib_paths[i];
         settings.images_path = refoc_paths[i];
-        settings.mtiff = 0;
+        settings.mtiff = 1;
         if (all_frame_flags[i]) {
             settings.all_frames = 1;
         } else {
@@ -68,6 +69,8 @@ void batchFind::run() {
         s2.zmax = 105.0;
         s2.dz = 0.1;
         s2.thresh = thresh;
+        s2.zmethod = zms[i];
+        s2.show_particles = 0;
 
         pLocalize localizer(s2, refocus, settings);        
         localizer.find_particles_all_frames();
@@ -88,7 +91,7 @@ void batchFind::read_config_file() {
 
     string str;
     double t;
-    int all, start, end;
+    int all, start, end, zm;
 
     // read blank line
     getline(file, str);
@@ -107,6 +110,9 @@ void batchFind::read_config_file() {
         file>>t;
         threshs.push_back(t);
         //cout<<t<<endl;
+
+        file>>zm;
+        zms.push_back(zm);
 
         file>>all;
         all_frame_flags.push_back(all);
