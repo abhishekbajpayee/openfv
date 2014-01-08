@@ -29,91 +29,62 @@ int main(int argc, char** argv) {
     } else {
     
     refocus_settings settings;
-    settings.gpu = 1;
-    settings.ref = 1;
-    settings.mult = 0;
-    settings.mult_exp = 1/9.0;
-    settings.corner_method = 0;
+    settings.gpu = 1; settings.ref = 1; settings.mult = 0;
+    settings.corner_method = 1;
     settings.calib_file_path = string(argv[1]);
     settings.images_path = string(argv[2]);
-    settings.mtiff = 0;
-    settings.all_frames = 1;
-    settings.start_frame = 108;
-    settings.end_frame = 112;
-    settings.upload_frame = 0;
-    
-    //string particle_file("../temp/particles_run2_t70.txt");
-    
-    int window = 2;
-    double thresh = 30.0;
-    int zmeth = 2;
+    settings.mtiff = 1;
+    settings.all_frames = 0; settings.start_frame = 78; settings.end_frame = 81;
+    settings.upload_frame = -1;
+    settings.preprocess = 1;
 
-    stringstream s;
-    s<<string(argv[2])<<"particles/";
-    if (settings.all_frames) {
-        s<<"f_all_";
-    } else {
-        s<<"f"<<settings.start_frame<<"to"<<settings.end_frame<<"_";
-    }
-    s<<"w"<<window<<"_";
-    s<<"t"<<thresh<<"_";
-    s<<"zm"<<zmeth<<".txt";
-    string particle_file = s.str();
-    cout<<particle_file<<endl;
+    int task = 2;
 
-    int find = 1;
-    int live = !find;
+    //saRefocus refocus(settings);
+    //gpu::DeviceInfo gpuDevice(gpu::getDevice());
+    //cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
 
-    saRefocus refocus(settings);
+    switch (task) {
+        
+    case 1: {
 
-    gpu::DeviceInfo gpuDevice(gpu::getDevice());
-    cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
-
-    if (live) {
+        saRefocus refocus(settings);
         refocus.GPUliveView();
-        /*
-        vector<int> comparams;
-        comparams.push_back(CV_IMWRITE_JPEG_QUALITY);
-        comparams.push_back(100);
+        break;
 
-        refocus.initializeGPU();
-        float zmin=-5.0;
-        float zmax=-4.9;
-
-        double start = omp_get_wtime();
-        for (float i=zmin; i<=zmax; i += 0.1) {
-            refocus.refocus(i, thresh, 0);
-            Mat image = refocus.result;
-            stringstream fn;
-            fn<<"../../stack_orig/";
-            fn<<(i-zmin)<<".jpg";
-            //imwrite(fn.str(), image, comparams);
-            cout<<i<<endl;
-        }
-        cout<<omp_get_wtime()-start<<endl;
-        */
     }
 
-    if (find) {
+    case 2: {
 
+        saRefocus refocus(settings);
         refocus.initializeGPU();
-        
         localizer_settings s2;
-        
-        s2.window = window;
-        s2.zmin = -5.0; //-20
-        s2.zmax = 105.0; //40
-        s2.dz = 0.5;
-        s2.thresh = thresh; //90.0; //100.0
-        s2.zmethod = zmeth;
-        pLocalize localizer(s2, refocus);
+        s2.window = 2; s2.thresh = 50.0; s2.zmethod = 2;
+        s2.zmin = 0; //-20
+        s2.zmax = 50.0; //40
+        s2.dz = 0.1;
+        s2.show_particles = 0;
+        pLocalize localizer(s2, refocus, settings);
 
         localizer.find_particles_all_frames();
-        localizer.write_all_particles_to_file(particle_file);
-        
+        localizer.write_all_particles_to_file(string(argv[2]));
+        break;
+
+    }
+
+    case 3: {
+
+        pTracking track(string(argv[1]), atof(argv[2]), atof(argv[3]));
+        track.track_all();
+        //track.plot_complete_paths();
+        track.write_quiver_data();
+
     }
 
     }
+
+    }
+
     return 1;
 
 }

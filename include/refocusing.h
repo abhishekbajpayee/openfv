@@ -115,6 +115,7 @@ class saRefocus {
     int CORNER_FLAG; // Flag to use corner based homography fit method
     int MTIFF_FLAG;
     int ALL_FRAME_FLAG;
+    int preprocess_;
 
 };
 

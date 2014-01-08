@@ -24,6 +24,8 @@ struct refocus_settings {
     int end_frame;
     int upload_frame;
     int all_frames;
+    
+    int preprocess;
 
 };
 
@@ -56,6 +58,7 @@ struct localizer_settings {
     double zmin, zmax, dz;
     double thresh;
     int zmethod;
+    int show_particles;
     
 };
 

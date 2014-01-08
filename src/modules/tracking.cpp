@@ -39,7 +39,7 @@ void pTracking::initialize() {
 }
 
 void pTracking::read_points() {
-    
+
     Point3f point;
     volume vol;
 

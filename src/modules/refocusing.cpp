@@ -23,7 +23,7 @@ using namespace std;
 using namespace cv;
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.corner_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult) {
+    GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.corner_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult), preprocess_(settings.preprocess) {
 
     if (REF_FLAG) {
         read_calib_data(settings.calib_file_path);
@@ -50,8 +50,6 @@ saRefocus::saRefocus(refocus_settings settings):
     } else {
         read_imgs(settings.images_path);
     }
-
-    cout<<settings.mult<<" "<<settings.mult_exp<<endl;
 
 }
 
@@ -270,8 +268,7 @@ void saRefocus::GPUliveView() {
         cout<<"Using full refractive calculation method..."<<endl;
     }
 
-    active_frame_ = 0;
-    z = 20;
+    active_frame_ = 0; z = 0; thresh = 0;
     namedWindow("Result", CV_WINDOW_AUTOSIZE);
     if (REF_FLAG) {
         if (CORNER_FLAG) {
@@ -286,12 +283,7 @@ void saRefocus::GPUliveView() {
     double dz = 0.1;
     double dthresh = 5;
     double tlimit = 255;
-    /*
-    if (REF_FLAG) {
-        dthresh = 5.0/255;
-        tlimit = 1.0;
-    }
-    */
+
     while( 1 ){
         int key = cvWaitKey(10);
         //cout<<(key & 255)<<endl;
@@ -817,9 +809,9 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
 
 void saRefocus::preprocess(Mat in, Mat &out) {
 
-    
+    if (preprocess_) {
     //equalizeHist(in, in);
-    /*
+    
     threshold(in, in, 20, 0, THRESH_TOZERO);
     //qimshow(in);
 
@@ -841,10 +833,13 @@ void saRefocus::preprocess(Mat in, Mat &out) {
 
     //imwrite("../temp/out.jpg", out);
     //imshow("img1", in); imshow("img2", out); waitKey(0);
-    qimshow(out);
-    */
+    //qimshow(out);
+
+    } else {
 
     out = in.clone();
+
+    }
 
 }
 

@@ -28,6 +28,7 @@ class pTracking {
 
  pTracking(string particle_file, double R_n, double R_s): path_(particle_file), R_s(R_s), R_n(R_n) {
         initialize();
+        read_points();
     }
     
     void initialize();

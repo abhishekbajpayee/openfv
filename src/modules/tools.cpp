@@ -117,4 +117,18 @@ void qimshow(Mat image) {
 
 }
 
+void pimshow(Mat image, double z, int n) {
+
+    namedWindow("Image", CV_WINDOW_AUTOSIZE);
+    
+    char title[50];
+    sprintf(title, "z = %f, n = %d", z, n);
+    putText(image, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
+    imshow("Image", image);
+    
+    waitKey(0);
+    destroyWindow("Image");
+
+}
+
 #endif

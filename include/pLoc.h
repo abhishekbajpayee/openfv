@@ -27,7 +27,7 @@ class pLocalize {
 
     }
 
-    pLocalize(localizer_settings s, saRefocus refocus);
+    pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s2);
 
     vector<Point3f> detected_particles() { return particles_; }
 
@@ -75,6 +75,9 @@ class pLocalize {
     vector< vector<Point3f> > particles_all_;
 
     saRefocus refocus_;
+    refocus_settings s2_;
+
+    int show_particles_;
 
 };
 

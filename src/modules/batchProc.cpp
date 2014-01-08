@@ -59,18 +59,6 @@ void batchFind::run() {
         int window = 2;
         double thresh = threshs[i];
 
-        stringstream s;
-        s<<refoc_paths[i]<<"particles/";
-        if (settings.all_frames) {
-            s<<"f_all_";
-        } else {
-            s<<"f"<<settings.start_frame<<"to"<<settings.end_frame<<"_";
-        }
-        s<<"w"<<window<<"_";
-        s<<"t"<<thresh<<".txt";
-        string particle_file = s.str();
-        cout<<particle_file<<endl;
-
         saRefocus refocus(settings);
         refocus.initializeGPU();
 
@@ -81,9 +69,9 @@ void batchFind::run() {
         s2.dz = 0.1;
         s2.thresh = thresh;
 
-        pLocalize localizer(s2, refocus);        
+        pLocalize localizer(s2, refocus, settings);        
         localizer.find_particles_all_frames();
-        localizer.write_all_particles_to_file(particle_file);
+        localizer.write_all_particles_to_file(refoc_paths[i]);
         
     }
     

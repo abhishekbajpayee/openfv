@@ -14,3 +14,5 @@ Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P);
 double dist(Point3f p1, Point3f p2);
 
 void qimshow(Mat image);
+
+void pimshow(Mat image, double z, int n);

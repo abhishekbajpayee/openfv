@@ -18,12 +18,13 @@
 using namespace std;
 using namespace cv;
 
-pLocalize::pLocalize(localizer_settings s, saRefocus refocus):
-    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), refocus_(refocus), zmethod_(s.zmethod) {
+pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s2):
+    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), zmethod_(s.zmethod), refocus_(refocus), s2_(s2), show_particles_(s.show_particles) {
     
     zext_ = 3.3;
 
     cluster_size_ = 0.9*(zext_/dz_);
+    cluster_size_ = 8;
     //cout<<"Crit cluster size: "<<cluster_size_<<endl;
 
 }
@@ -68,7 +69,9 @@ void pLocalize::find_particles_3d(int frame) {
         //Mat img; draw_points(image, img, points); qimshow(img);
 
         refine_subpixel(image, points, particles);
-        //Mat img; draw_points(image, img, particles); qimshow(img); cout<<"\r"<<i<<flush;
+        if (show_particles_) {
+            Mat img; draw_points(image, img, particles); pimshow(img, i, particles.size()); cout<<"\r"<<i<<flush;
+        }
 
         for (int j=0; j<particles.size(); j++) {
             particle.x = (particles[j].x - refocus_.img_size().width*0.5)/refocus_.scale();
@@ -440,8 +443,21 @@ void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<par
 
 void pLocalize::write_all_particles_to_file(string path) {
 
+    stringstream s;
+    s<<path<<"particles/";
+    if (s2_.all_frames) {
+        s<<"f_all_";
+    } else {
+        s<<"f"<<s2_.start_frame<<"to"<<s2_.end_frame<<"_";
+    }
+    s<<"w"<<window_<<"_";
+    s<<"t"<<thresh_<<"_";
+    s<<"zm"<<zmethod_<<"_";
+    s<<"idz"<<1/dz_<<".txt";
+    string particle_file = s.str();
+
     ofstream file;
-    file.open(path.c_str());
+    file.open(particle_file.c_str());
 
     file<<particles_all_.size()<<endl;
 
@@ -455,6 +471,8 @@ void pLocalize::write_all_particles_to_file(string path) {
     }
 
     file.close();
+
+    cout<<"All particles written to: "<<particle_file<<endl;
 
 }
 
@@ -565,28 +583,16 @@ double pLocalize::get_zloc(vector<particle2d> cluster) {
         }
         
         ceres::Solver::Options options;
-        options.linear_solver_type = ceres::DENSE_QR;
-        //options.minimizer_progress_to_stdout = true;
-        //options.max_num_iterations = refractive_max_iterations;
-        
-        //int threads = omp_get_num_procs();
-        //options.num_threads = threads;
-        //cout<<"\nSolver using "<<threads<<" threads.\n\n";
-        
-        //options.gradient_tolerance = 1E-12;
-        //options.function_tolerance = 1E-8;
-        
+        options.linear_solver_type = ceres::DENSE_QR;       
         ceres::Solver::Summary summary;
         ceres::Solve(options, &problem, &summary);
-        //cout<<summary.FullReport()<<"\n";
 
         z = -(params[1]/(2*params[0]));
-
         break;
 
     }
 
-    case 3:
+    case 3: { // gauss fit
 
         double* params = new double[3];
         ceres::Problem problem;
@@ -604,23 +610,13 @@ double pLocalize::get_zloc(vector<particle2d> cluster) {
         
         ceres::Solver::Options options;
         options.linear_solver_type = ceres::DENSE_QR;
-        //options.minimizer_progress_to_stdout = true;
-        //options.max_num_iterations = refractive_max_iterations;
-        
-        //int threads = omp_get_num_procs();
-        //options.num_threads = threads;
-        //cout<<"\nSolver using "<<threads<<" threads.\n\n";
-        
-        //options.gradient_tolerance = 1E-12;
-        //options.function_tolerance = 1E-8;
-        
         ceres::Solver::Summary summary;
         ceres::Solve(options, &problem, &summary);
-        //cout<<summary.FullReport()<<"\n";
 
         z = params[1];
-
         break;
+
+    }
 
     }
 

@@ -18,11 +18,10 @@ int main(int argc, char** argv) {
     double rs = atof(argv[3]);
 
     pTracking track(argv[1], rn, rs);
-    track.read_points();
-    track.track_frames(60, 80);
+    track.track_frames(0, 2);
     //track.track_all();
 
-    track.write_quiver_data();
+    //track.write_quiver_data();
 
     track.plot_all_paths();
     //track.plot_complete_paths();
