@@ -28,6 +28,7 @@ add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/execs/sa-ptv.cpp)
 
 # release files
 # add_executable (refocus ${PROJECT_SOURCE_DIR}/src/execs/refocus.cpp)
+add_executable (jobFind ${PROJECT_SOURCE_DIR}/src/execs/jobFind.cpp)
 add_executable (track ${PROJECT_SOURCE_DIR}/src/execs/track.cpp)
 add_executable (liveRefocus ${PROJECT_SOURCE_DIR}/src/execs/liveRefocus.cpp)
 add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/execs/calibrate.cpp)
@@ -38,6 +39,7 @@ set (PROF_LIB -lprofiler)
 set (CUSTOM_LIBS saptv cuda_saptv)
 
 target_link_libraries (sa-ptv ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${OTHER_LIBS} ${PROF_LIB})
+target_link_libraries (jobFind ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${OTHER_LIBS} ${PROF_LIB})
 # target_link_libraries (testing ${OpenCV_LIBS} lib ${CERES_LIBS} ${PYTHON_LIB})
 # target_link_libraries (refocus ${CUSTOM_LIBS} ${OpenCV_LIBS} lib ${CERES_LIBS} ${OTHER_LIBS})
 target_link_libraries (track ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${OTHER_LIBS})

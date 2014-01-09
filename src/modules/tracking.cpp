@@ -27,14 +27,31 @@ void pTracking::initialize() {
     V_n = (4/3)*pi*pow(R_n,3);
     V_s = (4/3)*pi*pow(R_s,3);
 
-    cout<<"R_n: "<<R_n<<", R_s: "<<R_s<<endl;
+    //cout<<"R_n: "<<R_n<<", R_s: "<<R_s<<endl;
 
     A = 0.3;
     B = 3.0;
     C = 0.1;
     D = 5.0;
-    E = 0; //1.0;
-    F = 0.1; //0.05;
+    E = 1.0;
+    F = 0.05;
+
+}
+
+void pTracking::set_vars(double rn, double rs, double a, double b, double c, double d, double e, double f) {
+
+    R_n = rn;
+    R_s = rs;
+
+    A = a;
+    B = b;
+    C = c;
+    D = d;
+    E = e;
+    F = f;
+
+    match_counts.clear();
+    all_matches.clear();
 
 }
 
@@ -133,7 +150,7 @@ void pTracking::track_all() {
 
 vector<Point2i> pTracking::track_frame(int f1, int f2, int &count) {
 
-    cout<<"Matching frames "<<f1<<" and "<<f2<<" | ";
+    //cout<<"Matching frames "<<f1<<" and "<<f2<<" | ";
 
     int n1, n2;
     n1 = all_points_[f1].size();
@@ -279,7 +296,7 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
 
     }
 
-    cout<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
+    //cout<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
     
     return(count);
 
@@ -564,7 +581,45 @@ void pTracking::write_quiver_data() {
 
 void pTracking::write_tracking_result() {
 
-    // 
+    string qpath("");
+    for (int i=0; i<path_.size()-4; i++) {
+        qpath += path_[i];
+    }
+    qpath += "_result.txt";
+
+    ofstream file;
+    file.open(qpath.c_str());
+
+    cout<<"Writing quiver data to: "<<qpath<<endl;
+
+    file<<all_matches.size()<<endl;
+
+    for (int frame=0; frame<all_matches.size(); frame++) {
+        file<<all_matches[frame].size()<<endl;
+        for (int i=0; i<all_matches[frame].size(); i++) {
+            file<<all_matches[frame][i].x<<"\t"<<all_matches[frame][i].y<<endl;
+        }
+    }
+
+    file.close();
+
+}
+
+double pTracking::sim_performance() {
+
+    double perf;
+
+    for (int frame=0; frame<all_matches.size(); frame++) {
+        int count = 0;
+        int total = all_matches[frame].size();
+        for (int i=0; i<all_matches[frame].size(); i++) {
+            if(all_matches[frame][i].x==all_matches[frame][i].y)
+                count++;
+        }
+        perf = double(count)/double(total);
+    }
+
+    return(perf);
 
 }
 

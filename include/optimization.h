@@ -2,6 +2,7 @@
 #define OPTIMIZATION_H
 
 #include "std_include.h"
+#include "tracking.h"
 
 using namespace cv;
 using namespace std;
@@ -781,6 +782,38 @@ class gaussFitError {
     
     double x;
     double y;
+    
+};
+
+// Relaxation Tracking Error function
+class rlxTrackingError {
+
+ public:
+    
+ rlxTrackingError(pTracking track): 
+    track_(track) {}
+    
+    template <typename T>
+    bool operator()(const T* const params,
+                    T* residuals) {
+        
+        track_.set_vars(double(params[0]),
+                        double(params[1]),
+                        double(params[2]),
+                        double(params[3]),
+                        double(params[4]),
+                        double(params[5]),
+                        double(params[6]),
+                        double(params[7]));
+        
+        track_.track_frames(15, 16);
+        residuals[0] = T(track_.sim_performance());
+
+        return true;
+
+    }
+    
+    pTracking track_;
     
 };
 

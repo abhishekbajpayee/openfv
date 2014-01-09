@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     settings.upload_frame = -1;
     settings.preprocess = 1;
 
-    int task = 2;
+    int task = 3;
 
     //saRefocus refocus(settings);
     //gpu::DeviceInfo gpuDevice(gpu::getDevice());

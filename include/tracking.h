@@ -13,7 +13,7 @@
 #define TRACKING_LIBRARY
 
 #include "std_include.h"
-#include "refocusing.h"
+//#include "refocusing.h"
 #include "typedefs.h"
 
 using namespace std;
@@ -31,6 +31,8 @@ class pTracking {
         read_points();
     }
     
+    void set_vars(double rn, double rs, double a, double b, double c, double d, double e, double f);
+
     void initialize();
     void read_points();
 
@@ -44,6 +46,8 @@ class pTracking {
     void write_quiver_data();
     void write_tracking_result();
     void write_all_paths(string path);
+
+    double sim_performance();
 
  private:
 
