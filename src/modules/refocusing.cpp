@@ -812,7 +812,7 @@ void saRefocus::preprocess(Mat in, Mat &out) {
     if (preprocess_) {
     //equalizeHist(in, in);
     
-    threshold(in, in, 20, 0, THRESH_TOZERO);
+    threshold(in, in, 10, 0, THRESH_TOZERO);
     //qimshow(in);
 
     Mat im2;
@@ -823,10 +823,11 @@ void saRefocus::preprocess(Mat in, Mat &out) {
     //qimshow(im3);
 
     Mat im3;
-    dynamicMinMax(im2, im3, 40, 40);
-    //qimshow(out);
+    dynamicMinMax(im2, im3, 20, 20);
+    //qimshow(im3);
 
-    threshold(im3, im3, 100, 0, THRESH_TOZERO);
+    //threshold(im3, im3, 100, 0, THRESH_TOZERO);
+    //qimshow(im3);
 
     Mat im4;
     dynamicMinMax(im3, out, 40, 40);

@@ -790,31 +790,29 @@ class rlxTrackingError {
 
  public:
     
- rlxTrackingError(pTracking track): 
-    track_(track) {}
+ rlxTrackingError(string path): 
+    path_(path) {}
     
     template <typename T>
     bool operator()(const T* const params,
-                    T* residuals) {
+                    T* residuals) const {
         
-        track_.set_vars(double(params[0]),
+        pTracking track(path_, params[0], params[1]);
+
+        track.set_vars(double(params[0]),
                         double(params[1]),
                         double(params[2]),
-                        double(params[3]),
-                        double(params[4]),
-                        double(params[5]),
-                        double(params[6]),
-                        double(params[7]));
+                        double(params[3]));
         
-        track_.track_frames(15, 16);
-        residuals[0] = T(track_.sim_performance());
+        track.track_frames(15, 16);
+        residuals[0] = T(1.0) - T(track.sim_performance());
 
         return true;
 
     }
     
-    pTracking track_;
-    
+    string path_;
+
 };
 
 // FUNCTION DEFINITIONS

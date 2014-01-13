@@ -38,15 +38,13 @@ void pTracking::initialize() {
 
 }
 
-void pTracking::set_vars(double rn, double rs, double a, double b, double c, double d, double e, double f) {
+void pTracking::set_vars(double rn, double rs, double e, double f) {
 
     R_n = rn;
     R_s = rs;
 
-    A = a;
-    B = b;
-    C = c;
-    D = d;
+    //cout<<rn<<" "<<rs<<" "<<e<<" "<<f<<" ";
+
     E = e;
     F = f;
 
@@ -63,7 +61,7 @@ void pTracking::read_points() {
     ifstream file;
     file.open(path_.c_str());
 
-    //cout<<"Reading points to track...";
+    VLOG(1)<<"Reading points to track...";
     
     int num_frames;
     file>>num_frames;
@@ -106,7 +104,7 @@ void pTracking::read_points() {
 
     }
 
-    //cout<<"done!"<<endl;
+    VLOG(1)<<"done!"<<endl;
 
 }
 
@@ -150,21 +148,21 @@ void pTracking::track_all() {
 
 vector<Point2i> pTracking::track_frame(int f1, int f2, int &count) {
 
-    //cout<<"Matching frames "<<f1<<" and "<<f2<<" | ";
+    LOG(INFO)<<"Matching frames "<<f1<<" and "<<f2<<" | ";
 
     int n1, n2;
     n1 = all_points_[f1].size();
     n2 = all_points_[f2].size();
 
-    //cout<<"Neighbor Sets...";
+    VLOG(1)<<"Neighbor Sets...";
     vector< vector<int> > S_r = neighbor_set(f1, f1, R_n);
     vector< vector<int> > S_c = neighbor_set(f1, f2, R_s);
 
     vector<Mat> Pij, Pi, Pij2, Pi2;
-    //cout<<"Probability Sets...";
+    VLOG(1)<<"Probability Sets...";
     build_probability_sets(S_r, S_c, Pij, Pi, Pij2, Pi2);
 
-    //cout<<"Relaxation Sets...\n";
+    VLOG(1)<<"Relaxation Sets...\n";
     vector< vector< vector< vector<Point2i> > > > theta;
     //double t = omp_get_wtime();
     build_relaxation_sets(f1, f2, S_r, S_c, C, D, E, F, theta);
@@ -199,7 +197,7 @@ vector<Point2i> pTracking::track_frame(int f1, int f2, int &count) {
 
     }
 
-    //cout<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
+    VLOG(1)<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
 
     vector<Point2i> matches;
     count = find_matches(Pij, Pi, S_r, S_c, matches);
@@ -296,7 +294,7 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
 
     }
 
-    //cout<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
+    LOG(INFO)<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
     
     return(count);
 
@@ -460,14 +458,9 @@ vector<int> pTracking::points_in_region(int frame, Point3f center, double r) {
 
 }
 
-void pTracking::plot_complete_paths() {
-
-    PyVisualize vis;
-
-    vis.figure3d();
+void pTracking::find_long_paths(int l) {
 
     vector<int> path;
-    vector< vector<int> > all_paths;
     for (int i=0; i<all_points_[0].size(); i++) {
         
         path.push_back(i);
@@ -485,24 +478,34 @@ void pTracking::plot_complete_paths() {
         }
 
         //if (path.size()==all_points_.size()) {
-        if (path.size()>20) {
-            all_paths.push_back(path);
+        if (path.size()>l) {
+            long_paths_.push_back(path);
             //cout<<path.size()<<endl;
         }
 
         path.clear();
 
     }
-    cout<<"full: "<<all_paths.size()<<endl;
-    
-    int every = 3;
-    for (int i=0; i<all_paths.size(); i++) {
-        if (i%every==1) {
+    cout<<"Paths longer than "<<l<<" frames: "<<long_paths_.size()<<endl;
+
+}
+
+void pTracking::plot_long_paths() {
+
+    PyVisualize vis;
+
+    vis.figure3d();
+
+    int every = 1;
+    for (int i=0; i<long_paths_.size(); i++) {
+        if (i%every==0) {
         vector<Point3f> points;
-        for (int j=0; j<all_paths[i].size(); j++) {
-            points.push_back(all_points_[j+offset][all_paths[i][j]]);
+        for (int j=0; j<long_paths_[i].size(); j++) {
+            if (all_points_[j+offset][long_paths_[i][j]].x > -5 && all_points_[j+offset][long_paths_[i][j]].x < 35)
+                points.push_back(all_points_[j+offset][long_paths_[i][j]]);
         }
-        vis.plot3d(points, "k");
+        if (points.size())
+            vis.plot3d(points, "k");
         points.clear();
         }
     }
@@ -619,7 +622,9 @@ double pTracking::sim_performance() {
         perf = double(count)/double(total);
     }
 
-    return(perf);
+    //cout<<1-perf<<endl;
+
+    return(1-perf);
 
 }
 
@@ -644,6 +649,32 @@ void pTracking::write_all_paths(string path) {
         }
     }
 
+    file.close();
+
+}
+
+void pTracking::write_long_quiver(string path, int l) {
+
+    ofstream file;
+    file.open(path.c_str());
+    
+    file<<l-1<<endl;
+
+    for (int j=0; j<l-1; j++) {
+        file<<long_paths_.size()<<endl;
+        for (int i=0; i<long_paths_.size(); i++) {
+
+            file<<all_points_[offset+j][long_paths_[i][j]].x<<"\t";
+            file<<all_points_[offset+j][long_paths_[i][j]].y<<"\t";
+            file<<all_points_[offset+j][long_paths_[i][j]].z<<"\t";
+            
+            double u = all_points_[offset+j+1][long_paths_[i][j+1]].x - all_points_[offset+j][long_paths_[i][j]].x;
+            double v = all_points_[offset+j+1][long_paths_[i][j+1]].y - all_points_[offset+j][long_paths_[i][j]].y;
+            double w = all_points_[offset+j+1][long_paths_[i][j+1]].z - all_points_[offset+j][long_paths_[i][j]].z;
+            
+            file<<u<<"\t"<<v<<"\t"<<w<<endl;
+        }
+    }
     file.close();
 
 }

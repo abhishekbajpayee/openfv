@@ -33,7 +33,7 @@ add_executable (track ${PROJECT_SOURCE_DIR}/src/execs/track.cpp)
 add_executable (liveRefocus ${PROJECT_SOURCE_DIR}/src/execs/liveRefocus.cpp)
 add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/execs/calibrate.cpp)
 
-set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp)
+set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS python2.7 tiff)
 set (PROF_LIB -lprofiler)
 set (CUSTOM_LIBS saptv cuda_saptv)

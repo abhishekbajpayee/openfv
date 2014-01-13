@@ -24,7 +24,7 @@ pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s
     zext_ = 3.3;
 
     cluster_size_ = 0.9*(zext_/dz_);
-    cluster_size_ = 8;
+    cluster_size_ = 5;
     //cout<<"Crit cluster size: "<<cluster_size_<<endl;
 
 }
@@ -85,10 +85,10 @@ void pLocalize::find_particles_3d(int frame) {
 
     }
 
-    int write_clusters=0;
+    int write_clusters=1;
     if (write_clusters) {
         ofstream file;
-        file.open("../../experiment/thesis/test_field_100/clusters/clusters_dz_01_t30_inv.txt");
+        file.open("../../experiment/thesis/clusters_real.txt");
         for (int i=0; i<particles3D_.size(); i++) {
             file<<particles3D_[i].x<<"\t";
             file<<particles3D_[i].y<<"\t";

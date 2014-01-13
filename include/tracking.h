@@ -31,7 +31,7 @@ class pTracking {
         read_points();
     }
     
-    void set_vars(double rn, double rs, double a, double b, double c, double d, double e, double f);
+    void set_vars(double rn, double rs, double e, double f);
 
     void initialize();
     void read_points();
@@ -40,12 +40,15 @@ class pTracking {
     void track_all();
     vector<Point2i> track_frame(int f1, int f2, int &count);
 
-    void plot_complete_paths();
+    void find_long_paths(int l);
+    void plot_long_paths();
     void plot_all_paths();
 
     void write_quiver_data();
     void write_tracking_result();
     void write_all_paths(string path);
+
+    void write_long_quiver(string path, int l);
 
     double sim_performance();
 
@@ -69,6 +72,8 @@ class pTracking {
     
     vector< vector<Point2i> > all_matches;
     vector<int> match_counts;
+
+    vector< vector<int> > long_paths_;
 
     double R_n, R_s, V_n, V_s;
     double A, B, C, D, E, F;
