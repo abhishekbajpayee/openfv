@@ -37,9 +37,10 @@ void PyVisualize::plot3d(vector<Point3f> points, string args) {
     string_from_vPoint3f(points, strs);
 
     string call("pl.plot(");
-    call += strs[0] + "," + strs[1] + "," + strs[2] + ",'" + args + "')";
+    call += strs[0] + "," + strs[1] + "," + strs[2] + ",'" + args + "',linewidth=0.5)";
 
     PyRun_SimpleString(call.c_str());
+    //PyRun_SimpleString("axis('equal')");
 
 }
 

@@ -55,7 +55,7 @@ void batchFind::run() {
             settings.end_frame = frames[i].y;
         }
 
-        settings.upload_frame = 0;
+        settings.upload_frame = -1;
 
         int window = 2;
         double thresh = threshs[i];

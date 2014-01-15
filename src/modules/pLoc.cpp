@@ -252,7 +252,7 @@ void pLocalize::find_clusters() {
         double z = particles3D_[0].z;
 
         double xydist, zdist;
-        double xythresh = 0.5;
+        double xythresh = 2.0/refocus_.scale();
         double zthresh = zext_;
 
         vector<int> used;

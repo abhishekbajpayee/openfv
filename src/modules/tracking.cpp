@@ -21,8 +21,8 @@ using namespace cv;
 
 void pTracking::initialize() {
 
-    N = 500;
-    tol = 0.1;
+    N = 5000;
+    tol = 0.01;
 
     V_n = (4/3)*pi*pow(R_n,3);
     V_s = (4/3)*pi*pow(R_s,3);
@@ -70,6 +70,7 @@ void pTracking::read_points() {
 
         int num_points;
         file>>num_points;
+        VLOG(1)<<"f"<<i<<": "<<num_points<<", ";
 
         vol.x1 = 0;
         vol.x2 = 0;
@@ -395,7 +396,7 @@ void pTracking::build_relaxation_sets(int frame1, int frame2, vector< vector<int
                         dij_mag = dist(all_points_[frame1][S_r[n][i]], all_points_[frame2][S_c[n][j]]);
 
                         /*
-                        double thresh = 20;
+                        double thresh = E;
                         double ijmag = dist(dij, Point3f(0,0,0));
                         double klmag = dist(dkl, Point3f(0,0,0));
                         double ijkldot = dij.x*dkl.x + dij.y*dkl.y + dij.z*dkl.z;
@@ -407,7 +408,7 @@ void pTracking::build_relaxation_sets(int frame1, int frame2, vector< vector<int
                             //cout<<(dist(dij, dkl) < (E+(F*dij_mag)))<<endl;
                         }
                         */
-
+                        
                         double thresh = E+(F*dij_mag);
                         if ( dist(dij, dkl) < thresh ) {
                             theta_single.push_back(Point2i(k,l));
@@ -461,12 +462,13 @@ vector<int> pTracking::points_in_region(int frame, Point3f center, double r) {
 void pTracking::find_long_paths(int l) {
 
     vector<int> path;
-    for (int i=0; i<all_points_[0].size(); i++) {
+    for (int i=0; i<all_matches[0].size(); i++) {
         
-        path.push_back(i);
-        
+        path.push_back(all_matches[0][i].x);
+
         int j=0;
         int p1=i;
+
         while(j < all_matches.size()) {
             if (all_matches[j][p1].y > -1) {
                 path.push_back(all_matches[j][p1].y);
@@ -496,20 +498,25 @@ void pTracking::plot_long_paths() {
 
     vis.figure3d();
 
+    int count=0;
     int every = 1;
     for (int i=0; i<long_paths_.size(); i++) {
         if (i%every==0) {
         vector<Point3f> points;
         for (int j=0; j<long_paths_[i].size(); j++) {
-            if (all_points_[j+offset][long_paths_[i][j]].x > -5 && all_points_[j+offset][long_paths_[i][j]].x < 35)
+            if (all_points_[j+offset][long_paths_[i][j]].x > -5 && all_points_[j+offset][long_paths_[i][j]].x < 45)
                 points.push_back(all_points_[j+offset][long_paths_[i][j]]);
         }
-        if (points.size())
+        if (points.size()) {
             vis.plot3d(points, "k");
+            count++;
+        }
         points.clear();
         }
     }
-    
+
+    cout<<"Paths plotted: "<<count<<endl;
+
     vis.xlabel("x [mm]");
     vis.ylabel("y [mm]");
     vis.zlabel("z [mm]");

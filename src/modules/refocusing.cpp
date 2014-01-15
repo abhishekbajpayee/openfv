@@ -830,7 +830,7 @@ void saRefocus::preprocess(Mat in, Mat &out) {
     //qimshow(im3);
 
     Mat im4;
-    dynamicMinMax(im3, out, 40, 40);
+    dynamicMinMax(im3, out, 20, 20);
 
     //imwrite("../temp/out.jpg", out);
     //imshow("img1", in); imshow("img2", out); waitKey(0);
