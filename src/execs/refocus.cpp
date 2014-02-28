@@ -5,61 +5,35 @@
 #include "pLoc.h"
 #include "tracking.h"
 #include "tools.h"
+#include "parse_settings.h"
 
 using namespace cv;
 using namespace std;
 
+DEFINE_bool(live, false, "live refocusing");
+DEFINE_bool(fhelp, false, "show config file options");
+
 int main(int argc, char** argv) {
 
-    char* refoc_path_c = argv[2];
-    string refoc_path(refoc_path_c);
+    google::ParseCommandLineFlags(&argc, &argv, true);
+    google::InitGoogleLogging(argv[0]);
+    FLAGS_logtostderr=1;
 
-    stringstream zmins(argv[3]);
-    double zmin;
-    zmins>>zmin;
+    refocus_settings settings;
+    parse_refocus_settings(string(argv[1]), settings, FLAGS_fhelp);
+    saRefocus refocus(settings);
 
-    stringstream zmaxs(argv[4]);
-    double zmax;
-    zmaxs>>zmax;
+    if (FLAGS_live) {
+        if (settings.gpu) {
+            refocus.GPUliveView();
+        } else {
+            refocus.CPUliveView();
+        }
+    } else {
+        refocus.initializeGPU();
+        refocus.dump_stack(settings.save_path, settings.zmin, settings.zmax, settings.dz, settings.thresh);
+    }
 
-    stringstream dzs(argv[5]);
-    double dz;
-    dzs>>dz;
-
-    stringstream mults(argv[6]);
-    int mult;
-    mults>>mult;
-
-    stringstream mes(argv[7]);
-    double mexp;
-    mes>>mexp;
-
-    stringstream threshs(argv[8]);
-    double thresh;
-    threshs>>thresh;
-
-    // Camera Calibration Section
-    
-    string calib_path(argv[1]); // Folder where calibration images lie
-    Size grid_size = Size(6,5); // Format (horizontal_corners, vertical_corners)
-    double grid_size_phys = 5;  // in [mm]
-
-    int dummy_mode = 1;
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, dummy_mode, 0);
-    calibration.run();
-    //calibration.write_calib_results_matlab();
-
-    int frame = 0;
-    saRefocus refocus(calibration.refocusing_params(), frame, mult, mexp);
-    refocus.read_imgs(refoc_path);
-    refocus.initializeGPU();
-    
-    int window = 2;
-    int cluster_size = 10;
-    //double thresh = 90.0; //100.0
-    pLocalize localizer(window, zmin, zmax, dz, thresh, cluster_size, refocus);
-    localizer.save_refocus(frame);
-    
     return 1;
 
 }

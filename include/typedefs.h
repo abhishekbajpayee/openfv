@@ -26,6 +26,10 @@ struct refocus_settings {
     int all_frames;
     
     int preprocess;
+    string preprocess_file;
+
+    double zmin, zmax, dz, thresh;
+    string save_path;
 
 };
 
@@ -59,6 +63,13 @@ struct localizer_settings {
     double thresh;
     int zmethod;
     int show_particles;
+    
+};
+
+struct particle_path {
+    
+    int start_frame;
+    vector<int> path;
     
 };
 

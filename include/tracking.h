@@ -41,7 +41,9 @@ class pTracking {
     vector<Point2i> track_frame(int f1, int f2, int &count);
 
     void find_long_paths(int l);
+    void find_sized_paths(int l);
     void plot_long_paths();
+    void plot_sized_paths();
     void plot_all_paths();
 
     void write_quiver_data();
@@ -63,6 +65,8 @@ class pTracking {
     vector< vector<int> > neighbor_set(int frame1, int frame2, double r);
     vector<int> points_in_region(int frame, Point3f center, double r);
 
+    bool is_used(vector< vector<int> > used, int k, int i);
+
     // Variables
     string path_;
 
@@ -74,6 +78,7 @@ class pTracking {
     vector<int> match_counts;
 
     vector< vector<int> > long_paths_;
+    vector<particle_path> sized_paths_;
 
     double R_n, R_s, V_n, V_s;
     double A, B, C, D, E, F;

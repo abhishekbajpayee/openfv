@@ -35,6 +35,10 @@ saRefocus::saRefocus(refocus_settings settings):
         mult_exp_ = settings.mult_exp;
     }
 
+    if (preprocess_) {
+        parse_preprocess_settings(settings.preprocess_file);
+    }
+
     if (MTIFF_FLAG) {
         vector<int> frames;
         if (settings.all_frames) {
@@ -44,9 +48,9 @@ saRefocus::saRefocus(refocus_settings settings):
             int begin = settings.start_frame;
             int end = settings.end_frame;
             for (int i=begin; i<=end; i++)
-                frames.push_back(i);
+                frames_.push_back(i);
         }
-        read_imgs_mtiff(settings.images_path, frames);
+        read_imgs_mtiff(settings.images_path);
     } else {
         read_imgs(settings.images_path);
     }
@@ -58,7 +62,10 @@ void saRefocus::read_calib_data(string path) {
     ifstream file;
 
     file.open(path.c_str());
-    cout<<"LOADING CALIBRATION DATA...";
+    if(file.fail())
+        LOG(FATAL)<<"Could not open calibration file! Terminating..."<<endl;
+
+    LOG(INFO)<<"LOADING CALIBRATION DATA...";
 
     file>>num_cams_;
 
@@ -92,7 +99,7 @@ void saRefocus::read_calib_data(string path) {
     file>>img_size_.height;
     file>>scale_;
 
-    cout<<"DONE!"<<endl<<endl;
+    //LOG(INFO)<<"DONE"<<endl;
 
 }
 
@@ -110,11 +117,12 @@ void saRefocus::read_imgs(string path) {
 
     vector<string> img_names;
 
-    cout<<"\nREADING IMAGES TO REFOCUS...\n\n";
+    LOG(INFO)<<"READING IMAGES TO REFOCUS...";
+    VLOG(1)<<"\n";
 
     for (int i=0; i<num_cams_; i++) {
 
-        cout<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
+        VLOG(1)<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
 
         string path_tmp;
         vector<Mat> refocusing_imgs_sub;
@@ -134,7 +142,7 @@ void saRefocus::read_imgs(string path) {
 
         sort(img_names.begin(), img_names.end());
         for (int i=0; i<img_names.size(); i++) {
-            cout<<i<<": "<<img_names[i]<<endl;
+            VLOG(1)<<i<<": "<<img_names[i]<<endl;
             image = imread(img_names[i], 0);
             
             Mat imgI; preprocess(image, imgI);
@@ -145,16 +153,19 @@ void saRefocus::read_imgs(string path) {
         imgs.push_back(refocusing_imgs_sub);
         path_tmp = "";
 
-        cout<<"done!\n";
+        VLOG(1)<<"done!\n";
    
     }
  
-    cout<<"\nDONE READING IMAGES!\n\n";
+    LOG(INFO)<<"DONE READING IMAGES"<<endl;
 
 }
 
-void saRefocus::read_imgs_mtiff(string path, vector<int> frames) {
+void saRefocus::read_imgs_mtiff(string path) {
     
+    LOG(INFO)<<"READING IMAGES TO REFOCUS...";
+    VLOG(1)<<"\n";
+
     DIR *dir;
     struct dirent *ent;
 
@@ -179,33 +190,33 @@ void saRefocus::read_imgs_mtiff(string path, vector<int> frames) {
 
     sort(img_names.begin(), img_names.end());
     vector<TIFF*> tiffs;
+
+    VLOG(1)<<"Images in path:"<<endl;
     for (int i=0; i<img_names.size(); i++) {
-        cout<<img_names[i]<<endl;
+        VLOG(1)<<img_names[i]<<endl;
         TIFF* tiff = TIFFOpen(img_names[i].c_str(), "r");
         tiffs.push_back(tiff);
     }
 
-    cout<<"\nREADING IMAGES TO REFOCUS...\n\n";
-
-    cout<<"Counting number of frames...";
+    VLOG(1)<<"Counting number of frames...";
     int dircount = 0;
     if (tiffs[0]) {
 	do {
 	    dircount++;
 	} while (TIFFReadDirectory(tiffs[0]));
     }
-    cout<<"done! ("<<dircount<<" frames found.)"<<endl<<endl;
+    VLOG(1)<<"done! ("<<dircount<<" frames found.)"<<endl<<endl;
 
     if (ALL_FRAME_FLAG) {
-        cout<<"READING ALL FRAMES..."<<endl;
+        VLOG(1)<<"READING ALL FRAMES..."<<endl;
         for (int i=0; i<dircount; i++)
-            frames.push_back(i);
+            frames_.push_back(i);
     }
 
-    cout<<"Reading images..."<<endl;
+    VLOG(1)<<"Reading images..."<<endl;
     for (int n=0; n<img_names.size(); n++) {
         
-        cout<<"Camera "<<n+1<<"...";
+        VLOG(1)<<"Camera "<<n+1<<"...";
 
         vector<Mat> refocusing_imgs_sub;
 
@@ -213,14 +224,14 @@ void saRefocus::read_imgs_mtiff(string path, vector<int> frames) {
         int count=0;
         int skip=1400;
         
-        for (int f=0; f<frames.size(); f++) {
+        for (int f=0; f<frames_.size(); f++) {
 
             Mat img, img2;
             uint32 c, r;
             size_t npixels;
             uint32* raster;
             
-            TIFFSetDirectory(tiffs[n], frames[f]);
+            TIFFSetDirectory(tiffs[n], frames_[f]);
 
             TIFFGetField(tiffs[n], TIFFTAG_IMAGEWIDTH, &c);
             TIFFGetField(tiffs[n], TIFFTAG_IMAGELENGTH, &r);
@@ -250,11 +261,11 @@ void saRefocus::read_imgs_mtiff(string path, vector<int> frames) {
         }
 
         imgs.push_back(refocusing_imgs_sub);
-        cout<<"done! "<<count<<" frames read."<<endl;
+        VLOG(1)<<"done! "<<count<<" frames read."<<endl;
 
     }
 
-    cout<<"\nDONE READING IMAGES TO REFOCUS\n\n";
+    cout<<"DONE READING IMAGES"<<endl;
 
 }
 
@@ -631,10 +642,11 @@ void saRefocus::GPUrefocus_ref_corner(double z, double thresh, int live, int fra
     Scalar fact = Scalar(1/double(num_cams_));
     Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
     refocused.upload(blank);
-
+    
     Mat H;
     calc_ref_refocus_H(cam_locations_[0], z, 0, H);
     gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
+    
 
     if (mult_) {
         gpu::pow(temp, mult_exp_, temp2);
@@ -807,43 +819,6 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
 
 // ---CPU Refocusing Functions End--- //
 
-void saRefocus::preprocess(Mat in, Mat &out) {
-
-    if (preprocess_) {
-    //equalizeHist(in, in);
-    
-    threshold(in, in, 10, 0, THRESH_TOZERO);
-    //qimshow(in);
-
-    Mat im2;
-    dynamicMinMax(in, im2, 40, 40); 
-    //qimshow(im2);
-
-    GaussianBlur(im2, im2, Size(3,3), 1.0);
-    //qimshow(im3);
-
-    Mat im3;
-    dynamicMinMax(im2, im3, 20, 20);
-    //qimshow(im3);
-
-    //threshold(im3, im3, 100, 0, THRESH_TOZERO);
-    //qimshow(im3);
-
-    Mat im4;
-    dynamicMinMax(im3, out, 20, 20);
-
-    //imwrite("../temp/out.jpg", out);
-    //imshow("img1", in); imshow("img2", out); waitKey(0);
-    //qimshow(out);
-
-    } else {
-
-    out = in.clone();
-
-    }
-
-}
-
 void saRefocus::calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam) {
 
     int width = img_size_.width;
@@ -928,16 +903,16 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
 
     for (int i=0; i<A.cols; i++) {
         src.x = A.at<double>(0,i); src.y = A.at<double>(1,i);
-        cout<<src.x<<", "<<src.y<<" -> ";
+        //cout<<src.x<<", "<<src.y<<" -> ";
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
-        cout<<dst.x<<", "<<dst.y<<endl;
+        //cout<<dst.x<<", "<<dst.y<<endl;
         sp.push_back(src); dp.push_back(dst);
     }
     
     //H = findHomography(dp, sp, CV_RANSAC);
     H = findHomography(dp, sp, 0);
+    cout<<H<<endl;
     */
-    
     
     int width = img_size_.width;
     int height = img_size_.height;
@@ -979,7 +954,6 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
     //H = findHomography(dp, sp, CV_RANSAC);
     H = findHomography(dp, sp, 0);
     H = D*H;
-    
 
 }
 
@@ -1057,7 +1031,99 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
 
 }
 
-void saRefocus::dynamicMinMax(Mat in, Mat &out, int xf, int yf) {
+void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh) {
+
+    LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
+    
+    for (int f=0; f<frames_.size(); f++) {
+        
+        stringstream fn;
+        fn<<path<<frames_[f];
+        mkdir(fn.str().c_str(), S_IRWXU);
+
+        for (double z=zmin; z<=zmax; z+=dz) {
+
+            refocus(z, thresh, f);
+            Mat result = refocused_host_.clone();
+
+            stringstream ss;
+            ss<<fn.str()<<"/"<<((z-zmin)/dz)<<".tif";
+            imwrite(ss.str(), result);
+
+        }
+    }
+
+}
+
+// ---Preprocessing related functions--- //
+
+void saRefocus::preprocess(Mat in, Mat &out) {
+
+    if (preprocess_) {
+
+        Mat im = in.clone();
+        int tc = 0; int gbc = 0; int anc = 0; int mfc = 0; int sMeanc = 0; int smtzc = 0;
+
+        for (int i=0; i<pp_ops.size(); i++) {
+            
+            Mat im2;
+
+            switch(pp_ops[i]) {
+
+            case 1:
+                threshold(im, im2, thresh_vals[tc], 0, THRESH_TOZERO);
+                VLOG(1)<<"Applied threshold at "<<thresh_vals[tc]<<endl;
+                tc++;
+                break;
+
+            case 2:
+                GaussianBlur(im, im2, Size(gbkernel[gbc], gbkernel[gbc]), gbsigma[gbc]);
+                VLOG(1)<<"Applied gaussianBlur with kernel size "<<gbkernel[gbc]<<" and sigma "<<gbsigma[gbc]<<endl;
+                gbc++;
+                break;
+
+            case 3:
+                adaptiveNorm(im, im2, anwx[anc], anwy[anc]);
+                VLOG(1)<<"Applied adaptiveNorm using window sizes "<<anwx[anc]<<" and "<<anwy[anc]<<endl;
+                anc++;
+                break;
+
+            case 4:
+                medianBlur(im, im2, mfkernel[mfc]);
+                VLOG(1)<<"Applied medianFilter using kernel size "<<mfkernel[mfc]<<endl;
+                mfc++;
+                break;
+
+            case 5:
+                boxFilter(im, im2, -1, Size(sMeankernel[sMeanc], sMeankernel[sMeanc]));
+                VLOG(1)<<"Applied slidingMean using kernel size "<<sMeankernel[sMeanc]<<endl;
+                sMeanc++;
+                break;
+                
+            case 6:
+                slidingMinToZero(im, im2, smtzwx[smtzc], smtzwy[smtzc]);
+                VLOG(1)<<"Applied slidingMinToZero using window sizes "<<smtzwx[smtzc]<<" and "<<smtzwy[smtzc]<<endl;
+                smtzc++;
+                break;
+
+            }
+
+            qimshow(im2);
+            im = im2.clone();
+
+        }
+
+        out = im.clone();
+
+    } else {
+
+        out = in.clone();
+
+    }
+
+}
+
+void saRefocus::adaptiveNorm(Mat in, Mat &out, int xf, int yf) {
 
     int xs = in.cols/xf;
     int ys = in.rows/yf;
@@ -1085,5 +1151,108 @@ void saRefocus::dynamicMinMax(Mat in, Mat &out, int xf, int yf) {
 
         }
     }
+
+}
+
+void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
+
+    int xs = in.cols/xf;
+    int ys = in.rows/yf;
+
+    if (xs*xf != in.cols || ys*yf != in.rows)
+        LOG(WARNING)<<"Windows sizes dont add up!"<<endl;
+
+    out.create(in.rows, in.cols, CV_8U);
+
+    for (int i=0; i<xf; i++) {
+        for (int j=0; j<yf; j++) {
+            
+            Mat submat = in(Rect(i*xs,j*ys,xs,ys)).clone();
+            Mat subf; submat.convertTo(subf, CV_32F);
+            SparseMat spsubf(subf);
+
+            double min, max;            
+            minMaxLoc(spsubf, &min, &max, NULL, NULL);
+            min--;
+            if (min>255.0) min = 0;
+            subf -+ min;
+            subf.convertTo(submat, CV_8U);
+
+            submat.copyTo(out(Rect(i*xs,j*ys,xs,ys)));
+
+        }
+    }
+
+}
+
+void saRefocus::parse_preprocess_settings(string path) {
+
+    ifstream file;
+    file.open(path.c_str());
+
+    string op;
+    while (getline(file, op)) {
+
+        // threshold = 1
+        // gaussianBlur = 2
+        // adaptiveNorm = 3
+        // medianFilter = 4
+        // slidingMean = 5
+        // slidingMinToZero = 6
+
+        if (op.compare("threshold")==0) {
+
+            pp_ops.push_back(1);
+            int v1;
+            file>>v1;
+            thresh_vals.push_back(v1);
+
+        } else if (op.compare("gaussianBlur")==0) {
+
+            pp_ops.push_back(2);
+            int v1;   float v2;
+            file>>v1; file>>v2;
+            gbkernel.push_back(v1);
+            gbsigma.push_back(v2);
+
+        } else if (op.compare("adaptiveNorm")==0) {
+
+            pp_ops.push_back(3);
+            int v1;   int v2;
+            file>>v1; file>>v2;
+            anwx.push_back(v1);
+            anwy.push_back(v2);
+
+        } else if (op.compare("medianFilter")==0) {
+
+            pp_ops.push_back(4);
+            int v1;
+            file>>v1;
+            mfkernel.push_back(v1);
+
+        } else if (op.compare("slidingMean")==0) {
+
+            pp_ops.push_back(5);
+            int v1;
+            file>>v1;
+            sMeankernel.push_back(v1);
+
+        } else if (op.compare("slidingMinToZero")==0) {
+
+            pp_ops.push_back(6);
+            int v1;   int v2;
+            file>>v1; file>>v2;
+            smtzwx.push_back(v1);
+            smtzwy.push_back(v2);
+
+        } else {
+
+            LOG(FATAL)<<"Invalid preprocess operation "<<op<<endl;
+
+        }
+
+        getline(file, op);
+
+    } 
 
 }

@@ -18,18 +18,24 @@ int main(int argc, char** argv) {
     
     double rn = atof(argv[2]);
     double rs = atof(argv[3]);
+    double e = atof(argv[4]);
+    double f = atof(argv[5]);
 
     pTracking track(argv[1], rn, rs);
-    track.track_frames(atof(argv[4]), atof(argv[5]));
+
+    track.set_vars(rn, rs, e, f);
+
+    track.track_frames(atof(argv[6]), atof(argv[7]));
     //track.track_all();
     
     //track.write_quiver_data();
     //track.write_tracking_result();
     
-    track.plot_all_paths();
-    //track.find_long_paths(atof(argv[6]));
+    track.find_long_paths(atof(argv[8]));
+    track.find_sized_paths(atof(argv[8]));
     //track.plot_long_paths();
-    //track.write_long_quiver("../temp/exp_quiver.txt", atof(argv[6]));
+    //track.plot_sized_paths();
+    track.write_long_quiver("../temp/exp_quiver_orig.txt", atof(argv[6]));
     
     /*
     string path = string(argv[1]);
@@ -47,15 +53,13 @@ int main(int argc, char** argv) {
 
     pTracking track(argv[1], 1, 1);
 
-    for (double rn=1; rn<30; rn+=0.5) {
-        for (double rs=1; rs<30; rs+=0.5) {
-            for (double e=0.1; e<=3.0; e+=0.1) {
-                for (double f=0; f<=0.5; f+=0.025) {
-                    track.set_vars(rn, rs, e, f);
-                    track.track_frames(15, 16);
-                    double res = track.sim_performance();
-                    file<<rn<<"\t"<<rs<<"\t"<<e<<"\t"<<f<<"\t"<<res<<endl;
-                }
+    for (double rn=1; rn<30; rn+=1.0) {
+        for (double e=0.1; e<=3.0; e+=0.1) {
+            for (double f=0; f<=0.5; f+=0.025) {
+                track.set_vars(rn, rn, e, f);
+                track.track_frames(15, 16);
+                double res = track.sim_performance();
+                file<<rn<<"\t"<<e<<"\t"<<f<<"\t"<<res<<endl;
             }
         }
     }

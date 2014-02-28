@@ -492,6 +492,52 @@ void pTracking::find_long_paths(int l) {
 
 }
 
+void pTracking::find_sized_paths(int l) {
+
+    vector< vector<int> > used;
+    for (int i=0; i<all_points_.size(); i++) {
+        vector<int> usub;
+        used.push_back(usub);
+    }
+
+    particle_path pp;
+
+    for (int k=0; k<all_matches.size()-l; k++) {
+        for (int i=0; i<all_matches[k].size(); i++) {    
+            
+            if (is_used(used, k, i)) {
+                continue;
+            } else {
+                
+                pp.path.push_back(all_matches[k][i].x);
+                pp.start_frame = k;
+                used[k].push_back(all_matches[k][i].x);
+                
+                int j=k;
+                int p1=i;
+                while(j < all_matches.size()) {
+                    if (all_matches[j][p1].y > -1) {
+                        pp.path.push_back(all_matches[j][p1].y);
+                        used[j+1].push_back(all_matches[j][p1].y);
+                            p1 = all_matches[j][p1].y;
+                        j++;
+                    } else {
+                        break;
+                    }
+                }
+                if (pp.path.size()>l) {
+                    sized_paths_.push_back(pp);
+                }
+                pp.path.clear();
+            }
+            
+        }
+    }
+
+    cout<<"Paths longer than "<<l<<" frames: "<<sized_paths_.size()<<endl;
+
+}
+
 void pTracking::plot_long_paths() {
 
     PyVisualize vis;
@@ -512,6 +558,40 @@ void pTracking::plot_long_paths() {
             count++;
         }
         points.clear();
+        }
+    }
+
+    cout<<"Paths plotted: "<<count<<endl;
+
+    vis.xlabel("x [mm]");
+    vis.ylabel("y [mm]");
+    vis.zlabel("z [mm]");
+    vis.show();
+
+}
+
+void pTracking::plot_sized_paths() {
+
+    PyVisualize vis;
+
+    vis.figure3d();
+
+    int count=0;
+    int every = 1;
+    for (int i=0; i<sized_paths_.size(); i++) {
+        
+        if (i%every==0) {
+            vector<Point3f> points;
+            for (int j=0; j<sized_paths_[i].path.size(); j++) {
+                int sf = sized_paths_[i].start_frame;
+                if (all_points_[j+offset+sf][sized_paths_[i].path[j]].x > -5 && all_points_[j+offset+sf][sized_paths_[i].path[j]].x < 45)
+                    points.push_back(all_points_[j+offset+sf][sized_paths_[i].path[j]]);
+            }
+            if (points.size()) {
+                vis.plot3d(points, "k");
+                count++;
+            }
+            points.clear();
         }
     }
 
@@ -683,5 +763,16 @@ void pTracking::write_long_quiver(string path, int l) {
         }
     }
     file.close();
+
+}
+
+bool pTracking::is_used(vector< vector<int> > used, int k, int i) {
+
+    for (int j=0; j<used[k].size(); j++) {
+        if (used[k][j]==i)
+            return 1;
+    }
+
+    return 0;
 
 }

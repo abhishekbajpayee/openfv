@@ -1,9 +1,9 @@
 clear all;
 
-path = '/media/Elements/NN_Vortex_ring_11_21/';
+path = '/media/Elements/data_jan7/calibration2/';
 load([path, 'calibration_result/calibration_results.mat']);
 
-file = fopen('calibration_results.txt', 'w');
+file = fopen([path 'calibration_result/calibration_results.txt'], 'w');
 
 sizeP = size(P);
 fprintf(file, '%d\n', sizeP(3));
@@ -30,4 +30,4 @@ fprintf(file, '%f\t%f\t%f\t%f\t%f\n', selfcal.Zw, selfcal.t, selfcal.n1, selfcal
 
 fprintf(file, '%d\t%d\t%f\n', selfcal.img_size_u, selfcal.img_size_v, calib_data.pixperphys);
 
-file.close();
+fclose(file);

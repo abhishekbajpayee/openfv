@@ -43,7 +43,7 @@ class saRefocus {
     void read_calib_data(string path);
 
     void read_imgs(string path);
-    void read_imgs_mtiff(string path, vector<int> frames);
+    void read_imgs_mtiff(string path);
 
     void CPUliveView();
     void GPUliveView();
@@ -59,6 +59,8 @@ class saRefocus {
     void CPUrefocus_ref(double z, double thresh, int live, int frame);
     void CPUrefocus_ref_corner(double z, double thresh, int live, int frame);
 
+    void dump_stack(string path, double zmin, double zmax, double dz, double thresh);
+
     Mat result;
 
  private:
@@ -67,12 +69,14 @@ class saRefocus {
     void uploadToGPU_ref();
 
     void preprocess(Mat in, Mat &out);
+    void parse_preprocess_settings(string file);
 
     void calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam);
     void calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H);
     void img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out);
 
-    void dynamicMinMax(Mat in, Mat &out, int xf, int yf);
+    void adaptiveNorm(Mat in, Mat &out, int xf, int yf);
+    void slidingMinToZero(Mat in, Mat &out, int xf, int yf);
 
     // data types and private functions
     vector<Mat> P_mats_;
@@ -89,7 +93,7 @@ class saRefocus {
     double z;
     double thresh;
     int frame_;
-    //vector<int> frames_;
+    vector<int> frames_;
     double mult_exp_;
     double warp_factor_;
     int active_frame_;
@@ -115,7 +119,18 @@ class saRefocus {
     int CORNER_FLAG; // Flag to use corner based homography fit method
     int MTIFF_FLAG;
     int ALL_FRAME_FLAG;
+    
     int preprocess_;
+    vector<int> pp_ops;
+    vector<int> thresh_vals;
+    vector<int> gbkernel;
+    vector<float> gbsigma;
+    vector<int> anwx;
+    vector<int> anwy;
+    vector<int> mfkernel;
+    vector<int> sMeankernel;
+    vector<int> smtzwx;
+    vector<int> smtzwy;
 
 };
 
