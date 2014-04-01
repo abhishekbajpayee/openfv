@@ -1108,7 +1108,7 @@ void saRefocus::preprocess(Mat in, Mat &out) {
 
             }
 
-            qimshow(im2);
+            //qimshow(im2);
             im = im2.clone();
 
         }

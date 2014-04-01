@@ -5,6 +5,7 @@
 #include "pLoc.h"
 #include "tracking.h"
 #include "tools.h"
+#include "parse_settings.h"
 #include "optimization.h"
 #include "typedefs.h"
 #include "batchProc.h"
@@ -15,9 +16,16 @@
 using namespace cv;
 using namespace std;
 
+DEFINE_bool(live, false, "live refocusing");
+DEFINE_bool(fhelp, false, "show config file options");
+
 int main(int argc, char** argv) {
 
-    /*
+    google::ParseCommandLineFlags(&argc, &argv, true);
+    google::InitGoogleLogging(argv[0]);
+    FLAGS_logtostderr=1;
+
+    
     int batch = 0;
 
     if (batch) {
@@ -28,20 +36,9 @@ int main(int argc, char** argv) {
     } else {
     
     refocus_settings settings;
-    settings.gpu = 1; settings.ref = 1; settings.mult = 0;
-    settings.corner_method = 1;
-    settings.calib_file_path = string(argv[1]);
-    settings.images_path = string(argv[2]);
-    settings.mtiff = 1;
-    settings.all_frames = 0; settings.start_frame = 90; settings.end_frame = 120;
-    settings.upload_frame = -1;
-    settings.preprocess = 1;
+    parse_refocus_settings(string(argv[1]), settings, FLAGS_fhelp);
 
-    int task = 1;
-
-    //saRefocus refocus(settings);
-    //gpu::DeviceInfo gpuDevice(gpu::getDevice());
-    //cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
+    int task = 2;
 
     switch (task) {
         
@@ -58,8 +55,8 @@ int main(int argc, char** argv) {
         saRefocus refocus(settings);
         refocus.initializeGPU();
         localizer_settings s2;
-        s2.window = 1; s2.thresh = 60.0; s2.zmethod = 1;
-        s2.zmin = -10; //-20
+        s2.window = 1; s2.thresh = 40.0; s2.zmethod = 1;
+        s2.zmin = -40; //-20
         s2.zmax = 40.0; //40
         s2.dz = 0.1;
         s2.show_particles = 0;
@@ -83,7 +80,7 @@ int main(int argc, char** argv) {
     }
 
     }
-    */
+    
     return 1;
 
 }
