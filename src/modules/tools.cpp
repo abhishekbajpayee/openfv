@@ -131,4 +131,39 @@ void pimshow(Mat image, double z, int n) {
 
 }
 
+Mat getRotMat(double x, double y, double z) {
+
+    double pi = 3.14159;
+    x = x*pi/180.0;
+    y = y*pi/180.0;
+    z = z*pi/180.0;
+
+    Mat_<double> Rx = Mat_<double>::zeros(3,3);
+    Mat_<double> Ry = Mat_<double>::zeros(3,3);
+    Mat_<double> Rz = Mat_<double>::zeros(3,3);
+
+    Rx(0,0) = 1;
+    Rx(1,1) = cos(x);
+    Rx(1,2) = -sin(x);
+    Rx(2,1) = sin(x);
+    Rx(2,2) = cos(x);
+
+    Ry(0,0) = cos(y);
+    Ry(1,1) = 1;
+    Ry(2,0) = -sin(y);
+    Ry(2,2) = cos(y);
+    Ry(0,2) = sin(y);
+
+    Rz(0,0) = cos(z);
+    Rz(0,1) = -sin(z);
+    Rz(1,0) = sin(z);
+    Rz(1,1) = cos(z);
+    Rz(2,2) = 1;
+
+    Mat R = Rx*Ry*Rz;
+
+    return(R);
+
+}
+
 #endif

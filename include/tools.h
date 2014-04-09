@@ -16,3 +16,5 @@ double dist(Point3f p1, Point3f p2);
 void qimshow(Mat image);
 
 void pimshow(Mat image, double z, int n);
+
+Mat getRotMat(double x, double y, double z);

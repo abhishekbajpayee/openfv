@@ -31,7 +31,7 @@ class saRefocus {
     }
 
  saRefocus(refocusing_data refocusing_params, int frame, int mult, double mult_exp):
-    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z(0), thresh(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) { }
+    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z_(0), thresh(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) { }
 
     saRefocus(refocus_settings settings);
 
@@ -41,6 +41,7 @@ class saRefocus {
     int num_frames() { return imgs[0].size(); }
 
     void read_calib_data(string path);
+    void read_calib_data_pin(string path);
 
     void read_imgs(string path);
     void read_imgs_mtiff(string path);
@@ -51,9 +52,9 @@ class saRefocus {
 
     void refocus(double z, double thresh, int frame);
 
-    void GPUrefocus(double z, double thresh, int live, int frame);
-    void GPUrefocus_ref(double z, double thresh, int live, int frame);
-    void GPUrefocus_ref_corner(double z, double thresh, int live, int frame);
+    void GPUrefocus(double thresh, int live, int frame);
+    void GPUrefocus_ref(double thresh, int live, int frame);
+    void GPUrefocus_ref_corner(double thresh, int live, int frame);
 
     void CPUrefocus(double z, double thresh, int live, int frame);
     void CPUrefocus_ref(double z, double thresh, int live, int frame);
@@ -72,7 +73,9 @@ class saRefocus {
     void parse_preprocess_settings(string file);
 
     void calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam);
+    void calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam);
     void calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H);
+    void calc_refocus_H(int cam, Mat &H);
     void img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out);
 
     void adaptiveNorm(Mat in, Mat &out, int xf, int yf);
@@ -90,7 +93,7 @@ class saRefocus {
     // Scene geometry params
     float geom[5];
 
-    double z;
+    double z_, xs_, ys_, zs_, rx_, ry_, rz_;
     double thresh;
     int frame_;
     vector<int> frames_;

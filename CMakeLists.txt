@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 project (sa-ptv)
 
@@ -8,14 +8,17 @@ set (PROJECT_VERSION_MINOR 0)
 # find required packages
 find_package (OpenCV REQUIRED)
 find_package (CUDA REQUIRED)
-find_package( Boost COMPONENTS program_options REQUIRED )
+find_package ( Boost COMPONENTS program_options REQUIRED )
+#find_package (Qt5 REQUIRED)
 
 # include directories
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories ("/usr/local/cuda-5.0/include")
 include_directories ( ${Boost_INCLUDE_DIR} )
+include_directories ("/home/ab9/Apps/Qt/5.2.1/gcc_64/include")
 
 # subdirectories
+
 add_subdirectory (src)
 
 find_package (OpenMP)

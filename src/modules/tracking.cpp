@@ -584,7 +584,7 @@ void pTracking::plot_sized_paths() {
             vector<Point3f> points;
             for (int j=0; j<sized_paths_[i].path.size(); j++) {
                 int sf = sized_paths_[i].start_frame;
-                if (all_points_[j+offset+sf][sized_paths_[i].path[j]].x > -5 && all_points_[j+offset+sf][sized_paths_[i].path[j]].x < 45)
+                //if (all_points_[j+offset+sf][sized_paths_[i].path[j]].x > -5 && all_points_[j+offset+sf][sized_paths_[i].path[j]].x < 45)
                     points.push_back(all_points_[j+offset+sf][sized_paths_[i].path[j]]);
             }
             if (points.size()) {

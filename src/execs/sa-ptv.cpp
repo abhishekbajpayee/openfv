@@ -24,7 +24,6 @@ int main(int argc, char** argv) {
     google::ParseCommandLineFlags(&argc, &argv, true);
     google::InitGoogleLogging(argv[0]);
     FLAGS_logtostderr=1;
-
     
     int batch = 0;
 
@@ -55,9 +54,9 @@ int main(int argc, char** argv) {
         saRefocus refocus(settings);
         refocus.initializeGPU();
         localizer_settings s2;
-        s2.window = 1; s2.thresh = 40.0; s2.zmethod = 1;
-        s2.zmin = -40; //-20
-        s2.zmax = 40.0; //40
+        s2.window = 2; s2.thresh = 40.0; s2.zmethod = 1;
+        s2.zmin = -50; //-20
+        s2.zmax = 50.0; //40
         s2.dz = 0.1;
         s2.show_particles = 0;
         pLocalize localizer(s2, refocus, settings);
