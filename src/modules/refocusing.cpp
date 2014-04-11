@@ -55,7 +55,11 @@ saRefocus::saRefocus(refocus_settings settings):
         read_imgs(settings.images_path);
     }
 
-    z_ = 0; xs_ = 0; ys_ = 0; zs_ = 0; rx_ = 0; ry_ = 0; rz_ = 0;
+    z_ = 0; 
+    xs_ = 0; ys_ = 0; zs_ = 0; 
+    rx_ = 0; ry_ = 0; rz_ = 0;
+    cxs_ = 0; cys_ = 0; czs_ = 0;
+    crx_ = 0; cry_ = -20; crz_ = 0;
 
 }
 
@@ -385,7 +389,7 @@ void saRefocus::GPUliveView() {
                 rx_ -= 1;
             } else if( (key & 255)==115 ) { // s
                 ry_ += 1;
-            } else if( (key & 255)==97 ) { // a
+            } else if( (key & 255)==97 ) {  // a
                 ry_ -= 1;
             } else if( (key & 255)==120 ) { // x
                 rz_ += 1;
@@ -401,9 +405,21 @@ void saRefocus::GPUliveView() {
                 ys_ -= 1;
             } else if( (key & 255)==118 ) { // v
                 zs_ += 1;
-            } else if( (key & 255)==99 ) { // c
+            } else if( (key & 255)==99 ) {  // c
                 zs_ -= 1;
-            } else if( (key & 255)==27 ) { // ESC
+            } else if( (key & 255)==117 ) { // u
+                crx_ += 1;
+            } else if( (key & 255)==121 ) { // y
+                crx_ -= 1;
+            } else if( (key & 255)==106 ) { // j
+                cry_ += 1;
+            } else if( (key & 255)==104 ) { // h
+                cry_ -= 1;
+            } else if( (key & 255)==109 ) { // m
+                crz_ += 1;
+            } else if( (key & 255)==110 ) { // n
+                crz_ -= 1;
+            } else if( (key & 255)==27 ) {  // ESC
                 cvDestroyAllWindows();
                 break;
             }
@@ -641,19 +657,18 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
     Mat_<double> y = Mat_<double>::zeros(img_size_.height, img_size_.width);
 
     Mat xm, ym;
-    
 
     // add warp factor stuff
 
     Scalar fact = Scalar(1/double(array_all[frame].size()));
 
     Mat H, trans;
-    //T_from_P(P_mats_[0], H, z, scale_, img_size_);
-    //calc_refocus_H(0, H);
-    //gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
+    T_from_P(P_mats_[0], H, z_, scale_, img_size_);
+    calc_refocus_H(0, H);
+    gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
 
-    calc_refocus_map(x, y, 0); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
-    gpu::remap(array_all[frame][0], temp, xmap, ymap, INTER_LINEAR);
+    //calc_refocus_map(x, y, 0); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
+    //gpu::remap(array_all[frame][0], temp, xmap, ymap, INTER_LINEAR);
 
     if (mult_) {
         gpu::pow(temp, mult_exp_, temp2);
@@ -666,11 +681,11 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
     for (int i=1; i<num_cams_; i++) {
         
         //T_from_P(P_mats_[i], H, z, scale_, img_size_);
-        //calc_refocus_H(i, H);       
-        //gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
+        calc_refocus_H(i, H);       
+        gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
 
-        calc_refocus_map(x, y, i); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
-        gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
+        //calc_refocus_map(x, y, i); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
+        //gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
 
         if (mult_) {
             gpu::pow(temp, mult_exp_, temp2);
@@ -688,11 +703,8 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
 
     if (live) {
 
-        char title[150];
-        sprintf(title, "T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", thresh, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
-
-        //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
-        //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
+        char title[200];
+        sprintf(title, "T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", thresh, frame, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
 
         imshow("Result", refocused_host_);
         displayOverlay("Result", title);
@@ -778,11 +790,13 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
     //imwrite("../temp/refocused1.jpg", refocused_host_);
 
     if (live) {
-        //refocused_host_ /= 255.0;
-        char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z_, thresh, frame);
-        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
+        
+        char title[150];
+        sprintf(title, "T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", thresh, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
+
         imshow("Result", refocused_host_);
+        displayOverlay("Result", title);
+
     }
 
     result = refocused_host_.clone();
@@ -1080,7 +1094,7 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
     for (int i=0; i<X.cols; i++)
         X(2,i) = z;
 
-    Mat R = getRotMat(0,25,0);
+    Mat R = getRotMat(rx_, ry_, rz_);
     X = R*X;
 
     //cout<<"Refracting points"<<endl;
@@ -1127,7 +1141,7 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     X = hinv*X;
 
     for (int i=0; i<X.cols; i++)
-        X(2,i) = z_;
+        X(2,i) = 0;//z_;
 
     Mat R = getRotMat(rx_, ry_, rz_);
     X = R*X;
@@ -1136,26 +1150,44 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     for (int j=0; j<X.cols; j++) {
         X2(0,j) = X(0,j)+xs_;
         X2(1,j) = X(1,j)+ys_;
-        X2(2,j) = X(2,j)+zs_;
+        X2(2,j) = X(2,j)+z_;
         X2(3,j) = 1;
     }
 
     //cout<<"Projecting to find final map"<<endl;
     Mat_<double> proj = P_mats_[cam]*X2;
+    //Mat_<double> proj2 = P_mats_[4]*X2;
+
+    
+    Mat K, Rot, t;
+    decomposeProjectionMatrix(P_mats_[4], K, Rot, t);
+    Rot = getRotMat(crx_, cry_, crz_)*Rot;
+
+    Mat_<double> P_mat_new = Mat_<double>::zeros(3,4);
+    for (int i=0; i<3; i++) {
+        for (int j=0; j<3; j++) {
+            P_mat_new(i,j) = Rot.at<double>(i,j);
+        }
+        P_mat_new(i,3) = -t.at<double>(i,0)/t.at<double>(3,0); // WHY NEGATIVE?
+    }
+    P_mat_new = K*P_mat_new;
+    Mat_<double> proj2 = P_mat_new*X2;
+
 
     Point2f src, dst;
     vector<Point2f> sp, dp;
     int i, j;
 
     for (int i=0; i<X.cols; i++) {
-        src.x = X(0,i); src.y = X(1,i);
+        //src.x = X(0,i); src.y = X(1,i);
+        src.x = proj2(0,i)/proj2(2,i); src.y = proj2(1,i)/proj2(2,i);
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
         sp.push_back(src); dp.push_back(dst);
     }
 
     //H = findHomography(dp, sp, CV_RANSAC);
     H = findHomography(dp, sp, 0);
-    H = D*H;
+    //H = D*H;
 
 }
 

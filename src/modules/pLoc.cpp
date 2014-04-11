@@ -88,7 +88,7 @@ void pLocalize::find_particles_3d(int frame) {
     int write_clusters=1;
     if (write_clusters) {
         ofstream file;
-        file.open("../../experiment/thesis/clusters_real.txt");
+        file.open("../../experiment/thesis/clusters_z20_c.txt");
         for (int i=0; i<particles3D_.size(); i++) {
             file<<particles3D_[i].x<<"\t";
             file<<particles3D_[i].y<<"\t";

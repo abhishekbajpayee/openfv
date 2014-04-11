@@ -93,7 +93,7 @@ class saRefocus {
     // Scene geometry params
     float geom[5];
 
-    double z_, xs_, ys_, zs_, rx_, ry_, rz_;
+    double z_, xs_, ys_, zs_, rx_, ry_, rz_, cxs_, cys_, czs_, crx_, cry_, crz_;
     double thresh;
     int frame_;
     vector<int> frames_;
