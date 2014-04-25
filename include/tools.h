@@ -3,6 +3,8 @@
 using namespace std;
 using namespace cv;
 
+void init(int argc, char** argv);
+
 void T_from_P(Mat P, Mat &H, double z, double scale, Size img_size);
 
 bool dirExists(string dirPath);
@@ -18,3 +20,5 @@ void qimshow(Mat image);
 void pimshow(Mat image, double z, int n);
 
 Mat getRotMat(double x, double y, double z);
+
+void failureFunction();

@@ -59,7 +59,7 @@ saRefocus::saRefocus(refocus_settings settings):
     xs_ = 0; ys_ = 0; zs_ = 0; 
     rx_ = 0; ry_ = 0; rz_ = 0;
     cxs_ = 0; cys_ = 0; czs_ = 0;
-    crx_ = 0; cry_ = -20; crz_ = 0;
+    crx_ = 0; cry_ = 0; crz_ = 0;
 
 }
 
@@ -80,6 +80,7 @@ void saRefocus::read_calib_data(string path) {
     for (int n=0; n<num_cams_; n++) {
         
         for (int i=0; i<2; i++) getline(file, cam_name);
+        VLOG(3)<<"cam_names_["<<n<<"] = "<<cam_name<<endl;
         cam_names_.push_back(cam_name);
 
         Mat_<double> P_mat = Mat_<double>::zeros(3,4);
@@ -89,12 +90,13 @@ void saRefocus::read_calib_data(string path) {
             }
         }
         P_mats_.push_back(P_mat);
-        //cout<<P_mat<<endl;
+        VLOG(3)<<"P_mat["<<n<<"]"<<endl<<P_mat<<endl;
 
         Mat_<double> loc = Mat_<double>::zeros(3,1);
         for (int i=0; i<3; i++)
             file>>loc(i,0);
 
+        VLOG(3)<<"cam_locations_["<<n<<"]"<<endl<<loc<<endl;
         cam_locations_.push_back(loc);
 
     }
@@ -105,7 +107,7 @@ void saRefocus::read_calib_data(string path) {
     file>>img_size_.height;
     file>>scale_;
 
-    //LOG(INFO)<<"DONE"<<endl;
+    LOG(INFO)<<"DONE"<<endl;
 
 }
 
@@ -159,7 +161,7 @@ void saRefocus::read_calib_data_pin(string path) {
 
     file.close();
 
-    //cout<<"\nCALIBRATION RESULTS LOADED!\n";
+    LOG(INFO)<<"DONE"<<endl;
 
 }
 
@@ -325,7 +327,7 @@ void saRefocus::read_imgs_mtiff(string path) {
 
     }
 
-    cout<<"DONE READING IMAGES"<<endl;
+    LOG(INFO)<<"DONE READING IMAGES"<<endl;
 
 }
 
@@ -334,9 +336,9 @@ void saRefocus::GPUliveView() {
     initializeGPU();
 
     if (CORNER_FLAG) {
-        cout<<"Using corner based homography fit method..."<<endl;
+        LOG(INFO)<<"Using corner based homography fit method..."<<endl;
     } else {
-        cout<<"Using full refractive calculation method..."<<endl;
+        LOG(INFO)<<"Using full refractive calculation method..."<<endl;
     }
 
     active_frame_ = 0; thresh = 0;
@@ -359,8 +361,8 @@ void saRefocus::GPUliveView() {
 
     while( 1 ){
         int key = cvWaitKey(10);
-        //cout<<(key & 255)<<endl;
-        
+        VLOG(3)<<"Key press: "<<(key & 255)<<endl;
+
         if ( (key & 255)!=255 ) {
 
             if ( (key & 255)==83 ) {
@@ -444,9 +446,9 @@ void saRefocus::GPUliveView() {
 void saRefocus::CPUliveView() {
 
     if (CORNER_FLAG) {
-        cout<<"Using corner based homography fit method..."<<endl;
+        LOG(INFO)<<"Using corner based homography fit method..."<<endl;
     } else {
-        cout<<"Using full refractive calculation method..."<<endl;
+        LOG(INFO)<<"Using full refractive calculation method..."<<endl;
     }
 
     active_frame_ = 0;
@@ -472,7 +474,7 @@ void saRefocus::CPUliveView() {
 
     while( 1 ){
         int key = cvWaitKey(10);
-        //cout<<(key & 255)<<endl;
+        VLOG(3)<<"Key press: "<<(key & 255)<<endl;
         
         if ( (key & 255)!=255 ) {
 
@@ -517,9 +519,12 @@ void saRefocus::CPUliveView() {
 
 }
 
-void saRefocus::refocus(double z, double thresh, int frame) {
+void saRefocus::refocus(double z, double rx, double ry, double rz, double thresh, int frame) {
 
     z_ = z;
+    rx_ = rx;
+    ry_ = ry;
+    rz_ = rz;
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
@@ -550,14 +555,13 @@ void saRefocus::refocus(double z, double thresh, int frame) {
 //       frame or all frames to GPU depending on frame_
 void saRefocus::initializeGPU() {
 
-    cout<<endl<<"INITIALIZING GPU..."<<endl;
-    cout<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
+    LOG(INFO)<<endl<<"INITIALIZING GPU..."<<endl;
+    LOG(INFO)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
     
     gpu::DeviceInfo gpuDevice(gpu::getDevice());
     
-    cout<<"---"<<gpuDevice.name()<<"---"<<endl;
-    cout<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
-    cout<<"Free Memory: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
+    LOG(INFO)<<"---"<<gpuDevice.name()<<"---"<<endl;
+    LOG(INFO)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
 
     uploadToGPU();
 
@@ -574,13 +578,13 @@ void saRefocus::uploadToGPU() {
 
     gpu::DeviceInfo gpuDevice(gpu::getDevice());
     double free_mem_GPU = gpuDevice.freeMemory()/pow(1024.0,2);
-    cout<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
+    LOG(INFO)<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
 
     double factor = 0.9;
 
     if (frame_>=0) {
 
-        cout<<"Uploading frame "<<frame_<<" to GPU..."<<endl;
+        VLOG(0)<<"Uploading frame "<<frame_<<" to GPU..."<<endl;
         for (int i=0; i<num_cams_; i++) {
             temp.upload(imgs[i][frame_]);
             array.push_back(temp.clone());
@@ -589,7 +593,7 @@ void saRefocus::uploadToGPU() {
 
     } else if (frame_==-1) {
         
-        cout<<"Uploading all frame to GPU..."<<endl;
+        VLOG(0)<<"Uploading all frame to GPU..."<<endl;
         for (int i=0; i<imgs[0].size(); i++) {
             for (int j=0; j<num_cams_; j++) {
                 temp.upload(imgs[j][i]);
@@ -601,16 +605,16 @@ void saRefocus::uploadToGPU() {
         }
         
     } else {
-        cout<<"Invalid frame value to visualize!"<<endl;
+        LOG(FATAL)<<"Invalid frame value to visualize!"<<endl;
     }
 
-    cout<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
+    LOG(INFO)<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
 
 }
 
 void saRefocus::uploadToGPU_ref() {
 
-    cout<<"Uploading required data to GPU...";
+    LOG(INFO)<<"Uploading data required by full refocusing method to GPU...";
 
     Mat_<float> D = Mat_<float>::zeros(3,3);
     D(0,0) = scale_; D(1,1) = scale_;
@@ -645,13 +649,15 @@ void saRefocus::uploadToGPU_ref() {
         ymaps.push_back(ymap.clone());
     }
 
-    cout<<"done!"<<endl;
+    LOG(INFO)<<"done!"<<endl;
 
 }
 
 // ---GPU Refocusing Functions Begin--- //
 
 void saRefocus::GPUrefocus(double thresh, int live, int frame) {
+
+    int curve = 0;
 
     Mat_<double> x = Mat_<double>::zeros(img_size_.height, img_size_.width);
     Mat_<double> y = Mat_<double>::zeros(img_size_.height, img_size_.width);
@@ -663,12 +669,15 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
     Scalar fact = Scalar(1/double(array_all[frame].size()));
 
     Mat H, trans;
-    T_from_P(P_mats_[0], H, z_, scale_, img_size_);
-    calc_refocus_H(0, H);
-    gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
 
-    //calc_refocus_map(x, y, 0); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
-    //gpu::remap(array_all[frame][0], temp, xmap, ymap, INTER_LINEAR);
+    if (curve) {
+        calc_refocus_map(x, y, 0); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
+        gpu::remap(array_all[frame][0], temp, xmap, ymap, INTER_LINEAR);
+    } else {
+        //T_from_P(P_mats_[0], H, z_, scale_, img_size_);
+        calc_refocus_H(0, H);
+        gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
+    }
 
     if (mult_) {
         gpu::pow(temp, mult_exp_, temp2);
@@ -680,12 +689,14 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
 
     for (int i=1; i<num_cams_; i++) {
         
-        //T_from_P(P_mats_[i], H, z, scale_, img_size_);
-        calc_refocus_H(i, H);       
-        gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
-
-        //calc_refocus_map(x, y, i); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
-        //gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
+        if (curve) {
+            calc_refocus_map(x, y, i); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
+            gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
+        } else {       
+            //T_from_P(P_mats_[i], H, z, scale_, img_size_);
+            calc_refocus_H(i, H);       
+            gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
+        }
 
         if (mult_) {
             gpu::pow(temp, mult_exp_, temp2);
@@ -861,9 +872,6 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
 
 void saRefocus::CPUrefocus_ref(double z, double thresh, int live, int frame) {
 
-    //double wall_timer = omp_get_wtime();
-    cout<<"Calculating image..."<<endl;
-
     Mat_<double> x = Mat_<double>::zeros(img_size_.height, img_size_.width);
     Mat_<double> y = Mat_<double>::zeros(img_size_.height, img_size_.width);
     calc_ref_refocus_map(cam_locations_[0], z, x, y, 0);
@@ -887,8 +895,6 @@ void saRefocus::CPUrefocus_ref(double z, double thresh, int live, int frame) {
         
     }
 
-    //cout<<"Time: "<<omp_get_wtime()-wall_timer<<endl;
-
     if (live) {
         //refocused_host_ /= 255.0;
         char title[50];
@@ -900,9 +906,6 @@ void saRefocus::CPUrefocus_ref(double z, double thresh, int live, int frame) {
 }
 
 void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int frame) {
-
-    //double wall_timer = omp_get_wtime();
-    cout<<"Calculating image..."<<endl;
 
     Mat H;
     calc_ref_refocus_H(cam_locations_[0], z, 0, H);
@@ -918,8 +921,6 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
         refocused_host_ += res.clone()/9.0;
         
     }
-
-    //cout<<"Time: "<<omp_get_wtime()-wall_timer<<endl;
 
     if (live) {
         //refocused_host_ /= 255.0;
@@ -1089,6 +1090,15 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
     X(0,1) = width-1; X(1,1) = 0;
     X(0,2) = width-1; X(1,2) = height-1;
     X(0,3) = 0;       X(1,3) = height-1;
+    for (int i=0; i<X.cols; i++)
+        X(2,i) = 1.0;
+
+    Mat_<double> A = X.clone();
+    A(0,0) = 1;       A(1,0) = 1.5;
+    A(0,1) = width-1; A(1,1) = 1.5;
+    A(0,2) = width-1; A(1,2) = height-0.5;
+    A(0,3) = 1;       A(1,3) = height-0.5;
+
     X = hinv*X;
 
     for (int i=0; i<X.cols; i++)
@@ -1109,14 +1119,16 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
     int i, j;
 
     for (int i=0; i<X.cols; i++) {
-        src.x = X(0,i); src.y = X(1,i);
+        //cout<<A<<endl;
+        src.x = A.at<double>(0,i); src.y = A.at<double>(1,i);
+        //src.x = X(0,i); src.y = X(1,i);
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
         sp.push_back(src); dp.push_back(dst);
     }
 
     //H = findHomography(dp, sp, CV_RANSAC);
     H = findHomography(dp, sp, 0);
-    H = D*H;
+    //H = D*H;
 
 }
 
@@ -1125,12 +1137,7 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     int width = img_size_.width;
     int height = img_size_.height;
 
-    Mat_<double> D = Mat_<double>::zeros(3,3);
-    D(0,0) = scale_; 
-    D(1,1) = scale_;
-    D(0,2) = width*0.5;
-    D(1,2) = height*0.5;
-    D(2,2) = 1;
+    Mat D = (Mat_<double>(3,3) << scale_, 0, width*0.5, 0, scale_, height*0.5, 0, 0, 1); 
     Mat hinv = D.inv();
 
     Mat_<double> X = Mat_<double>::zeros(3, 4);
@@ -1158,7 +1165,7 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     Mat_<double> proj = P_mats_[cam]*X2;
     //Mat_<double> proj2 = P_mats_[4]*X2;
 
-    
+    /*
     Mat K, Rot, t;
     decomposeProjectionMatrix(P_mats_[4], K, Rot, t);
     Rot = getRotMat(crx_, cry_, crz_)*Rot;
@@ -1172,22 +1179,22 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     }
     P_mat_new = K*P_mat_new;
     Mat_<double> proj2 = P_mat_new*X2;
-
+    */
 
     Point2f src, dst;
     vector<Point2f> sp, dp;
     int i, j;
 
     for (int i=0; i<X.cols; i++) {
-        //src.x = X(0,i); src.y = X(1,i);
-        src.x = proj2(0,i)/proj2(2,i); src.y = proj2(1,i)/proj2(2,i);
+        src.x = X(0,i); src.y = X(1,i);
+        //src.x = proj2(0,i)/proj2(2,i); src.y = proj2(1,i)/proj2(2,i);
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
         sp.push_back(src); dp.push_back(dst);
     }
 
     //H = findHomography(dp, sp, CV_RANSAC);
     H = findHomography(dp, sp, 0);
-    //H = D*H;
+    H = D*H;
 
 }
 
@@ -1277,7 +1284,7 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
 
         for (double z=zmin; z<=zmax; z+=dz) {
 
-            refocus(z, thresh, f);
+            refocus(z, 0, 0, 0, thresh, f);
             Mat result = refocused_host_.clone();
 
             stringstream ss;
@@ -1363,7 +1370,7 @@ void saRefocus::adaptiveNorm(Mat in, Mat &out, int xf, int yf) {
     int ys = in.rows/yf;
 
     if (xs*xf != in.cols || ys*yf != in.rows)
-        cout<<endl<<"Wrong divide factor. Does not lead to integer window sizes!"<<endl;
+        LOG(WARNING)<<"Adaptive normalization divide factor leads to non integer window sizes!"<<endl;
 
     out.create(in.rows, in.cols, CV_8U);
 
@@ -1394,7 +1401,7 @@ void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
     int ys = in.rows/yf;
 
     if (xs*xf != in.cols || ys*yf != in.rows)
-        LOG(WARNING)<<"Windows sizes dont add up!"<<endl;
+        LOG(WARNING)<<"Sliding minimum divide factor leads to non integer window sizes!"<<endl;
 
     out.create(in.rows, in.cols, CV_8U);
 

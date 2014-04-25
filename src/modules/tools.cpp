@@ -7,6 +7,15 @@
 using namespace std;
 using namespace cv;
 
+void init(int argc, char** argv) {
+
+    google::InitGoogleLogging(argv[0]);
+    google::InstallFailureSignalHandler();
+    google::InstallFailureFunction(&failureFunction);
+    FLAGS_logtostderr=1;
+
+}
+
 void T_from_P(Mat P, Mat &H, double z, double scale, Size img_size) {
 
     Mat_<double> A = Mat_<double>::zeros(3,3);
@@ -163,6 +172,13 @@ Mat getRotMat(double x, double y, double z) {
     Mat R = Rx*Ry*Rz;
 
     return(R);
+
+}
+
+void failureFunction() {
+
+    LOG(INFO)<<"Good luck debugging that X-|";
+    exit(1);
 
 }
 

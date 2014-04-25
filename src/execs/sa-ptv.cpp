@@ -24,8 +24,7 @@ DEFINE_bool(fhelp, false, "show config file options");
 int main(int argc, char** argv) {
 
     google::ParseCommandLineFlags(&argc, &argv, true);
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_logtostderr=1;
+    init(argc, argv);
     
     int batch = 0;
 
@@ -49,15 +48,17 @@ int main(int argc, char** argv) {
         saRefocus refocus(settings);
         refocus.initializeGPU();
         localizer_settings s2;
-        s2.window = 2; s2.thresh = 40.0; s2.zmethod = 1;
-        s2.zmin = 0; //-20
-        s2.zmax = 100.0; //40
-        s2.dz = 0.1;
+        s2.window = 1; s2.thresh = 40.0; s2.zmethod = 2;
+        s2.zmin = -30;
+        s2.zmax = 60.0; //40
+        s2.dz = 0.2;
         s2.show_particles = 0;
         pLocalize localizer(s2, refocus, settings);
 
         localizer.find_particles_all_frames();
-        //localizer.write_all_particles_to_file(string(argv[2]));
+        localizer.write_all_particles(settings.images_path);
+        //localizer.write_all_particles("../temp/");
+        //localizer.write_all_particles_to_file("../temp/particles.txt");
 
     } else if (FLAGS_track) {
 

@@ -50,7 +50,7 @@ class saRefocus {
     void GPUliveView();
     void initializeGPU();
 
-    void refocus(double z, double thresh, int frame);
+    void refocus(double z, double rx, double ry, double rz, double thresh, int frame);
 
     void GPUrefocus(double thresh, int live, int frame);
     void GPUrefocus_ref(double thresh, int live, int frame);

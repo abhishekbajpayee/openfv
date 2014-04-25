@@ -27,17 +27,17 @@ int main(int argc, char** argv) {
 
     track.set_vars(rn, rs, e, f);
 
-    track.track_frames(atof(argv[6]), atof(argv[7]));
-    //track.track_all();
+    //track.track_frames(atof(argv[6]), atof(argv[7]));
+    track.track_all();
     
     //track.write_quiver_data();
     //track.write_tracking_result();
     
     track.find_long_paths(atof(argv[8]));
     //track.find_sized_paths(atof(argv[8]));
-    //track.plot_long_paths();
+    track.plot_long_paths();
     //track.plot_sized_paths();
-    track.write_long_quiver("../temp/exp_quiver_new2.txt", atof(argv[8]));
+    //track.write_long_quiver("../temp/exp_quiver_new2.txt", atof(argv[8]));
     
     /*
     string path = string(argv[1]);

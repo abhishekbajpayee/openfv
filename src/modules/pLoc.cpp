@@ -21,10 +21,10 @@ using namespace cv;
 pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s2):
     window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), zmethod_(s.zmethod), refocus_(refocus), s2_(s2), show_particles_(s.show_particles) {
     
-    zext_ = 3.3;
+    zext_ = 2.5;
 
     cluster_size_ = 0.9*(zext_/dz_);
-    cluster_size_ = 5;
+    cluster_size_ = 10;
     //cout<<"Crit cluster size: "<<cluster_size_<<endl;
 
 }
@@ -56,13 +56,15 @@ void pLocalize::find_particles_3d(int frame) {
     vector<Point2f> points, points2;
     vector<particle2d> particles;
 
+    double rx = 0; double ry = 0; double rz = 0;
+
     cout<<"Searching for particles through volume at frame "<<frame<<"..."<<endl;
 
     for (float i=zmin_; i<=zmax_; i += dz_) {
         
         cout<<"\r"<<1+int((i-zmin_)*100.0/(zmax_-zmin_))<<"%"<<flush;
         //cout<<"\r"<<i<<flush;
-        refocus_.refocus(i, thresh_, frame);
+        refocus_.refocus(i, rx, ry, rz, thresh_, frame);
         Mat image = refocus_.result;
 
         find_particles(image, points);
@@ -85,18 +87,9 @@ void pLocalize::find_particles_3d(int frame) {
 
     }
 
-    int write_clusters=1;
-    if (write_clusters) {
-        ofstream file;
-        file.open("../../experiment/thesis/clusters_z20_c.txt");
-        for (int i=0; i<particles3D_.size(); i++) {
-            file<<particles3D_[i].x<<"\t";
-            file<<particles3D_[i].y<<"\t";
-            file<<particles3D_[i].z<<"\t";
-            file<<particles3D_[i].I<<"\n";
-        }
-        file.close();
-    }
+    int write_clust=1;
+    if (write_clust)
+        write_clusters(particles3D_, "../temp/clusters.txt");
 
     find_clusters();
     collapse_clusters();
@@ -162,10 +155,10 @@ void pLocalize::z_resolution() {
     double factor = 0.5;
     for (int i=0; i<10; i++) {
 
-        refocus_.refocus(zref, thresh_, 0);
+        refocus_.refocus(zref, 0, 0, 0, thresh_, 0);
         Mat base = refocus_.result.clone();
 
-        refocus_.refocus(zref+dz, thresh_, 0);
+        refocus_.refocus(zref+dz, 0, 0, 0, thresh_, 0);
         Mat ref = refocus_.result.clone();
 
         Mat numMat = ref.mul(base);
@@ -194,7 +187,7 @@ void pLocalize::z_resolution() {
 
 void pLocalize::find_clusters() {
 
-    //cout<<"\nClustering found particles...";
+    VLOG(1)<<"\nClustering found particles...";
 
     while(particles3D_.size()) {
 
@@ -231,8 +224,8 @@ void pLocalize::find_clusters() {
 
     }
 
-    //cout<<"done!\n";
-    //cout<<clusters_.size()<<" clusters found."<<endl;
+    VLOG(1)<<"done!\n";
+    VLOG(1)<<clusters_.size()<<" clusters found."<<endl;
 
     clean_clusters();
 
@@ -240,14 +233,14 @@ void pLocalize::find_clusters() {
 
 void pLocalize::clean_clusters() {
 
-    //cout<<"\nCleaning clusters...\n";
+    VLOG(1)<<"Cleaning clusters...\n";
 
     for (int i=clusters_.size()-1; i>=0; i--) {
         //cout<<clusters_[i].size()<<" ";
         if (clusters_[i].size() < cluster_size_) clusters_.erase(clusters_.begin()+i);
     }
 
-    //cout<<"done!\n";
+    VLOG(1)<<"done!\n";
 
 }
 
@@ -394,6 +387,28 @@ void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<par
 
 void pLocalize::write_all_particles_to_file(string path) {
 
+    ofstream file;
+    file.open(path.c_str());
+
+    file<<particles_all_.size()<<endl;
+
+    for (int i=0; i<particles_all_.size(); i++) {
+        file<<particles_all_[i].size()<<endl;
+        for (int j=0; j<particles_all_[i].size(); j++) {
+            file<<particles_all_[i][j].x<<"\t";
+            file<<particles_all_[i][j].y<<"\t";
+            file<<particles_all_[i][j].z<<endl;
+        }
+    }
+
+    file.close();
+
+    cout<<"All particles written to: "<<path<<endl;
+
+}
+
+void pLocalize::write_all_particles(string path) {
+
     stringstream s;
     s<<path<<"particles/";
     if (s2_.all_frames) {
@@ -439,6 +454,22 @@ void pLocalize::write_particles_to_file(string path) {
         cout<<i<<endl;
     }
 
+    file.close();
+
+}
+
+void pLocalize::write_clusters(vector<particle2d> &particles3D_, string path) {
+
+    VLOG(1)<<"Writing clusters to file...";
+
+    ofstream file;
+    file.open(path.c_str());
+    for (int i=0; i<particles3D_.size(); i++) {
+        file<<particles3D_[i].x<<"\t";
+        file<<particles3D_[i].y<<"\t";
+        file<<particles3D_[i].z<<"\t";
+        file<<particles3D_[i].I<<"\n";
+    }
     file.close();
 
 }

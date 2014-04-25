@@ -24,6 +24,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("upload_frame", po::value<int>()->default_value(-1), "frame to upload to GPU (-1 uploads all frames)")
         ("calib_file", po::value<string>(), "calibration file to use")
         ("data_path", po::value<string>(), "path where data is located")
+        ("dump_stack", po::value<int>(), "ON to save stack to path")
         ("zmin", po::value<double>(), "zmin")
         ("zmax", po::value<double>(), "zmax")
         ("dz", po::value<double>(), "dz")
@@ -59,10 +60,12 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.calib_file_path = vm["calib_file"].as<string>();
     settings.images_path = vm["data_path"].as<string>();
 
-    settings.zmin = vm["zmin"].as<double>();
-    settings.zmax = vm["zmax"].as<double>();
-    settings.dz = vm["dz"].as<double>();
-    settings.thresh = vm["thresh"].as<double>();
-    settings.save_path = vm["save_path"].as<string>();
+    if (vm["dump_stack"].as<int>()) {
+        settings.zmin = vm["zmin"].as<double>();
+        settings.zmax = vm["zmax"].as<double>();
+        settings.dz = vm["dz"].as<double>();
+        settings.thresh = vm["thresh"].as<double>();
+        settings.save_path = vm["save_path"].as<string>();
+    }
 
 }
