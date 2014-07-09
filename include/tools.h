@@ -22,3 +22,7 @@ void pimshow(Mat image, double z, int n);
 Mat getRotMat(double x, double y, double z);
 
 void failureFunction();
+
+void writeMat(Mat M, string path);
+
+Mat getTransform(vector<Point2f> src, vector<Point2f> dst);

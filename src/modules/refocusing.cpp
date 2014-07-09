@@ -203,12 +203,15 @@ void saRefocus::read_imgs(string path) {
         }
 
         sort(img_names.begin(), img_names.end());
-        for (int i=0; i<img_names.size(); i++) {
-            VLOG(1)<<i<<": "<<img_names[i]<<endl;
-            image = imread(img_names[i], 0);
+        for (int j=0; j<img_names.size(); j++) {
+            VLOG(1)<<j<<": "<<img_names[j]<<endl;
+            image = imread(img_names[j], 0);
             //image = imread(img_names[i]);
             Mat imgI; preprocess(image, imgI);
             refocusing_imgs_sub.push_back(imgI.clone());
+            if (i==0) {
+                frames_.push_back(j);
+            }
         }
         img_names.clear();
 
@@ -736,7 +739,12 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
 
         gpu_calc_refocus_map(xmap, ymap, z_, i);
         gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
-
+        
+        if (i==0) {
+            Mat M; 
+            xmap.download(M); writeMat(M, "../temp/xmap.txt");
+            ymap.download(M); writeMat(M, "../temp/ymap.txt");
+        }
         //preprocess();
 
         gpu::multiply(temp, fact, temp2);
@@ -768,6 +776,7 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
     
     Mat H;
     calc_ref_refocus_H(cam_locations_[0], z_, 0, H);
+    writeMat(H, "../temp/Hcust.txt");
     gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
     
 
@@ -1024,56 +1033,6 @@ void saRefocus::calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam) {
 }
 
 void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H) {
-
-    /*
-    int width = img_size_.width;
-    int height = img_size_.height;
-
-    Mat_<double> D = Mat_<double>::zeros(3,3);
-    D(0,0) = scale_; D(1,1) = scale_;
-    D(0,2) = width*0.5;
-    D(1,2) = height*0.5;
-    D(2,2) = 1;
-    Mat hinv = D.inv();
-
-    Mat_<double> X = Mat_<double>::zeros(3, 4);
-    X(0,0) = 1;       X(1,0) = 1;
-    X(0,1) = width-1; X(1,1) = 1;
-    X(0,2) = width-1; X(1,2) = height-1;
-    X(0,3) = 1;       X(1,3) = height-1;
-    for (int i=0; i<X.cols; i++)
-        X(2,i) = 1.0;
-
-    Mat A = X.clone();
-    
-    X = hinv*X;
-
-    for (int i=0; i<X.cols; i++)
-        X(2,i) = z;
-
-    //cout<<"Refracting points"<<endl;
-    Mat_<double> X_out = Mat_<double>::zeros(4, 4);
-    img_refrac(Xcam, X, X_out);
-
-    //cout<<"Projecting to find final map"<<endl;
-    Mat_<double> proj = P_mats_[cam]*X_out;
-
-    Point2f src, dst;
-    vector<Point2f> sp, dp;
-    int i, j;
-
-    for (int i=0; i<A.cols; i++) {
-        src.x = A.at<double>(0,i); src.y = A.at<double>(1,i);
-        //cout<<src.x<<", "<<src.y<<" -> ";
-        dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
-        //cout<<dst.x<<", "<<dst.y<<endl;
-        sp.push_back(src); dp.push_back(dst);
-    }
-    
-    //H = findHomography(dp, sp, CV_RANSAC);
-    H = findHomography(dp, sp, 0);
-    cout<<H<<endl;
-    */
     
     int width = img_size_.width;
     int height = img_size_.height;
@@ -1087,17 +1046,13 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
 
     Mat_<double> X = Mat_<double>::zeros(3, 4);
     X(0,0) = 0;       X(1,0) = 0;
-    X(0,1) = width-1; X(1,1) = 0;
+    X(0,3) = width-1; X(1,3) = 0;
     X(0,2) = width-1; X(1,2) = height-1;
-    X(0,3) = 0;       X(1,3) = height-1;
+    X(0,1) = 0;       X(1,1) = height-1;
     for (int i=0; i<X.cols; i++)
         X(2,i) = 1.0;
 
     Mat_<double> A = X.clone();
-    A(0,0) = 1;       A(1,0) = 1.5;
-    A(0,1) = width-1; A(1,1) = 1.5;
-    A(0,2) = width-1; A(1,2) = height-0.5;
-    A(0,3) = 1;       A(1,3) = height-0.5;
 
     X = hinv*X;
 
@@ -1119,15 +1074,14 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
     int i, j;
 
     for (int i=0; i<X.cols; i++) {
-        //cout<<A<<endl;
         src.x = A.at<double>(0,i); src.y = A.at<double>(1,i);
         //src.x = X(0,i); src.y = X(1,i);
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
         sp.push_back(src); dp.push_back(dst);
     }
 
-    //H = findHomography(dp, sp, CV_RANSAC);
-    H = findHomography(dp, sp, 0);
+    H = getPerspectiveTransform(dp, sp);
+    //H = findHomography(dp, sp, 0);
     //H = D*H;
 
 }
@@ -1234,7 +1188,8 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
         
         // Newton Raphson loop to solve for Snell's law
         double tol=1E-8;
-        do {
+
+        for (int i=0; i<10; i++) {
 
             f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( (n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
             g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( (n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );
@@ -1258,8 +1213,8 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
             ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
             rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
 
-        } while (f>tol || g >tol);
-        
+        }
+
         a[0] = ra*cos(phi) + c[0];
         a[1] = ra*sin(phi) + c[1];
 

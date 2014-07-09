@@ -24,7 +24,7 @@ pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s
     zext_ = 2.5;
 
     cluster_size_ = 0.9*(zext_/dz_);
-    cluster_size_ = 10;
+    cluster_size_ = 20;
     //cout<<"Crit cluster size: "<<cluster_size_<<endl;
 
 }

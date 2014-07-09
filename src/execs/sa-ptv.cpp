@@ -48,17 +48,17 @@ int main(int argc, char** argv) {
         saRefocus refocus(settings);
         refocus.initializeGPU();
         localizer_settings s2;
-        s2.window = 1; s2.thresh = 40.0; s2.zmethod = 2;
-        s2.zmin = -30;
-        s2.zmax = 60.0; //40
-        s2.dz = 0.2;
+        s2.window = 2; s2.thresh = 40.0; s2.zmethod = 2;
+        s2.zmin = -10;
+        s2.zmax = 110.0; //40
+        s2.dz = 0.05;
         s2.show_particles = 0;
         pLocalize localizer(s2, refocus, settings);
 
         localizer.find_particles_all_frames();
-        localizer.write_all_particles(settings.images_path);
+        //localizer.write_all_particles(settings.images_path);
         //localizer.write_all_particles("../temp/");
-        //localizer.write_all_particles_to_file("../temp/particles.txt");
+        localizer.write_all_particles_to_file("../temp/particles/particles_idz20_zm2.txt");
 
     } else if (FLAGS_track) {
 

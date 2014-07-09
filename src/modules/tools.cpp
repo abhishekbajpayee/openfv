@@ -182,4 +182,81 @@ void failureFunction() {
 
 }
 
+void writeMat(Mat M, string path) {
+
+    ofstream file;
+    file.open(path.c_str());
+
+    Mat_<double> A = M;
+
+    for (int i=0; i<M.rows; i++) {
+        for (int j=0; j<M.cols; j++) {
+            file<<A.at<double>(i,j)<<"\t";
+        }
+        file<<"\n";
+    }
+
+    VLOG(3)<<"Written matrix to file "<<path<<endl;
+
+    file.close();
+
+}
+
+Mat getTransform(vector<Point2f> src, vector<Point2f> dst) {
+
+    Mat_<double> A1 = Mat_<double>::zeros(8,8);
+    Mat_<double> B1 = Mat_<double>::zeros(8,1);
+    for (int i=0; i<4; i++) {
+        A1(i*2,0) = src[i].x; A1(i*2,1) = src[i].y; A1(i*2,2) = 1;
+        A1(i*2+1,3) = src[i].x; A1(i*2+1,4) = src[i].y; A1(i*2+1,5) = 1;
+        A1(i*2,6) = -dst[i].x*src[i].x; A1(i*2,7) = -dst[i].x*src[i].y;
+        A1(i*2+1,6) = -dst[i].y*src[i].x; A1(i*2+1,7) = -dst[i].y*src[i].y;
+        B1(i*2,0) = dst[i].x;
+        B1(i*2+1,0) = dst[i].y;
+    }
+
+    Mat A1t;
+    transpose(A1, A1t);
+
+    Mat C1;
+    invert(A1t*A1, C1, DECOMP_SVD);
+    Mat C2 = A1t*B1;
+
+    Mat_<double> R = C1*C2;
+
+    Mat_<double> H = Mat_<double>::zeros(3,3);
+    H(0,0) = R(0,0); H(0,1) = R(1,0); H(0,2) = R(2,0);
+    H(1,0) = R(3,0); H(1,1) = R(4,0); H(1,2) = R(5,0);
+    H(2,0) = R(6,0); H(2,1) = R(7,0); H(2,2) = 1.0;
+
+
+    // old
+
+
+    Mat M(3, 3, CV_64F), X(8, 1, CV_64F, M.data);
+    double a[8][8], b[8];
+    Mat A(8, 8, CV_64F, a), B(8, 1, CV_64F, b);
+
+    for( int i = 0; i < 4; ++i )
+    {
+        a[i][0] = a[i+4][3] = src[i].x;
+        a[i][1] = a[i+4][4] = src[i].y;
+        a[i][2] = a[i+4][5] = 1;
+        a[i][3] = a[i][4] = a[i][5] =
+        a[i+4][0] = a[i+4][1] = a[i+4][2] = 0;
+        a[i][6] = -src[i].x*dst[i].x;
+        a[i][7] = -src[i].y*dst[i].x;
+        a[i+4][6] = -src[i].x*dst[i].y;
+        a[i+4][7] = -src[i].y*dst[i].y;
+        b[i] = dst[i].x;
+        b[i+4] = dst[i].y;
+    }
+
+    solve( A, B, X, DECOMP_SVD );
+    ((double*)M.data)[8] = 1.;
+
+    return M;
+
+}
+
 #endif
