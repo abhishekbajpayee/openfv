@@ -1237,6 +1237,7 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
         fn<<path<<frames_[f];
         mkdir(fn.str().c_str(), S_IRWXU);
 
+        LOG(INFO)<<"Saving frame "<<f<<"...";
         for (double z=zmin; z<=zmax; z+=dz) {
 
             refocus(z, 0, 0, 0, thresh, f);
@@ -1247,7 +1248,11 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
             imwrite(ss.str(), result);
 
         }
+        LOG(INFO)<<"done!"<<endl;
+
     }
+
+    LOG(INFO)<<"SAVING COMPLETE!"<<endl;
 
 }
 
