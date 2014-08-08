@@ -259,4 +259,33 @@ Mat getTransform(vector<Point2f> src, vector<Point2f> dst) {
 
 }
 
+void listDir(string path, vector<string> &files) {
+    
+    DIR *dir;
+    struct dirent *ent;
+
+    string temp_name;
+    
+    dir = opendir(path.c_str());
+    while(ent = readdir(dir)) {
+        temp_name = ent->d_name;
+        if (temp_name.compare(".")) {
+            if (temp_name.compare("..")) {
+                string path_file = path+temp_name;
+                files.push_back(path_file);
+            }
+        }
+    }
+
+}
+
+void readImgStack(vector<string> img_names, vector<Mat> &imgs) {
+
+    for (int i=0; i<img_names.size(); i++) {
+        Mat img = imread(img_names[i], 0);
+        imgs.push_back(img);
+    }
+
+}
+
 #endif

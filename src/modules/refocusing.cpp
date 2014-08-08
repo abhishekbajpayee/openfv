@@ -22,6 +22,28 @@
 using namespace std;
 using namespace cv;
 
+saRefocus::saRefocus() {
+
+    LOG(INFO)<<"Refocusing object created in expert mode!"<<endl;
+
+    GPU_FLAG=1;
+    REF_FLAG=0;
+    CORNER_FLAG=0;
+    MTIFF_FLAG=0;
+    INVERT_Y_FLAG=0;
+    frame_=-1;
+    mult_=0;
+    preprocess_=0;
+    
+    frames_.push_back(0);
+
+    img_size_ = Size(1280, 800);
+    num_cams_ = 9;
+
+    scale_ = 1;
+
+}
+
 saRefocus::saRefocus(refocus_settings settings):
     GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.corner_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult), preprocess_(settings.preprocess) {
 
@@ -725,7 +747,8 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
 
     }
 
-    refocused_host_.convertTo(result, CV_8U);
+    //refocused_host_.convertTo(result, CV_8U);
+    result = refocused_host_.clone();
 
 }
 
@@ -1091,7 +1114,12 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     int width = img_size_.width;
     int height = img_size_.height;
 
-    Mat D = (Mat_<double>(3,3) << scale_, 0, width*0.5, 0, scale_, height*0.5, 0, 0, 1); 
+    Mat D;
+    if (INVERT_Y_FLAG) {
+        D = (Mat_<double>(3,3) << scale_, 0, width*0.5, 0, -1.0*scale_, height*0.5, 0, 0, 1); 
+    } else {
+        D = (Mat_<double>(3,3) << scale_, 0, width*0.5, 0, scale_, height*0.5, 0, 0, 1); 
+    }
     Mat hinv = D.inv();
 
     Mat_<double> X = Mat_<double>::zeros(3, 4);
@@ -1227,7 +1255,7 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
 
 }
 
-void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh) {
+void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type) {
 
     LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
     
@@ -1241,10 +1269,10 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
         for (double z=zmin; z<=zmax; z+=dz) {
 
             refocus(z, 0, 0, 0, thresh, f);
-            Mat result = refocused_host_.clone();
+            //Mat result = refocused_host_.clone();
 
             stringstream ss;
-            ss<<fn.str()<<"/"<<((z-zmin)/dz)<<".tif";
+            ss<<fn.str()<<"/"<<((z-zmin)/dz)<<"."<<type;
             imwrite(ss.str(), result);
 
         }
@@ -1253,6 +1281,40 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
     }
 
     LOG(INFO)<<"SAVING COMPLETE!"<<endl;
+
+}
+
+void saRefocus::return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack) {
+
+    for (double z=zmin; z<=zmax+(dz*0.5); z+=dz) {
+        refocus(z, 0, 0, 0, thresh, frame);
+        stack.push_back(result);
+    }
+
+}
+
+double saRefocus::getQ(vector<Mat> &stack, vector<Mat> &refStack) {
+
+    double xct=0;
+    double xc1=0;
+    double xc2=0;
+
+    for (int i=0; i<stack.size(); i++) {
+        
+        Mat a; multiply(stack[i], refStack[i], a);
+        xct += double(sum(a)[0]);
+
+        Mat b; pow(stack[i], 2, b);
+        xc1 += double(sum(b)[0]);
+
+        Mat c; pow(refStack[i], 2, c);
+        xc2 += double(sum(c)[0]);
+
+    }
+
+    double q = xct/sqrt(xc1*xc2);
+
+    return(q);
 
 }
 
@@ -1455,5 +1517,19 @@ void saRefocus::parse_preprocess_settings(string path) {
         getline(file, op);
 
     } 
+
+}
+
+// ---Expert mode functions--- //
+
+void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats) {
+
+    P_mats_ = Pmats;
+
+    for (int i=0; i<imgs_sub.size(); i++) {
+        vector<Mat> sub;
+        sub.push_back(imgs_sub[i]);
+        imgs.push_back(sub);
+    }
 
 }

@@ -35,6 +35,8 @@ class saRefocus {
 
     saRefocus(refocus_settings settings);
 
+    saRefocus();
+
     int num_cams() { return num_cams_; }
     double scale() { return scale_; }
     Size img_size() { return img_size_; }
@@ -60,7 +62,12 @@ class saRefocus {
     void CPUrefocus_ref(double z, double thresh, int live, int frame);
     void CPUrefocus_ref_corner(double z, double thresh, int live, int frame);
 
-    void dump_stack(string path, double zmin, double zmax, double dz, double thresh);
+    void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
+    void return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack);
+    double getQ(vector<Mat> &stack, vector<Mat> &refStack);
+
+    // Expert mode functions
+    void setArrayData(vector<Mat> imgs, vector<Mat> Pmats);
 
     Mat result;
 
@@ -122,6 +129,7 @@ class saRefocus {
     int CORNER_FLAG; // Flag to use corner based homography fit method
     int MTIFF_FLAG;
     int ALL_FRAME_FLAG;
+    int INVERT_Y_FLAG;
     
     int preprocess_;
     vector<int> pp_ops;
