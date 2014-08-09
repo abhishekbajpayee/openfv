@@ -22,7 +22,7 @@
 using namespace std;
 using namespace cv;
 
-saRefocus::saRefocus() {
+saRefocus::saRefocus(int num_cams, double f) {
 
     LOG(INFO)<<"Refocusing object created in expert mode!"<<endl;
 
@@ -31,6 +31,7 @@ saRefocus::saRefocus() {
     CORNER_FLAG=0;
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
+    EXPERT_FLAG=1;
     frame_=-1;
     mult_=0;
     preprocess_=0;
@@ -38,9 +39,9 @@ saRefocus::saRefocus() {
     frames_.push_back(0);
 
     img_size_ = Size(1280, 800);
-    num_cams_ = 9;
+    num_cams_ = num_cams;
 
-    scale_ = 1;
+    scale_ = f;
 
 }
 
@@ -581,12 +582,16 @@ void saRefocus::refocus(double z, double rx, double ry, double rz, double thresh
 void saRefocus::initializeGPU() {
 
     LOG(INFO)<<endl<<"INITIALIZING GPU..."<<endl;
-    LOG(INFO)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
     
-    gpu::DeviceInfo gpuDevice(gpu::getDevice());
+    if (!EXPERT_FLAG) {
+
+        LOG(INFO)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
     
-    LOG(INFO)<<"---"<<gpuDevice.name()<<"---"<<endl;
-    LOG(INFO)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
+        gpu::DeviceInfo gpuDevice(gpu::getDevice());
+    
+        LOG(INFO)<<"---"<<gpuDevice.name()<<"---"<<endl;
+        LOG(INFO)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
+    }
 
     uploadToGPU();
 
@@ -601,11 +606,11 @@ void saRefocus::initializeGPU() {
 //       or not.
 void saRefocus::uploadToGPU() {
 
-    gpu::DeviceInfo gpuDevice(gpu::getDevice());
-    double free_mem_GPU = gpuDevice.freeMemory()/pow(1024.0,2);
-    LOG(INFO)<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
-
-    double factor = 0.9;
+    if (!EXPERT_FLAG) {
+        gpu::DeviceInfo gpuDevice(gpu::getDevice());
+        double free_mem_GPU = gpuDevice.freeMemory()/pow(1024.0,2);
+        LOG(INFO)<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
+    }
 
     if (frame_>=0) {
 
@@ -622,7 +627,6 @@ void saRefocus::uploadToGPU() {
         for (int i=0; i<imgs[0].size(); i++) {
             for (int j=0; j<num_cams_; j++) {
                 temp.upload(imgs[j][i]);
-                //gpu::Canny(temp, temp2, 100, 200);
                 array.push_back(temp.clone());
             }
             array_all.push_back(array);
@@ -633,7 +637,10 @@ void saRefocus::uploadToGPU() {
         LOG(FATAL)<<"Invalid frame value to visualize!"<<endl;
     }
 
-    LOG(INFO)<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
+    if (!EXPERT_FLAG) {
+        gpu::DeviceInfo gpuDevice(gpu::getDevice());
+        LOG(INFO)<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
+    }
 
 }
 

@@ -35,7 +35,7 @@ class saRefocus {
 
     saRefocus(refocus_settings settings);
 
-    saRefocus();
+    saRefocus(int num_cams, double f);
 
     int num_cams() { return num_cams_; }
     double scale() { return scale_; }
@@ -130,6 +130,7 @@ class saRefocus {
     int MTIFF_FLAG;
     int ALL_FRAME_FLAG;
     int INVERT_Y_FLAG;
+    int EXPERT_FLAG;
     
     int preprocess_;
     vector<int> pp_ops;
