@@ -63,6 +63,7 @@ class saRefocus {
     void CPUrefocus_ref_corner(double z, double thresh, int live, int frame);
 
     void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
+    void calculateQ(double zmin, double zmax, double dz, double thresh, int frame, string refPath);
     void return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack);
     double getQ(vector<Mat> &stack, vector<Mat> &refStack);
 

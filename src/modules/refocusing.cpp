@@ -16,6 +16,8 @@
 #include "cuda_lib.h"
 #include "visualize.h"
 
+#include <Eigen/Core>
+
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
 
@@ -623,7 +625,7 @@ void saRefocus::uploadToGPU() {
 
     } else if (frame_==-1) {
         
-        VLOG(0)<<"Uploading all frame to GPU..."<<endl;
+        VLOG(0)<<"Uploading all frames to GPU..."<<endl;
         for (int i=0; i<imgs[0].size(); i++) {
             for (int j=0; j<num_cams_; j++) {
                 temp.upload(imgs[j][i]);
@@ -1291,6 +1293,32 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
 
 }
 
+// Function to reconstruct a volume and then compare to reference stack and calculate Q without
+// dumping stack
+void saRefocus::calculateQ(double zmin, double zmax, double dz, double thresh, int frame, string refPath) {
+
+    // get refStack
+    string stackPath = refPath + "stack/";
+    vector<string> img_names;
+    listDir(stackPath, img_names);
+    sort(img_names.begin(), img_names.end());
+
+    vector<Mat> refStack;
+    LOG(INFO)<<"Reading reference stack from "<<stackPath;
+    readImgStack(img_names, refStack);
+    LOG(INFO)<<"done.";
+
+    vector<Mat> stack;
+    LOG(INFO)<<"Reconstructing volume...";
+    return_stack(zmin, zmax, dz, thresh, frame, stack);
+
+    LOG(INFO)<<"Calculating Q...";
+    double q = getQ(stack, refStack);
+
+    LOG(INFO)<<q;
+
+}
+
 void saRefocus::return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack) {
 
     for (double z=zmin; z<=zmax+(dz*0.5); z+=dz) {
@@ -1307,7 +1335,7 @@ double saRefocus::getQ(vector<Mat> &stack, vector<Mat> &refStack) {
     double xc2=0;
 
     for (int i=0; i<stack.size(); i++) {
-        
+
         Mat a; multiply(stack[i], refStack[i], a);
         xct += double(sum(a)[0]);
 
@@ -1534,9 +1562,16 @@ void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats) {
     P_mats_ = Pmats;
 
     for (int i=0; i<imgs_sub.size(); i++) {
+        
         vector<Mat> sub;
-        sub.push_back(imgs_sub[i]);
+        
+        // Applying a 5x5 1.5x1.5 sigma GaussianBlur to preprocess
+        Mat img;
+        GaussianBlur(imgs_sub[i], img, Size(15,15), 1.5, 1.5);
+
+        sub.push_back(img.clone());
         imgs.push_back(sub);
+    
     }
 
 }
