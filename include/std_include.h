@@ -24,8 +24,13 @@
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 
-#include <python2.7/Python.h>
-
+// Profiler header
 #include <gperftools/profiler.h>
 
+// Boost libraries
 #include <boost/program_options.hpp>
+
+// Python library
+#include <python2.7/Python.h>
+
+// #include <boost/python.hpp>

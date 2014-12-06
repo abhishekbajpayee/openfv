@@ -288,4 +288,11 @@ void readImgStack(vector<string> img_names, vector<Mat> &imgs) {
 
 }
 
+// BOOST_PYTHON_MODULE(libsaTools) {
+
+//     using namespace boost::python;
+//     def("dirExists", dirExists);
+
+// }
+
 #endif
