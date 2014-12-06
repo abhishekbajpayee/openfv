@@ -7,7 +7,7 @@ Bibtex citation
 ---------------
 
 @misc{openfv-library,
-  author = "Abhishek Bajpayee and Others",
-  title = "OpenFV Library",
+  author = "Abhishek Bajpayee",
+  title = "openFV Library",
   howpublished = "\url{http://openfv.org}",
 }
