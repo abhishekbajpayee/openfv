@@ -98,4 +98,11 @@ struct volume {
     double v;
 };
 
+struct voxel {
+    int x;
+    int y;
+    int z;
+    int I;
+};
+
 #endif

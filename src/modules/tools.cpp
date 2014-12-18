@@ -288,6 +288,19 @@ void readImgStack(vector<string> img_names, vector<Mat> &imgs) {
 
 }
 
+vector<double> linspace(double a, double b, int n) {
+    
+    vector<double> array;
+    double step = (b-a) / (n-1);
+
+    while(a <= b) {
+        array.push_back(a);
+        a += step;           // could recode to better handle rounding errors
+    }
+    return array;
+
+}
+
 // BOOST_PYTHON_MODULE(libsaTools) {
 
 //     using namespace boost::python;

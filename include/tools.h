@@ -30,3 +30,5 @@ Mat getTransform(vector<Point2f> src, vector<Point2f> dst);
 void listDir(string, vector<string> &);
 
 void readImgStack(vector<string>, vector<Mat> &);
+
+vector<double> linspace(double, double, int);
