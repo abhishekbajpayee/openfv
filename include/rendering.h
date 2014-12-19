@@ -13,9 +13,7 @@
 #define RENDERING_LIBRARY
 
 #include "std_include.h"
-//#include "calibration.h"
 #include "typedefs.h"
-//#include "cuda_lib.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
@@ -30,32 +28,33 @@ class Scene {
 
     }
 
- Scene() {}
+    Scene();
 
+    void seedR();
     void seedParticles(vector< vector<double> > locations);
     void seedParticles(int num);
 
     // extents and bounds
     void create(double sx, int vx, double sy, int vy, double sz, int vz);
 
-    // Note: the mem efficient way is to store x,y,z coords and intensity as a list
-    // and not init a matrix of intensities. Too many black pixels...
-
     Mat getImg(int zv);
+
+    Mat getParticles();
+    double sigma();
 
  private:
 
     void createVolume();
     vector<voxel> getVoxels(int z);
-
     double f(double x, double y, double z);
 
+    double sigma_;
     vector<double> xlims_, ylims_, zlims_;
     double sx_, sy_, sz_;
     int vx_, vy_, vz_;
     vector<double> voxelsX_, voxelsY_, voxelsZ_;
 
-    vector< vector<double> > particles_;
+    Mat_<double> particles_;
     vector<voxel> volume_;
 
 };
@@ -67,11 +66,10 @@ class Camera {
 
     }
 
- Camera() {}
+    Camera();
 
-    void init(double f, int imx, int imy);
-
-    void bindScene(Scene scene);
+    void init(double f, int imsx, int imsy);
+    void setScene(Scene scene);
     void setLocation(double x, double y, double z);
     void pointAt(double x, double y, double z);
     Mat render();
@@ -79,12 +77,23 @@ class Camera {
     Mat getP();
 
  private:
-    
-    Mat loc_;
-    Mat t_;
-    Mat R_;
-    Mat K_;
-    Mat P_;
+
+    Mat Rt();
+    void project();
+    double f(double x, double y);
+
+    int imsx_, imsy_, cx_, cy_;
+    double f_;
+
+    Mat_<double> loc_;
+    Mat_<double> t_;
+    Mat_<double> R_;
+    Mat_<double> K_;
+    Mat_<double> P_;
+
+    // TODO: name these better
+    Mat_<double> p_;
+    Mat_<double> s_;
 
     Scene scene_;
 

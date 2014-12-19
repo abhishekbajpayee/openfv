@@ -2,6 +2,7 @@
 #define TOOLS_LIBRARY
 
 #include "std_include.h"
+#include "typedefs.h"
 #include "tools.h"
 
 using namespace std;
@@ -121,7 +122,13 @@ void qimshow(Mat image) {
 
     namedWindow("Image", CV_WINDOW_AUTOSIZE);
     imshow("Image", image);
-    waitKey(0);
+    
+    int key;
+    while(1) {
+        key = cvWaitKey(10);
+        if ((key & 255) == 27)
+            break;
+    }
     destroyWindow("Image");
 
 }
@@ -142,7 +149,6 @@ void pimshow(Mat image, double z, int n) {
 
 Mat getRotMat(double x, double y, double z) {
 
-    double pi = 3.14159;
     x = x*pi/180.0;
     y = y*pi/180.0;
     z = z*pi/180.0;
