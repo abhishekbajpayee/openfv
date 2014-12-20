@@ -175,7 +175,8 @@ double Scene::sigma() {
 Camera::Camera() {
 
     K_ = Mat_<double>::zeros(3,3);
-    loc_ = Mat_<double>::zeros(3,1);
+    R_ = Mat_<double>::zeros(3,3);
+    C_ = Mat_<double>::zeros(3,1);
     t_ = Mat_<double>::zeros(3,1);
 
 }
@@ -199,22 +200,29 @@ void Camera::init(double f, int imsx, int imsy) {
 
 void Camera::setLocation(double x, double y, double z) {
 
-    loc_(0,0) = x; loc_(1,0) = y; loc_(2,0) = z;
-    t_(2,0) = sqrt(x*x + y*y + z*z);
-
+    C_(0,0) = x; C_(1,0) = y; C_(2,0) = z;
     pointAt(0, 0, 0);
 
 }
 
+// Generates rotation matrix according to the right, up, out
+// convention and point the camera at C to point p
 void Camera::pointAt(double x, double y, double z) {
 
-    double rx, ry, rz;
+    Mat_<double> p = (Mat_<double>(3,1) << x, y, z);
+    Mat_<double> up = (Mat_<double>(3,1) << 0, 1, 0);
 
-    rx = -180*atan( (loc_(0,0)-x)/(loc_(2,0)-z) )/pi;
-    ry = 180*atan( (loc_(1,0)-y)/(loc_(2,0)-z) )/pi;
-    rz = 0;
+    Mat_<double> L = p - C_; L = normalize(L);
+    Mat_<double> s = cross(L, up);
+    Mat_<double> u = cross(s, L);
+    
+    for (int i=0; i<3; i++) {
+        R_(0,i) = -s(i,0); 
+        R_(1,i) = u(i,0);
+        R_(2,i) = -L(i,0);
+    }
 
-    R_ = getRotMat(rx, ry, rz);
+    t_ = -R_*C_;
 
     P_ = K_*Rt();
 
@@ -265,7 +273,7 @@ void Camera::project() {
         p_(0,i) = proj(0,i);
         p_(1,i) = proj(1,i);
         
-        d = sqrt( pow(loc_(0,0)-particles(0,i), 2) + pow(loc_(1,0)-particles(1,i), 2) + pow(loc_(2,0)-particles(2,i), 2) );
+        d = sqrt( pow(C_(0,0)-particles(0,i), 2) + pow(C_(1,0)-particles(1,i), 2) + pow(C_(2,0)-particles(2,i), 2) );
         s_(0,i) = scene_.sigma()*f_/d;
 
     }

@@ -147,6 +147,7 @@ void pimshow(Mat image, double z, int n) {
 
 }
 
+// Yaw Pitch Roll Rotation Matrix
 Mat getRotMat(double x, double y, double z) {
 
     x = x*pi/180.0;
@@ -175,7 +176,7 @@ Mat getRotMat(double x, double y, double z) {
     Rz(1,1) = cos(z);
     Rz(2,2) = 1;
 
-    Mat R = Rx*Ry*Rz;
+    Mat R = Rz*Ry*Rx;
 
     return(R);
 
@@ -304,6 +305,28 @@ vector<double> linspace(double a, double b, int n) {
         a += step;           // could recode to better handle rounding errors
     }
     return array;
+
+}
+
+// returns normalized(A x B) where A and B are 2 vectors
+Mat cross(Mat_<double> A, Mat_<double> B) {
+
+    Mat_<double> result = Mat_<double>::zeros(3,1);
+
+    result(0,0) = A(1,0)*B(2,0) - A(2,0)*B(1,0);
+    result(1,0) = A(2,0)*B(0,0) - A(0,0)*B(2,0);
+    result(2,0) = A(0,0)*B(1,0) - A(1,0)*B(0,0);
+
+    return(normalize(result));
+
+}
+
+// Normalizes a vector and then returns it
+Mat normalize(Mat_<double> A) {
+
+    double d = sqrt(pow(A(0,0), 2) + pow(A(1,0), 2) + pow(A(2,0), 2));
+    A(0,0) /= d; A(1,0) /= d; A(2,0) /= d;
+    return(A);
 
 }
 

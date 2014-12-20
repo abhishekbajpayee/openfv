@@ -85,7 +85,7 @@ class Camera {
     int imsx_, imsy_, cx_, cy_;
     double f_;
 
-    Mat_<double> loc_;
+    Mat_<double> C_;
     Mat_<double> t_;
     Mat_<double> R_;
     Mat_<double> K_;

@@ -32,3 +32,7 @@ void listDir(string, vector<string> &);
 void readImgStack(vector<string>, vector<Mat> &);
 
 vector<double> linspace(double, double, int);
+
+Mat cross(Mat_<double>, Mat_<double>);
+
+Mat normalize(Mat_<double>);
