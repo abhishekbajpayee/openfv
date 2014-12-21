@@ -29,8 +29,8 @@
 
 // Boost libraries
 #include <boost/program_options.hpp>
+#include <boost/python.hpp>
 
 // Python library
-#include <python2.7/Python.h>
+#include <Python.h>
 
-// #include <boost/python.hpp>

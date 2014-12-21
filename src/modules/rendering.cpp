@@ -308,3 +308,26 @@ Mat Camera::Rt() {
     return(Rt);
 
 }
+
+// Python wrapper
+BOOST_PYTHON_MODULE(libpysaptv) {
+
+    using namespace boost::python;
+
+    void (Scene::*sPx1)(vector< vector<double> >) = &Scene::seedParticles;
+    void (Scene::*sPx2)(int)                      = &Scene::seedParticles;
+
+    class_<Scene>("Scene")
+        .def("seedR", &Scene::seedR)
+        .def("seedParticles", sPx2)
+        .def("create", &Scene::create)
+    ;
+
+    class_<Camera>("Camera")
+        .def("init", &Camera::init)
+        .def("setScene", &Camera::setScene)
+        .def("setLocation", &Camera::setLocation)
+        .def("render", &Camera::render)
+    ;
+
+}

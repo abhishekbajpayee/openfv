@@ -330,11 +330,4 @@ Mat normalize(Mat_<double> A) {
 
 }
 
-// BOOST_PYTHON_MODULE(libsaTools) {
-
-//     using namespace boost::python;
-//     def("dirExists", dirExists);
-
-// }
-
 #endif
