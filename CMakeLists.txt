@@ -8,26 +8,39 @@ set (PROJECT_VERSION_MINOR 0)
 # find required packages
 find_package (OpenCV REQUIRED)
 find_package (CUDA REQUIRED)
-find_package ( Boost COMPONENTS program_options REQUIRED )
-#find_package (Qt5 REQUIRED)
+
+# Required Boost Libraries
+find_package(Boost)
+if(Boost_FOUND)
+  find_package ( Boost COMPONENTS program_options REQUIRED )
+  set(Boost_PO ${Boost_LIBRARIES})
+  find_package ( Boost COMPONENTS python REQUIRED )
+  set(Boost_PY ${Boost_LIBRARIES})
+elseif(NOT Boost_FOUND)
+  message("Boost not found!")
+endif()
 
 # include directories
+include_directories( ${Boost_INCLUDE_DIR} )
+include_directories("/usr/include/python2.7")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories ("/usr/local/cuda-5.0/include")
-include_directories ( ${Boost_INCLUDE_DIR} )
 include_directories ("/home/ab9/Apps/Qt/5.2.1/gcc_64/include")
 
-# subdirectories
+# IF(CMAKE_COMPILER_IS_GNUCXX)
+#   ADD_DEFINITIONS("-Wall")
+# ENDIF()
 
+# subdirectories
 add_subdirectory (src)
 
 find_package (OpenMP)
 if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-# prototyping executables
+# prototyping executable
 add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/execs/sa-ptv.cpp)
 
 # release files
@@ -37,12 +50,17 @@ add_executable (track ${PROJECT_SOURCE_DIR}/src/execs/track.cpp)
 add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/execs/calibrate.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
-set (OTHER_LIBS python2.7 tiff ${Boost_LIBRARIES})
-set (PROF_LIB -lprofiler)
+set (OTHER_LIBS python2.7 tiff ${Boost_PO} ${Boost_PY})
+set (PROF_LIB profiler)
 set (CUSTOM_LIBS saptv cuda_saptv)
+set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
 
-target_link_libraries (sa-ptv ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${OTHER_LIBS} ${PROF_LIB})
-target_link_libraries (jobFind ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${OTHER_LIBS} ${PROF_LIB})
-target_link_libraries (refocus ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${OTHER_LIBS} ${PROF_LIB})
-target_link_libraries (track ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${OTHER_LIBS})
-target_link_libraries (calibrate ${CUSTOM_LIBS} ${OpenCV_LIBS} ${CERES_LIBS} ${OTHER_LIBS} ${PROF_LIB})
+target_link_libraries (sa-ptv ${LIBS})
+target_link_libraries (jobFind ${LIBS})
+target_link_libraries (refocus ${LIBS})
+target_link_libraries (track ${LIBS})
+target_link_libraries (calibrate ${LIBS})
+
+add_library(pysaptv SHARED ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
+set_target_properties(pysaptv PROPERTIES Boost_USE_STATIC_LIBS OFF Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON)
+target_link_libraries(pysaptv ${LIBS})
