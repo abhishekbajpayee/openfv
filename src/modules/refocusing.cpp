@@ -31,8 +31,8 @@ saRefocus::saRefocus(int num_cams, double f) {
     LOG(INFO)<<"Refocusing object created in expert mode!"<<endl;
 
     GPU_FLAG=1;
-    REF_FLAG=0;
-    CORNER_FLAG=0;
+    REF_FLAG=1;
+    CORNER_FLAG=1;
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
@@ -1559,7 +1559,7 @@ void saRefocus::parse_preprocess_settings(string path) {
 
 // ---Expert mode functions--- //
 
-void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats) {
+void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats, vector<Mat> cam_locations) {
 
     P_mats_ = Pmats;
 
@@ -1568,13 +1568,19 @@ void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats) {
         vector<Mat> sub;
         
         // Applying a 5x5 1.5x1.5 sigma GaussianBlur to preprocess
-        Mat img;
-        GaussianBlur(imgs_sub[i], img, Size(15,15), 1.5, 1.5);
+        // Mat img;
+        // GaussianBlur(imgs_sub[i], img, Size(15,15), 1.5, 1.5);
 
-        sub.push_back(img.clone());
+        sub.push_back(imgs_sub[i]);
         imgs.push_back(sub);
     
     }
+
+    cam_locations_ = cam_locations;
+
+    geom[0] = -100.0;
+    geom[1] = 1.0; geom[2] = 1.5; geom[3] = 1.33;
+    geom[4] = 5.0;
 
 }
 

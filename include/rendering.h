@@ -30,16 +30,18 @@ class Scene {
 
     Scene();
 
+    void create(double sx, int vx, double sy, int vy, double sz, int vz);
+    void setRefractiveGeom(float zW, float n1, float n2, float n3, float t);
+
     void seedR();
     void seedParticles(vector< vector<double> > locations);
-    void seedParticles(int num);
-
-    // extents and bounds
-    void create(double sx, int vx, double sy, int vy, double sz, int vz);
+    void seedParticles(int num);    
 
     Mat getImg(int zv);
 
     Mat getParticles();
+    vector<float> getRefGeom();
+    int getRefFlag();
     double sigma();
 
  private:
@@ -57,6 +59,9 @@ class Scene {
     Mat_<double> particles_;
     vector<voxel> volume_;
 
+    int REF_FLAG;
+    vector<float> geom_;
+
 };
 
 class Camera {
@@ -72,15 +77,18 @@ class Camera {
     void setScene(Scene scene);
     void setLocation(double x, double y, double z);
     void pointAt(double x, double y, double z);
+    
     Mat render();
 
     Mat getP();
+    Mat getC();
 
  private:
 
     Mat Rt();
     void project();
     double f(double x, double y);
+    void img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &Xout);
 
     int imsx_, imsy_, cx_, cy_;
     double f_;
@@ -96,6 +104,8 @@ class Camera {
     Mat_<double> s_;
 
     Scene scene_;
+    int REF_FLAG;
+    vector<float> geom_;
 
     //private members here
 

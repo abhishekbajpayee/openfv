@@ -70,7 +70,7 @@ class saRefocus {
     double getQ(vector<Mat> &stack, vector<Mat> &refStack);
 
     // Expert mode functions
-    void setArrayData(vector<Mat> imgs, vector<Mat> Pmats);
+    void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);
 
     Mat result;
 
