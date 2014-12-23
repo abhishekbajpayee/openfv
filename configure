@@ -4,4 +4,10 @@ mkdir temp
 mkdir bin
 
 cd bin
+
+mkdir saptv
+cd saptv
+touch __init__.py
+
+cd ..
 cmake ..

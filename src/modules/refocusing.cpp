@@ -24,6 +24,8 @@
 using namespace std;
 using namespace cv;
 
+saRefocus::saRefocus() {}
+
 saRefocus::saRefocus(int num_cams, double f) {
 
     LOG(INFO)<<"Refocusing object created in expert mode!"<<endl;
@@ -1573,5 +1575,17 @@ void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats) {
         imgs.push_back(sub);
     
     }
+
+}
+
+// Python wrapper
+BOOST_PYTHON_MODULE(refocusing) {
+
+    using namespace boost::python;
+
+    class_<saRefocus>("saRefocus")
+        .def("initializeGPU", &saRefocus::initializeGPU)
+        .def("refocus", &saRefocus::refocus)
+    ;
 
 }

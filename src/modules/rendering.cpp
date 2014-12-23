@@ -310,7 +310,7 @@ Mat Camera::Rt() {
 }
 
 // Python wrapper
-BOOST_PYTHON_MODULE(libpysaptv) {
+BOOST_PYTHON_MODULE(rendering) {
 
     using namespace boost::python;
 
