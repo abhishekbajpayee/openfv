@@ -133,6 +133,31 @@ void qimshow(Mat image) {
 
 }
 
+// Quick image show for n number of images
+void qimshow2(vector<Mat> imgs) {
+
+    for (int i=0; i<imgs.size(); i++) {
+        stringstream wname;
+        wname<<"Image"<<i;
+        namedWindow(wname.str(), CV_WINDOW_AUTOSIZE);
+        imshow(wname.str(), imgs[i]);
+    }
+    
+    int key;
+    while(1) {
+        key = cvWaitKey(10);
+        if ((key & 255) == 27)
+            break;
+    }
+
+    for (int i=0; i<imgs.size(); i++) {
+        stringstream wname;
+        wname<<"Image"<<i;
+        destroyWindow(wname.str());
+    }
+
+}
+
 void pimshow(Mat image, double z, int n) {
 
     namedWindow("Image", CV_WINDOW_AUTOSIZE);

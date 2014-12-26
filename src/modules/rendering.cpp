@@ -13,7 +13,7 @@
 #include "tools.h"
 #include "rendering.h"
 
-//#include <Eigen/Core>
+// #include <Eigen/Core>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
@@ -25,7 +25,7 @@ using namespace cv;
 
 Scene::Scene() {}
 
-void Scene::create(double sx, int vx, double sy, int vy, double sz, int vz) {
+void Scene::create(double sx, double sy, double sz) {
 
     LOG(INFO)<<"Creating scene...";
 
@@ -34,11 +34,7 @@ void Scene::create(double sx, int vx, double sy, int vy, double sz, int vz) {
     zlims_.push_back(-0.5*sz); zlims_.push_back(0.5*sz);
 
     sx_ = sx; sy_ = sy; sz_ = sz;
-    vx_ = vx; vy_ = vy; vz_ = vz;
-
-    voxelsX_ = linspace(-0.5*sx, 0.5*sx, vx);
-    voxelsY_ = linspace(-0.5*sy, 0.5*sy, vy);
-    voxelsZ_ = linspace(-0.5*sz, 0.5*sz, vz);
+    
     
     REF_FLAG = 0;
 
@@ -66,9 +62,6 @@ void Scene::seedR() {
                                         0, 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
                                         1, 1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1,   1);
 
-    LOG(INFO)<<"Generating voxels...";
-    createVolume();
-
 }
 
 void Scene::seedParticles(vector< vector<double> > points) {
@@ -81,9 +74,6 @@ void Scene::seedParticles(vector< vector<double> > points) {
     for (int i=0; i<num; i++) {
         particles_(0,i) = points[i][0]; particles_(1,i) = points[i][1]; particles_(2,i) = points[i][2]; particles_(3,i) = 1;
     }
-
-    LOG(INFO)<<"Generating voxels...";
-    createVolume();
 
 }
 
@@ -106,19 +96,25 @@ void Scene::seedParticles(int num) {
 
     }
 
-    LOG(INFO)<<"Generating voxels...";
-    createVolume();
-
 }
 
-void Scene::createVolume() {
+void Scene::createVolume(int xv, int yv, int zv) {
+
+    vx_ = xv; vy_ = yv; vz_ = zv;
+
+    voxelsX_ = linspace(-0.5*sx_, 0.5*sx_, vx_);
+    voxelsY_ = linspace(-0.5*sy_, 0.5*sy_, vy_);
+    voxelsZ_ = linspace(-0.5*sz_, 0.5*sz_, vz_);
+
+    LOG(INFO)<<"Generating voxels...";
 
     double thresh = 0.1;
 
-    for (int i=0; i<voxelsX_.size(); i++) {
-        for (int j=0; j<voxelsY_.size(); j++) {
-            for (int k=0; k<voxelsZ_.size(); k++) {
-
+    for (int k=0; k<voxelsZ_.size(); k++) {
+        LOG(INFO)<<k;
+        for (int i=0; i<voxelsX_.size(); i++) {
+            for (int j=0; j<voxelsY_.size(); j++) {
+            
                 double intensity = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]);
                 if (intensity > thresh) {
                     voxel v;
@@ -137,11 +133,16 @@ void Scene::createVolume() {
 double Scene::f(double x, double y, double z) {
 
     double intensity=0;
+    double sigma = sigma_*8.0;
 
     for (int i=0; i<particles_.cols; i++) {
-        double a = -1.0*( pow(x-particles_(0,i), 2) + pow(y-particles_(1,i), 2) + pow(z-particles_(2,i), 2) );
-        double b = exp( a/(2*pow(sigma_, 2)) ); // normalization factor?
-        intensity += b;
+        // 0,25 for z part to increase effective sigma in z
+        double d = pow(x-particles_(0,i), 2) + pow(y-particles_(1,i), 2) + (1.0/4)*pow(z-particles_(2,i), 2);
+        if (d<25)
+        {
+            double b = exp( -d/(2*pow(sigma_, 2)) ); // normalization factor?
+            intensity += b;
+        }
     }
     
     return(intensity*255.0);
@@ -150,14 +151,14 @@ double Scene::f(double x, double y, double z) {
 
 Mat Scene::getImg(int zv) {
 
-    Mat A = Mat::zeros(vx_, vy_, CV_8U);
+    Mat A = Mat::zeros(vy_, vx_, CV_8U);
     vector<voxel> slice = getVoxels(zv);
 
     for (int i=0; i<slice.size(); i++) {
-        A.at<char>(slice[i].x, slice[i].y) = slice[i].I;
+        A.at<char>(slice[i].y, slice[i].x) = slice[i].I;
     }
     
-    return(A);
+    return(A.clone());
 
 }
 
@@ -398,10 +399,19 @@ double Camera::f(double x, double y) {
 
     double intensity=0;
 
+    // directly use the buffer allocated by OpenCV
+    // Eigen::Map<MatrixXf, 0, InnerStride<3> > eigenP(p_.data);
+
     for (int i=0; i<p_.cols; i++) {
-        double a = -1.0*( pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2) );
-        double b = exp( a/(2*pow(s_(0,i), 2)) ); // normalization factor?
-        intensity += b;
+        double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2); 
+        if (d<25)
+        {
+            //double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2);
+            double b = exp( -d/(2*pow(s_(0,i), 2)) ); // normalization factor?
+            //LOG(INFO)<<b;
+            intensity += b;
+        }
+
     }
     
     return(intensity*255.0);
@@ -432,9 +442,11 @@ BOOST_PYTHON_MODULE(rendering) {
     void (Scene::*sPx2)(int)                      = &Scene::seedParticles;
 
     class_<Scene>("Scene")
+        .def("create", &Scene::create)
         .def("seedR", &Scene::seedR)
         .def("seedParticles", sPx2)
-        .def("create", &Scene::create)
+        .def("createVolume", &Scene::createVolume)
+        .def("getImg", &Scene::getImg)
     ;
 
     class_<Camera>("Camera")
@@ -443,6 +455,7 @@ BOOST_PYTHON_MODULE(rendering) {
         .def("setLocation", &Camera::setLocation)
         .def("render", &Camera::render)
         .def("getP", &Camera::getP)
+        .def("getC", &Camera::getC)
     ;
 
 }

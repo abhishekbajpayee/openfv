@@ -30,7 +30,9 @@ class Scene {
 
     Scene();
 
-    void create(double sx, int vx, double sy, int vy, double sz, int vz);
+    void create(double sx, double sy, double sz);
+    void createVolume(int xv, int yv, int zv);
+
     void setRefractiveGeom(float zW, float n1, float n2, float n3, float t);
 
     void seedR();
@@ -42,11 +44,10 @@ class Scene {
     Mat getParticles();
     vector<float> getRefGeom();
     int getRefFlag();
-    double sigma();
+    double sigma();    
 
  private:
 
-    void createVolume();
     vector<voxel> getVoxels(int z);
     double f(double x, double y, double z);
 

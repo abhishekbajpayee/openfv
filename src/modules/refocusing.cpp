@@ -24,15 +24,32 @@
 using namespace std;
 using namespace cv;
 
-saRefocus::saRefocus() {}
+saRefocus::saRefocus() {
+
+    GPU_FLAG=1;
+    REF_FLAG=0;
+    CORNER_FLAG=0;
+    MTIFF_FLAG=0;
+    INVERT_Y_FLAG=0;
+    EXPERT_FLAG=1;
+    frame_=-1;
+    mult_=0;
+    preprocess_=0;
+
+    frames_.push_back(0);
+
+    num_cams_ = 0;
+
+}
 
 saRefocus::saRefocus(int num_cams, double f) {
 
-    LOG(INFO)<<"Refocusing object created in expert mode!"<<endl;
+    LOG(INFO)<<"Refocusing object created in expert mode";
+    LOG(INFO)<<"Note: requires manual tweaking of parameters!";
 
     GPU_FLAG=1;
-    REF_FLAG=1;
-    CORNER_FLAG=1;
+    REF_FLAG=0;
+    CORNER_FLAG=0;
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
@@ -42,7 +59,6 @@ saRefocus::saRefocus(int num_cams, double f) {
     
     frames_.push_back(0);
 
-    img_size_ = Size(1280, 800);
     num_cams_ = num_cams;
 
     scale_ = f;
@@ -549,7 +565,7 @@ void saRefocus::CPUliveView() {
 
 }
 
-void saRefocus::refocus(double z, double rx, double ry, double rz, double thresh, int frame) {
+Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh, int frame) {
 
     z_ = z;
     rx_ = rx;
@@ -577,6 +593,8 @@ void saRefocus::refocus(double z, double rx, double ry, double rz, double thresh
             CPUrefocus(z_, thresh, 0, frame);
         }
     }
+
+    return(result_);
 
 }
 
@@ -759,7 +777,7 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
     }
 
     //refocused_host_.convertTo(result, CV_8U);
-    result = refocused_host_.clone();
+    result_ = refocused_host_.clone();
 
 }
 
@@ -798,7 +816,7 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
         imshow("Result", refocused_host_);
     }
     
-    result = refocused_host_.clone();
+    result_ = refocused_host_.clone();
 
 }
 
@@ -853,7 +871,7 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
 
     }
 
-    result = refocused_host_.clone();
+    result_ = refocused_host_.clone();
 
 }
 
@@ -909,7 +927,7 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
         imshow("Result", refocused_host_);
     }
 
-    refocused_host_.convertTo(result, CV_8U);
+    refocused_host_.convertTo(result_, CV_8U);
 
 }
 
@@ -946,6 +964,8 @@ void saRefocus::CPUrefocus_ref(double z, double thresh, int live, int frame) {
         imshow("Result", refocused_host_);
     }
 
+    refocused_host_.convertTo(result_, CV_8U);
+
 }
 
 void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int frame) {
@@ -972,6 +992,8 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
+
+    refocused_host_.convertTo(result_, CV_8U);
 
 }
 
@@ -1279,12 +1301,12 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
         LOG(INFO)<<"Saving frame "<<f<<"...";
         for (double z=zmin; z<=zmax; z+=dz) {
 
-            refocus(z, 0, 0, 0, thresh, f);
+            Mat img = refocus(z, 0, 0, 0, thresh, f);
             //Mat result = refocused_host_.clone();
 
             stringstream ss;
             ss<<fn.str()<<"/"<<((z-zmin)/dz)<<"."<<type;
-            imwrite(ss.str(), result);
+            imwrite(ss.str(), img);
 
         }
         LOG(INFO)<<"done!"<<endl;
@@ -1324,8 +1346,8 @@ void saRefocus::calculateQ(double zmin, double zmax, double dz, double thresh, i
 void saRefocus::return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack) {
 
     for (double z=zmin; z<=zmax+(dz*0.5); z+=dz) {
-        refocus(z, 0, 0, 0, thresh, frame);
-        stack.push_back(result);
+        Mat img = refocus(z, 0, 0, 0, thresh, frame);
+        stack.push_back(img);
     }
 
 }
@@ -1561,6 +1583,8 @@ void saRefocus::parse_preprocess_settings(string path) {
 
 void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats, vector<Mat> cam_locations) {
 
+    img_size_ = Size(imgs_sub[0].cols, imgs_sub[0].rows);
+
     P_mats_ = Pmats;
 
     for (int i=0; i<imgs_sub.size(); i++) {
@@ -1578,9 +1602,47 @@ void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats, vector<Mat
 
     cam_locations_ = cam_locations;
 
+    /*
     geom[0] = -100.0;
     geom[1] = 1.0; geom[2] = 1.5; geom[3] = 1.33;
     geom[4] = 5.0;
+    */
+
+}
+
+void saRefocus::addView(Mat img, Mat P, Mat location) {
+
+    img_size_ = Size(img.cols, img.rows);
+
+    P_mats_.push_back(P);
+    
+    vector<Mat> sub; sub.push_back(img);
+    imgs.push_back(sub);
+
+    cam_locations_.push_back(location);
+
+    num_cams_++;
+
+}
+
+void saRefocus::setF(double f) {
+
+    scale_ = f;
+
+}
+
+string saRefocus::showSettings() {
+
+    stringstream s;
+    s<<"--- FLAGS ---"<<endl;
+    s<<"GPU:\t\t"<<GPU_FLAG<<endl;
+    s<<"Refractive:\t"<<REF_FLAG<<endl;
+    s<<"HF Method:\t"<<CORNER_FLAG<<endl;
+    s<<endl<<"--- Other Parameters ---"<<endl;
+    s<<"Num Cams:\t"<<num_cams_<<endl;
+    s<<"f:\t\t"<<scale_;
+
+    return(s.str());
 
 }
 
@@ -1590,6 +1652,9 @@ BOOST_PYTHON_MODULE(refocusing) {
     using namespace boost::python;
 
     class_<saRefocus>("saRefocus")
+        .def("addView", &saRefocus::addView)
+        .def("setF", &saRefocus::setF)
+        .def("showSettings", &saRefocus::showSettings)
         .def("initializeGPU", &saRefocus::initializeGPU)
         .def("refocus", &saRefocus::refocus)
     ;

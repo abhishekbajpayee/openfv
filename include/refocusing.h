@@ -54,7 +54,7 @@ class saRefocus {
     void GPUliveView();
     void initializeGPU();
 
-    void refocus(double z, double rx, double ry, double rz, double thresh, int frame);
+    Mat refocus(double z, double rx, double ry, double rz, double thresh, int frame);
 
     void GPUrefocus(double thresh, int live, int frame);
     void GPUrefocus_ref(double thresh, int live, int frame);
@@ -71,8 +71,9 @@ class saRefocus {
 
     // Expert mode functions
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);
-
-    Mat result;
+    void addView(Mat img, Mat P, Mat location);
+    void setF(double f);
+    string showSettings();
 
  private:
 
@@ -90,6 +91,9 @@ class saRefocus {
 
     void adaptiveNorm(Mat in, Mat &out, int xf, int yf);
     void slidingMinToZero(Mat in, Mat &out, int xf, int yf);
+
+    // Refocusing result
+    Mat result_;
 
     // data types and private functions
     vector<Mat> P_mats_;

@@ -64,8 +64,7 @@ void pLocalize::find_particles_3d(int frame) {
         
         cout<<"\r"<<1+int((i-zmin_)*100.0/(zmax_-zmin_))<<"%"<<flush;
         //cout<<"\r"<<i<<flush;
-        refocus_.refocus(i, rx, ry, rz, thresh_, frame);
-        Mat image = refocus_.result;
+        Mat image = refocus_.refocus(i, rx, ry, rz, thresh_, frame);
 
         find_particles(image, points);
         //Mat img; draw_points(image, img, points); qimshow(img);
@@ -155,11 +154,9 @@ void pLocalize::z_resolution() {
     double factor = 0.5;
     for (int i=0; i<10; i++) {
 
-        refocus_.refocus(zref, 0, 0, 0, thresh_, 0);
-        Mat base = refocus_.result.clone();
+        Mat base = refocus_.refocus(zref, 0, 0, 0, thresh_, 0);
 
-        refocus_.refocus(zref+dz, 0, 0, 0, thresh_, 0);
-        Mat ref = refocus_.result.clone();
+        Mat ref = refocus_.refocus(zref+dz, 0, 0, 0, thresh_, 0);
 
         Mat numMat = ref.mul(base);
         Scalar sumnum = sum(numMat);
