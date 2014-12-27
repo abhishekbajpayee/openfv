@@ -1631,6 +1631,13 @@ void saRefocus::setF(double f) {
 
 }
 
+void saRefocus::setMult(int flag, double exp) {
+
+    mult_ = flag;
+    mult_exp_ = exp;
+
+}
+
 string saRefocus::showSettings() {
 
     stringstream s;
@@ -1638,6 +1645,7 @@ string saRefocus::showSettings() {
     s<<"GPU:\t\t"<<GPU_FLAG<<endl;
     s<<"Refractive:\t"<<REF_FLAG<<endl;
     s<<"HF Method:\t"<<CORNER_FLAG<<endl;
+    s<<"Multiplicative:\t"<<mult_<<endl;
     s<<endl<<"--- Other Parameters ---"<<endl;
     s<<"Num Cams:\t"<<num_cams_<<endl;
     s<<"f:\t\t"<<scale_;
@@ -1654,6 +1662,7 @@ BOOST_PYTHON_MODULE(refocusing) {
     class_<saRefocus>("saRefocus")
         .def("addView", &saRefocus::addView)
         .def("setF", &saRefocus::setF)
+        .def("setMult", &saRefocus::setMult)
         .def("showSettings", &saRefocus::showSettings)
         .def("initializeGPU", &saRefocus::initializeGPU)
         .def("refocus", &saRefocus::refocus)

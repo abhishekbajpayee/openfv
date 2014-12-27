@@ -31,27 +31,30 @@ class Scene {
     Scene();
 
     void create(double sx, double sy, double sz);
-    void createVolume(int xv, int yv, int zv);
+    void renderVolume(int xv, int yv, int zv);
+    void renderVolumeGPU(int xv, int yv, int zv);
 
+    void setParticleSigma(double, double, double);
     void setRefractiveGeom(float zW, float n1, float n2, float n3, float t);
 
     void seedR();
     void seedParticles(vector< vector<double> > locations);
     void seedParticles(int num);    
 
+    Mat getSlice(int zv);
     Mat getImg(int zv);
 
     Mat getParticles();
     vector<float> getRefGeom();
     int getRefFlag();
-    double sigma();    
+    double sigma();
 
  private:
 
     vector<voxel> getVoxels(int z);
     double f(double x, double y, double z);
 
-    double sigma_;
+    double sigmax_, sigmay_, sigmaz_;
     vector<double> xlims_, ylims_, zlims_;
     double sx_, sy_, sz_;
     int vx_, vy_, vz_;
@@ -59,6 +62,11 @@ class Scene {
 
     Mat_<double> particles_;
     vector<voxel> volume_;
+
+    vector<Mat> vol;
+    gpu::GpuMat gx, gy;
+    gpu::GpuMat tmp1, tmp2;
+    gpu::GpuMat slice;
 
     int REF_FLAG;
     vector<float> geom_;
@@ -80,6 +88,7 @@ class Camera {
     void pointAt(double x, double y, double z);
     
     Mat render();
+    Mat renderGPU();
 
     Mat getP();
     Mat getC();
@@ -103,6 +112,8 @@ class Camera {
     // TODO: name these better
     Mat_<double> p_;
     Mat_<double> s_;
+
+    gpu::GpuMat gx, gy, tmp1, tmp2, img;
 
     Scene scene_;
     int REF_FLAG;

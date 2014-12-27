@@ -73,6 +73,7 @@ class saRefocus {
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);
     void addView(Mat img, Mat P, Mat location);
     void setF(double f);
+    void setMult(int flag, double exp);
     string showSettings();
 
  private:

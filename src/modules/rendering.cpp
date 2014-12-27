@@ -39,8 +39,18 @@ void Scene::create(double sx, double sy, double sz) {
     REF_FLAG = 0;
 
     // TODO: this needs to be tweaked
-    sigma_ = 0.1;
+    sigmax_ = 0.1;
+    sigmay_ = 0.1;
+    sigmaz_ = 0.1;
 
+}
+
+void Scene::setParticleSigma(double sx, double sy, double sz) {
+
+    sigmax_ = sx;
+    sigmay_ = sy;
+    sigmaz_ = sz;
+    
 }
 
 void Scene::setRefractiveGeom(float zW, float n1, float n2, float n3, float t) {
@@ -98,7 +108,7 @@ void Scene::seedParticles(int num) {
 
 }
 
-void Scene::createVolume(int xv, int yv, int zv) {
+void Scene::renderVolume(int xv, int yv, int zv) {
 
     vx_ = xv; vy_ = yv; vz_ = zv;
 
@@ -130,17 +140,79 @@ void Scene::createVolume(int xv, int yv, int zv) {
 
 }
 
+void Scene::renderVolumeGPU(int xv, int yv, int zv) {
+
+    LOG(INFO)<<"GPU rendering voxels...";
+
+    vx_ = xv; vy_ = yv; vz_ = zv;
+
+    voxelsX_ = linspace(-0.5*sx_, 0.5*sx_, vx_);
+    voxelsY_ = linspace(-0.5*sy_, 0.5*sy_, vy_);
+    voxelsZ_ = linspace(-0.5*sz_, 0.5*sz_, vz_);
+
+    Mat x = Mat::zeros(vy_, vx_, CV_32F);
+    Mat y = Mat::zeros(vy_, vx_, CV_32F);
+    Mat blank = Mat::zeros(vy_, vx_, CV_32F);
+
+    // filling temp matrices
+    tmp1.upload(x); tmp2.upload(x);
+    slice.upload(x);
+
+    for (int i=0; i<vy_; i++) {
+        for (int j=0; j<vx_; j++) {
+            x.at<float>(i,j) = voxelsX_[j];
+            y.at<float>(i,j) = voxelsY_[i];
+        }
+    }
+    
+    gx.upload(x); gy.upload(y);
+
+    vol.clear();
+
+    for (int z=0; z<vz_; z++) {
+        for (int k=0; k<particles_.cols; k++) {
+        
+            tmp2 = 0;
+
+            // outputs -(x-ux)^2/2sig^2
+            gpu::add(gx, Scalar(-particles_(0,k)), tmp1);
+            gpu::pow(tmp1, 2.0, tmp1);
+            gpu::multiply(tmp1, Scalar(-1.0/(2*sigmax_*sigmax_)), tmp1);
+            gpu::add(tmp2, tmp1, tmp2);
+
+            // outputs -(y-uy)^2/2sig^2
+            gpu::add(gy, Scalar(-particles_(1,k)), tmp1);
+            gpu::pow(tmp1, 2.0, tmp1);
+            gpu::multiply(tmp1, Scalar(-1.0/(2*sigmay_*sigmay_)), tmp1);
+            gpu::add(tmp2, tmp1, tmp2);
+
+            gpu::add(tmp2, Scalar(-1.0*pow(voxelsZ_[z]-particles_(2,k),2.0)/(2*sigmaz_*sigmaz_)), tmp2);
+        
+            gpu::exp(tmp2, tmp2);
+            gpu::add(slice, tmp2, slice);
+        
+        }
+    
+        Mat result(slice);
+        vol.push_back(result.clone());
+        //qimshow(result);
+
+    }
+
+}
+
 double Scene::f(double x, double y, double z) {
 
     double intensity=0;
-    double sigma = sigma_*8.0;
+    double d, dx, dy, dz, b;
 
     for (int i=0; i<particles_.cols; i++) {
         // 0,25 for z part to increase effective sigma in z
-        double d = pow(x-particles_(0,i), 2) + pow(y-particles_(1,i), 2) + (1.0/4)*pow(z-particles_(2,i), 2);
+        dx = pow(x-particles_(0,i), 2); dy = pow(y-particles_(1,i), 2); dz = pow(z-particles_(2,i), 2);
+        d = dx + dy + dz;
         if (d<25)
         {
-            double b = exp( -d/(2*pow(sigma_, 2)) ); // normalization factor?
+            b = exp( -dx/(2*pow(sigmax_, 2)) - dy/(2*pow(sigmay_, 2)) - dz/(2*pow(sigmaz_, 2)) ); // normalization factor?
             intensity += b;
         }
     }
@@ -159,6 +231,12 @@ Mat Scene::getImg(int zv) {
     }
     
     return(A.clone());
+
+}
+
+Mat Scene::getSlice(int zv) {
+
+    return(vol[zv]);
 
 }
 
@@ -188,7 +266,7 @@ int Scene::getRefFlag() {
 }
 
 double Scene::sigma() {
-    return(sigma_);
+    return(sigmax_);
 }
 
 // Camera class functions
@@ -276,6 +354,54 @@ Mat Camera::render() {
 
 }
 
+Mat Camera::renderGPU() {
+
+    project();
+
+    LOG(INFO)<<"Rendering image...";
+
+    Mat x = Mat::zeros(imsy_, imsx_, CV_32F);
+    Mat y = Mat::zeros(imsy_, imsx_, CV_32F);
+    Mat blank = Mat::zeros(imsy_, imsx_, CV_32F);
+
+    tmp1.upload(x), tmp2.upload(x);
+    img.upload(x);
+
+    for (int i=0; i<imsy_; i++) {
+        for (int j=0; j<imsx_; j++) {
+            x.at<float>(i,j) = float(j);
+            y.at<float>(i,j) = float(i);
+        }
+    }
+
+    gx.upload(x); gy.upload(y);
+    
+    for (int k=0; k<p_.cols; k++) {
+        
+        tmp2 = 0;
+
+        // outputs -(x-ux)^2/2sig^2
+        gpu::add(gx, Scalar(-p_(0,k)), tmp1);
+        gpu::pow(tmp1, 2.0, tmp1);
+        gpu::multiply(tmp1, Scalar(-1.0/(2*s_(0,k)*s_(0,k))), tmp1);
+        gpu::add(tmp2, tmp1, tmp2);
+
+        // outputs -(y-uy)^2/2sig^2
+        gpu::add(gy, Scalar(-p_(1,k)), tmp1);
+        gpu::pow(tmp1, 2.0, tmp1);
+        gpu::multiply(tmp1, Scalar(-1.0/(2*s_(0,k)*s_(0,k))), tmp1);
+        gpu::add(tmp2, tmp1, tmp2);
+        
+        gpu::exp(tmp2, tmp2);
+        gpu::add(img, tmp2, img);
+        
+    }
+    
+    Mat result(img);
+    return(result.clone());
+
+}
+
 Mat Camera::getP() {
     return(P_.clone());
 }
@@ -284,6 +410,7 @@ Mat Camera::getC() {
     return(C_.clone());
 }
 
+// TODO: Consider GPU version of this?
 void Camera::project() {
 
     VLOG(1)<<"Projecting points...";
@@ -399,9 +526,6 @@ double Camera::f(double x, double y) {
 
     double intensity=0;
 
-    // directly use the buffer allocated by OpenCV
-    // Eigen::Map<MatrixXf, 0, InnerStride<3> > eigenP(p_.data);
-
     for (int i=0; i<p_.cols; i++) {
         double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2); 
         if (d<25)
@@ -445,7 +569,10 @@ BOOST_PYTHON_MODULE(rendering) {
         .def("create", &Scene::create)
         .def("seedR", &Scene::seedR)
         .def("seedParticles", sPx2)
-        .def("createVolume", &Scene::createVolume)
+        .def("setParticleSigma", &Scene::setParticleSigma)
+        .def("renderVolume", &Scene::renderVolume)
+        .def("renderVolumeGPU", &Scene::renderVolumeGPU)
+        .def("getSlice", &Scene::getSlice)
         .def("getImg", &Scene::getImg)
     ;
 
@@ -454,6 +581,7 @@ BOOST_PYTHON_MODULE(rendering) {
         .def("setScene", &Camera::setScene)
         .def("setLocation", &Camera::setLocation)
         .def("render", &Camera::render)
+        .def("renderGPU", &Camera::renderGPU)
         .def("getP", &Camera::getP)
         .def("getC", &Camera::getC)
     ;
