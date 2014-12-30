@@ -1625,6 +1625,15 @@ void saRefocus::addView(Mat img, Mat P, Mat location) {
 
 }
 
+void saRefocus::clearViews() {
+
+    P_mats_.clear();
+    imgs.clear();
+    cam_locations_.clear();
+    num_cams_ = 0;
+
+}
+
 void saRefocus::setF(double f) {
 
     scale_ = f;
@@ -1646,6 +1655,7 @@ string saRefocus::showSettings() {
     s<<"Refractive:\t"<<REF_FLAG<<endl;
     s<<"HF Method:\t"<<CORNER_FLAG<<endl;
     s<<"Multiplicative:\t"<<mult_<<endl;
+    s<<"Mult. exp.:\t"<<mult_exp_<<endl;
     s<<endl<<"--- Other Parameters ---"<<endl;
     s<<"Num Cams:\t"<<num_cams_<<endl;
     s<<"f:\t\t"<<scale_;
@@ -1661,6 +1671,7 @@ BOOST_PYTHON_MODULE(refocusing) {
 
     class_<saRefocus>("saRefocus")
         .def("addView", &saRefocus::addView)
+        .def("clearViews", &saRefocus::clearViews)
         .def("setF", &saRefocus::setF)
         .def("setMult", &saRefocus::setMult)
         .def("showSettings", &saRefocus::showSettings)

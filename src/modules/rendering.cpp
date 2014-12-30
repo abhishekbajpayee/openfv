@@ -11,6 +11,7 @@
 
 #include "std_include.h"
 #include "tools.h"
+#include "refocusing.h"
 #include "rendering.h"
 
 // #include <Eigen/Core>
@@ -25,7 +26,7 @@ using namespace cv;
 
 Scene::Scene() {}
 
-void Scene::create(double sx, double sy, double sz) {
+void Scene::create(double sx, double sy, double sz, int gpu) {
 
     LOG(INFO)<<"Creating scene...";
 
@@ -43,6 +44,12 @@ void Scene::create(double sx, double sy, double sz) {
     sigmay_ = 0.1;
     sigmaz_ = 0.1;
 
+    GPU_FLAG = gpu;
+
+}
+
+void Scene::setGpuFlag(int gpu) {
+    GPU_FLAG = gpu;
 }
 
 void Scene::setParticleSigma(double sx, double sy, double sz) {
@@ -110,33 +117,54 @@ void Scene::seedParticles(int num) {
 
 void Scene::renderVolume(int xv, int yv, int zv) {
 
-    vx_ = xv; vy_ = yv; vz_ = zv;
+    if (GPU_FLAG) {
+        renderVolumeGPU(xv, yv, zv);
+    } else {
+        renderVolumeCPU(xv, yv, zv);
+    }
 
+}
+
+void Scene::renderVolumeCPU(int xv, int yv, int zv) {
+
+    volumeCPU_.clear();
+    vx_ = xv; vy_ = yv; vz_ = zv;
     voxelsX_ = linspace(-0.5*sx_, 0.5*sx_, vx_);
     voxelsY_ = linspace(-0.5*sy_, 0.5*sy_, vy_);
     voxelsZ_ = linspace(-0.5*sz_, 0.5*sz_, vz_);
 
-    LOG(INFO)<<"Generating voxels...";
+    LOG(INFO)<<"CPU rendering voxels...";
 
     double thresh = 0.1;
 
     for (int k=0; k<voxelsZ_.size(); k++) {
+
         LOG(INFO)<<k;
+
+        vector<voxel> slice;
         for (int i=0; i<voxelsX_.size(); i++) {
             for (int j=0; j<voxelsY_.size(); j++) {
-            
                 double intensity = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]);
                 if (intensity > thresh) {
                     voxel v;
-                    v.x = i; v.y = j; v.z = k; v.I = int(intensity);
-                    volume_.push_back(v);
+                    v.x = i; v.y = j; v.z = k; v.I = intensity;
+                    slice.push_back(v);
                 }
-
             }
         }
+        
+        // Pushing image at kth z depth into vol
+        Mat img = Mat::zeros(vy_, vx_, CV_32F);
+        for (int i=0; i<slice.size(); i++) {
+            img.at<float>(slice[i].y, slice[i].x) = slice[i].I;
+        }
+        img *= 255.0;
+        img.convertTo(img, CV_8U);
+        volumeCPU_.push_back(img.clone());
+
     }
 
-    VLOG(1)<<"Seeded voxels: "<<volume_.size();
+    VLOG(1)<<"done";
 
 }
 
@@ -144,6 +172,7 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
 
     LOG(INFO)<<"GPU rendering voxels...";
 
+    volumeGPU_.clear();
     vx_ = xv; vy_ = yv; vz_ = zv;
 
     voxelsX_ = linspace(-0.5*sx_, 0.5*sx_, vx_);
@@ -155,8 +184,8 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
     Mat blank = Mat::zeros(vy_, vx_, CV_32F);
 
     // filling temp matrices
-    tmp1.upload(x); tmp2.upload(x);
-    slice.upload(x);
+    tmp1.upload(blank); tmp2.upload(blank); tmp3.upload(blank); tmp4.upload(blank);
+    slice.upload(blank);
 
     for (int i=0; i<vy_; i++) {
         for (int j=0; j<vx_; j++) {
@@ -167,26 +196,29 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
     
     gx.upload(x); gy.upload(y);
 
-    vol.clear();
-
     for (int z=0; z<vz_; z++) {
+        
+        slice = 0;
+
         for (int k=0; k<particles_.cols; k++) {
         
-            tmp2 = 0;
+            tmp1 = 0; tmp2 = 0;
 
             // outputs -(x-ux)^2/2sig^2
             gpu::add(gx, Scalar(-particles_(0,k)), tmp1);
             gpu::pow(tmp1, 2.0, tmp1);
-            gpu::multiply(tmp1, Scalar(-1.0/(2*sigmax_*sigmax_)), tmp1);
-            gpu::add(tmp2, tmp1, tmp2);
+            gpu::multiply(tmp1, Scalar(-1.0/(2*pow(sigmax_, 2))), tmp1);
+            gpu::add(tmp1, tmp2, tmp2);
+
+            tmp1 = 0;
 
             // outputs -(y-uy)^2/2sig^2
             gpu::add(gy, Scalar(-particles_(1,k)), tmp1);
             gpu::pow(tmp1, 2.0, tmp1);
-            gpu::multiply(tmp1, Scalar(-1.0/(2*sigmay_*sigmay_)), tmp1);
-            gpu::add(tmp2, tmp1, tmp2);
+            gpu::multiply(tmp1, Scalar(-1.0/(2*pow(sigmay_, 2))), tmp1);
+            gpu::add(tmp1, tmp2, tmp2);
 
-            gpu::add(tmp2, Scalar(-1.0*pow(voxelsZ_[z]-particles_(2,k),2.0)/(2*sigmaz_*sigmaz_)), tmp2);
+            gpu::add(tmp2, Scalar( -1.0*pow(voxelsZ_[z]-particles_(2,k), 2.0) / (2*pow(sigmaz_, 2)) ), tmp2);
         
             gpu::exp(tmp2, tmp2);
             gpu::add(slice, tmp2, slice);
@@ -194,10 +226,13 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
         }
     
         Mat result(slice);
-        vol.push_back(result.clone());
-        //qimshow(result);
+        result *= 255.0;
+        result.convertTo(result, CV_8U);
+        volumeGPU_.push_back(result.clone());
 
     }
+
+    VLOG(1)<<"done";
 
 }
 
@@ -212,44 +247,26 @@ double Scene::f(double x, double y, double z) {
         d = dx + dy + dz;
         if (d<25)
         {
-            b = exp( -dx/(2*pow(sigmax_, 2)) - dy/(2*pow(sigmay_, 2)) - dz/(2*pow(sigmaz_, 2)) ); // normalization factor?
+            b = exp( -dx/(2*pow(sigmax_, 2)) - dy/(2*pow(sigmay_, 2)) - dz/(2*pow(sigmaz_, 2)) );
             intensity += b;
         }
     }
     
-    return(intensity*255.0);
-
-}
-
-Mat Scene::getImg(int zv) {
-
-    Mat A = Mat::zeros(vy_, vx_, CV_8U);
-    vector<voxel> slice = getVoxels(zv);
-
-    for (int i=0; i<slice.size(); i++) {
-        A.at<char>(slice[i].y, slice[i].x) = slice[i].I;
-    }
-    
-    return(A.clone());
+    return(intensity);
 
 }
 
 Mat Scene::getSlice(int zv) {
-
-    return(vol[zv]);
-
-}
-
-vector<voxel> Scene::getVoxels(int z) {
-
-    vector<voxel> slice;
-
-    for (int i=0; i<volume_.size(); i++) {
-        if (volume_[i].z == z)
-            slice.push_back(volume_[i]);
-    }
     
-    return(slice);
+    Mat img;
+
+    if (GPU_FLAG) {
+        img = volumeGPU_[zv];
+    } else {
+        img = volumeCPU_[zv];
+    }
+
+    return(img);
 
 }
 
@@ -263,6 +280,28 @@ vector<float> Scene::getRefGeom() {
 
 int Scene::getRefFlag() {
     return(REF_FLAG);
+}
+
+vector<int> Scene::getVoxelGeom() {
+
+    vector<int> geom;
+    geom.push_back(vx_);
+    geom.push_back(vy_);
+    geom.push_back(vz_);
+
+    return(geom);
+
+}
+
+vector<double> Scene::getSceneGeom() {
+
+    vector<double> geom;
+    geom.push_back(sx_);
+    geom.push_back(sy_);
+    geom.push_back(sz_);
+
+    return(geom);
+
 }
 
 double Scene::sigma() {
@@ -280,7 +319,7 @@ Camera::Camera() {
 
 }
 
-void Camera::init(double f, int imsx, int imsy) {
+void Camera::init(double f, int imsx, int imsy, int gpu) {
 
     LOG(INFO)<<"Initializing camera...";
 
@@ -294,6 +333,8 @@ void Camera::init(double f, int imsx, int imsy) {
     K_(0,0) = f_;  K_(1,1) = f_;
     K_(0,2) = cx_; K_(1,2) = cy_;
     K_(2,2) = 1;
+
+    GPU_FLAG = gpu;
 
 }
 
@@ -338,23 +379,37 @@ void Camera::setScene(Scene scene) {
 
 Mat Camera::render() {
 
+    if (GPU_FLAG) {
+        renderGPU();
+    } else {
+        renderCPU();
+    }
+
+    return(render_);
+
+}
+
+void Camera::renderCPU() {
+
     project();
 
     LOG(INFO)<<"Rendering image...";
 
-    Mat img = Mat::zeros(imsy_, imsx_, CV_8U);
+    Mat img = Mat::zeros(imsy_, imsx_, CV_32F);
 
     for (int i=0; i<img.rows; i++) {
         for (int j=0; j<img.cols; j++) {
-            img.at<char>(i,j) = int( f(double(j), double(i)) );
+            img.at<float>(i,j) = f(double(j), double(i));
         }
     }
 
-    return(img.clone());
+    img *= 255.0;
+    img.convertTo(img, CV_8U);
+    render_ = img.clone();
 
 }
 
-Mat Camera::renderGPU() {
+void Camera::renderGPU() {
 
     project();
 
@@ -364,8 +419,8 @@ Mat Camera::renderGPU() {
     Mat y = Mat::zeros(imsy_, imsx_, CV_32F);
     Mat blank = Mat::zeros(imsy_, imsx_, CV_32F);
 
-    tmp1.upload(x), tmp2.upload(x);
-    img.upload(x);
+    tmp1.upload(blank), tmp2.upload(blank);
+    img.upload(blank);
 
     for (int i=0; i<imsy_; i++) {
         for (int j=0; j<imsx_; j++) {
@@ -378,13 +433,15 @@ Mat Camera::renderGPU() {
     
     for (int k=0; k<p_.cols; k++) {
         
-        tmp2 = 0;
+        tmp1 = 0; tmp2 = 0;
 
         // outputs -(x-ux)^2/2sig^2
         gpu::add(gx, Scalar(-p_(0,k)), tmp1);
         gpu::pow(tmp1, 2.0, tmp1);
         gpu::multiply(tmp1, Scalar(-1.0/(2*s_(0,k)*s_(0,k))), tmp1);
         gpu::add(tmp2, tmp1, tmp2);
+
+        tmp1 = 0;
 
         // outputs -(y-uy)^2/2sig^2
         gpu::add(gy, Scalar(-p_(1,k)), tmp1);
@@ -398,7 +455,9 @@ Mat Camera::renderGPU() {
     }
     
     Mat result(img);
-    return(result.clone());
+    result *= 255.0;
+    result.convertTo(result, CV_8U);
+    render_ = result.clone();
 
 }
 
@@ -530,15 +589,13 @@ double Camera::f(double x, double y) {
         double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2); 
         if (d<25)
         {
-            //double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2);
-            double b = exp( -d/(2*pow(s_(0,i), 2)) ); // normalization factor?
-            //LOG(INFO)<<b;
+            double b = exp( -d/(2*pow(s_(0,i), 2)) );
             intensity += b;
         }
 
     }
     
-    return(intensity*255.0);
+    return(intensity);
 
 }
 
@@ -557,6 +614,47 @@ Mat Camera::Rt() {
 
 }
 
+void benchmark::benchmarkSA(Scene scn, saRefocus refocus) {
+
+    scene_ = scn;
+    refocus_ = refocus;
+
+}
+
+double benchmark::calcQ(double thresh, int mult, double mult_exp) {
+
+    vector<int> voxels = scene_.getVoxelGeom();
+    vector<double> scnSize = scene_.getSceneGeom();
+    vector<double> z = linspace(-0.5*scnSize[2], 0.5*scnSize[2], voxels[2]);
+
+    if (mult) {
+        refocus_.setMult(mult, mult_exp);
+    } else {
+        refocus_.setMult(0, 1.0);
+    }
+
+    double at = 0; double bt = 0; double ct = 0;
+    for (int i=0; i<voxels[2]; i++) {
+
+        Mat ref = scene_.getSlice(i);
+        Mat img;
+        if (mult) {
+            img = refocus_.refocus(z[i], 0, 0, 0, 0, 0); // <-- TODO: in future add ability to handle multiple time frames?
+        } else {
+            img = refocus_.refocus(z[i], 0, 0, 0, thresh, 0);
+        }
+
+        Mat a; multiply(ref, img, a); double as = double(sum(a)[0]); at += as;
+        Mat b; pow(ref, 2, b); double bs = double(sum(b)[0]); bt += bs;
+        Mat c; pow(img, 2, c); double cs = double(sum(c)[0]); ct += cs;
+
+    }
+
+    double Q = at/sqrt(bt*ct);
+    return(Q);
+
+}
+
 // Python wrapper
 BOOST_PYTHON_MODULE(rendering) {
 
@@ -567,13 +665,12 @@ BOOST_PYTHON_MODULE(rendering) {
 
     class_<Scene>("Scene")
         .def("create", &Scene::create)
+        .def("setGpuFlag", &Scene::setGpuFlag)
         .def("seedR", &Scene::seedR)
         .def("seedParticles", sPx2)
         .def("setParticleSigma", &Scene::setParticleSigma)
         .def("renderVolume", &Scene::renderVolume)
-        .def("renderVolumeGPU", &Scene::renderVolumeGPU)
         .def("getSlice", &Scene::getSlice)
-        .def("getImg", &Scene::getImg)
     ;
 
     class_<Camera>("Camera")
@@ -581,9 +678,13 @@ BOOST_PYTHON_MODULE(rendering) {
         .def("setScene", &Camera::setScene)
         .def("setLocation", &Camera::setLocation)
         .def("render", &Camera::render)
-        .def("renderGPU", &Camera::renderGPU)
         .def("getP", &Camera::getP)
         .def("getC", &Camera::getC)
+    ;
+
+    class_<benchmark>("benchmark")
+        .def("benchmarkSA", &benchmark::benchmarkSA)
+        .def("calcQ", &benchmark::calcQ)
     ;
 
 }

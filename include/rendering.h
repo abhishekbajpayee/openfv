@@ -14,6 +14,7 @@
 
 #include "std_include.h"
 #include "typedefs.h"
+#include "refocusing.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
@@ -30,8 +31,11 @@ class Scene {
 
     Scene();
 
-    void create(double sx, double sy, double sz);
+    void create(double sx, double sy, double sz, int gpu);
+    void setGpuFlag(int gpu);
+
     void renderVolume(int xv, int yv, int zv);
+    void renderVolumeCPU(int xv, int yv, int zv);
     void renderVolumeGPU(int xv, int yv, int zv);
 
     void setParticleSigma(double, double, double);
@@ -42,16 +46,16 @@ class Scene {
     void seedParticles(int num);    
 
     Mat getSlice(int zv);
-    Mat getImg(int zv);
 
     Mat getParticles();
     vector<float> getRefGeom();
     int getRefFlag();
+    vector<int> getVoxelGeom();
+    vector<double> getSceneGeom();
     double sigma();
 
  private:
 
-    vector<voxel> getVoxels(int z);
     double f(double x, double y, double z);
 
     double sigmax_, sigmay_, sigmaz_;
@@ -61,14 +65,16 @@ class Scene {
     vector<double> voxelsX_, voxelsY_, voxelsZ_;
 
     Mat_<double> particles_;
-    vector<voxel> volume_;
+    vector<Mat> volumeGPU_;
+    vector<Mat> volumeCPU_;
 
     vector<Mat> vol;
     gpu::GpuMat gx, gy;
-    gpu::GpuMat tmp1, tmp2;
+    gpu::GpuMat tmp1, tmp2, tmp3, tmp4;
     gpu::GpuMat slice;
 
     int REF_FLAG;
+    int GPU_FLAG;
     vector<float> geom_;
 
 };
@@ -82,13 +88,14 @@ class Camera {
 
     Camera();
 
-    void init(double f, int imsx, int imsy);
+    void init(double f, int imsx, int imsy, int gpu);
     void setScene(Scene scene);
     void setLocation(double x, double y, double z);
     void pointAt(double x, double y, double z);
     
     Mat render();
-    Mat renderGPU();
+    void renderCPU();
+    void renderGPU();
 
     Mat getP();
     Mat getC();
@@ -109,6 +116,9 @@ class Camera {
     Mat_<double> K_;
     Mat_<double> P_;
 
+    // Rendered image
+    Mat render_;
+
     // TODO: name these better
     Mat_<double> p_;
     Mat_<double> s_;
@@ -117,11 +127,28 @@ class Camera {
 
     Scene scene_;
     int REF_FLAG;
+    int GPU_FLAG;
     vector<float> geom_;
-
-    //private members here
 
 };
 
+class benchmark {
+
+ public:
+    ~benchmark() {
+
+    }
+
+    benchmark() {}
+
+    void benchmarkSA(Scene scene, saRefocus refocus);
+    double calcQ(double thresh, int mult, double mult_exp);
+
+ private:
+
+    Scene scene_;
+    saRefocus refocus_;
+
+};
 
 #endif

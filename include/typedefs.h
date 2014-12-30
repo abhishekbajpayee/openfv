@@ -102,7 +102,7 @@ struct voxel {
     int x;
     int y;
     int z;
-    int I;
+    double I;
 };
 
 #endif
