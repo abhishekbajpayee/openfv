@@ -1,4 +1,8 @@
+#ifndef TOOLS_LIBRARY
+#define TOOLS_LIBRARY
+
 #include "std_include.h"
+#include "typedefs.h"
 
 using namespace std;
 using namespace cv;
@@ -38,3 +42,45 @@ vector<double> linspace(double, double, int);
 Mat cross(Mat_<double>, Mat_<double>);
 
 Mat normalize(Mat_<double>);
+
+// File IO class
+
+class fileIO {
+
+ public:
+    ~fileIO() {
+        LOG(INFO)<<"Closing file...";
+        file.close(); 
+    }
+
+    fileIO(string filename);
+
+    // TODO: add more templates
+    void operator<< (int);
+    void operator<< (float);
+    void operator<< (double);
+    void operator<< (string);
+    void operator<< (const char*);
+    void operator<< (vector<double>);
+    
+    /*
+    void write(Mat);
+    void write(vector<int>);
+    void write(vector<float>);
+    void write(vector<double>);
+    void write(vector< vector<int> >);
+    void write(vector< vector<float> >);
+    void write(vector< vector<double> >);
+    */
+
+ protected:
+
+ private:
+
+    string getFilename(string filename);
+
+    ofstream file;
+
+};
+
+#endif

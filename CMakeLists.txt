@@ -27,10 +27,6 @@ include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories ("/usr/local/cuda-5.0/include")
 include_directories ("/home/ab9/Apps/Qt/5.2.1/gcc_64/include")
 
-# IF(CMAKE_COMPILER_IS_GNUCXX)
-#   ADD_DEFINITIONS("-Wall")
-# ENDIF()
-
 # subdirectories
 add_subdirectory (src)
 

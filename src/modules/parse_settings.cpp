@@ -14,6 +14,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("refractive", po::value<int>(), "ON to use refractive refocusing")
         ("use_gpu", po::value<int>(), "ON to use GPU")
         ("mult", po::value<int>(), "ON to use multiplicative method")
+        ("mult_exp", po::value<double>(), "Multiplicative method exponent")
         ("hf_method", po::value<int>(), "ON to use HF method")
         ("mtiff", po::value<int>(), "ON if data is in multipage tiff files")
         ("all_frames", po::value<int>(), "ON to process all frames in a multipage tiff file")
@@ -45,6 +46,9 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.corner_method = vm["hf_method"].as<int>();
     settings.mtiff = vm["mtiff"].as<int>();
     settings.mult = vm["mult"].as<int>();
+    if (settings.mult)
+        settings.mult_exp = vm["mult_exp"].as<double>();
+
 
     settings.preprocess = vm["preprocess"].as<int>();
     if (settings.preprocess)

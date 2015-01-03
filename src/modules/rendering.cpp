@@ -141,23 +141,18 @@ void Scene::renderVolumeCPU(int xv, int yv, int zv) {
 
         LOG(INFO)<<k;
 
-        vector<voxel> slice;
+        Mat img = Mat::zeros(vy_, vx_, CV_32F);
+
         for (int i=0; i<voxelsX_.size(); i++) {
             for (int j=0; j<voxelsY_.size(); j++) {
-                double intensity = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]);
-                if (intensity > thresh) {
-                    voxel v;
-                    v.x = i; v.y = j; v.z = k; v.I = intensity;
-                    slice.push_back(v);
+                // double intensity = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]);
+                // if (intensity > thresh) 
+                {
+                    img.at<float>(j, i) = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]); //intensity;
                 }
             }
         }
         
-        // Pushing image at kth z depth into vol
-        Mat img = Mat::zeros(vy_, vx_, CV_32F);
-        for (int i=0; i<slice.size(); i++) {
-            img.at<float>(slice[i].y, slice[i].x) = slice[i].I;
-        }
         img *= 255.0;
         img.convertTo(img, CV_8U);
         volumeCPU_.push_back(img.clone());
@@ -168,13 +163,31 @@ void Scene::renderVolumeCPU(int xv, int yv, int zv) {
 
 }
 
+double Scene::f(double x, double y, double z) {
+
+    double intensity=0;
+    double d, dx, dy, dz, b;
+
+    for (int i=0; i<particles_.cols; i++) {
+        dx = pow(x-particles_(0,i), 2); dy = pow(y-particles_(1,i), 2); dz = pow(z-particles_(2,i), 2);
+        d = dx + dy + dz;
+        if (d<25)
+        {
+            b = exp( -1.0*(dx/(2*pow(sigmax_, 2)) + dy/(2*pow(sigmay_, 2)) + dz/(2*pow(sigmaz_, 2))) );
+            intensity += b;
+        }
+    }
+    
+    return(intensity);
+
+}
+
 void Scene::renderVolumeGPU(int xv, int yv, int zv) {
 
     LOG(INFO)<<"GPU rendering voxels...";
 
     volumeGPU_.clear();
     vx_ = xv; vy_ = yv; vz_ = zv;
-
     voxelsX_ = linspace(-0.5*sx_, 0.5*sx_, vx_);
     voxelsY_ = linspace(-0.5*sy_, 0.5*sy_, vy_);
     voxelsZ_ = linspace(-0.5*sz_, 0.5*sz_, vz_);
@@ -233,26 +246,6 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
     }
 
     VLOG(1)<<"done";
-
-}
-
-double Scene::f(double x, double y, double z) {
-
-    double intensity=0;
-    double d, dx, dy, dz, b;
-
-    for (int i=0; i<particles_.cols; i++) {
-        // 0,25 for z part to increase effective sigma in z
-        dx = pow(x-particles_(0,i), 2); dy = pow(y-particles_(1,i), 2); dz = pow(z-particles_(2,i), 2);
-        d = dx + dy + dz;
-        if (d<25)
-        {
-            b = exp( -dx/(2*pow(sigmax_, 2)) - dy/(2*pow(sigmay_, 2)) - dz/(2*pow(sigmaz_, 2)) );
-            intensity += b;
-        }
-    }
-    
-    return(intensity);
 
 }
 
@@ -406,6 +399,24 @@ void Camera::renderCPU() {
     img *= 255.0;
     img.convertTo(img, CV_8U);
     render_ = img.clone();
+
+}
+
+double Camera::f(double x, double y) {
+
+    double intensity=0;
+
+    for (int i=0; i<p_.cols; i++) {
+        double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2); 
+        if (d<25)
+        {
+            double b = exp( -d/(2*pow(s_(0,i), 2)) );
+            intensity += b;
+        }
+
+    }
+    
+    return(intensity);
 
 }
 
@@ -581,24 +592,6 @@ void Camera::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out) 
 
 }
 
-double Camera::f(double x, double y) {
-
-    double intensity=0;
-
-    for (int i=0; i<p_.cols; i++) {
-        double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2); 
-        if (d<25)
-        {
-            double b = exp( -d/(2*pow(s_(0,i), 2)) );
-            intensity += b;
-        }
-
-    }
-    
-    return(intensity);
-
-}
-
 Mat Camera::Rt() {
 
     Mat_<double> Rt = Mat_<double>::zeros(3,4);
@@ -643,10 +636,12 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
         } else {
             img = refocus_.refocus(z[i], 0, 0, 0, thresh, 0);
         }
-
+        
+        //qimshow(ref); qimshow(img);
         Mat a; multiply(ref, img, a); double as = double(sum(a)[0]); at += as;
         Mat b; pow(ref, 2, b); double bs = double(sum(b)[0]); bt += bs;
         Mat c; pow(img, 2, c); double cs = double(sum(c)[0]); ct += cs;
+        VLOG(0)<<as<<", "<<bs<<", "<<cs<<", "<<as/sqrt(bs*cs);
 
     }
 
@@ -669,6 +664,7 @@ BOOST_PYTHON_MODULE(rendering) {
         .def("seedR", &Scene::seedR)
         .def("seedParticles", sPx2)
         .def("setParticleSigma", &Scene::setParticleSigma)
+        .def("setRefractiveGeom", &Scene::setRefractiveGeom)
         .def("renderVolume", &Scene::renderVolume)
         .def("getSlice", &Scene::getSlice)
     ;

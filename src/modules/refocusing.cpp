@@ -1647,15 +1647,38 @@ void saRefocus::setMult(int flag, double exp) {
 
 }
 
+void saRefocus::setHF(int hf) {
+
+    CORNER_FLAG = hf;
+
+}
+
+void saRefocus::setRefractive(int ref, double zW, double n1, double n2, double n3, double t) {
+
+    REF_FLAG = ref;
+    geom[0] = zW;
+    geom[1] = n1; geom[2] = n2; geom[3] = n3;
+    geom[4] = t;
+
+}
+
 string saRefocus::showSettings() {
 
     stringstream s;
     s<<"--- FLAGS ---"<<endl;
     s<<"GPU:\t\t"<<GPU_FLAG<<endl;
     s<<"Refractive:\t"<<REF_FLAG<<endl;
+    if (REF_FLAG) {
+        s<<"Wall z: "<<geom[0]<<endl;
+        s<<"n1: "<<geom[1]<<endl;
+        s<<"n2: "<<geom[2]<<endl;
+        s<<"n3: "<<geom[3]<<endl;
+        s<<"Wall t: "<<geom[4]<<endl;
+    }
     s<<"HF Method:\t"<<CORNER_FLAG<<endl;
     s<<"Multiplicative:\t"<<mult_<<endl;
-    s<<"Mult. exp.:\t"<<mult_exp_<<endl;
+    if (mult_)
+        s<<"Mult. exp.:\t"<<mult_exp_<<endl;
     s<<endl<<"--- Other Parameters ---"<<endl;
     s<<"Num Cams:\t"<<num_cams_<<endl;
     s<<"f:\t\t"<<scale_;
@@ -1674,6 +1697,8 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("clearViews", &saRefocus::clearViews)
         .def("setF", &saRefocus::setF)
         .def("setMult", &saRefocus::setMult)
+        .def("setHF", &saRefocus::setHF)
+        .def("setRefractive", &saRefocus::setRefractive)
         .def("showSettings", &saRefocus::showSettings)
         .def("initializeGPU", &saRefocus::initializeGPU)
         .def("refocus", &saRefocus::refocus)

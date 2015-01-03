@@ -75,6 +75,8 @@ class saRefocus {
     void clearViews();
     void setF(double f);
     void setMult(int flag, double exp);
+    void setHF(int hf);
+    void setRefractive(int ref, double zW, double n1, double n2, double n3, double t);
     string showSettings();
 
  private:

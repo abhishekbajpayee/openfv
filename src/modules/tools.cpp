@@ -1,6 +1,3 @@
-#ifndef TOOLS_LIBRARY
-#define TOOLS_LIBRARY
-
 #include "std_include.h"
 #include "typedefs.h"
 #include "tools.h"
@@ -355,4 +352,57 @@ Mat normalize(Mat_<double> A) {
 
 }
 
-#endif
+fileIO::fileIO(string filename) {
+
+    file.open(filename.c_str());
+    if(file.is_open()) {
+        LOG(INFO)<<"Successfully opened file "<<filename;
+    } else {
+        LOG(INFO)<<"Could not open file "<<filename<<"!";
+        string reroute_path = "../temp/" + getFilename(filename);
+        file.open(reroute_path.c_str());
+        if (file.is_open())
+            LOG(INFO)<<"Routing output to "<<reroute_path;
+    }
+
+}
+
+void fileIO::operator<< (int val) {
+    file<<val;
+}
+
+void fileIO::operator<< (float val) {
+    file<<val;
+}
+
+void fileIO::operator<< (double val) {
+    file<<val;
+}
+
+void fileIO::operator<< (string val) {
+    file<<val;
+}
+
+void fileIO::operator<< (const char* val) {
+    file<<val;
+}
+
+void fileIO::operator<< (vector<double> val) {
+
+    for (int i=0; i<val.size(); i++)
+        file<<val[i]<<endl;
+
+}
+
+string fileIO::getFilename(string filename) {
+
+    string slash = "/";
+    int i;
+    for (i=filename.length()-1; i>=0; i--) {
+        if (string(1, filename[i]) == slash)
+            break;
+    }
+
+    return(filename.substr(i+1));
+
+}
