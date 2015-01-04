@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
         }
     } else {
         refocus.initializeGPU();
-        refocus.dump_stack(settings.save_path, settings.zmin, settings.zmax, settings.dz, settings.thresh);
+        refocus.dump_stack(settings.save_path, settings.zmin, settings.zmax, settings.dz, settings.thresh, "tif");
     }
 
     return 1;
