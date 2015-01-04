@@ -42,8 +42,11 @@ class Scene {
     void setRefractiveGeom(float zW, float n1, float n2, float n3, float t);
 
     void seedR();
+    void seedAxes();
     void seedParticles(vector< vector<double> > locations);
     void seedParticles(int num);    
+
+    void propagateParticles(vector<double> (*func)(double, double, double, double), double t);
 
     Mat getSlice(int zv);
 
@@ -65,6 +68,7 @@ class Scene {
     vector<double> voxelsX_, voxelsY_, voxelsZ_;
 
     Mat_<double> particles_;
+    vector< Mat_<double> > trajectory_;
     vector<Mat> volumeGPU_;
     vector<Mat> volumeCPU_;
 

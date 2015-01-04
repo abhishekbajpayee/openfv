@@ -55,22 +55,23 @@ class fileIO {
 
     fileIO(string filename);
 
-    // TODO: add more templates
     void operator<< (int);
     void operator<< (float);
     void operator<< (double);
     void operator<< (string);
     void operator<< (const char*);
+    void operator<< (vector<int>);
+    void operator<< (vector< vector<int> >);
+    void operator<< (vector<float>);
+    void operator<< (vector< vector<float> >);
     void operator<< (vector<double>);
-    
+    void operator<< (vector< vector<double> >);
+
+    // TODO: add templated Mat data output to file
+    // TODO: think of clean way to write image and vector of images to folders -> maybe write imageIO class
+
     /*
     void write(Mat);
-    void write(vector<int>);
-    void write(vector<float>);
-    void write(vector<double>);
-    void write(vector< vector<int> >);
-    void write(vector< vector<float> >);
-    void write(vector< vector<double> >);
     */
 
  protected:

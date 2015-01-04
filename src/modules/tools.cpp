@@ -387,10 +387,54 @@ void fileIO::operator<< (const char* val) {
     file<<val;
 }
 
+void fileIO::operator<< (vector<int> val) {
+
+    for (int i=0; i<val.size(); i++)
+        file<<val[i]<<endl;
+
+}
+
+void fileIO::operator<< (vector< vector<int> > val) {
+
+    for (int i=0; i<val.size(); i++) {
+        for (int j=0; j<val[i].size(); j++)
+            file<<val[i][j]<<"\t";
+        file<<endl;
+    }
+
+}
+
+void fileIO::operator<< (vector<float> val) {
+
+    for (int i=0; i<val.size(); i++)
+        file<<val[i]<<endl;
+
+}
+
+void fileIO::operator<< (vector< vector<float> > val) {
+
+    for (int i=0; i<val.size(); i++) {
+        for (int j=0; j<val[i].size(); j++)
+            file<<val[i][j]<<"\t";
+        file<<endl;
+    }
+
+}
+
 void fileIO::operator<< (vector<double> val) {
 
     for (int i=0; i<val.size(); i++)
         file<<val[i]<<endl;
+
+}
+
+void fileIO::operator<< (vector< vector<double> > val) {
+
+    for (int i=0; i<val.size(); i++) {
+        for (int j=0; j<val[i].size(); j++)
+            file<<val[i][j]<<"\t";
+        file<<endl;
+    }
 
 }
 

@@ -81,6 +81,26 @@ void Scene::seedR() {
 
 }
 
+void Scene::seedAxes() {
+    
+    LOG(INFO)<<"Seeding coordinate system axes...";
+
+    particles_ = Mat_<double>::zeros(4, 175);
+
+    for (int i=0; i<100; i++) {
+        particles_(3,i) = 1; particles_(0,i) = i*0.5;
+    }
+    for (int i=0; i<50; i++) {
+        particles_(3,i+100) = 1; particles_(1,i+100) = i;
+    }
+    for (int i=0; i<25; i++) {
+        particles_(3,i+150) = 1; particles_(2,i+150) = i*2;
+    }
+
+    // TODO: add axis labels enough to identify orientation
+
+}
+
 void Scene::seedParticles(vector< vector<double> > points) {
 
     LOG(INFO)<<"Seeding particles...";
@@ -91,6 +111,8 @@ void Scene::seedParticles(vector< vector<double> > points) {
     for (int i=0; i<num; i++) {
         particles_(0,i) = points[i][0]; particles_(1,i) = points[i][1]; particles_(2,i) = points[i][2]; particles_(3,i) = 1;
     }
+
+    trajectory_.push_back(particles_.clone());
 
 }
 
@@ -112,6 +134,23 @@ void Scene::seedParticles(int num) {
         particles_(0,i) = x; particles_(1,i) = y; particles_(2,i) = z; particles_(3,i) = 1;
 
     }
+
+    trajectory_.push_back(particles_.clone());
+
+}
+
+// Accepts a pointer to a function func(x, y, z, t) which outputs the new position of a particle
+// at (x, y, z) after moving it according to a certain velocity field over time t
+void Scene::propagateParticles(vector<double> (*func)(double, double, double, double), double t) {
+
+    LOG(INFO)<<"Propagating particles using function over "<<t<<" seconds...";
+
+    for (int i=0; i<particles_.cols; i++) {
+        vector<double> new_point = func(particles_(0,i), particles_(1,i), particles_(2,i), t);
+        particles_(0,i) = new_point[0]; particles_(1,i) = new_point[1]; particles_(2,i) = new_point[2];
+    }
+
+    trajectory_.push_back(particles_.clone());
 
 }
 
