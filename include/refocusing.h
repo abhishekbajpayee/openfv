@@ -79,6 +79,10 @@ class saRefocus {
     void setRefractive(int ref, double zW, double n1, double n2, double n3, double t);
     string showSettings();
 
+ protected:
+    // Vector of vectors that stores images from all cameras and for all time steps
+    vector< vector<Mat> > imgs;
+
  private:
 
     void uploadToGPU();
@@ -121,8 +125,6 @@ class saRefocus {
 
     Mat refocused_host_;
 
-    // Vector of vectors that stores images from all cameras and for all time steps
-    vector< vector<Mat> > imgs;
     Mat cputemp; Mat cputemp2; Mat cpurefocused;
 
     vector<gpu::GpuMat> array;
