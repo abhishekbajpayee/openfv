@@ -33,6 +33,23 @@ struct refocus_settings {
 
 };
 
+struct safe_refocus_settings {
+
+  double dp;
+  double minDist; 
+  double param1;
+  double param2;
+  int minRadius;
+  int maxRadius;
+  int gKerWid;
+  int gKerHt;
+  int gKerSigX;
+  int gKerSigY;
+  int circle_rim_thickness;
+  int debug;
+
+};
+
 struct refocusing_data {
     vector<Mat> P_mats_u; // Unaligned P matrices
     vector<Mat> P_mats;

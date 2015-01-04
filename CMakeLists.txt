@@ -44,6 +44,7 @@ add_executable (refocus ${PROJECT_SOURCE_DIR}/src/execs/refocus.cpp)
 add_executable (jobFind ${PROJECT_SOURCE_DIR}/src/execs/jobFind.cpp)
 add_executable (track ${PROJECT_SOURCE_DIR}/src/execs/track.cpp)
 add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/execs/calibrate.cpp)
+add_executable (safeRefocus ${PROJECT_SOURCE_DIR}/src/execs/safeRefocus.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS python2.7 tiff ${Boost_PO} ${Boost_PY})
@@ -56,6 +57,7 @@ target_link_libraries (jobFind ${LIBS})
 target_link_libraries (refocus ${LIBS})
 target_link_libraries (track ${LIBS})
 target_link_libraries (calibrate ${LIBS})
+target_link_libraries (safeRefocus ${LIBS})
 
 # Python wrappers
 
