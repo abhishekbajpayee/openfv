@@ -380,7 +380,31 @@ saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
 
 }
 
-// TODO: write something to vector of Mats as movie with trackbar
+// ----------------------------------------------------
+// Temporary location of particle propagation functions
+// ----------------------------------------------------
+
+vector<double> vortex(double x, double y, double z, double t) {
+
+    double omega = 2.0;
+
+    double r = sqrt(x*x + z*z);
+    double theta = atan2(z, x);
+    double dTheta = omega*t;
+    double theta2 = theta+dTheta;
+
+    double x2 = r*cos(theta2); double z2 = r*sin(theta2); double y2 = y;
+
+    vector<double> np;
+    np.push_back(x2); np.push_back(y2); np.push_back(z2);
+
+    return(np);
+
+}
+
+// ----------------------------------------------------
+// Movie class functions
+// ----------------------------------------------------
 
 Movie::Movie(vector<Mat> frames) {
 
@@ -427,7 +451,9 @@ void Movie::updateFrame() {
 
 }
 
+// ----------------------------------------------------
 // fileIO class functions
+// ----------------------------------------------------
 
 fileIO::fileIO(string filename) {
 
@@ -525,5 +551,110 @@ string fileIO::getFilename(string filename) {
     }
 
     return(filename.substr(i+1));
+
+}
+
+// ----------------------------------------------------
+// imageIO class functions
+// ----------------------------------------------------
+
+imageIO::imageIO(string path) {
+
+    DIR *dir;
+    struct dirent *ent;
+    string slash = "/";
+
+    dir = opendir(path.c_str());
+    if (!dir) {
+
+        LOG(INFO)<<"Could not open directory "<<path;
+
+        int i=1;
+        dir_path_ = "../temp/folder001/";
+        while(opendir(dir_path_.c_str())) {
+            i++;
+            dir_path_ = "../temp/folder";
+            char buf[10];
+            sprintf(buf, "%03d", i);
+            dir_path_ += string(buf) + "/";
+        }
+        DIR_CREATED = 0;
+        LOG(INFO)<<"Redirecting output to directory "<<dir_path_;
+
+    } else {
+
+        if (string(1, path[path.length()-1]) == slash) {
+            dir_path_ = path;
+        } else {
+            dir_path_ = path + "/";
+        }
+
+        LOG(INFO)<<"Successfully initialized image writer in "<<dir_path_;
+        
+        int files=0;
+        while(ent = readdir(dir)) {
+            files++;
+            if(files>2)
+                break;
+        }
+
+        if(files>2)
+            LOG(INFO)<<"Warning: "<<dir_path_<<" is not empty";
+
+    }
+
+    counter_ = 1;
+    prefix_ = string("");
+    ext_ = ".jpg";
+
+}
+
+void imageIO::operator<< (Mat img) {
+
+    if (!DIR_CREATED)
+        mkdir(dir_path_.c_str(), S_IRWXU);
+
+    stringstream filename;
+    filename<<dir_path_<<prefix_;
+    
+    char num[10];
+    sprintf(num, "%03d", counter_);
+    
+    filename<<string(num);
+    filename<<ext_;
+
+    // TODO: specify quality depending on extension
+    imwrite(filename.str(), img);
+    counter_++;
+
+}
+
+void imageIO::operator<< (vector<Mat> imgs) {
+
+    if (!DIR_CREATED)
+        mkdir(dir_path_.c_str(), S_IRWXU);
+    
+    for (int i = 0; i < imgs.size(); i++) {
+        
+        stringstream filename;
+        filename<<dir_path_<<prefix_;
+
+        char num[10];
+        sprintf(num, "%03d", counter_);
+    
+        filename<<string(num);
+        filename<<ext_;
+
+        // TODO: specify quality depending on extension
+        imwrite(filename.str(), imgs[i]);
+        counter_++;
+
+    }
+
+}
+
+void imageIO::setPrefix(string prefix) {
+
+    prefix_ = prefix;
 
 }

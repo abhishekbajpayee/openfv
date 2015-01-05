@@ -47,6 +47,26 @@ Mat normalize(Mat_<double>);
 
 saRefocus addCams(Scene, Camera, double, double, double);
 
+vector<double> vortex(double, double, double, double);
+
+// Movie class
+
+class Movie {
+
+ public:
+    ~Movie() {}
+
+    Movie(vector<Mat>);
+
+ private:
+    
+    void play();
+    void updateFrame();
+    vector<Mat> frames_;
+    int active_frame_;
+
+};
+
 // File IO class
 
 class fileIO {
@@ -72,7 +92,6 @@ class fileIO {
     void operator<< (vector< vector<double> >);
 
     // TODO: add templated Mat data output to file
-    // TODO: think of clean way to write image and vector of images to folders -> maybe write imageIO class
 
     /*
     void write(Mat);
@@ -88,19 +107,31 @@ class fileIO {
 
 };
 
-class Movie {
+class imageIO {
 
  public:
-    ~Movie() {}
+    ~imageIO() {
 
-    Movie(vector<Mat>);
+    }
+
+    imageIO(string path);
+
+    void setPrefix(string prefix);
+
+    void operator<< (Mat);
+    void operator<< (vector<Mat>);
+
+ protected:
 
  private:
     
-    void play();
-    void updateFrame();
-    vector<Mat> frames_;
-    int active_frame_;
+    string dir_path_;
+    string prefix_;
+    string ext_;
+
+    int counter_;
+
+    int DIR_CREATED;
 
 };
 
