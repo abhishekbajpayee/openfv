@@ -52,7 +52,10 @@ class saRefocus {
 
     void CPUliveView();
     void GPUliveView();
+
+    void initializeRefocus();
     void initializeGPU();
+    void initializeCPU();
 
     Mat refocus(double z, double rx, double ry, double rz, double thresh, int frame);
 

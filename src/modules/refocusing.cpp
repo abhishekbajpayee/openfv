@@ -249,9 +249,11 @@ void saRefocus::read_imgs(string path) {
         for (int j=0; j<img_names.size(); j++) {
             VLOG(1)<<j<<": "<<img_names[j]<<endl;
             image = imread(img_names[j], 0);
-            //image = imread(img_names[i]);
-            Mat imgI; preprocess(image, imgI);
-            refocusing_imgs_sub.push_back(imgI.clone());
+            // image = imread(img_names[i]);
+            Mat imgI;
+            // preprocess(image, imgI);
+            //refocusing_imgs_sub.push_back(imgI.clone());
+            refocusing_imgs_sub.push_back(image.clone());
             if (i==0) {
                 frames_.push_back(j);
             }
@@ -328,7 +330,7 @@ void saRefocus::read_imgs_mtiff(string path) {
 
         vector<Mat> refocusing_imgs_sub;
 
-        int frame=0;
+        int frame=0; // TODO: check if this is being used at all
         int count=0;
         int skip=1400;
         
@@ -357,11 +359,12 @@ void saRefocus::read_imgs_mtiff(string path) {
                 _TIFFfree(raster);
             }
             
-            img.convertTo(img2, CV_8U);
-            Mat imgI; preprocess(img2, imgI);
+            // img.convertTo(img2, CV_8U);
+            Mat imgI;
+            // preprocess(img2, imgI);
             
-            //imshow("img to push", imgI); waitKey(0);
-            refocusing_imgs_sub.push_back(imgI.clone());
+            // imshow("img to push", imgI); waitKey(0);
+            refocusing_imgs_sub.push_back(img.clone());
             count++;
             
             frame += skip;
@@ -402,8 +405,8 @@ void saRefocus::GPUliveView() {
     }
     
     double dz = 0.1;
-    double dthresh = 5;
-    double tlimit = 255;
+    double dthresh = 5/255.0;
+    double tlimit = 1.0;
 
     while( 1 ){
         int key = cvWaitKey(10);
@@ -491,6 +494,8 @@ void saRefocus::GPUliveView() {
 
 void saRefocus::CPUliveView() {
 
+    initializeCPU();
+
     if (CORNER_FLAG) {
         LOG(INFO)<<"Using corner based homography fit method..."<<endl;
     } else {
@@ -511,12 +516,8 @@ void saRefocus::CPUliveView() {
     }
     
     double dz = 0.5;
-    double dthresh = 5;
-    double tlimit = 255;
-    if (REF_FLAG) {
-        dthresh = 5.0/255;
-        tlimit = 1.0;
-    }
+    double dthresh = 5/255.0;
+    double tlimit = 1.0;
 
     while( 1 ){
         int key = cvWaitKey(10);
@@ -598,10 +599,58 @@ Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh,
 
 }
 
+void saRefocus::initializeRefocus() {
+
+    // This functions converts any incoming datatype images to
+    // CV_32F ranging between 0 and 1
+    // Note this assumes that black and white pixel value depends
+    // on the datatype
+    // TODO: add ability to handle more data types
+
+    int type = imgs[0][0].type();
+
+    for (int i=0; i<imgs.size(); i++) {
+        for (int j=0; j<imgs[i].size(); j++) {
+
+            Mat img;
+            switch(type) {
+
+            case CV_8U:
+                imgs[i][j].convertTo(img, CV_32F);
+                img /= 255.0;
+                imgs[i][j] = img.clone();
+                break;
+
+            case CV_16U:
+                imgs[i][j].convertTo(img, CV_32F);
+                img /= 65535.0;
+                imgs[i][j] = img.clone();
+                break;
+
+            case CV_32F:
+                break;
+
+            case CV_64F:
+                imgs[i][j].convertTo(img, CV_32F);
+                imgs[i][j] = img.clone();
+                break;
+
+            }
+
+
+        }
+    }
+
+    //preprocess();
+
+}
+
 // TODO: This function prints free memory on GPU and then
 //       calls uploadToGPU() which uploads either a given
 //       frame or all frames to GPU depending on frame_
 void saRefocus::initializeGPU() {
+
+    initializeRefocus();
 
     LOG(INFO)<<endl<<"INITIALIZING GPU..."<<endl;
     
@@ -620,6 +669,12 @@ void saRefocus::initializeGPU() {
     if (REF_FLAG)
         if (!CORNER_FLAG)
             uploadToGPU_ref();
+
+}
+
+void saRefocus::initializeCPU() {
+
+    initializeRefocus();
 
 }
 
@@ -693,7 +748,7 @@ void saRefocus::uploadToGPU_ref() {
     
     uploadRefractiveData(hinv, locations, pmats, geom);
 
-    Mat blank(img_size_.height, img_size_.width, CV_32FC1, float(0));
+    Mat blank(img_size_.height, img_size_.width, CV_32F, float(0));
     xmap.upload(blank); ymap.upload(blank);
     temp.upload(blank); temp2.upload(blank); 
     //refocused.upload(blank);
@@ -784,7 +839,8 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
 void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
-    Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+    //Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+    Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
     refocused.upload(blank);
     
     for (int i=0; i<num_cams_; i++) {
@@ -797,7 +853,6 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
             xmap.download(M); writeMat(M, "../temp/xmap.txt");
             ymap.download(M); writeMat(M, "../temp/ymap.txt");
         }
-        //preprocess();
 
         gpu::multiply(temp, fact, temp2);
         gpu::add(refocused, temp2, refocused);
@@ -809,7 +864,6 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
     refocused.download(refocused_host_);
     
     if (live) {
-        //refocused_host_ /= 255.0;
         char title[50];
         sprintf(title, "z = %f, thresh = %f, frame = %d", z_, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
@@ -823,7 +877,8 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
 void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
-    Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+    //Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+    Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
     refocused.upload(blank);
     
     Mat H;
@@ -915,10 +970,8 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
     threshold(cpurefocused, cpurefocused, thresh, 0, THRESH_TOZERO);
 
     Mat refocused_host_(cpurefocused);
-    //refocused_host_ /= 255.0;
 
     if (live) {
-        refocused_host_ /= 255.0;
         char title[50];
         sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
@@ -927,7 +980,8 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
         imshow("Result", refocused_host_);
     }
 
-    refocused_host_.convertTo(result_, CV_8U);
+    //refocused_host_.convertTo(result_, CV_8U);
+    result_ = refocused_host_.clone();
 
 }
 
@@ -957,14 +1011,14 @@ void saRefocus::CPUrefocus_ref(double z, double thresh, int live, int frame) {
     }
 
     if (live) {
-        //refocused_host_ /= 255.0;
         char title[50];
         sprintf(title, "z = %f, thresh = %f, frame = %d", z, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
 
-    refocused_host_.convertTo(result_, CV_8U);
+    //refocused_host_.convertTo(result_, CV_8U);
+    result_ = refocused_host_.clone();
 
 }
 
@@ -986,14 +1040,14 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
     }
 
     if (live) {
-        //refocused_host_ /= 255.0;
         char title[50];
         sprintf(title, "z = %f, thresh = %f, frame = %d", z, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
 
-    refocused_host_.convertTo(result_, CV_8U);
+    //refocused_host_.convertTo(result_, CV_8U);
+    result_ = refocused_host_.clone();
 
 }
 
@@ -1446,6 +1500,8 @@ void saRefocus::preprocess(Mat in, Mat &out) {
 }
 
 void saRefocus::adaptiveNorm(Mat in, Mat &out, int xf, int yf) {
+
+    // TODO: this will have to change assuming image coming in is a float
 
     int xs = in.cols/xf;
     int ys = in.rows/yf;
