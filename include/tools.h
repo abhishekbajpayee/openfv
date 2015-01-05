@@ -2,6 +2,8 @@
 #define TOOLS_LIBRARY
 
 #include "std_include.h"
+#include "refocusing.h"
+#include "rendering.h"
 #include "typedefs.h"
 
 using namespace std;
@@ -43,6 +45,8 @@ Mat cross(Mat_<double>, Mat_<double>);
 
 Mat normalize(Mat_<double>);
 
+saRefocus addCams(Scene, Camera, double, double, double);
+
 // File IO class
 
 class fileIO {
@@ -81,6 +85,22 @@ class fileIO {
     string getFilename(string filename);
 
     ofstream file;
+
+};
+
+class Movie {
+
+ public:
+    ~Movie() {}
+
+    Movie(vector<Mat>);
+
+ private:
+    
+    void play();
+    void updateFrame();
+    vector<Mat> frames_;
+    int active_frame_;
 
 };
 

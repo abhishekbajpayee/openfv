@@ -1,4 +1,6 @@
 #include "std_include.h"
+#include "refocusing.h"
+#include "rendering.h"
 #include "typedefs.h"
 #include "tools.h"
 
@@ -351,6 +353,81 @@ Mat normalize(Mat_<double> A) {
     return(A);
 
 }
+
+saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
+
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
+
+    saRefocus ref;
+    ref.setF(f);
+
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += xy) {
+        for (double y = -xy; y<=xy; y += xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
+
+    ref.initializeGPU();
+
+    return(ref);
+
+}
+
+// TODO: write something to vector of Mats as movie with trackbar
+
+Movie::Movie(vector<Mat> frames) {
+
+    frames_ = frames;
+    active_frame_ = 0;
+    play();
+
+}
+
+void Movie::play() {
+
+    namedWindow("Movie", CV_WINDOW_AUTOSIZE);
+    updateFrame();
+    
+    while (1) {
+    
+        int key = waitKey(10);
+        
+        if ( (key & 255) == 83) {
+            if (active_frame_ < frames_.size()-1) {
+                active_frame_++;
+                updateFrame();
+            }
+        } else if ( (key & 255) == 81) {
+            if (active_frame_ > 0) {
+                active_frame_--;
+                updateFrame();
+            }
+        } else if ( (key & 255) == 27) {
+            cvDestroyAllWindows();
+            break;
+        }
+
+    }
+
+}
+
+void Movie::updateFrame() {
+    
+    char title[50];
+    sprintf(title, "Frame %d/%d", active_frame_+1, frames_.size());
+    imshow("Movie", frames_[active_frame_]);
+    displayOverlay("Movie", title);
+
+}
+
+// fileIO class functions
 
 fileIO::fileIO(string filename) {
 

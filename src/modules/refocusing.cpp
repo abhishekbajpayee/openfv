@@ -572,6 +572,7 @@ Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh,
     rx_ = rx;
     ry_ = ry;
     rz_ = rz;
+    thresh /= 255.0;
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
@@ -691,7 +692,7 @@ void saRefocus::uploadToGPU() {
 
     if (frame_>=0) {
 
-        VLOG(0)<<"Uploading frame "<<frame_<<" to GPU..."<<endl;
+        VLOG(1)<<"Uploading frame "<<frame_<<" to GPU..."<<endl;
         for (int i=0; i<num_cams_; i++) {
             temp.upload(imgs[i][frame_]);
             array.push_back(temp.clone());
@@ -700,7 +701,7 @@ void saRefocus::uploadToGPU() {
 
     } else if (frame_==-1) {
         
-        VLOG(0)<<"Uploading all frames to GPU..."<<endl;
+        VLOG(1)<<"Uploading all frames to GPU..."<<endl;
         for (int i=0; i<imgs[0].size(); i++) {
             for (int j=0; j<num_cams_; j++) {
                 temp.upload(imgs[j][i]);

@@ -143,7 +143,7 @@ void Scene::seedParticles(int num) {
 // at (x, y, z) after moving it according to a certain velocity field over time t
 void Scene::propagateParticles(vector<double> (*func)(double, double, double, double), double t) {
 
-    LOG(INFO)<<"Propagating particles using function over "<<t<<" seconds...";
+    VLOG(1)<<"Propagating particles using function over "<<t<<" seconds...";
 
     for (int i=0; i<particles_.cols; i++) {
         vector<double> new_point = func(particles_(0,i), particles_(1,i), particles_(2,i), t);
@@ -425,7 +425,7 @@ void Camera::renderCPU() {
 
     project();
 
-    LOG(INFO)<<"Rendering image...";
+    VLOG(1)<<"Rendering image...";
 
     Mat img = Mat::zeros(imsy_, imsx_, CV_32F);
 
@@ -463,7 +463,7 @@ void Camera::renderGPU() {
 
     project();
 
-    LOG(INFO)<<"Rendering image...";
+    VLOG(1)<<"Rendering image...";
 
     Mat x = Mat::zeros(imsy_, imsx_, CV_32F);
     Mat y = Mat::zeros(imsy_, imsx_, CV_32F);
@@ -669,6 +669,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
     for (int i=0; i<voxels[2]; i++) {
 
         Mat ref = scene_.getSlice(i);
+        ref.convertTo(ref, CV_32F); ref /= 255.0;
         Mat img;
         if (mult) {
             img = refocus_.refocus(z[i], 0, 0, 0, 0, 0); // <-- TODO: in future add ability to handle multiple time frames?
@@ -680,7 +681,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
         Mat a; multiply(ref, img, a); double as = double(sum(a)[0]); at += as;
         Mat b; pow(ref, 2, b); double bs = double(sum(b)[0]); bt += bs;
         Mat c; pow(img, 2, c); double cs = double(sum(c)[0]); ct += cs;
-        VLOG(0)<<as<<", "<<bs<<", "<<cs<<", "<<as/sqrt(bs*cs);
+        VLOG(3)<<as<<", "<<bs<<", "<<cs<<", "<<as/sqrt(bs*cs);
 
     }
 
