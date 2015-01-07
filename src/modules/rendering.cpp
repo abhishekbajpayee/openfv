@@ -192,8 +192,8 @@ void Scene::renderVolumeCPU(int xv, int yv, int zv) {
             }
         }
         
-        img *= 255.0;
-        img.convertTo(img, CV_8U);
+        // img *= 255.0;
+        // img.convertTo(img, CV_8U);
         volumeCPU_.push_back(img.clone());
 
     }
@@ -278,8 +278,8 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
         }
     
         Mat result(slice);
-        result *= 255.0;
-        result.convertTo(result, CV_8U);
+        // result *= 255.0;
+        // result.convertTo(result, CV_8U);
         volumeGPU_.push_back(result.clone());
 
     }
@@ -287,6 +287,90 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
     VLOG(1)<<"done";
 
 }
+
+// TODO: complete this function
+
+void Scene::saveScene(string path, string name) {
+
+    using namespace boost::filesystem;
+    
+    string slash = "/";
+    string tmp_dir, target_dir;
+
+    if (!is_directory(path)) {
+        LOG(INFO)<<path<<" is not a valid directory. Routing output to ../temp/";
+        path = "../temp/";
+    }
+
+    if (string(1, path[path.length()-1]) == slash) {
+        tmp_dir = path + name;
+    } else {
+        tmp_dir = path + slash + name;
+    }
+
+    target_dir = tmp_dir;
+    int i=1;
+    if (is_directory(target_dir)) {
+        LOG(INFO)<<target_dir<<" already exists!";
+        while(is_directory(target_dir)) {
+            char num[10];
+            sprintf(num, "%d", i);
+            target_dir = tmp_dir + string(num);
+            i++;
+        }
+    }
+
+    create_directory(target_dir);
+    LOG(INFO)<<"Saving to "<<target_dir;
+
+    string tab = "\t";
+    string nl = "\n";
+    
+    fileIO cfg(target_dir+"/config.dat");
+    cfg<<vx_<<tab<<vy_<<tab<<vz_<<nl;
+    cfg<<sx_<<tab<<sy_<<tab<<sz_<<nl;
+    cfg<<sigmax_<<tab<<sigmay_<<tab<<sigmaz_<<nl;
+    cfg<<GPU_FLAG<<nl;
+    cfg<<REF_FLAG<<nl;
+    if (REF_FLAG)
+        cfg<<geom_[0]<<tab<<geom_[1]<<tab<<geom_[2]<<tab<<geom_[3]<<tab<<geom_[4]<<nl;
+    
+    fileIO particles(target_dir+"/particles.dat");
+    particles<<particles_;
+
+    create_directory(target_dir+"/volumeGPU");
+    imageIO i1(target_dir+"/volumeGPU");
+    i1<<volumeGPU_;
+    
+    create_directory(target_dir+"/volumeCPU");
+    imageIO i2(target_dir+"/volumeCPU");
+    i2<<volumeCPU_;
+
+}
+
+// void Scene::loadScene(string path) {
+
+//     using namespace boost::filesystem;
+
+//     string slash = "/";
+    
+//     if (string(1, path[path.length()-1]) != slash)
+//         path = path + slash;
+    
+//     int ok=0;
+//     if (is_directory(path)) {
+//         if (is_directory(path+"volumeGPU"))
+//             if (is_directory(path+"volumeCPU"))
+//                 if (exists(path+"config.dat"))
+//                     if (exists(path+"particles.dat"))
+//                         ok = 1;
+//     } else {
+//         LOG(INFO)<<path<<" directory does not exist!";
+//     }
+
+    
+
+// }
 
 Mat Scene::getSlice(int zv) {
     
@@ -435,8 +519,8 @@ void Camera::renderCPU() {
         }
     }
 
-    img *= 255.0;
-    img.convertTo(img, CV_8U);
+    // img *= 255.0;
+    // img.convertTo(img, CV_8U);
     render_ = img.clone();
 
 }
@@ -505,8 +589,8 @@ void Camera::renderGPU() {
     }
     
     Mat result(img);
-    result *= 255.0;
-    result.convertTo(result, CV_8U);
+    // result *= 255.0;
+    // result.convertTo(result, CV_8U);
     render_ = result.clone();
 
 }

@@ -79,17 +79,18 @@ class fileIO {
 
     fileIO(string filename);
 
-    void operator<< (int);
-    void operator<< (float);
-    void operator<< (double);
-    void operator<< (string);
-    void operator<< (const char*);
-    void operator<< (vector<int>);
-    void operator<< (vector< vector<int> >);
-    void operator<< (vector<float>);
-    void operator<< (vector< vector<float> >);
-    void operator<< (vector<double>);
-    void operator<< (vector< vector<double> >);
+    fileIO& operator<< (int);
+    fileIO& operator<< (float);
+    fileIO& operator<< (double);
+    fileIO& operator<< (string);
+    fileIO& operator<< (const char*);
+    fileIO& operator<< (vector<int>);
+    fileIO& operator<< (vector< vector<int> >);
+    fileIO& operator<< (vector<float>);
+    fileIO& operator<< (vector< vector<float> >);
+    fileIO& operator<< (vector<double>);
+    fileIO& operator<< (vector< vector<double> >);
+    fileIO& operator<< (Mat);
 
     // TODO: add templated Mat data output to file
 

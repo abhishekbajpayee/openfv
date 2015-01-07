@@ -459,7 +459,7 @@ fileIO::fileIO(string filename) {
 
     file.open(filename.c_str());
     if(file.is_open()) {
-        LOG(INFO)<<"Successfully opened file "<<filename;
+        VLOG(1)<<"Successfully opened file "<<filename;
     } else {
         LOG(INFO)<<"Could not open file "<<filename<<"!";
         string reroute_path = "../temp/" + getFilename(filename);
@@ -470,34 +470,41 @@ fileIO::fileIO(string filename) {
 
 }
 
-void fileIO::operator<< (int val) {
+fileIO& fileIO::operator<< (int val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (float val) {
+fileIO& fileIO::operator<< (float val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (double val) {
+fileIO& fileIO::operator<< (double val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (string val) {
+fileIO& fileIO::operator<< (string val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (const char* val) {
+fileIO& fileIO::operator<< (const char* val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (vector<int> val) {
+fileIO& fileIO::operator<< (vector<int> val) {
 
     for (int i=0; i<val.size(); i++)
         file<<val[i]<<endl;
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector< vector<int> > val) {
+fileIO& fileIO::operator<< (vector< vector<int> > val) {
 
     for (int i=0; i<val.size(); i++) {
         for (int j=0; j<val[i].size(); j++)
@@ -505,16 +512,20 @@ void fileIO::operator<< (vector< vector<int> > val) {
         file<<endl;
     }
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector<float> val) {
+fileIO& fileIO::operator<< (vector<float> val) {
 
     for (int i=0; i<val.size(); i++)
         file<<val[i]<<endl;
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector< vector<float> > val) {
+fileIO& fileIO::operator<< (vector< vector<float> > val) {
 
     for (int i=0; i<val.size(); i++) {
         for (int j=0; j<val[i].size(); j++)
@@ -522,22 +533,55 @@ void fileIO::operator<< (vector< vector<float> > val) {
         file<<endl;
     }
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector<double> val) {
+fileIO& fileIO::operator<< (vector<double> val) {
 
     for (int i=0; i<val.size(); i++)
         file<<val[i]<<endl;
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector< vector<double> > val) {
+fileIO& fileIO::operator<< (vector< vector<double> > val) {
 
     for (int i=0; i<val.size(); i++) {
         for (int j=0; j<val[i].size(); j++)
             file<<val[i][j]<<"\t";
         file<<endl;
     }
+
+    return(*this);
+
+}
+
+fileIO& fileIO::operator<< (Mat mat) {
+
+    int type = mat.type();
+
+    file<<type<<"\t"<<mat.rows<<"\t"<<mat.cols<<endl;
+
+    for (int i = 0; i < mat.rows; i++) {
+        for (int j = 0; j < mat.cols; j++) {
+            switch(type) {
+            case CV_8U:
+                file<<mat.at<char>(i,j)<<"\t";
+                break;
+            case CV_32F:
+                file<<mat.at<float>(i,j)<<"\t";
+                break;
+            case CV_64F:
+                file<<mat.at<double>(i,j)<<"\t";
+                break;
+            }
+        }
+        file<<endl;
+    }
+
+    return(*this);
 
 }
 
@@ -589,7 +633,7 @@ imageIO::imageIO(string path) {
             dir_path_ = path + "/";
         }
 
-        LOG(INFO)<<"Successfully initialized image writer in "<<dir_path_;
+        VLOG(1)<<"Successfully initialized image writer in "<<dir_path_;
         
         int files=0;
         while(ent = readdir(dir)) {

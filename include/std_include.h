@@ -30,6 +30,9 @@
 // Boost libraries
 #include <boost/program_options.hpp>
 #include <boost/python.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 
 // Python library
 #include <Python.h>
