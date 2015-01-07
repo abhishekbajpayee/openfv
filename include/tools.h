@@ -47,6 +47,10 @@ Mat normalize(Mat_<double>);
 
 saRefocus addCams(Scene, Camera, double, double, double);
 
+void saveScene(string filename, Scene scn);
+
+void loadScene(string filename, Scene &scn);
+
 vector<double> vortex(double, double, double, double);
 
 // Movie class

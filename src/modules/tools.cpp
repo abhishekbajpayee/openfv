@@ -380,6 +380,26 @@ saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
 
 }
 
+void saveScene(string filename, Scene scn) {
+
+    // TODO: add some check as to whether or not this saving worked
+    ofstream ofile(filename.c_str());
+    boost::archive::binary_oarchive oa(ofile);
+    oa<<scn;
+    ofile.close();
+    LOG(INFO)<<"Scene saved at "<<filename;
+
+}
+
+void loadScene(string filename, Scene &scn) {
+
+    ifstream ifile(filename.c_str());
+    boost::archive::binary_iarchive ia(ifile);
+    ia>>scn;
+    ifile.close();
+
+}
+
 // ----------------------------------------------------
 // Temporary location of particle propagation functions
 // ----------------------------------------------------
@@ -445,7 +465,8 @@ void Movie::play() {
 void Movie::updateFrame() {
     
     char title[50];
-    sprintf(title, "Frame %d/%d", active_frame_+1, frames_.size());
+    int size = frames_.size();
+    sprintf(title, "Frame %d/%d", active_frame_+1, size);
     imshow("Movie", frames_[active_frame_]);
     displayOverlay("Movie", title);
 
@@ -700,5 +721,16 @@ void imageIO::operator<< (vector<Mat> imgs) {
 void imageIO::setPrefix(string prefix) {
 
     prefix_ = prefix;
+
+}
+
+// Python wrapper
+BOOST_PYTHON_MODULE(tools) {
+
+    using namespace boost::python;
+
+    def("saveScene", saveScene);
+    def("loadScene", loadScene);
+    def("addCams", addCams);
 
 }

@@ -652,10 +652,10 @@ void saRefocus::initializeRefocus() {
 void saRefocus::initializeGPU() {
 
     initializeRefocus();
-
-    LOG(INFO)<<endl<<"INITIALIZING GPU..."<<endl;
     
     if (!EXPERT_FLAG) {
+
+        LOG(INFO)<<endl<<"INITIALIZING GPU..."<<endl;
 
         LOG(INFO)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
     

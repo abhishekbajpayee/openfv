@@ -39,8 +39,6 @@ class Scene {
     void renderVolumeCPU(int xv, int yv, int zv);
     void renderVolumeGPU(int xv, int yv, int zv);
 
-    void saveScene(string, string);
-
     void setParticleSigma(double, double, double);
     void setRefractiveGeom(float zW, float n1, float n2, float n3, float t);
 
@@ -60,6 +58,8 @@ class Scene {
     vector<double> getSceneGeom();
     double sigma();
 
+    void temp();
+
   private:
 
     // Function to serialize and save Scene object
@@ -77,8 +77,7 @@ class Scene {
         ar & volumeCPU_;
         ar & GPU_FLAG;
         ar & REF_FLAG;
-        if (REF_FLAG)
-            ar & geom_;
+        ar & geom_;
     }
 
     double f(double x, double y, double z);

@@ -38,6 +38,7 @@ void Scene::create(double sx, double sy, double sz, int gpu) {
     
     
     REF_FLAG = 0;
+    geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0);
 
     // TODO: this needs to be tweaked
     sigmax_ = 0.1;
@@ -64,9 +65,9 @@ void Scene::setRefractiveGeom(float zW, float n1, float n2, float n3, float t) {
 
     REF_FLAG = 1;
 
-    geom_.push_back(zW);
-    geom_.push_back(n1); geom_.push_back(n2); geom_.push_back(n3);
-    geom_.push_back(t);
+    geom_[0] = zW;
+    geom_[1] = n1; geom_[2] = n2; geom_[3] = n3;
+    geom_[4] = t;
 
 }
 
@@ -192,8 +193,6 @@ void Scene::renderVolumeCPU(int xv, int yv, int zv) {
             }
         }
         
-        // img *= 255.0;
-        // img.convertTo(img, CV_8U);
         volumeCPU_.push_back(img.clone());
 
     }
@@ -278,8 +277,6 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
         }
     
         Mat result(slice);
-        // result *= 255.0;
-        // result.convertTo(result, CV_8U);
         volumeGPU_.push_back(result.clone());
 
     }
@@ -287,90 +284,6 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
     VLOG(1)<<"done";
 
 }
-
-// TODO: complete this function
-
-void Scene::saveScene(string path, string name) {
-
-    using namespace boost::filesystem;
-    
-    string slash = "/";
-    string tmp_dir, target_dir;
-
-    if (!is_directory(path)) {
-        LOG(INFO)<<path<<" is not a valid directory. Routing output to ../temp/";
-        path = "../temp/";
-    }
-
-    if (string(1, path[path.length()-1]) == slash) {
-        tmp_dir = path + name;
-    } else {
-        tmp_dir = path + slash + name;
-    }
-
-    target_dir = tmp_dir;
-    int i=1;
-    if (is_directory(target_dir)) {
-        LOG(INFO)<<target_dir<<" already exists!";
-        while(is_directory(target_dir)) {
-            char num[10];
-            sprintf(num, "%d", i);
-            target_dir = tmp_dir + string(num);
-            i++;
-        }
-    }
-
-    create_directory(target_dir);
-    LOG(INFO)<<"Saving to "<<target_dir;
-
-    string tab = "\t";
-    string nl = "\n";
-    
-    fileIO cfg(target_dir+"/config.dat");
-    cfg<<vx_<<tab<<vy_<<tab<<vz_<<nl;
-    cfg<<sx_<<tab<<sy_<<tab<<sz_<<nl;
-    cfg<<sigmax_<<tab<<sigmay_<<tab<<sigmaz_<<nl;
-    cfg<<GPU_FLAG<<nl;
-    cfg<<REF_FLAG<<nl;
-    if (REF_FLAG)
-        cfg<<geom_[0]<<tab<<geom_[1]<<tab<<geom_[2]<<tab<<geom_[3]<<tab<<geom_[4]<<nl;
-    
-    fileIO particles(target_dir+"/particles.dat");
-    particles<<particles_;
-
-    create_directory(target_dir+"/volumeGPU");
-    imageIO i1(target_dir+"/volumeGPU");
-    i1<<volumeGPU_;
-    
-    create_directory(target_dir+"/volumeCPU");
-    imageIO i2(target_dir+"/volumeCPU");
-    i2<<volumeCPU_;
-
-}
-
-// void Scene::loadScene(string path) {
-
-//     using namespace boost::filesystem;
-
-//     string slash = "/";
-    
-//     if (string(1, path[path.length()-1]) != slash)
-//         path = path + slash;
-    
-//     int ok=0;
-//     if (is_directory(path)) {
-//         if (is_directory(path+"volumeGPU"))
-//             if (is_directory(path+"volumeCPU"))
-//                 if (exists(path+"config.dat"))
-//                     if (exists(path+"particles.dat"))
-//                         ok = 1;
-//     } else {
-//         LOG(INFO)<<path<<" directory does not exist!";
-//     }
-
-    
-
-// }
 
 Mat Scene::getSlice(int zv) {
     
@@ -422,6 +335,38 @@ vector<double> Scene::getSceneGeom() {
 
 double Scene::sigma() {
     return(sigmax_);
+}
+
+void Scene::temp() {
+
+    LOG(INFO)<<"State";
+
+    LOG(INFO)<<sigmax_;
+    LOG(INFO)<<sigmay_;
+    LOG(INFO)<<sigmaz_;
+
+    // LOG(INFO)<<sx_;
+    // LOG(INFO)<<sy_;
+    // LOG(INFO)<<sz_;
+
+    // LOG(INFO)<<vx_;
+    // LOG(INFO)<<vy_;
+    // LOG(INFO)<<vz_;
+
+    // LOG(INFO)<<xlims_.size();
+    // LOG(INFO)<<voxelsX_.size();
+
+    // LOG(INFO)<<particles_.cols;
+    // LOG(INFO)<<particles_;
+
+    LOG(INFO)<<volumeGPU_.size();
+    LOG(INFO)<<volumeCPU_.size();
+
+    LOG(INFO)<<trajectory_.size();
+
+    LOG(INFO)<<GPU_FLAG;
+    LOG(INFO)<<REF_FLAG;
+
 }
 
 // Camera class functions
@@ -519,8 +464,6 @@ void Camera::renderCPU() {
         }
     }
 
-    // img *= 255.0;
-    // img.convertTo(img, CV_8U);
     render_ = img.clone();
 
 }
@@ -589,8 +532,6 @@ void Camera::renderGPU() {
     }
     
     Mat result(img);
-    // result *= 255.0;
-    // result.convertTo(result, CV_8U);
     render_ = result.clone();
 
 }
@@ -753,7 +694,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
     for (int i=0; i<voxels[2]; i++) {
 
         Mat ref = scene_.getSlice(i);
-        ref.convertTo(ref, CV_32F); ref /= 255.0;
+        
         Mat img;
         if (mult) {
             img = refocus_.refocus(z[i], 0, 0, 0, 0, 0); // <-- TODO: in future add ability to handle multiple time frames?
