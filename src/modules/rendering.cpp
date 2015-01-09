@@ -382,7 +382,7 @@ Camera::Camera() {
 
 void Camera::init(double f, int imsx, int imsy, int gpu) {
 
-    LOG(INFO)<<"Initializing camera...";
+    VLOG(1)<<"Initializing camera...";
 
     f_ = f;
     imsx_ = imsx;
@@ -706,11 +706,12 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
         Mat a; multiply(ref, img, a); double as = double(sum(a)[0]); at += as;
         Mat b; pow(ref, 2, b); double bs = double(sum(b)[0]); bt += bs;
         Mat c; pow(img, 2, c); double cs = double(sum(c)[0]); ct += cs;
-        VLOG(3)<<as<<", "<<bs<<", "<<cs<<", "<<as/sqrt(bs*cs);
 
     }
 
     double Q = at/sqrt(bt*ct);
+    VLOG(1)<<"Q data: "<<at<<", "<<bt<<", "<<ct<<", "<<Q;
+
     return(Q);
 
 }

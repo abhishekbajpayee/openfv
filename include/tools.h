@@ -51,6 +51,8 @@ void saveScene(string filename, Scene scn);
 
 void loadScene(string filename, Scene &scn);
 
+Scene loadScene(string filename);
+
 vector<double> vortex(double, double, double, double);
 
 // Movie class

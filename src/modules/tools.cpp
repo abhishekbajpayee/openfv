@@ -400,6 +400,18 @@ void loadScene(string filename, Scene &scn) {
 
 }
 
+Scene loadScene(string filename) {
+
+    Scene scn;
+    ifstream ifile(filename.c_str());
+    boost::archive::binary_iarchive ia(ifile);
+    ia>>scn;
+    ifile.close();
+
+    return(scn);
+
+}
+
 // ----------------------------------------------------
 // Temporary location of particle propagation functions
 // ----------------------------------------------------
@@ -729,8 +741,11 @@ BOOST_PYTHON_MODULE(tools) {
 
     using namespace boost::python;
 
+    void (*sPx3)(string, Scene&) = &loadScene;
+    Scene (*sPx4)(string)         = &loadScene;
+
     def("saveScene", saveScene);
-    def("loadScene", loadScene);
+    def("loadScene", sPx4);
     def("addCams", addCams);
 
 }
