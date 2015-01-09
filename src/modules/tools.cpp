@@ -1,4 +1,6 @@
 #include "std_include.h"
+#include "refocusing.h"
+#include "rendering.h"
 #include "typedefs.h"
 #include "tools.h"
 
@@ -352,11 +354,145 @@ Mat normalize(Mat_<double> A) {
 
 }
 
+saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
+
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
+
+    saRefocus ref;
+    ref.setF(f);
+
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += xy) {
+        for (double y = -xy; y<=xy; y += xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
+
+    ref.initializeGPU();
+
+    return(ref);
+
+}
+
+void saveScene(string filename, Scene scn) {
+
+    // TODO: add some check as to whether or not this saving worked
+    ofstream ofile(filename.c_str());
+    boost::archive::binary_oarchive oa(ofile);
+    oa<<scn;
+    ofile.close();
+    LOG(INFO)<<"Scene saved at "<<filename;
+
+}
+
+void loadScene(string filename, Scene &scn) {
+
+    ifstream ifile(filename.c_str());
+    boost::archive::binary_iarchive ia(ifile);
+    ia>>scn;
+    ifile.close();
+
+}
+
+Scene loadScene(string filename) {
+
+    Scene scn;
+    ifstream ifile(filename.c_str());
+    boost::archive::binary_iarchive ia(ifile);
+    ia>>scn;
+    ifile.close();
+
+    return(scn);
+
+}
+
+// ----------------------------------------------------
+// Temporary location of particle propagation functions
+// ----------------------------------------------------
+
+vector<double> vortex(double x, double y, double z, double t) {
+
+    double omega = 2.0;
+
+    double r = sqrt(x*x + z*z);
+    double theta = atan2(z, x);
+    double dTheta = omega*t;
+    double theta2 = theta+dTheta;
+
+    double x2 = r*cos(theta2); double z2 = r*sin(theta2); double y2 = y;
+
+    vector<double> np;
+    np.push_back(x2); np.push_back(y2); np.push_back(z2);
+
+    return(np);
+
+}
+
+// ----------------------------------------------------
+// Movie class functions
+// ----------------------------------------------------
+
+Movie::Movie(vector<Mat> frames) {
+
+    frames_ = frames;
+    active_frame_ = 0;
+    play();
+
+}
+
+void Movie::play() {
+
+    namedWindow("Movie", CV_WINDOW_AUTOSIZE);
+    updateFrame();
+    
+    while (1) {
+    
+        int key = waitKey(10);
+        
+        if ( (key & 255) == 83) {
+            if (active_frame_ < frames_.size()-1) {
+                active_frame_++;
+                updateFrame();
+            }
+        } else if ( (key & 255) == 81) {
+            if (active_frame_ > 0) {
+                active_frame_--;
+                updateFrame();
+            }
+        } else if ( (key & 255) == 27) {
+            cvDestroyAllWindows();
+            break;
+        }
+
+    }
+
+}
+
+void Movie::updateFrame() {
+    
+    char title[50];
+    int size = frames_.size();
+    sprintf(title, "Frame %d/%d", active_frame_+1, size);
+    imshow("Movie", frames_[active_frame_]);
+    displayOverlay("Movie", title);
+
+}
+
+// ----------------------------------------------------
+// fileIO class functions
+// ----------------------------------------------------
+
 fileIO::fileIO(string filename) {
 
     file.open(filename.c_str());
     if(file.is_open()) {
-        LOG(INFO)<<"Successfully opened file "<<filename;
+        VLOG(1)<<"Successfully opened file "<<filename;
     } else {
         LOG(INFO)<<"Could not open file "<<filename<<"!";
         string reroute_path = "../temp/" + getFilename(filename);
@@ -367,34 +503,41 @@ fileIO::fileIO(string filename) {
 
 }
 
-void fileIO::operator<< (int val) {
+fileIO& fileIO::operator<< (int val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (float val) {
+fileIO& fileIO::operator<< (float val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (double val) {
+fileIO& fileIO::operator<< (double val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (string val) {
+fileIO& fileIO::operator<< (string val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (const char* val) {
+fileIO& fileIO::operator<< (const char* val) {
     file<<val;
+    return(*this);
 }
 
-void fileIO::operator<< (vector<int> val) {
+fileIO& fileIO::operator<< (vector<int> val) {
 
     for (int i=0; i<val.size(); i++)
         file<<val[i]<<endl;
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector< vector<int> > val) {
+fileIO& fileIO::operator<< (vector< vector<int> > val) {
 
     for (int i=0; i<val.size(); i++) {
         for (int j=0; j<val[i].size(); j++)
@@ -402,16 +545,20 @@ void fileIO::operator<< (vector< vector<int> > val) {
         file<<endl;
     }
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector<float> val) {
+fileIO& fileIO::operator<< (vector<float> val) {
 
     for (int i=0; i<val.size(); i++)
         file<<val[i]<<endl;
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector< vector<float> > val) {
+fileIO& fileIO::operator<< (vector< vector<float> > val) {
 
     for (int i=0; i<val.size(); i++) {
         for (int j=0; j<val[i].size(); j++)
@@ -419,22 +566,55 @@ void fileIO::operator<< (vector< vector<float> > val) {
         file<<endl;
     }
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector<double> val) {
+fileIO& fileIO::operator<< (vector<double> val) {
 
     for (int i=0; i<val.size(); i++)
         file<<val[i]<<endl;
 
+    return(*this);
+
 }
 
-void fileIO::operator<< (vector< vector<double> > val) {
+fileIO& fileIO::operator<< (vector< vector<double> > val) {
 
     for (int i=0; i<val.size(); i++) {
         for (int j=0; j<val[i].size(); j++)
             file<<val[i][j]<<"\t";
         file<<endl;
     }
+
+    return(*this);
+
+}
+
+fileIO& fileIO::operator<< (Mat mat) {
+
+    int type = mat.type();
+
+    file<<type<<"\t"<<mat.rows<<"\t"<<mat.cols<<endl;
+
+    for (int i = 0; i < mat.rows; i++) {
+        for (int j = 0; j < mat.cols; j++) {
+            switch(type) {
+            case CV_8U:
+                file<<mat.at<char>(i,j)<<"\t";
+                break;
+            case CV_32F:
+                file<<mat.at<float>(i,j)<<"\t";
+                break;
+            case CV_64F:
+                file<<mat.at<double>(i,j)<<"\t";
+                break;
+            }
+        }
+        file<<endl;
+    }
+
+    return(*this);
 
 }
 
@@ -448,5 +628,124 @@ string fileIO::getFilename(string filename) {
     }
 
     return(filename.substr(i+1));
+
+}
+
+// ----------------------------------------------------
+// imageIO class functions
+// ----------------------------------------------------
+
+imageIO::imageIO(string path) {
+
+    DIR *dir;
+    struct dirent *ent;
+    string slash = "/";
+
+    dir = opendir(path.c_str());
+    if (!dir) {
+
+        LOG(INFO)<<"Could not open directory "<<path;
+
+        int i=1;
+        dir_path_ = "../temp/folder001/";
+        while(opendir(dir_path_.c_str())) {
+            i++;
+            dir_path_ = "../temp/folder";
+            char buf[10];
+            sprintf(buf, "%03d", i);
+            dir_path_ += string(buf) + "/";
+        }
+        DIR_CREATED = 0;
+        LOG(INFO)<<"Redirecting output to directory "<<dir_path_;
+
+    } else {
+
+        if (string(1, path[path.length()-1]) == slash) {
+            dir_path_ = path;
+        } else {
+            dir_path_ = path + "/";
+        }
+
+        VLOG(1)<<"Successfully initialized image writer in "<<dir_path_;
+        
+        int files=0;
+        while(ent = readdir(dir)) {
+            files++;
+            if(files>2)
+                break;
+        }
+
+        if(files>2)
+            LOG(INFO)<<"Warning: "<<dir_path_<<" is not empty";
+
+    }
+
+    counter_ = 1;
+    prefix_ = string("");
+    ext_ = ".jpg";
+
+}
+
+void imageIO::operator<< (Mat img) {
+
+    if (!DIR_CREATED)
+        mkdir(dir_path_.c_str(), S_IRWXU);
+
+    stringstream filename;
+    filename<<dir_path_<<prefix_;
+    
+    char num[10];
+    sprintf(num, "%03d", counter_);
+    
+    filename<<string(num);
+    filename<<ext_;
+
+    // TODO: specify quality depending on extension
+    imwrite(filename.str(), img);
+    counter_++;
+
+}
+
+void imageIO::operator<< (vector<Mat> imgs) {
+
+    if (!DIR_CREATED)
+        mkdir(dir_path_.c_str(), S_IRWXU);
+    
+    for (int i = 0; i < imgs.size(); i++) {
+        
+        stringstream filename;
+        filename<<dir_path_<<prefix_;
+
+        char num[10];
+        sprintf(num, "%03d", counter_);
+    
+        filename<<string(num);
+        filename<<ext_;
+
+        // TODO: specify quality depending on extension
+        imwrite(filename.str(), imgs[i]);
+        counter_++;
+
+    }
+
+}
+
+void imageIO::setPrefix(string prefix) {
+
+    prefix_ = prefix;
+
+}
+
+// Python wrapper
+BOOST_PYTHON_MODULE(tools) {
+
+    using namespace boost::python;
+
+    void (*sPx3)(string, Scene&) = &loadScene;
+    Scene (*sPx4)(string)         = &loadScene;
+
+    def("saveScene", saveScene);
+    def("loadScene", sPx4);
+    def("addCams", addCams);
 
 }

@@ -2,6 +2,8 @@
 #define TOOLS_LIBRARY
 
 #include "std_include.h"
+#include "refocusing.h"
+#include "rendering.h"
 #include "typedefs.h"
 
 using namespace std;
@@ -43,6 +45,34 @@ Mat cross(Mat_<double>, Mat_<double>);
 
 Mat normalize(Mat_<double>);
 
+saRefocus addCams(Scene, Camera, double, double, double);
+
+void saveScene(string filename, Scene scn);
+
+void loadScene(string filename, Scene &scn);
+
+Scene loadScene(string filename);
+
+vector<double> vortex(double, double, double, double);
+
+// Movie class
+
+class Movie {
+
+ public:
+    ~Movie() {}
+
+    Movie(vector<Mat>);
+
+ private:
+    
+    void play();
+    void updateFrame();
+    vector<Mat> frames_;
+    int active_frame_;
+
+};
+
 // File IO class
 
 class fileIO {
@@ -55,20 +85,20 @@ class fileIO {
 
     fileIO(string filename);
 
-    void operator<< (int);
-    void operator<< (float);
-    void operator<< (double);
-    void operator<< (string);
-    void operator<< (const char*);
-    void operator<< (vector<int>);
-    void operator<< (vector< vector<int> >);
-    void operator<< (vector<float>);
-    void operator<< (vector< vector<float> >);
-    void operator<< (vector<double>);
-    void operator<< (vector< vector<double> >);
+    fileIO& operator<< (int);
+    fileIO& operator<< (float);
+    fileIO& operator<< (double);
+    fileIO& operator<< (string);
+    fileIO& operator<< (const char*);
+    fileIO& operator<< (vector<int>);
+    fileIO& operator<< (vector< vector<int> >);
+    fileIO& operator<< (vector<float>);
+    fileIO& operator<< (vector< vector<float> >);
+    fileIO& operator<< (vector<double>);
+    fileIO& operator<< (vector< vector<double> >);
+    fileIO& operator<< (Mat);
 
     // TODO: add templated Mat data output to file
-    // TODO: think of clean way to write image and vector of images to folders -> maybe write imageIO class
 
     /*
     void write(Mat);
@@ -81,6 +111,34 @@ class fileIO {
     string getFilename(string filename);
 
     ofstream file;
+
+};
+
+class imageIO {
+
+ public:
+    ~imageIO() {
+
+    }
+
+    imageIO(string path);
+
+    void setPrefix(string prefix);
+
+    void operator<< (Mat);
+    void operator<< (vector<Mat>);
+
+ protected:
+
+ private:
+    
+    string dir_path_;
+    string prefix_;
+    string ext_;
+
+    int counter_;
+
+    int DIR_CREATED;
 
 };
 

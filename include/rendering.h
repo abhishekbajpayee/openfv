@@ -15,6 +15,7 @@
 #include "std_include.h"
 #include "typedefs.h"
 #include "refocusing.h"
+#include "serialization.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
@@ -57,7 +58,27 @@ class Scene {
     vector<double> getSceneGeom();
     double sigma();
 
- private:
+    void temp();
+
+  private:
+
+    // Function to serialize and save Scene object
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version) {
+        ar & sigmax_ & sigmay_ & sigmaz_;
+        ar & xlims_ & ylims_ & zlims_;
+        ar & sx_ & sy_ & sz_;
+        ar & vx_ & vy_ & vz_;
+        ar & voxelsX_, voxelsY_, voxelsZ_;
+        ar & particles_;
+        ar & trajectory_;
+        ar & volumeGPU_;
+        ar & volumeCPU_;
+        ar & GPU_FLAG;
+        ar & REF_FLAG;
+        ar & geom_;
+    }
 
     double f(double x, double y, double z);
 
@@ -72,7 +93,6 @@ class Scene {
     vector<Mat> volumeGPU_;
     vector<Mat> volumeCPU_;
 
-    vector<Mat> vol;
     gpu::GpuMat gx, gy;
     gpu::GpuMat tmp1, tmp2, tmp3, tmp4;
     gpu::GpuMat slice;

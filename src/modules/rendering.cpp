@@ -38,6 +38,7 @@ void Scene::create(double sx, double sy, double sz, int gpu) {
     
     
     REF_FLAG = 0;
+    geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0);
 
     // TODO: this needs to be tweaked
     sigmax_ = 0.1;
@@ -64,9 +65,9 @@ void Scene::setRefractiveGeom(float zW, float n1, float n2, float n3, float t) {
 
     REF_FLAG = 1;
 
-    geom_.push_back(zW);
-    geom_.push_back(n1); geom_.push_back(n2); geom_.push_back(n3);
-    geom_.push_back(t);
+    geom_[0] = zW;
+    geom_[1] = n1; geom_[2] = n2; geom_[3] = n3;
+    geom_[4] = t;
 
 }
 
@@ -143,7 +144,7 @@ void Scene::seedParticles(int num) {
 // at (x, y, z) after moving it according to a certain velocity field over time t
 void Scene::propagateParticles(vector<double> (*func)(double, double, double, double), double t) {
 
-    LOG(INFO)<<"Propagating particles using function over "<<t<<" seconds...";
+    VLOG(1)<<"Propagating particles using function over "<<t<<" seconds...";
 
     for (int i=0; i<particles_.cols; i++) {
         vector<double> new_point = func(particles_(0,i), particles_(1,i), particles_(2,i), t);
@@ -192,8 +193,6 @@ void Scene::renderVolumeCPU(int xv, int yv, int zv) {
             }
         }
         
-        img *= 255.0;
-        img.convertTo(img, CV_8U);
         volumeCPU_.push_back(img.clone());
 
     }
@@ -278,8 +277,6 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
         }
     
         Mat result(slice);
-        result *= 255.0;
-        result.convertTo(result, CV_8U);
         volumeGPU_.push_back(result.clone());
 
     }
@@ -340,6 +337,38 @@ double Scene::sigma() {
     return(sigmax_);
 }
 
+void Scene::temp() {
+
+    LOG(INFO)<<"State";
+
+    LOG(INFO)<<sigmax_;
+    LOG(INFO)<<sigmay_;
+    LOG(INFO)<<sigmaz_;
+
+    // LOG(INFO)<<sx_;
+    // LOG(INFO)<<sy_;
+    // LOG(INFO)<<sz_;
+
+    // LOG(INFO)<<vx_;
+    // LOG(INFO)<<vy_;
+    // LOG(INFO)<<vz_;
+
+    // LOG(INFO)<<xlims_.size();
+    // LOG(INFO)<<voxelsX_.size();
+
+    // LOG(INFO)<<particles_.cols;
+    // LOG(INFO)<<particles_;
+
+    LOG(INFO)<<volumeGPU_.size();
+    LOG(INFO)<<volumeCPU_.size();
+
+    LOG(INFO)<<trajectory_.size();
+
+    LOG(INFO)<<GPU_FLAG;
+    LOG(INFO)<<REF_FLAG;
+
+}
+
 // Camera class functions
 
 Camera::Camera() {
@@ -353,7 +382,7 @@ Camera::Camera() {
 
 void Camera::init(double f, int imsx, int imsy, int gpu) {
 
-    LOG(INFO)<<"Initializing camera...";
+    VLOG(1)<<"Initializing camera...";
 
     f_ = f;
     imsx_ = imsx;
@@ -425,7 +454,7 @@ void Camera::renderCPU() {
 
     project();
 
-    LOG(INFO)<<"Rendering image...";
+    VLOG(1)<<"Rendering image...";
 
     Mat img = Mat::zeros(imsy_, imsx_, CV_32F);
 
@@ -435,8 +464,6 @@ void Camera::renderCPU() {
         }
     }
 
-    img *= 255.0;
-    img.convertTo(img, CV_8U);
     render_ = img.clone();
 
 }
@@ -463,7 +490,7 @@ void Camera::renderGPU() {
 
     project();
 
-    LOG(INFO)<<"Rendering image...";
+    VLOG(1)<<"Rendering image...";
 
     Mat x = Mat::zeros(imsy_, imsx_, CV_32F);
     Mat y = Mat::zeros(imsy_, imsx_, CV_32F);
@@ -505,8 +532,6 @@ void Camera::renderGPU() {
     }
     
     Mat result(img);
-    result *= 255.0;
-    result.convertTo(result, CV_8U);
     render_ = result.clone();
 
 }
@@ -669,6 +694,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
     for (int i=0; i<voxels[2]; i++) {
 
         Mat ref = scene_.getSlice(i);
+        
         Mat img;
         if (mult) {
             img = refocus_.refocus(z[i], 0, 0, 0, 0, 0); // <-- TODO: in future add ability to handle multiple time frames?
@@ -680,11 +706,12 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
         Mat a; multiply(ref, img, a); double as = double(sum(a)[0]); at += as;
         Mat b; pow(ref, 2, b); double bs = double(sum(b)[0]); bt += bs;
         Mat c; pow(img, 2, c); double cs = double(sum(c)[0]); ct += cs;
-        VLOG(0)<<as<<", "<<bs<<", "<<cs<<", "<<as/sqrt(bs*cs);
 
     }
 
     double Q = at/sqrt(bt*ct);
+    VLOG(1)<<"Q data: "<<at<<", "<<bt<<", "<<ct<<", "<<Q;
+
     return(Q);
 
 }
