@@ -374,6 +374,8 @@ saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
         }
     }
 
+    ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
+    ref.setHF(0);
     ref.initializeGPU();
 
     return(ref);

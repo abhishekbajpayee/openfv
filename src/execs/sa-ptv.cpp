@@ -2,6 +2,7 @@
 
 #include "calibration.h"
 #include "refocusing.h"
+#include "rendering.h"
 #include "pLoc.h"
 #include "tracking.h"
 #include "tools.h"
@@ -9,6 +10,7 @@
 #include "optimization.h"
 #include "typedefs.h"
 #include "batchProc.h"
+#include "visualize.h"
 
 #include "cuda_lib.h"
 #include "cuda_profiler_api.h"
@@ -21,11 +23,13 @@ DEFINE_bool(find, false, "find particles");
 DEFINE_bool(track, false, "track particles");
 DEFINE_bool(fhelp, false, "show config file options");
 
+
 int main(int argc, char** argv) {
 
     google::ParseCommandLineFlags(&argc, &argv, true);
     init(argc, argv);
     
+    /*
     int batch = 0;
 
     if (batch) {
@@ -70,6 +74,40 @@ int main(int argc, char** argv) {
     }
 
     }
+    */
+
+    double f = 8.0;
+    int xv = 500; int yv = 500; int zv = 500; int particles = 1000;
+    Scene scn;
+    scn.create(xv/f, yv/f, zv/f, 1);
+    scn.seedParticles(particles);
+    // scn.renderVolume(xv, yv, zv);
+    scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
+
+    string filename = "/home/ab9/projects/scenes/scene_500_500_500_1000_1.obj";
+ 
+    // saveScene(filename, scn);
+ 
+    loadScene(filename, scn);
+
+    Camera cam;
+    double cf = 35.0; // [mm]
+    cam.init(cf*1200/4.8, xv, yv, 1);
+    cam.setScene(scn);
+    
+    benchmark bm;
+    double d = 1000;
+    vector<double> th, q;
+    saRefocus ref = addCams(scn, cam, 50, d, f);
+
+    LOG(INFO)<<ref.showSettings();
+
+    bm.benchmarkSA(scn, ref);
+    LOG(INFO)<<bm.calcQ(40.0, 0, 0);
+
+    // PyVisualize plt;
+    // plt.plot(th, q, "");
+    // plt.show();
     
     return 1;
 
