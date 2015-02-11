@@ -878,7 +878,7 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
 void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
-    //Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+    // Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
     Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
     refocused.upload(blank);
     
@@ -1305,7 +1305,7 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
         // Newton Raphson loop to solve for Snell's law
         double tol=1E-8;
 
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<20; i++) {
 
             f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( (n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
             g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( (n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );

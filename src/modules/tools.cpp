@@ -374,11 +374,28 @@ saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
         }
     }
 
-    ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
-    ref.setHF(0);
-    ref.initializeGPU();
-
     return(ref);
+
+}
+
+void addCams(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
+
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
+
+    ref.setF(f);
+
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += xy) {
+        for (double y = -xy; y<=xy; y += xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
 
 }
 
@@ -744,10 +761,13 @@ BOOST_PYTHON_MODULE(tools) {
     using namespace boost::python;
 
     void (*sPx3)(string, Scene&) = &loadScene;
-    Scene (*sPx4)(string)         = &loadScene;
+    Scene (*sPx4)(string)        = &loadScene;
+
+    saRefocus (*addCams1)(Scene, Camera, double, double, double)        = &addCams;
+    void (*addCams2)(Scene, Camera, double, double, double, saRefocus&) = &addCams;
 
     def("saveScene", saveScene);
     def("loadScene", sPx4);
-    def("addCams", addCams);
+    def("addCams", addCams1);
 
 }

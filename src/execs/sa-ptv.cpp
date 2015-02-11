@@ -77,14 +77,14 @@ int main(int argc, char** argv) {
     */
 
     double f = 8.0;
-    int xv = 500; int yv = 500; int zv = 500; int particles = 1000;
+    int xv = 500; int yv = 500; int zv = 200; int particles = 1000;
     Scene scn;
-    scn.create(xv/f, yv/f, zv/f, 1);
-    scn.seedParticles(particles);
+    // scn.create(xv/f, yv/f, zv/f, 1);
+    // scn.seedParticles(particles);
     // scn.renderVolume(xv, yv, zv);
-    scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
+    // scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
 
-    string filename = "/home/ab9/projects/scenes/scene_500_500_500_1000_1.obj";
+    string filename = "/home/ab9/projects/scenes/scene_500_500_200_1000_ref_1.obj";
  
     // saveScene(filename, scn);
  
@@ -98,16 +98,28 @@ int main(int argc, char** argv) {
     benchmark bm;
     double d = 1000;
     vector<double> th, q;
-    saRefocus ref = addCams(scn, cam, 50, d, f);
 
-    LOG(INFO)<<ref.showSettings();
+    double ang = 30;
 
-    bm.benchmarkSA(scn, ref);
-    LOG(INFO)<<bm.calcQ(40.0, 0, 0);
+    saRefocus ref;
+    ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
+    // ref.setHF(1);
+    addCams(scn, cam, ang, d, f, ref);
+    ref.initializeGPU();
 
-    // PyVisualize plt;
-    // plt.plot(th, q, "");
-    // plt.show();
+    saRefocus ref2;
+    ref2.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
+    ref2.setHF(1);
+    addCams(scn, cam, ang, d, f, ref2);
+    ref2.initializeGPU();
+
+    Mat orig = ref.refocus(0, 0, 0, 0, 0, 0);
+    Mat hf = ref2.refocus(0, 0, 0, 0, 0, 0);
+
+    // ref.GPUliveView();
+
+    // bm.benchmarkSA(scn, ref);
+    // LOG(INFO)<<bm.calcQ(60.0, 0, 0);
     
     return 1;
 

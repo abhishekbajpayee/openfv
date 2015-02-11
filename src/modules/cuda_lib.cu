@@ -99,7 +99,7 @@ __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_
     float dfdra, dfdrb, dgdra, dgdrb;
         
     // Newton Raphson loop to solve for Snell's law
-    for (int i=0; i<10; i++) {
+    for (int i=0; i<20; i++) {
         
         f = ( ra/sqrt((ra*ra)+(da*da)) ) - ( (n2_/n1_)*(rb-ra)/sqrt((rb-ra)*(rb-ra) + (db*db)) );
         g = ( (rb-ra)/sqrt((rb-ra)*(rb-ra)+(db*db)) ) - ( (n3_/n2_)*(rp-rb)/sqrt((rp-rb)*(rp-rb)+(dp*dp)) );
@@ -224,8 +224,8 @@ void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][1
 
 void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i) {
 
-    dim3 grid(80, 50); dim3 block(16, 16);
-    //dim3 grid(1, 1); dim3 block(1, 1);
+    //dim3 grid(80, 50); dim3 block(16, 16);
+    dim3 grid(50, 50); dim3 block(10, 10);
 
     if (!cudaGetLastError()) {
         calc_refocus_map_kernel<<<grid, block>>>(xmap, ymap, z, i);

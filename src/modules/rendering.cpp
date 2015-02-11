@@ -701,8 +701,12 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
         } else {
             img = refocus_.refocus(z[i], 0, 0, 0, thresh, 0);
         }
-        
+
         //qimshow(ref); qimshow(img);
+        
+        //double minval, maxval; minMaxLoc(img, minval, maxval);
+        //VLOG(3)<<maxval;
+
         Mat a; multiply(ref, img, a); double as = double(sum(a)[0]); at += as;
         Mat b; pow(ref, 2, b); double bs = double(sum(b)[0]); bt += bs;
         Mat c; pow(img, 2, c); double cs = double(sum(c)[0]); ct += cs;
