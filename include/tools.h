@@ -47,6 +47,8 @@ Mat normalize(Mat_<double>);
 
 saRefocus addCams(Scene, Camera, double, double, double);
 
+void addCams(Scene, Camera, double, double, double, saRefocus&);
+
 void saveScene(string filename, Scene scn);
 
 void loadScene(string filename, Scene &scn);
