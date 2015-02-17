@@ -45,7 +45,7 @@ class Scene {
     void seedR();
     void seedAxes();
     void seedParticles(vector< vector<double> > locations);
-    void seedParticles(int num);    
+    void seedParticles(int num, double factor);    
 
     void propagateParticles(vector<double> (*func)(double, double, double, double), double t);
 

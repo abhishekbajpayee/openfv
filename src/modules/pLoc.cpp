@@ -24,7 +24,7 @@ pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s
     zext_ = 2.5;
 
     cluster_size_ = 0.9*(zext_/dz_);
-    cluster_size_ = 20;
+    cluster_size_ = 5;
     //cout<<"Crit cluster size: "<<cluster_size_<<endl;
 
 }
@@ -67,7 +67,7 @@ void pLocalize::find_particles_3d(int frame) {
         Mat image = refocus_.refocus(i, rx, ry, rz, thresh_, frame);
 
         find_particles(image, points);
-        //Mat img; draw_points(image, img, points); qimshow(img);
+        // Mat img; draw_points(image, img, points); qimshow(img);
 
         refine_subpixel(image, points, particles);
         if (show_particles_) {
@@ -102,48 +102,6 @@ void pLocalize::z_resolution() {
     double zref = 5.0;
     double dz = 1.0;
     double bounds = 1.0;
-
-    /*
-    ofstream file;
-    file.open("../py_scripts/cx_v_z_add.txt");
-    
-    for (float i=zref-bounds; i<=zref+bounds; i += dz) {
-        
-        file<<i<<"\t";
-        cout<<i<<endl;
-
-        for (float t=0; t<=150; t += 50) {
-
-        refocus_.GPUrefocus(zref, t, 0, 0);
-        Mat base = refocus_.result.clone();
-
-        refocus_.GPUrefocus(i, t, 0, 0);
-        Mat ref = refocus_.result.clone();
-
-        Mat numMat = ref.mul(base);
-        Scalar sumnum = sum(numMat);
-
-        Mat denA = base.mul(base);
-        Mat denB = ref.mul(ref);
-        Scalar sumdenA = sum(denA);
-        Scalar sumdenB = sum(denB);
-        
-        double num = sumnum.val[0];
-        double den1 = sumdenA.val[0];
-        double den2 = sumdenB.val[0];
-        
-        double cx = num/sqrt(den1*den2);
-
-        file<<cx<<"\t";
-
-        }
-        
-        file<<"\n";
-        
-    }
-    
-    file.close();
-    */
 
     
     ofstream file;
@@ -289,8 +247,10 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
             tmp_loc.x = j;
             tmp_loc.y = i;
 
-            Scalar intensity = image.at<uchar>(i,j);
-            int I = intensity.val[0];
+            // Scalar intensity = image.at<uchar>(i,j);
+            // int I = intensity.val[0];
+
+            float I = image.at<float>(i,j);
 
             // Look for non zero value
             if (I>i_min && min_dist(tmp_loc, points_out)>2*window_) {
@@ -306,8 +266,11 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
                         
                         if (x<0 || x>=h || y<0 || y>=w) continue;
 
-                        Scalar intensity2 = image.at<uchar>(x,y);
-                        int I2 = intensity2.val[0];
+                        // Scalar intensity2 = image.at<uchar>(x,y);
+                        // int I2 = intensity2.val[0];
+
+                        float I2 = image.at<float>(x,y);
+
                         if (I2>i_max) {
                             i_max = I2;
                             l_max.x = y;
@@ -324,8 +287,11 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
                         
                         if (x<0 || x>=h || y<0 || y>=w) continue;
 
-                        Scalar intensity2 = image.at<uchar>(x,y);
-                        int I2 = intensity2.val[0];
+                        // Scalar intensity2 = image.at<uchar>(x,y);
+                        // int I2 = intensity2.val[0];
+
+                        float I2 = image.at<float>(x,y);
+
                         if (I2>i_min) count++;
                         
                     }
@@ -362,8 +328,11 @@ void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<par
 
                 if (x<0 || x>=w || y<0 || y>=h) continue;
                 
-                Scalar intensity = image.at<uchar>(y,x);
-                int i_xy = intensity.val[0];
+                // Scalar intensity = image.at<uchar>(y,x);
+                // int i_xy = intensity.val[0];
+
+                float i_xy = image.at<float>(y,x);
+
                 x_num = x_num + double(i_xy)*(x+0.5);
                 y_num = y_num + double(i_xy)*(y+0.5);
                 i_sum = i_sum + double(i_xy);

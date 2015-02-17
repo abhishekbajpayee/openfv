@@ -117,7 +117,7 @@ void Scene::seedParticles(vector< vector<double> > points) {
 
 }
 
-void Scene::seedParticles(int num) {
+void Scene::seedParticles(int num, double factor) {
 
     LOG(INFO)<<"Seeding particles...";
 
@@ -128,9 +128,9 @@ void Scene::seedParticles(int num) {
     double x, y, z;
     for (int i=0; i<num; i++) {
 
-        x = (double(rand()%res)/double(res))*sx_ - 0.5*sx_;
-        y = (double(rand()%res)/double(res))*sy_ - 0.5*sy_;
-        z = (double(rand()%res)/double(res))*sz_ - 0.5*sz_;
+        x = (double(rand()%res)/double(res))*factor*sx_ - 0.5*factor*sx_;
+        y = (double(rand()%res)/double(res))*factor*sy_ - 0.5*factor*sy_;
+        z = (double(rand()%res)/double(res))*factor*sz_ - 0.5*factor*sz_;
 
         particles_(0,i) = x; particles_(1,i) = y; particles_(2,i) = z; particles_(3,i) = 1;
 
@@ -726,7 +726,7 @@ BOOST_PYTHON_MODULE(rendering) {
     using namespace boost::python;
 
     void (Scene::*sPx1)(vector< vector<double> >) = &Scene::seedParticles;
-    void (Scene::*sPx2)(int)                      = &Scene::seedParticles;
+    void (Scene::*sPx2)(int, double)              = &Scene::seedParticles;
 
     class_<Scene>("Scene")
         .def("create", &Scene::create)

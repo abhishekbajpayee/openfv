@@ -77,44 +77,48 @@ int main(int argc, char** argv) {
     */
 
     double f = 8.0;
-    int xv = 500; int yv = 500; int zv = 200; int particles = 1000;
+    int xv = 1000; int yv = 1000; int zv = 500; int particles = 1000;
     Scene scn;
-    // scn.create(xv/f, yv/f, zv/f, 1);
-    // scn.seedParticles(particles);
-    // scn.renderVolume(xv, yv, zv);
-    // scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
+    scn.create(xv/f, yv/f, zv/f, 1);
+    scn.seedParticles(particles, 0.75);
+    scn.renderVolume(xv, yv, zv);
+    scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
 
-    string filename = "/home/ab9/projects/scenes/scene_500_500_200_1000_ref_1.obj";
+    string path = "/home/ab9/projects/scenes/test/";
+    stringstream ss;
+    ss<<path<<"scene_"<<xv<<"_"<<yv<<"_"<<zv<<"_"<<particles<<"_ref_1.obj";
+    string filename = ss.str();
  
-    // saveScene(filename, scn);
+    saveScene(filename, scn);
  
-    loadScene(filename, scn);
+    // loadScene(filename, scn);
 
-    Camera cam;
-    double cf = 35.0; // [mm]
-    cam.init(cf*1200/4.8, xv, yv, 1);
-    cam.setScene(scn);
+    // Camera cam;
+    // double cf = 35.0; // [mm]
+    // cam.init(cf*1200/4.8, xv, yv, 1);
+    // cam.setScene(scn);
     
-    benchmark bm;
-    double d = 1000;
-    vector<double> th, q;
+    // benchmark bm;
+    // double d = 1000;
+    // vector<double> th, q;
 
-    double ang = 30;
+    // double ang = 30;
 
-    saRefocus ref;
-    ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
+    // saRefocus ref;
+    // ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
     // ref.setHF(1);
-    addCams(scn, cam, ang, d, f, ref);
-    ref.initializeGPU();
+    // addCams(scn, cam, ang, d, f, ref);
+    // ref.initializeGPU();
 
-    saRefocus ref2;
-    ref2.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
-    ref2.setHF(1);
-    addCams(scn, cam, ang, d, f, ref2);
-    ref2.initializeGPU();
-
-    Mat orig = ref.refocus(0, 0, 0, 0, 0, 0);
-    Mat hf = ref2.refocus(0, 0, 0, 0, 0, 0);
+    // refocus_settings settings;
+    // localizer_settings s2;
+    // s2.window = 2; s2.thresh = 30.0; s2.zmethod = 1;
+    // s2.zmin = -zv*0.5*1.1/8;
+    // s2.zmax = zv*0.5*1.1/8;
+    // s2.dz = 0.1;
+    // s2.show_particles = 0;
+    // pLocalize localizer(s2, ref, settings);
+    // localizer.find_particles_all_frames();
 
     // ref.GPUliveView();
 
