@@ -80,6 +80,7 @@ struct localizer_settings {
     double thresh;
     int zmethod;
     int show_particles;
+    int cluster_size;
     
 };
 

@@ -23,6 +23,14 @@ DEFINE_bool(find, false, "find particles");
 DEFINE_bool(track, false, "track particles");
 DEFINE_bool(fhelp, false, "show config file options");
 
+DEFINE_bool(save, false, "save scene");
+DEFINE_double(t, 0, "threshold level");
+DEFINE_int32(zm, 1, "z method");
+DEFINE_double(dz, 0.1, "dz");
+DEFINE_int32(i, 1, "scene id");
+DEFINE_bool(sp, false, "show particles");
+DEFINE_int32(cs, 5, "cluster size");
+DEFINE_int32(hf, 1, "HF method");
 
 int main(int argc, char** argv) {
 
@@ -79,48 +87,64 @@ int main(int argc, char** argv) {
     double f = 8.0;
     int xv = 1000; int yv = 1000; int zv = 500; int particles = 1000;
     Scene scn;
-    scn.create(xv/f, yv/f, zv/f, 1);
-    scn.seedParticles(particles, 0.75);
-    scn.renderVolume(xv, yv, zv);
-    scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
 
-    string path = "/home/ab9/projects/scenes/test/";
+    string path = "/home/ab9/projects/scenes/";
     stringstream ss;
-    ss<<path<<"scene_"<<xv<<"_"<<yv<<"_"<<zv<<"_"<<particles<<"_ref_1.obj";
+    ss<<path<<"scene_"<<xv<<"_"<<yv<<"_"<<zv<<"_"<<particles<<"_ref_"<<FLAGS_i<<".obj";
     string filename = ss.str();
- 
-    saveScene(filename, scn);
- 
-    // loadScene(filename, scn);
 
-    // Camera cam;
-    // double cf = 35.0; // [mm]
-    // cam.init(cf*1200/4.8, xv, yv, 1);
-    // cam.setScene(scn);
+    if (FLAGS_save) {
+
+        scn.create(xv/f, yv/f, zv/f, 1);
+        scn.seedParticles(particles, 0.75);
+        scn.renderVolume(xv, yv, zv);
+        scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
+        saveScene(filename, scn);
+
+    } else {
+ 
+        loadScene(filename, scn);
+        //fileIO fo("../temp/reference.txt");
+        //fo<<scn.getParticles();
+
+        Camera cam;
+        double cf = 35.0; // [mm]
+        cam.init(cf*1200/4.8, xv, yv, 1);
+        cam.setScene(scn);
     
-    // benchmark bm;
-    // double d = 1000;
-    // vector<double> th, q;
+        benchmark bm;
+        double d = 1000;
+        vector<double> th, q;
 
-    // double ang = 30;
+        double ang = 30;
 
-    // saRefocus ref;
-    // ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
-    // ref.setHF(1);
-    // addCams(scn, cam, ang, d, f, ref);
-    // ref.initializeGPU();
+        saRefocus ref;
+        ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
+        ref.setHF(FLAGS_hf);
+        addCams(scn, cam, ang, d, f, ref);
+        ref.initializeGPU();
 
-    // refocus_settings settings;
-    // localizer_settings s2;
-    // s2.window = 2; s2.thresh = 30.0; s2.zmethod = 1;
-    // s2.zmin = -zv*0.5*1.1/8;
-    // s2.zmax = zv*0.5*1.1/8;
-    // s2.dz = 0.1;
-    // s2.show_particles = 0;
-    // pLocalize localizer(s2, ref, settings);
-    // localizer.find_particles_all_frames();
+        if (FLAGS_live) {
 
-    // ref.GPUliveView();
+            ref.GPUliveView();
+
+        } else {
+
+            refocus_settings settings;
+            localizer_settings s2;
+            s2.window = 2; s2.thresh = FLAGS_t; s2.zmethod = FLAGS_zm;
+            s2.zmin = -zv*0.5*1.1/8;
+            s2.zmax = zv*0.5*1.1/8;
+            s2.dz = FLAGS_dz;
+            s2.show_particles = FLAGS_sp;
+            s2.cluster_size = FLAGS_cs;
+            pLocalize localizer(s2, ref, settings);
+            localizer.find_particles_all_frames();
+            localizer.write_all_particles_to_file("../temp/particles.txt");
+
+        }
+
+    }
 
     // bm.benchmarkSA(scn, ref);
     // LOG(INFO)<<bm.calcQ(60.0, 0, 0);

@@ -19,12 +19,10 @@ using namespace std;
 using namespace cv;
 
 pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s2):
-    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), zmethod_(s.zmethod), refocus_(refocus), s2_(s2), show_particles_(s.show_particles) {
+    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), zmethod_(s.zmethod), refocus_(refocus), s2_(s2), show_particles_(s.show_particles), cluster_size_(s.cluster_size) {
     
     zext_ = 2.5;
 
-    cluster_size_ = 0.9*(zext_/dz_);
-    cluster_size_ = 5;
     //cout<<"Crit cluster size: "<<cluster_size_<<endl;
 
 }

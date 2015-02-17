@@ -412,6 +412,7 @@ void saveScene(string filename, Scene scn) {
 
 void loadScene(string filename, Scene &scn) {
 
+    LOG(INFO)<<"Loading scene from "<<filename;
     ifstream ifile(filename.c_str());
     boost::archive::binary_iarchive ia(ifile);
     ia>>scn;
