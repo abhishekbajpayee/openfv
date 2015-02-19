@@ -24,16 +24,20 @@ DEFINE_bool(track, false, "track particles");
 DEFINE_bool(fhelp, false, "show config file options");
 
 DEFINE_bool(save, false, "save scene");
-DEFINE_double(t, 0, "threshold level");
-DEFINE_int32(zm, 1, "z method");
-DEFINE_double(dz, 0.1, "dz");
-DEFINE_int32(i, 1, "scene id");
 DEFINE_bool(sp, false, "show particles");
+DEFINE_bool(piv, false, "piv mode");
+
+DEFINE_int32(zm, 1, "z method");
+DEFINE_int32(i, 1, "scene id");
 DEFINE_int32(cs, 5, "cluster size");
 DEFINE_int32(hf, 1, "HF method");
+DEFINE_int32(part, 100, "particles");
+
 DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
 DEFINE_string(rfile, "../temp/default_rfile.txt", "reference file");
-DEFINE_int32(part, 100, "particles");
+
+DEFINE_double(t, 0, "threshold level");
+DEFINE_double(dz, 0.1, "dz");
 DEFINE_double(angle, 30, "angle between cameras");
 
 int main(int argc, char** argv) {
