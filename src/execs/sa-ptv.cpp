@@ -31,6 +31,10 @@ DEFINE_int32(i, 1, "scene id");
 DEFINE_bool(sp, false, "show particles");
 DEFINE_int32(cs, 5, "cluster size");
 DEFINE_int32(hf, 1, "HF method");
+DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
+DEFINE_string(rfile, "../temp/default_rfile.txt", "reference file");
+DEFINE_int32(part, 100, "particles");
+DEFINE_double(angle, 30, "angle between cameras");
 
 int main(int argc, char** argv) {
 
@@ -85,7 +89,7 @@ int main(int argc, char** argv) {
     */
 
     double f = 8.0;
-    int xv = 1000; int yv = 1000; int zv = 500; int particles = 1000;
+    int xv = 1000; int yv = 1000; int zv = 500; int particles = FLAGS_part;
     Scene scn;
 
     string path = "/home/ab9/projects/scenes/";
@@ -104,8 +108,8 @@ int main(int argc, char** argv) {
     } else {
  
         loadScene(filename, scn);
-        //fileIO fo("../temp/reference.txt");
-        //fo<<scn.getParticles();
+        fileIO fo(FLAGS_rfile);
+        fo<<scn.getParticles();
 
         Camera cam;
         double cf = 35.0; // [mm]
@@ -116,7 +120,7 @@ int main(int argc, char** argv) {
         double d = 1000;
         vector<double> th, q;
 
-        double ang = 30;
+        double ang = FLAGS_angle;
 
         saRefocus ref;
         ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
@@ -140,7 +144,7 @@ int main(int argc, char** argv) {
             s2.cluster_size = FLAGS_cs;
             pLocalize localizer(s2, ref, settings);
             localizer.find_particles_all_frames();
-            localizer.write_all_particles_to_file("../temp/particles.txt");
+            localizer.write_all_particles_to_file(FLAGS_pfile);
 
         }
 
