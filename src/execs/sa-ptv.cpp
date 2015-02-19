@@ -31,6 +31,9 @@ DEFINE_int32(i, 1, "scene id");
 DEFINE_bool(sp, false, "show particles");
 DEFINE_int32(cs, 5, "cluster size");
 DEFINE_int32(hf, 1, "HF method");
+DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
+DEFINE_int32(part, 100, "particles");
+DEFINE_double(angle, 30, "angle between cameras");
 
 int main(int argc, char** argv) {
 
@@ -85,14 +88,15 @@ int main(int argc, char** argv) {
     */
 
     double f = 8.0;
-    int xv = 1000; int yv = 1000; int zv = 500; int particles = 1000;
+    int xv = 512; int yv = 512; int zv = 512; int particles = FLAGS_part;
     Scene scn;
 
-    string path = "/home/ab9/projects/scenes/";
+    string path = "/home/ab9/projects/scenes/piv/";
     stringstream ss;
-    ss<<path<<"scene_"<<xv<<"_"<<yv<<"_"<<zv<<"_"<<particles<<"_ref_"<<FLAGS_i<<".obj";
+    ss<<path<<"scene_"<<xv<<"_"<<yv<<"_"<<zv<<"_"<<particles<<"_"<<FLAGS_i<<".obj";
     string filename = ss.str();
 
+    /*
     if (FLAGS_save) {
 
         scn.create(xv/f, yv/f, zv/f, 1);
@@ -116,7 +120,7 @@ int main(int argc, char** argv) {
         double d = 1000;
         vector<double> th, q;
 
-        double ang = 30;
+        double ang = FLAGS_angle;
 
         saRefocus ref;
         ref.setRefractive(1, -100, 1.0, 1.5, 1.33, 5);
@@ -140,15 +144,26 @@ int main(int argc, char** argv) {
             s2.cluster_size = FLAGS_cs;
             pLocalize localizer(s2, ref, settings);
             localizer.find_particles_all_frames();
-            localizer.write_all_particles_to_file("../temp/particles.txt");
+            localizer.write_all_particles_to_file(FLAGS_pfile);
 
         }
 
     }
+    */
 
     // bm.benchmarkSA(scn, ref);
     // LOG(INFO)<<bm.calcQ(60.0, 0, 0);
     
+    scn.create(xv/f, yv/f, zv/f, 1);
+    scn.seedParticles(particles, 1.2);
+    scn.renderVolume(xv, yv, zv);
+    saveScene(filename, scn);
+    scn.dumpStack("/home/ab9/projects/stack/piv/ref/1/refocused");
+
+    scn.propagateParticles(vortex, 0.01);
+    scn.renderVolume(xv, yv, zv);
+    scn.dumpStack("/home/ab9/projects/stack/piv/ref/2/refocused");
+
     return 1;
 
 }

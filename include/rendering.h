@@ -60,6 +60,8 @@ class Scene {
 
     void temp();
 
+    void dumpStack(string);
+
   private:
 
     // Function to serialize and save Scene object

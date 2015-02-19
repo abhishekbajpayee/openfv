@@ -369,6 +369,13 @@ void Scene::temp() {
 
 }
 
+void Scene::dumpStack(string path) {
+
+    imageIO io(path);
+    io<<volumeGPU_;
+
+}
+
 // Camera class functions
 
 Camera::Camera() {
