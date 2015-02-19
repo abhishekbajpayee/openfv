@@ -32,6 +32,7 @@ DEFINE_bool(sp, false, "show particles");
 DEFINE_int32(cs, 5, "cluster size");
 DEFINE_int32(hf, 1, "HF method");
 DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
+DEFINE_string(rfile, "../temp/default_rfile.txt", "reference file");
 DEFINE_int32(part, 100, "particles");
 DEFINE_double(angle, 30, "angle between cameras");
 
@@ -96,7 +97,6 @@ int main(int argc, char** argv) {
     ss<<path<<"scene_"<<xv<<"_"<<yv<<"_"<<zv<<"_"<<particles<<"_"<<FLAGS_i<<".obj";
     string filename = ss.str();
 
-    /*
     if (FLAGS_save) {
 
         scn.create(xv/f, yv/f, zv/f, 1);
@@ -105,11 +105,11 @@ int main(int argc, char** argv) {
         scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
         saveScene(filename, scn);
 
-    } else {
+    } else if (FLAGS_find) {
  
         loadScene(filename, scn);
-        //fileIO fo("../temp/reference.txt");
-        //fo<<scn.getParticles();
+        fileIO fo(FLAGS_rfile);
+        fo<<scn.getParticles();
 
         Camera cam;
         double cf = 35.0; // [mm]
@@ -148,21 +148,22 @@ int main(int argc, char** argv) {
 
         }
 
+    } else if (FLAGS_piv) {
+    
+        scn.create(xv/f, yv/f, zv/f, 1);
+        scn.seedParticles(particles, 1.2);
+        scn.renderVolume(xv, yv, zv);
+        saveScene(filename, scn);
+        scn.dumpStack("/home/ab9/projects/stack/piv/ref/1/refocused");
+        
+        scn.propagateParticles(vortex, 0.01);
+        scn.renderVolume(xv, yv, zv);
+        scn.dumpStack("/home/ab9/projects/stack/piv/ref/2/refocused");
+
     }
-    */
 
     // bm.benchmarkSA(scn, ref);
     // LOG(INFO)<<bm.calcQ(60.0, 0, 0);
-    
-    scn.create(xv/f, yv/f, zv/f, 1);
-    scn.seedParticles(particles, 1.2);
-    scn.renderVolume(xv, yv, zv);
-    saveScene(filename, scn);
-    scn.dumpStack("/home/ab9/projects/stack/piv/ref/1/refocused");
-
-    scn.propagateParticles(vortex, 0.01);
-    scn.renderVolume(xv, yv, zv);
-    scn.dumpStack("/home/ab9/projects/stack/piv/ref/2/refocused");
 
     return 1;
 
