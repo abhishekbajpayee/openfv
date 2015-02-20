@@ -399,6 +399,27 @@ void addCams(Scene scn, Camera cam, double theta, double d, double f, saRefocus&
 
 }
 
+void addCams4(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
+
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
+
+    ref.setF(f);
+
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += 2*xy) {
+        for (double y = -xy; y<=xy; y += 2*xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
+
+}
+
 void saveScene(string filename, Scene scn) {
 
     // TODO: add some check as to whether or not this saving worked
@@ -655,6 +676,8 @@ string fileIO::getFilename(string filename) {
 // imageIO class functions
 // ----------------------------------------------------
 
+// imageIO class allows writing of a single image or a sequence of
+// images to a certain path
 imageIO::imageIO(string path) {
 
     DIR *dir;
@@ -702,7 +725,7 @@ imageIO::imageIO(string path) {
 
     counter_ = 1;
     prefix_ = string("");
-    ext_ = ".jpg";
+    ext_ = ".tif";
 
 }
 
@@ -743,7 +766,7 @@ void imageIO::operator<< (vector<Mat> imgs) {
         filename<<ext_;
 
         // TODO: specify quality depending on extension
-        imwrite(filename.str(), imgs[i]);
+        imwrite(filename.str(), imgs[i]*255.0);
         counter_++;
 
     }

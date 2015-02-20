@@ -26,15 +26,23 @@ DEFINE_bool(fhelp, false, "show config file options");
 DEFINE_bool(save, false, "save scene");
 DEFINE_bool(sp, false, "show particles");
 DEFINE_bool(piv, false, "piv mode");
+DEFINE_bool(param, false, "t param study");
 
 DEFINE_int32(zm, 1, "z method");
+DEFINE_int32(xv, 1, "xv");
+DEFINE_int32(yv, 1, "yv");
+DEFINE_int32(zv, 1, "zv");
 DEFINE_int32(i, 1, "scene id");
 DEFINE_int32(cs, 5, "cluster size");
 DEFINE_int32(hf, 1, "HF method");
 DEFINE_int32(part, 100, "particles");
+DEFINE_int32(cams, 9, "num cams");
+DEFINE_int32(mult, 0, "multiplicative");
 
 DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
 DEFINE_string(rfile, "../temp/default_rfile.txt", "reference file");
+DEFINE_string(scnfile, "../temp/default_scn.obj", "Scene object file");
+DEFINE_string(stackpath, "../temp/stack", "stack location");
 
 DEFINE_double(t, 0, "threshold level");
 DEFINE_double(dz, 0.1, "dz");
@@ -93,7 +101,7 @@ int main(int argc, char** argv) {
     */
 
     double f = 8.0;
-    int xv = 512; int yv = 512; int zv = 512; int particles = FLAGS_part;
+    int xv = FLAGS_xv; int yv = FLAGS_yv; int zv = FLAGS_zv; int particles = FLAGS_part;
     Scene scn;
 
     string path = "/home/ab9/projects/scenes/piv/";
@@ -111,7 +119,7 @@ int main(int argc, char** argv) {
 
     } else if (FLAGS_find) {
  
-        loadScene(filename, scn);
+        loadScene(FLAGS_scnfile, scn);
         fileIO fo(FLAGS_rfile);
         fo<<scn.getParticles();
 
@@ -154,15 +162,79 @@ int main(int argc, char** argv) {
 
     } else if (FLAGS_piv) {
     
-        scn.create(xv/f, yv/f, zv/f, 1);
-        scn.seedParticles(particles, 1.2);
-        scn.renderVolume(xv, yv, zv);
-        saveScene(filename, scn);
-        scn.dumpStack("/home/ab9/projects/stack/piv/ref/1/refocused");
+        // scn.create(xv/f, yv/f, zv/f, 1);
+        // scn.seedParticles(particles, 1.2);
+        // scn.renderVolume(xv, yv, zv);
+        // saveScene(filename, scn);
+        // scn.dumpStack("/home/ab9/projects/stack/piv/ref/1/refocused");
         
-        scn.propagateParticles(vortex, 0.01);
-        scn.renderVolume(xv, yv, zv);
-        scn.dumpStack("/home/ab9/projects/stack/piv/ref/2/refocused");
+        loadScene(filename, scn);
+
+        Camera cam;
+        double cf = 35.0; // [mm]
+        cam.init(cf*1200/4.8, xv, yv, 1);
+        cam.setScene(scn);
+        
+        double d = 1000;
+        double t = FLAGS_t;
+
+        for (int i=0; i<2; i++) {
+
+            saRefocus ref;
+            ref.setF(f);
+        
+            double theta = FLAGS_angle*pi/180.0; 
+            double xy = d*sin(theta);
+            double z = -d*cos(theta);     
+        
+            int cams = FLAGS_cams;
+            double xxy, yxy;
+            if (cams==4) {
+                xxy = 2*xy; yxy = 2*xy;
+            } else if (cams==6) {
+                xxy = xy; yxy = 2*xy;
+            } else {
+                xxy = xy; yxy = xy;
+            }
+
+            for (double x = -xy; x<=xy; x += xxy) {
+                for (double y = -xy; y<=xy; y += yxy) {
+                    cam.setLocation(x, y, z);
+                    Mat P = cam.getP();
+                    Mat C = cam.getC();
+                    Mat img = cam.render();
+                    ref.addView(img, P, C);
+                }
+            }
+
+            if (FLAGS_live)
+                ref.GPUliveView();
+            else
+                ref.initializeGPU();
+            
+            benchmark bm;
+            bm.benchmarkSA(scn, ref);
+
+            if (FLAGS_param) {
+
+                for (t=100; t<=200; t+=5.0)
+                    LOG(INFO)<<t<<"\t"<<bm.calcQ(t, FLAGS_mult, 0.25);
+                break;
+
+            } else {
+
+                double q = bm.calcQ(t, FLAGS_mult, 0.25);
+                LOG(INFO)<<"Q"<<i<<"\t"<<q;
+
+                vector<double> zs = linspace(-0.5*zv/f, 0.5*zv/f, zv);
+                ref.setMult(FLAGS_mult, 0.25);
+                ref.dump_stack_piv(FLAGS_stackpath, zs[0], zs[zs.size()-1], zs[1]-zs[0], t, "tif", i, q);
+            
+            }
+
+            scn.propagateParticles(vortex, 0.01);
+        
+        }
 
     }
 
