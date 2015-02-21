@@ -38,6 +38,7 @@ class Scene {
     void renderVolume(int xv, int yv, int zv);
     void renderVolumeCPU(int xv, int yv, int zv);
     void renderVolumeGPU(int xv, int yv, int zv);
+    void renderVolumeGPU2(int xv, int yv, int zv);
 
     void setParticleSigma(double, double, double);
     void setRefractiveGeom(float zW, float n1, float n2, float n3, float t);
