@@ -99,7 +99,7 @@ struct particle2d {
     double x;
     double y;
     double z;
-    int I;
+    double I;
     int size;
 };
 

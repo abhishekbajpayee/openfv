@@ -541,6 +541,10 @@ double pLocalize::get_zloc(vector<particle2d> cluster) {
     case 3: { // gauss fit
 
         double* params = new double[3];
+        
+        // initial values for parameters
+        params[1] = cluster[0].z; params[0] = 1; params[2] = 0.25; 
+
         ceres::Problem problem;
         for (int i=0; i<cluster.size(); i++) {
 
