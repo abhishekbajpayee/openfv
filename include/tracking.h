@@ -26,10 +26,7 @@ class pTracking {
 
     }
 
- pTracking(string particle_file, double R_n, double R_s): path_(particle_file), R_s(R_s), R_n(R_n) {
-        initialize();
-        read_points();
-    }
+    pTracking(string particle_file, double Rn, double Rs);
     
     void set_vars(double rn, double rs, double e, double f);
 
@@ -53,6 +50,8 @@ class pTracking {
     void write_long_quiver(string path, int l);
 
     double sim_performance();
+
+    vector<int> get_match_counts();
 
  private:
 

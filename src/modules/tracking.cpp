@@ -19,6 +19,15 @@
 using namespace std;
 using namespace cv;
 
+pTracking::pTracking(string particle_file, double Rn, double Rs) {
+
+    path_ = particle_file; R_s = Rs; R_n = Rn;
+
+    initialize();
+    read_points();
+
+}
+
 void pTracking::initialize() {
 
     N = 5000;
@@ -42,8 +51,6 @@ void pTracking::set_vars(double rn, double rs, double e, double f) {
 
     R_n = rn;
     R_s = rs;
-
-    //cout<<rn<<" "<<rs<<" "<<e<<" "<<f<<" ";
 
     E = e;
     F = f;
@@ -695,26 +702,6 @@ void pTracking::write_tracking_result() {
 
 }
 
-double pTracking::sim_performance() {
-
-    double perf;
-
-    for (int frame=0; frame<all_matches.size(); frame++) {
-        int count = 0;
-        int total = all_matches[frame].size();
-        for (int i=0; i<all_matches[frame].size(); i++) {
-            if(all_matches[frame][i].x==all_matches[frame][i].y)
-                count++;
-        }
-        perf = double(count)/double(total);
-    }
-
-    //cout<<1-perf<<endl;
-
-    return(1-perf);
-
-}
-
 void pTracking::write_all_paths(string path) {
 
     ofstream file;
@@ -774,5 +761,45 @@ bool pTracking::is_used(vector< vector<int> > used, int k, int i) {
     }
 
     return 0;
+
+}
+
+double pTracking::sim_performance() {
+
+    double perf;
+
+    for (int frame=0; frame<all_matches.size(); frame++) {
+        int count = 0;
+        int total = all_matches[frame].size();
+        for (int i=0; i<all_matches[frame].size(); i++) {
+            if(all_matches[frame][i].x==all_matches[frame][i].y)
+                count++;
+        }
+        perf = double(count)/double(total);
+    }
+
+    //cout<<1-perf<<endl;
+
+    return(1-perf);
+
+}
+
+vector<int> pTracking::get_match_counts() {
+    
+    return(match_counts);
+
+}
+
+// Python wrapper
+BOOST_PYTHON_MODULE(tracking) {
+
+    using namespace boost::python;
+
+    class_<pTracking>("pTracking", init<string, double, double>())
+        .def("set_vars", &pTracking::set_vars)
+        .def("track_all", &pTracking::track_all)
+        .def("get_match_counts", &pTracking::get_match_counts)
+        .def("write_quiver_data", &pTracking::write_quiver_data)
+    ;
 
 }

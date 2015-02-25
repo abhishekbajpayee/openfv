@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-void init(int argc, char** argv);
+void init_logging(int argc, char** argv);
 
 void T_from_P(Mat P, Mat &H, double z, double scale, Size img_size);
 
@@ -58,6 +58,8 @@ void loadScene(string filename, Scene &scn);
 Scene loadScene(string filename);
 
 vector<double> vortex(double, double, double, double);
+
+vector<double> burgers_vortex(double, double, double, double);
 
 // Movie class
 

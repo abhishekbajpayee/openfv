@@ -7,7 +7,7 @@
 using namespace std;
 using namespace cv;
 
-void init(int argc, char** argv) {
+void init_logging(int argc, char** argv) {
 
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
@@ -463,6 +463,28 @@ vector<double> vortex(double x, double y, double z, double t) {
 
     double r = sqrt(x*x + z*z);
     double theta = atan2(z, x);
+    double dTheta = omega*t;
+    double theta2 = theta+dTheta;
+
+    double x2 = r*cos(theta2); double z2 = r*sin(theta2); double y2 = y;
+
+    vector<double> np;
+    np.push_back(x2); np.push_back(y2); np.push_back(z2);
+
+    return(np);
+
+}
+
+vector<double> burgers_vortex(double x, double y, double z, double t) {
+
+    double tau = 200;
+    double sigma = 0.01;
+    double nu = 1;
+
+    double r = sqrt(x*x + z*z);
+    double theta = atan2(z, x);
+    
+    double omega = (tau/(2*pi*r*r))*(1 - exp(-sigma*r*r/4/nu));
     double dTheta = omega*t;
     double theta2 = theta+dTheta;
 

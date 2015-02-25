@@ -870,7 +870,7 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
     
     if (live) {
         char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z_, thresh, frame);
+        sprintf(title, "z = %f, thresh = %f, frame = %d", z_, thresh*255.0, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
@@ -924,7 +924,7 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
     if (live) {
         
         char title[150];
-        sprintf(title, "T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", thresh, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
+        sprintf(title, "T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", thresh*255.0, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
 
         imshow("Result", refocused_host_);
         displayOverlay("Result", title);
