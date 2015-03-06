@@ -786,34 +786,34 @@ class gaussFitError {
 };
 
 // Relaxation Tracking Error function
-class rlxTrackingError {
+// class rlxTrackingError {
 
- public:
+//  public:
     
- rlxTrackingError(string path): 
-    path_(path) {}
+//  rlxTrackingError(string path): 
+//     path_(path) {}
     
-    template <typename T>
-    bool operator()(const T* const params,
-                    T* residuals) const {
+//     template <typename T>
+//     bool operator()(const T* const params,
+//                     T* residuals) const {
         
-        pTracking track(path_, params[0], params[1]);
+//         pTracking track(path_, params[0], params[1]);
 
-        track.set_vars(double(params[0]),
-                        double(params[1]),
-                        double(params[2]),
-                        double(params[3]));
+//         track.set_vars(double(params[0]),
+//                         double(params[1]),
+//                         double(params[2]),
+//                         double(params[3]));
         
-        track.track_frames(15, 16);
-        residuals[0] = T(1.0) - T(track.sim_performance());
+//         track.track_frames(15, 16);
+//         residuals[0] = T(1.0) - T(track.sim_performance());
 
-        return true;
+//         return true;
 
-    }
+//     }
     
-    string path_;
+//     string path_;
 
-};
+// };
 
 // FUNCTION DEFINITIONS
 
