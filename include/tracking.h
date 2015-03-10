@@ -28,7 +28,7 @@ class pTracking {
 
     pTracking(string particle_file, double Rn, double Rs);
     
-    void set_vars(int method, double rn, double rs, double e, double f, int reject_singles);
+    void set_vars(int method, double rn, double rs, double e, double f);
 
     void initialize();
     void read_points();
@@ -36,7 +36,7 @@ class pTracking {
     void track_frames(int start, int end);
     void track_all();
     vector<Point2i> track_frame(int f1, int f2, int &count);
-    vector<Point2i> track_frame_n(int f1, int f2, int &count);
+    void track_frame_n(int f1, int f2);
 
     void find_long_paths(int l);
     void find_sized_paths(int l);
@@ -53,6 +53,7 @@ class pTracking {
     double sim_performance();
 
     vector<int> get_match_counts();
+    Mat getP();
 
  private:
 
@@ -64,7 +65,7 @@ class pTracking {
     void build_probability_sets(vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
 
     // New functions
-    int find_matches_n(Mat Pij, Mat Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches);
+    int find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches);
     double update_probabilities_n(Mat &Pij, Mat &Pi, Mat &Pij2, Mat &Pi2);
     void normalize_probabilites_n(Mat &Pij, Mat &Pi);
     void build_probability_sets_n(vector< vector<int> > S_r, vector< vector<int> > S_c, Mat &Pij, Mat &Pi, Mat &Pij2, Mat &Pi2);
@@ -95,6 +96,8 @@ class pTracking {
     int N;
     double tol;
     int offset;
+
+    Mat P_;
 
     int method_;
     int reject_singles_;

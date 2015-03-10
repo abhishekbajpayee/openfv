@@ -47,10 +47,10 @@ void pTracking::initialize() {
 
 }
 
-void pTracking::set_vars(int method, double rn, double rs, double e, double f, int reject_singles) {
+void pTracking::set_vars(int method, double rn, double rs, double e, double f) {
 
     method_ = method;
-    reject_singles_ = reject_singles;
+    // reject_singles_ = reject_singles;
 
     R_n = rn;
     R_s = rs;
@@ -148,7 +148,7 @@ void pTracking::track_all() {
         //for (int i=0; i<5; i++) {
 
         int count;
-        matches = track_frame_n(i, i+1, count);
+        matches = track_frame(i, i+1, count);
         all_matches.push_back(matches);
         match_counts.push_back(count);
         matches.clear();
@@ -220,7 +220,7 @@ vector<Point2i> pTracking::track_frame(int f1, int f2, int &count) {
 
 }
 
-vector<Point2i> pTracking::track_frame_n(int f1, int f2, int &count) {
+void pTracking::track_frame_n(int f1, int f2) {
 
     LOG(INFO)<<"Matching frames "<<f1<<" and "<<f2<<" | ";
 
@@ -245,6 +245,7 @@ vector<Point2i> pTracking::track_frame_n(int f1, int f2, int &count) {
 
     double diff;
     int n;
+
     for (n=0; n<N; n++) {
 
         //for (int i=0; i<Pij.size(); i++) {
@@ -258,15 +259,15 @@ vector<Point2i> pTracking::track_frame_n(int f1, int f2, int &count) {
                     //VLOG(3)<<theta[i][j].size();
                     sum += Pij(theta[i][j][k].x,theta[i][j][k].y);
                 }
-                double newval = Pij(i,j)*( A + (B*sum) );
-                Pij2(i,j) = newval;
+
+                double newval = Pij(i,S_c[i][j])*( A + (B*sum) );
+                Pij2(i,S_c[i][j]) = newval;
 
             }
 
         }
 
         normalize_probabilites_n(Pij2,Pi2);
-        // diff = update_probabilities_n(Pij, Pi, Pij2, Pi2);
 
         diff = double(sum(abs(Pij-Pij2))[0] + sum(abs(Pi-Pi2))[0]);
         VLOG(3)<<n+1<<": "<<diff;
@@ -280,9 +281,11 @@ vector<Point2i> pTracking::track_frame_n(int f1, int f2, int &count) {
     VLOG(1)<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
 
     vector<Point2i> matches;
-    count = find_matches_n(Pij, Pi, S_r, S_c, matches);
+    // count = find_matches_n(Pij, Pi, matches);
 
-    return(matches);
+    P_ = Pij;
+
+    //return(matches);
 
 }
 
@@ -464,108 +467,119 @@ void pTracking::build_probability_sets(vector< vector<int> > S_r, vector< vector
 
 // New functions
 
-int pTracking::find_matches_n(Mat Pij, Mat Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches) {
+int pTracking::find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches) {
 
-    // for (int i=0; i<Pij.size(); i++) {
-    //     for (int j=0; j<Pij[i].size(); j++) {
-    //         cout<<Pij[i][j]<<"\t";
-    //     }
-    //     cout<<endl;
-    // }
+    qimshow(Pij);
 
-    //***    
+    // for (int i=0; i<Pij.rows; i++) {
 
-    // vector< vector<int> > zematch;
-    // vector<int> container;
+    //     LOG(INFO)<<sum(Pij.row(i));
 
-    // for (int i=0; i<Pij.size(); i++)
-    //     zematch.push_back(container);
-
-    // for (int i=0; i<Pij.size(); i++) {
-    //     for (int j=0; j<Pij[i].size(); j++) {
-    //         if (Pij[i][j]>0.99)
-    //             zematch[S_r[i][j]].push_back(S_c[i][j]);
-    //     }
     // }
 
     int count = 0;
     int count_single = 0;
     int count_mult = 0;
     int tiecount = 0;
+
+    /*
+
+    for (int i=0; i<Pij.size(); i++) {
+        for (int j=0; j<Pij[i].size(); j++) {
+            cout<<Pij[i][j]<<"\t";
+        }
+        cout<<endl;
+    }
+
     
-    // for (int i=0; i<Pij.size(); i++) {
+
+    vector< vector<int> > zematch;
+    vector<int> container;
+
+    for (int i=0; i<Pij.size(); i++)
+        zematch.push_back(container);
+
+    for (int i=0; i<Pij.size(); i++) {
+        for (int j=0; j<Pij[i].size(); j++) {
+            if (Pij[i][j]>0.99)
+                zematch[S_r[i][j]].push_back(S_c[i][j]);
+        }
+    }
+    
+    for (int i=0; i<Pij.size(); i++) {
         
-    //     vector<int> c;
-    //     vector<int> cf;
+        vector<int> c;
+        vector<int> cf;
 
-    //     if (zematch[i].size()==0) {
-    //         matches.push_back(Point2i(i,-1));
-    //     } else {
-    //         matches.push_back(Point2i(i,zematch[i][0]));
-    //         count++;
-    //     }
+        if (zematch[i].size()==0) {
+            matches.push_back(Point2i(i,-1));
+        } else {
+            matches.push_back(Point2i(i,zematch[i][0]));
+            count++;
+        }
     
-    // }
+    }
 
-    //***
+    else {
 
-    // else {
+            for (int j=0; j<zematch[i].size(); j++) {
 
-    //         for (int j=0; j<zematch[i].size(); j++) {
-
-    //             int counted=0;
-    //             for (int k=0; k<c.size(); k++) {
-    //                 if (zematch[i][j]==c[k]) {
-    //                     counted=1;
-    //                     cf[k]++;
-    //                 }
-    //             }
-    //             if (counted==0) {
-    //                 c.push_back(zematch[i][j]);
-    //                 cf.push_back(1);
-    //             }
+                int counted=0;
+                for (int k=0; k<c.size(); k++) {
+                    if (zematch[i][j]==c[k]) {
+                        counted=1;
+                        cf[k]++;
+                    }
+                }
+                if (counted==0) {
+                    c.push_back(zematch[i][j]);
+                    cf.push_back(1);
+                }
                 
-    //         }
+            }
 
-    //         // Finding maximum occurence frequency
-    //         int modloc = 0;
-    //         int modf = cf[0];
-    //         for (int k=1; k<cf.size(); k++) {
-    //             if (cf[k]>modf) {
-    //                 modloc = k;
-    //                 modf = cf[k];
-    //             }
-    //         }
+            // Finding maximum occurence frequency
+            int modloc = 0;
+            int modf = cf[0];
+            for (int k=1; k<cf.size(); k++) {
+                if (cf[k]>modf) {
+                    modloc = k;
+                    modf = cf[k];
+                }
+            }
 
-    //         // Checking if multiple maxima exist
-    //         int tie = 0;
-    //         for (int k=0; k<cf.size(); k++) {
+            // Checking if multiple maxima exist
+            int tie = 0;
+            for (int k=0; k<cf.size(); k++) {
                 
-    //             if (k==modloc)
-    //                 continue;
+                if (k==modloc)
+                    continue;
                 
-    //             if (cf[k]==cf[modloc]) {
-    //                 tie=1;
-    //                 tiecount++;
-    //                 matches.push_back(Point2i(i,-2));
-    //                 break;
-    //             }
+                if (cf[k]==cf[modloc]) {
+                    tie=1;
+                    tiecount++;
+                    matches.push_back(Point2i(i,-2));
+                    break;
+                }
 
-    //         }
+            }
 
-    //         if (tie==0) {
-    //             matches.push_back(Point2i(i,c[modloc]));
-    //             count++;
-    //             count_mult++;
-    //         }
+            if (tie==0) {
+                matches.push_back(Point2i(i,c[modloc]));
+                count++;
+                count_mult++;
+            }
 
-    //     }
+        }
 
-    //     c.clear(); cf.clear();
+        c.clear(); cf.clear();
 
-    // }
+    }
+
+    */
 
     // LOG(INFO)<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
+    
     LOG(INFO)<<"Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.rows)<<endl;
     // LOG(INFO)<<"Singles: "<<count_single<<", Multiples: "<<count_mult;
 
@@ -599,8 +613,15 @@ void pTracking::normalize_probabilites_n(Mat &Pij, Mat &Pi) {
 
     for (int i=0; i<Pij.rows; i++) {
 
-        double s = double(sum(Pij.row(i))[0]) + Pi.at<double>(i,0);
-        Pij.row(i) /= s;
+        double s = 0;
+        for (int j=0; j<Pij.cols; j++)
+            s += Pij.at<double>(i,j);
+
+        s += Pi.at<double>(i,0);
+
+        for (int j=0; j<Pij.cols; j++)
+            Pij.at<double>(i,j) /= s;
+
         Pi.at<double>(i,0) /= s;
 
         // for (int k=0; k<Pij[i].size(); k++) {
@@ -617,8 +638,8 @@ void pTracking::build_probability_sets_n(vector< vector<int> > S_r, vector< vect
     for (int i=0; i<S_r.size(); i++) {
 
         for (int k=0; k<S_c[i].size(); k++) {
-            Pij.at<double>(i,k) = 1.0/(double(S_c[i].size())+1.0);
-            Pij2.at<double>(i,k) = 1.0/(double(S_c[i].size())+1.0);
+            Pij.at<double>(i,S_c[i][k]) = 1.0/(double(S_c[i].size())+1.0);
+            Pij2.at<double>(i,S_c[i][k]) = 1.0/(double(S_c[i].size())+1.0);
         }
         Pi.at<double>(i,0) = 1.0/(double(S_c[i].size())+1.0);
         Pi2.at<double>(i,0) = 1.0/(double(S_c[i].size())+1.0);
@@ -1121,6 +1142,12 @@ vector<int> pTracking::get_match_counts() {
 
 }
 
+Mat pTracking::getP() {
+
+    return(P_.clone());
+
+}
+
 // Python wrapper
 BOOST_PYTHON_MODULE(tracking) {
 
@@ -1128,7 +1155,9 @@ BOOST_PYTHON_MODULE(tracking) {
 
     class_<pTracking>("pTracking", init<string, double, double>())
         .def("set_vars", &pTracking::set_vars)
-        .def("track_all", &pTracking::track_all)
+        .def("track_frame", &pTracking::track_frame_n)
+        .def("getP", &pTracking::getP)
+        // .def("track_all", &pTracking::track_all)
         .def("get_match_counts", &pTracking::get_match_counts)
         .def("write_quiver_data", &pTracking::write_quiver_data)
     ;
