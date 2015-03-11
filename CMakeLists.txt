@@ -77,3 +77,7 @@ target_link_libraries(refocusing ${LIBS})
 add_library(tools SHARED ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp)
 set_target_properties(tools PROPERTIES ${PYTHON_PROPS} PREFIX "")
 target_link_libraries(tools ${LIBS})
+
+add_library(tracking SHARED ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
+set_target_properties(tracking PROPERTIES ${PYTHON_PROPS} PREFIX "")
+target_link_libraries(tracking ${LIBS})

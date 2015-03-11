@@ -68,6 +68,7 @@ class saRefocus {
     void CPUrefocus_ref_corner(double z, double thresh, int live, int frame);
 
     void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
+    void dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, double q);
     void calculateQ(double zmin, double zmax, double dz, double thresh, int frame, string refPath);
     void return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack);
     double getQ(vector<Mat> &stack, vector<Mat> &refStack);
@@ -75,6 +76,7 @@ class saRefocus {
     // Expert mode functions
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);
     void addView(Mat img, Mat P, Mat location);
+    void addViews(vector< vector<Mat> > frames, vector<Mat> Ps, vector<Mat> locations);
     void clearViews();
     void setF(double f);
     void setMult(int flag, double exp);

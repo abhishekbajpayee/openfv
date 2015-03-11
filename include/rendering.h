@@ -38,6 +38,7 @@ class Scene {
     void renderVolume(int xv, int yv, int zv);
     void renderVolumeCPU(int xv, int yv, int zv);
     void renderVolumeGPU(int xv, int yv, int zv);
+    void renderVolumeGPU2(int xv, int yv, int zv);
 
     void setParticleSigma(double, double, double);
     void setRefractiveGeom(float zW, float n1, float n2, float n3, float t);
@@ -45,7 +46,7 @@ class Scene {
     void seedR();
     void seedAxes();
     void seedParticles(vector< vector<double> > locations);
-    void seedParticles(int num);    
+    void seedParticles(int num, double factor);    
 
     void propagateParticles(vector<double> (*func)(double, double, double, double), double t);
 
@@ -59,6 +60,8 @@ class Scene {
     double sigma();
 
     void temp();
+
+    void dumpStack(string);
 
   private:
 

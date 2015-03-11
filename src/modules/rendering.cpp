@@ -117,7 +117,7 @@ void Scene::seedParticles(vector< vector<double> > points) {
 
 }
 
-void Scene::seedParticles(int num) {
+void Scene::seedParticles(int num, double factor) {
 
     LOG(INFO)<<"Seeding particles...";
 
@@ -128,9 +128,9 @@ void Scene::seedParticles(int num) {
     double x, y, z;
     for (int i=0; i<num; i++) {
 
-        x = (double(rand()%res)/double(res))*sx_ - 0.5*sx_;
-        y = (double(rand()%res)/double(res))*sy_ - 0.5*sy_;
-        z = (double(rand()%res)/double(res))*sz_ - 0.5*sz_;
+        x = (double(rand()%res)/double(res))*factor*sx_ - 0.5*factor*sx_;
+        y = (double(rand()%res)/double(res))*factor*sy_ - 0.5*factor*sy_;
+        z = (double(rand()%res)/double(res))*factor*sz_ - 0.5*factor*sz_;
 
         particles_(0,i) = x; particles_(1,i) = y; particles_(2,i) = z; particles_(3,i) = 1;
 
@@ -158,7 +158,7 @@ void Scene::propagateParticles(vector<double> (*func)(double, double, double, do
 void Scene::renderVolume(int xv, int yv, int zv) {
 
     if (GPU_FLAG) {
-        renderVolumeGPU(xv, yv, zv);
+        renderVolumeGPU2(xv, yv, zv);
     } else {
         renderVolumeCPU(xv, yv, zv);
     }
@@ -285,6 +285,80 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
 
 }
 
+void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
+
+    LOG(INFO)<<"GPU rendering voxels fast...";
+
+    volumeGPU_.clear();
+    vx_ = xv; vy_ = yv; vz_ = zv;
+    voxelsX_ = linspace(-0.5*sx_, 0.5*sx_, vx_);
+    voxelsY_ = linspace(-0.5*sy_, 0.5*sy_, vy_);
+    voxelsZ_ = linspace(-0.5*sz_, 0.5*sz_, vz_);
+
+    Mat x = Mat::zeros(vy_, vx_, CV_32F);
+    Mat y = Mat::zeros(vy_, vx_, CV_32F);
+    Mat blank = Mat::zeros(vy_, vx_, CV_32F);
+
+    // filling temp matrices
+    tmp1.upload(blank); tmp2.upload(blank); tmp3.upload(blank); tmp4.upload(blank);
+    slice.upload(blank);
+
+    for (int i=0; i<vy_; i++) {
+        for (int j=0; j<vx_; j++) {
+            x.at<float>(i,j) = voxelsX_[j];
+            y.at<float>(i,j) = voxelsY_[i];
+        }
+    }
+    
+    gx.upload(x); gy.upload(y);
+
+    for (int z=0; z<vz_; z++) {
+        
+        slice = 0;
+
+        // sorting particles into bins...
+        vector<Mat> partbin;
+        for (int j=0; j<particles_.cols; j++) {
+            if (abs(particles_(2,j)-voxelsZ_[z])<sigmaz_*5)
+                partbin.push_back(particles_.col(j));
+        }
+
+        for (int k=0; k<partbin.size(); k++) {
+        
+            Mat_<double> particle = partbin[k];
+
+            tmp1 = 0; tmp2 = 0;
+
+            // outputs -(x-ux)^2/2sig^2
+            gpu::add(gx, Scalar(-particle(0,0)), tmp1);
+            gpu::pow(tmp1, 2.0, tmp1);
+            gpu::multiply(tmp1, Scalar(-1.0/(2*pow(sigmax_, 2))), tmp1);
+            gpu::add(tmp1, tmp2, tmp2);
+
+            tmp1 = 0;
+
+            // outputs -(y-uy)^2/2sig^2
+            gpu::add(gy, Scalar(-particle(1,0)), tmp1);
+            gpu::pow(tmp1, 2.0, tmp1);
+            gpu::multiply(tmp1, Scalar(-1.0/(2*pow(sigmay_, 2))), tmp1);
+            gpu::add(tmp1, tmp2, tmp2);
+
+            gpu::add(tmp2, Scalar( -1.0*pow(voxelsZ_[z]-particle(2,0), 2.0) / (2*pow(sigmaz_, 2)) ), tmp2);
+        
+            gpu::exp(tmp2, tmp2);
+            gpu::add(slice, tmp2, slice);
+        
+        }
+    
+        Mat result(slice);
+        volumeGPU_.push_back(result.clone());
+
+    }
+
+    VLOG(1)<<"done";
+
+}
+
 Mat Scene::getSlice(int zv) {
     
     Mat img;
@@ -366,6 +440,13 @@ void Scene::temp() {
 
     LOG(INFO)<<GPU_FLAG;
     LOG(INFO)<<REF_FLAG;
+
+}
+
+void Scene::dumpStack(string path) {
+
+    imageIO io(path);
+    io<<volumeGPU_;
 
 }
 
@@ -701,8 +782,12 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
         } else {
             img = refocus_.refocus(z[i], 0, 0, 0, thresh, 0);
         }
-        
+
         //qimshow(ref); qimshow(img);
+        
+        //double minval, maxval; minMaxLoc(img, minval, maxval);
+        //VLOG(3)<<maxval;
+
         Mat a; multiply(ref, img, a); double as = double(sum(a)[0]); at += as;
         Mat b; pow(ref, 2, b); double bs = double(sum(b)[0]); bt += bs;
         Mat c; pow(img, 2, c); double cs = double(sum(c)[0]); ct += cs;
@@ -722,7 +807,7 @@ BOOST_PYTHON_MODULE(rendering) {
     using namespace boost::python;
 
     void (Scene::*sPx1)(vector< vector<double> >) = &Scene::seedParticles;
-    void (Scene::*sPx2)(int)                      = &Scene::seedParticles;
+    void (Scene::*sPx2)(int, double)              = &Scene::seedParticles;
 
     class_<Scene>("Scene")
         .def("create", &Scene::create)

@@ -51,7 +51,7 @@ void multiCamCalibration::initialize() {
     results_just_saved_flag = 0;
 
     // Settings for optimization routines
-    pinhole_max_iterations = 50;
+    pinhole_max_iterations = 100;
     refractive_max_iterations = 100;
 
 }
@@ -171,6 +171,8 @@ void multiCamCalibration::read_cam_names_mtiff() {
         }
     }
     
+    sort(cam_names_.begin(), cam_names_.end());
+
     for (int i=0; i<cam_names_.size(); i++) cout<<"Camera "<<i+1<<": "<<cam_names_[i]<<endl;
 
     if (dummy_mode_) {
@@ -289,7 +291,7 @@ void multiCamCalibration::read_calib_imgs_mtiff() {
 
         int frame=0;
         int count=0;
-        int skip=280;
+        int skip=50;
         while (frame<dircount) {
 
             Mat img;
@@ -314,7 +316,10 @@ void multiCamCalibration::read_calib_imgs_mtiff() {
                 }
                 _TIFFfree(raster);
             }
-            calib_imgs_sub.push_back(img);
+
+            img *= 255;
+            Mat img1; img.convertTo(img1, CV_8U);
+            calib_imgs_sub.push_back(img1);
             count++;
             
             frame += skip;
@@ -364,6 +369,7 @@ void multiCamCalibration::find_corners() {
 
                 if (show_corners_flag) {
                     scene_drawn = scene;
+                    cvtColor(scene_drawn, scene_drawn, CV_GRAY2RGB);
                     drawChessboardCorners(scene_drawn, grid_size_, points, found);
                     namedWindow("Pattern", CV_WINDOW_AUTOSIZE);
                     imshow("Pattern", scene_drawn);
@@ -579,8 +585,8 @@ void multiCamCalibration::initialize_cams() {
 
         vector<Mat> rvec, tvec;
 
-        A(0,0) = 9000;//i; 
-        A(1,1) = 9000;//i;
+        A(0,0) = 2500;//i; 
+        A(1,1) = 2500;//i;
         A(0,2) = img_size_.width*0.5;
         A(1,2) = img_size_.height*0.5;
         A(2,2) = 1;
@@ -1633,5 +1639,16 @@ void multiCamCalibration::get_grid_size_pix() {
     grid_size_pix_ = dist/num;
 
     cout<<"GRID SIZE: "<<grid_size_pix_<<" pixels\n";
+
+}
+
+// Python wrapper
+BOOST_PYTHON_MODULE(calibration) {
+
+    using namespace boost::python;
+
+    class_<multiCamCalibration>("calibration", init<string, Size, double, int, int, int>())
+        .def("run", &multiCamCalibration::run)
+    ;
 
 }

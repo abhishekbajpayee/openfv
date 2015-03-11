@@ -384,10 +384,14 @@ void saRefocus::GPUliveView() {
 
     initializeGPU();
 
-    if (CORNER_FLAG) {
-        LOG(INFO)<<"Using corner based homography fit method..."<<endl;
+    if (REF_FLAG) {
+        if (CORNER_FLAG) {
+            LOG(INFO)<<"Using corner based homography fit method..."<<endl;
+        } else {
+            LOG(INFO)<<"Using full refractive calculation method..."<<endl;
+        }
     } else {
-        LOG(INFO)<<"Using full refractive calculation method..."<<endl;
+        LOG(INFO)<<"Using pinhole refocusing..."<<endl;
     }
 
     active_frame_ = 0; thresh = 0;
@@ -821,11 +825,11 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
     gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
 
     Mat refocused_host_(refocused);
-
+    
     if (live) {
 
         char title[200];
-        sprintf(title, "T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", thresh, frame, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+        sprintf(title, "T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", thresh*255.0, frame, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
 
         imshow("Result", refocused_host_);
         displayOverlay("Result", title);
@@ -866,7 +870,7 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
     
     if (live) {
         char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z_, thresh, frame);
+        sprintf(title, "z = %f, thresh = %f, frame = %d", z_, thresh*255.0, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         imshow("Result", refocused_host_);
     }
@@ -878,7 +882,7 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
 void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
-    //Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+    // Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
     Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
     refocused.upload(blank);
     
@@ -920,7 +924,7 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
     if (live) {
         
         char title[150];
-        sprintf(title, "T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", thresh, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
+        sprintf(title, "T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", thresh*255.0, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
 
         imshow("Result", refocused_host_);
         displayOverlay("Result", title);
@@ -1305,7 +1309,7 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
         // Newton Raphson loop to solve for Snell's law
         double tol=1E-8;
 
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<20; i++) {
 
             f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( (n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
             g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( (n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );
@@ -1354,19 +1358,62 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
         mkdir(fn.str().c_str(), S_IRWXU);
 
         LOG(INFO)<<"Saving frame "<<f<<"...";
+
+        vector<Mat> stack;
         for (double z=zmin; z<=zmax; z+=dz) {
 
             Mat img = refocus(z, 0, 0, 0, thresh, f);
             //Mat result = refocused_host_.clone();
+            stack.push_back(img);
 
-            stringstream ss;
-            ss<<fn.str()<<"/"<<((z-zmin)/dz)<<"."<<type;
-            imwrite(ss.str(), img);
+            // stringstream ss;
+            // ss<<fn.str()<<"/"<<((z-zmin)/dz)<<"."<<type;
+            // imwrite(ss.str(), img);
 
         }
+        
+        imageIO io(fn.str());
+        io<<stack; stack.clear();
+
         LOG(INFO)<<"done!"<<endl;
 
     }
+
+    LOG(INFO)<<"SAVING COMPLETE!"<<endl;
+
+}
+
+void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, double q) {
+
+    LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
+    
+    //for (int f=0; f<frames_.size(); f++) {
+        
+    stringstream fn;
+    fn<<path<<f;
+    mkdir(fn.str().c_str(), S_IRWXU);
+
+    string qfn = fn.str() + "/q.txt";
+    fileIO qio(qfn);
+    qio<<q;
+
+    fn<<"/refocused";
+    mkdir(fn.str().c_str(), S_IRWXU);
+    
+    LOG(INFO)<<"Saving frame "<<f<<"...";
+    
+    vector<Mat> stack;
+    for (double z=zmin; z<=zmax; z+=dz) {
+        Mat img = refocus(z, 0, 0, 0, thresh, 0);
+        stack.push_back(img);
+    }
+        
+    imageIO io(fn.str());
+    io<<stack; stack.clear();
+
+    LOG(INFO)<<"done!"<<endl;
+
+    //}
 
     LOG(INFO)<<"SAVING COMPLETE!"<<endl;
 
@@ -1679,6 +1726,31 @@ void saRefocus::addView(Mat img, Mat P, Mat location) {
     cam_locations_.push_back(location);
 
     num_cams_++;
+
+}
+
+void saRefocus::addViews(vector< vector<Mat> > frames, vector<Mat> Ps, vector<Mat> locations) {
+
+    Mat img = frames[0][0];
+    img_size_ = Size(img.cols, img.rows);
+
+    P_mats_ = Ps;
+    cam_locations_ = locations;
+
+    for (int i=0; i<frames[0].size(); i++) {
+        vector<Mat> view;
+        for (int j=0; j<frames.size(); j++) {
+            view.push_back(frames[j][i]);
+        }
+        imgs.push_back(view);
+    }
+
+    // imgs = frames;
+
+    for (int i=1; i<frames.size(); i++)
+        frames_.push_back(i);
+
+    num_cams_ = frames[0].size();
 
 }
 

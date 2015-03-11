@@ -9,31 +9,23 @@
 using namespace cv;
 using namespace std;
 
+DEFINE_string(path, "../temp/", "Calibration path");
+DEFINE_int32(hgrid, 5, "Horizontal grid size");
+DEFINE_int32(vgrid, 5, "Horizontal grid size");
+DEFINE_double(gridsize, 5, "Physical grid size");
+DEFINE_bool(ref, false, "Refractive flag");
+DEFINE_bool(mtiff, false, "Multipage tiff flag");
+
 int main(int argc, char** argv) {
 
-    // Camera Calibration Section
-    
-    if (argc != 5) {
-        cout<<endl<<"Invalid number of arguments!"<<endl;
-        cout<<"Usage: calibrate [calibration_path] [horizontal grid size] [vertical grid size] [physical grid size (mm)]"<<endl<<endl;
-    }
+    // Parsing flags
+    google::ParseCommandLineFlags(&argc, &argv, true);
+    init_logging(argc, argv);
 
-    string calib_path(argv[1]); // Folder where calibration images lie
-    
-    stringstream xg(argv[2]);
-    int xsize;
-    xg>>xsize;    
-    stringstream yg(argv[3]);
-    int ysize;
-    yg>>ysize;
-    Size grid_size = Size(xsize,ysize); // Format (horizontal_corners, vertical_corners)
-
-    stringstream ps(argv[4]);
-    double grid_size_phys;  // in [mm]
-    ps>>grid_size_phys;
+    Size grid_size = Size(FLAGS_hgrid, FLAGS_vgrid); // Format (horizontal_corners, vertical_corners)
 
     // Uses dummy mode
-    multiCamCalibration calibration(calib_path, grid_size, grid_size_phys, 0, 1, 1);
+    multiCamCalibration calibration(FLAGS_path, grid_size, FLAGS_gridsize, FLAGS_ref, 1, FLAGS_mtiff);
     calibration.run();
 
     cout<<"DONE!"<<endl;

@@ -19,6 +19,15 @@
 using namespace std;
 using namespace cv;
 
+pTracking::pTracking(string particle_file, double Rn, double Rs) {
+
+    path_ = particle_file; R_s = Rs; R_n = Rn;
+
+    initialize();
+    read_points();
+
+}
+
 void pTracking::initialize() {
 
     N = 5000;
@@ -27,8 +36,6 @@ void pTracking::initialize() {
     V_n = (4/3)*pi*pow(R_n,3);
     V_s = (4/3)*pi*pow(R_s,3);
 
-    //cout<<"R_n: "<<R_n<<", R_s: "<<R_s<<endl;
-
     A = 0.3;
     B = 3.0;
     C = 0.1;
@@ -36,14 +43,17 @@ void pTracking::initialize() {
     E = 1.0;
     F = 0.05;
 
+    method_ = 1;
+
 }
 
-void pTracking::set_vars(double rn, double rs, double e, double f) {
+void pTracking::set_vars(int method, double rn, double rs, double e, double f) {
+
+    method_ = method;
+    // reject_singles_ = reject_singles;
 
     R_n = rn;
     R_s = rs;
-
-    //cout<<rn<<" "<<rs<<" "<<e<<" "<<f<<" ";
 
     E = e;
     F = f;
@@ -156,8 +166,11 @@ vector<Point2i> pTracking::track_frame(int f1, int f2, int &count) {
     n2 = all_points_[f2].size();
 
     VLOG(1)<<"Neighbor Sets...";
-    vector< vector<int> > S_r = neighbor_set(f1, f1, R_n);
-    vector< vector<int> > S_c = neighbor_set(f1, f2, R_s);
+    // vector< vector<int> > S_r = neighbor_set(f1, f1, R_n);
+    // vector< vector<int> > S_c = neighbor_set(f1, f2, R_s);
+
+    vector< vector<int> > S_r = neighbor_set(f1, R_n);
+    vector< vector<int> > S_c = candidate_set(f1, f2, R_s);
 
     vector<Mat> Pij, Pi, Pij2, Pi2;
     VLOG(1)<<"Probability Sets...";
@@ -207,6 +220,75 @@ vector<Point2i> pTracking::track_frame(int f1, int f2, int &count) {
 
 }
 
+void pTracking::track_frame_n(int f1, int f2) {
+
+    LOG(INFO)<<"Matching frames "<<f1<<" and "<<f2<<" | ";
+
+    int n1, n2;
+    n1 = all_points_[f1].size();
+    n2 = all_points_[f2].size();
+
+    VLOG(1)<<"Neighbor Sets...";
+    vector< vector<int> > S_r = neighbor_set(f1, R_n);
+    vector< vector<int> > S_c = candidate_set(f1, f2, R_s);
+
+    Mat_<double> Pij = Mat_<double>::zeros(n1, n2); Mat_<double> Pij2 = Mat_<double>::zeros(n1, n2);
+    Mat_<double> Pi = Mat_<double>::zeros(n1, 1); Mat_<double> Pi2 = Mat_<double>::zeros(n1, 1);
+    VLOG(1)<<"Probability Sets...";
+    build_probability_sets_n(S_r, S_c, Pij, Pi, Pij2, Pi2);
+
+    VLOG(1)<<"Relaxation Sets...\n";
+    vector< vector< vector<Point2i> > > theta;
+    //double t = omp_get_wtime();
+    build_relaxation_sets_n(f1, f2, S_r, S_c, C, D, E, F, theta);
+    //cout<<"Time: "<<omp_get_wtime()-t<<endl;
+
+    double diff;
+    int n;
+
+    for (n=0; n<N; n++) {
+
+        //for (int i=0; i<Pij.size(); i++) {
+        for (int i=0; i<S_r.size(); i++) {
+
+            //for (int j=0; j<Pij[i].size(); j++) {
+            for (int j=0; j<S_c[i].size(); j++) {
+
+                double sum = 0;
+                for (int k=0; k<theta[i][j].size(); k++) {
+                    //VLOG(3)<<theta[i][j].size();
+                    sum += Pij(theta[i][j][k].x,theta[i][j][k].y);
+                }
+
+                double newval = Pij(i,S_c[i][j])*( A + (B*sum) );
+                Pij2(i,S_c[i][j]) = newval;
+
+            }
+
+        }
+
+        normalize_probabilites_n(Pij2,Pi2);
+
+        diff = double(sum(abs(Pij-Pij2))[0] + sum(abs(Pi-Pi2))[0]);
+        VLOG(3)<<n+1<<": "<<diff;
+        Pij = Pij2.clone();
+        Pi = Pi2.clone();
+
+        if (diff<tol) break;
+
+    }
+
+    VLOG(1)<<"Final residual change: "<<diff<<" in "<<n+1<<" iterations. "<<endl;
+
+    vector<Point2i> matches;
+    // count = find_matches_n(Pij, Pi, matches);
+
+    P_ = Pij;
+
+    //return(matches);
+
+}
+
 int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches) {
 
     vector< vector<int> > zematch;
@@ -216,6 +298,7 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
 
     for (int i=0; i<Pij.size(); i++) {
 
+        cout<<Pij[i]<<endl;
         for (int j=0; j<Pij[i].rows; j++) {
             for (int k=0; k<Pij[i].cols; k++) {
 
@@ -229,6 +312,8 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
     }
 
     int count = 0;
+    int count_single = 0;
+    int count_mult = 0;
     int tiecount = 0;
     for (int i=0; i<Pij.size(); i++) {
         
@@ -238,8 +323,11 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
         if (zematch[i].size()==0) {
             matches.push_back(Point2i(i,-1));
         } else if (zematch[i].size()==1) {
-            matches.push_back(Point2i(i,zematch[i][0]));
-            count++;
+            if (!reject_singles_) {
+                matches.push_back(Point2i(i,zematch[i][0]));
+                count++;
+                count_single++;
+            }
         } else {
 
             for (int j=0; j<zematch[i].size(); j++) {
@@ -287,6 +375,7 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
             if (tie==0) {
                 matches.push_back(Point2i(i,c[modloc]));
                 count++;
+                count_mult++;
             }
 
         }
@@ -296,7 +385,8 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
     }
 
     LOG(INFO)<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
-    
+    LOG(INFO)<<"Singles: "<<count_single<<", Multiples: "<<count_mult;
+
     return(count);
 
 }
@@ -375,6 +465,191 @@ void pTracking::build_probability_sets(vector< vector<int> > S_r, vector< vector
 
 }
 
+// New functions
+
+int pTracking::find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches) {
+
+    qimshow(Pij);
+
+    // for (int i=0; i<Pij.rows; i++) {
+
+    //     LOG(INFO)<<sum(Pij.row(i));
+
+    // }
+
+    int count = 0;
+    int count_single = 0;
+    int count_mult = 0;
+    int tiecount = 0;
+
+    /*
+
+    for (int i=0; i<Pij.size(); i++) {
+        for (int j=0; j<Pij[i].size(); j++) {
+            cout<<Pij[i][j]<<"\t";
+        }
+        cout<<endl;
+    }
+
+    
+
+    vector< vector<int> > zematch;
+    vector<int> container;
+
+    for (int i=0; i<Pij.size(); i++)
+        zematch.push_back(container);
+
+    for (int i=0; i<Pij.size(); i++) {
+        for (int j=0; j<Pij[i].size(); j++) {
+            if (Pij[i][j]>0.99)
+                zematch[S_r[i][j]].push_back(S_c[i][j]);
+        }
+    }
+    
+    for (int i=0; i<Pij.size(); i++) {
+        
+        vector<int> c;
+        vector<int> cf;
+
+        if (zematch[i].size()==0) {
+            matches.push_back(Point2i(i,-1));
+        } else {
+            matches.push_back(Point2i(i,zematch[i][0]));
+            count++;
+        }
+    
+    }
+
+    else {
+
+            for (int j=0; j<zematch[i].size(); j++) {
+
+                int counted=0;
+                for (int k=0; k<c.size(); k++) {
+                    if (zematch[i][j]==c[k]) {
+                        counted=1;
+                        cf[k]++;
+                    }
+                }
+                if (counted==0) {
+                    c.push_back(zematch[i][j]);
+                    cf.push_back(1);
+                }
+                
+            }
+
+            // Finding maximum occurence frequency
+            int modloc = 0;
+            int modf = cf[0];
+            for (int k=1; k<cf.size(); k++) {
+                if (cf[k]>modf) {
+                    modloc = k;
+                    modf = cf[k];
+                }
+            }
+
+            // Checking if multiple maxima exist
+            int tie = 0;
+            for (int k=0; k<cf.size(); k++) {
+                
+                if (k==modloc)
+                    continue;
+                
+                if (cf[k]==cf[modloc]) {
+                    tie=1;
+                    tiecount++;
+                    matches.push_back(Point2i(i,-2));
+                    break;
+                }
+
+            }
+
+            if (tie==0) {
+                matches.push_back(Point2i(i,c[modloc]));
+                count++;
+                count_mult++;
+            }
+
+        }
+
+        c.clear(); cf.clear();
+
+    }
+
+    */
+
+    // LOG(INFO)<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
+    
+    LOG(INFO)<<"Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.rows)<<endl;
+    // LOG(INFO)<<"Singles: "<<count_single<<", Multiples: "<<count_mult;
+
+    return(count);
+
+}
+
+double pTracking::update_probabilities_n(Mat &Pij, Mat &Pi, Mat &Pij2, Mat &Pi2) {
+
+    Mat diffpij, diffpi;
+    double difftotal = 0;
+    Scalar diffsum;
+
+    // for (int i=0; i<Pij.size(); i++) {
+
+    //     for (int j=0; j<Pij[i].size(); j++) {
+    //         difftotal += abs(Pij[i][j]-Pij2[i][j]);
+    //         Pij[i][j] = Pij2[i][j];
+    //     }
+
+    //     difftotal += abs(Pi[i]-Pi2[i]);
+    //     Pi[i] = Pi2[i];
+
+    // }
+
+    return(difftotal);
+
+}
+
+void pTracking::normalize_probabilites_n(Mat &Pij, Mat &Pi) {
+
+    for (int i=0; i<Pij.rows; i++) {
+
+        double s = 0;
+        for (int j=0; j<Pij.cols; j++)
+            s += Pij.at<double>(i,j);
+
+        s += Pi.at<double>(i,0);
+
+        for (int j=0; j<Pij.cols; j++)
+            Pij.at<double>(i,j) /= s;
+
+        Pi.at<double>(i,0) /= s;
+
+        // for (int k=0; k<Pij[i].size(); k++) {
+        //     Pij[i][k] /= sum;
+        // }
+        // Pi[i] /= sum;
+
+    }
+
+}
+
+void pTracking::build_probability_sets_n(vector< vector<int> > S_r, vector< vector<int> > S_c, Mat &Pij, Mat &Pi, Mat &Pij2, Mat &Pi2) {
+
+    for (int i=0; i<S_r.size(); i++) {
+
+        for (int k=0; k<S_c[i].size(); k++) {
+            Pij.at<double>(i,S_c[i][k]) = 1.0/(double(S_c[i].size())+1.0);
+            Pij2.at<double>(i,S_c[i][k]) = 1.0/(double(S_c[i].size())+1.0);
+        }
+        Pi.at<double>(i,0) = 1.0/(double(S_c[i].size())+1.0);
+        Pi2.at<double>(i,0) = 1.0/(double(S_c[i].size())+1.0);
+
+    }
+
+}
+
+// ---
+
 void pTracking::build_relaxation_sets(int frame1, int frame2, vector< vector<int> > S_r, vector< vector<int> > S_c, double C, double D, double E, double F, vector< vector< vector< vector<Point2i> > > > &theta) {
 
     vector<Point2i> theta_single;
@@ -408,8 +683,13 @@ void pTracking::build_relaxation_sets(int frame1, int frame2, vector< vector<int
                             //cout<<(dist(dij, dkl) < (E+(F*dij_mag)))<<endl;
                         }
                         */
-                        
-                        double thresh = E+(F*dij_mag);
+
+                        double thresh;
+                        if (method_==1)
+                            thresh = E+(F*dij_mag);
+                        else if (method_==2)
+                            thresh = F*R_s;
+
                         if ( dist(dij, dkl) < thresh ) {
                             theta_single.push_back(Point2i(k,l));
                         }
@@ -428,7 +708,86 @@ void pTracking::build_relaxation_sets(int frame1, int frame2, vector< vector<int
 
 }
 
-vector< vector<int> > pTracking::neighbor_set(int frame1, int frame2, double r) {
+void pTracking::build_relaxation_sets_n(int frame1, int frame2, vector< vector<int> > S_r, vector< vector<int> > S_c, double C, double D, double E, double F, vector< vector< vector<Point2i> > > &theta) {
+
+    vector<Point2i> theta_single;
+    vector< vector<Point2i> > theta_j;
+    //vector< vector< vector<Point2i> > > theta_ij;
+    Point3f dij, dkl;
+    double dij_mag;
+
+    for (int i=0; i<S_r.size(); i++) {
+        for (int j=0; j<S_c[i].size(); j++) {
+
+            dij = Point3f(all_points_[frame1][i].x-all_points_[frame2][S_c[i][j]].x, all_points_[frame1][i].y-all_points_[frame2][S_c[i][j]].y, all_points_[frame1][i].z-all_points_[frame2][S_c[i][j]].z);
+
+            for (int k=0; k<S_r[i].size(); k++) {
+                for (int l=0; l<S_c[i].size(); l++) {
+
+                    if (i==S_r[i][k] || S_c[i][j]==S_c[i][l])
+                        continue;
+
+                    //dij = Point3f(all_points_[frame1][i].x-all_points_[frame2][S_c[i][j]].x, all_points_[frame1][i].y-all_points_[frame2][S_c[i][j]].y, all_points_[frame1][i].z-all_points_[frame2][S_c[i][j]].z);
+
+                    dkl = Point3f(all_points_[frame1][S_r[i][k]].x-all_points_[frame2][S_c[i][l]].x, all_points_[frame1][S_r[i][k]].y-all_points_[frame2][S_c[i][l]].y, all_points_[frame1][S_r[i][k]].z-all_points_[frame2][S_c[i][l]].z);
+
+                    dij_mag = dist(all_points_[frame1][i], all_points_[frame2][S_c[i][j]]);
+
+                    /*
+                      double thresh = E;
+                      double ijmag = dist(dij, Point3f(0,0,0));
+                      double klmag = dist(dkl, Point3f(0,0,0));
+                      double ijkldot = dij.x*dkl.x + dij.y*dkl.y + dij.z*dkl.z;
+                      if ((acos(ijkldot/(ijmag*klmag))*180.0/3.14159)<thresh) {
+                      theta_single.push_back(Point2i(k,l));
+                      //cout<<dist(dij, dkl)<<" ";
+                      //cout<<dij_mag<<" ";
+                      //cout<<acos(ijkldot/(ijmag*klmag))*180.0/3.14159<<" ";
+                      //cout<<(dist(dij, dkl) < (E+(F*dij_mag)))<<endl;
+                      }
+                    */
+
+                    double thresh;
+                    if (method_==1)
+                        thresh = E+(F*dij_mag);
+                    else if (method_==2)
+                        thresh = F*R_s;
+
+                    if ( dist(dij, dkl) < thresh ) {
+                        theta_single.push_back(Point2i(S_r[i][k],S_c[i][l]));
+                    }
+                        
+                }
+            }
+            theta_j.push_back(theta_single);
+            theta_single.clear();
+        }
+        theta.push_back(theta_j);
+        theta_j.clear();
+    }
+
+}
+
+vector< vector<int> > pTracking::neighbor_set(int frame, double r) {
+
+    vector<int> indices;
+    vector< vector<int> > indices_all;
+
+    for (int i=0; i<all_points_[frame].size(); i++) {
+        for (int j=0; j<all_points_[frame].size(); j++) {
+            if (dist(all_points_[frame][i], all_points_[frame][j]) < r) {
+                indices.push_back(j);
+            }
+        }
+        indices_all.push_back(indices);
+        indices.clear();
+    }
+
+    return(indices_all);
+
+}
+
+vector< vector<int> > pTracking::candidate_set(int frame1, int frame2, double r) {
 
     vector<int> indices;
     vector< vector<int> > indices_all;
@@ -695,26 +1054,6 @@ void pTracking::write_tracking_result() {
 
 }
 
-double pTracking::sim_performance() {
-
-    double perf;
-
-    for (int frame=0; frame<all_matches.size(); frame++) {
-        int count = 0;
-        int total = all_matches[frame].size();
-        for (int i=0; i<all_matches[frame].size(); i++) {
-            if(all_matches[frame][i].x==all_matches[frame][i].y)
-                count++;
-        }
-        perf = double(count)/double(total);
-    }
-
-    //cout<<1-perf<<endl;
-
-    return(1-perf);
-
-}
-
 void pTracking::write_all_paths(string path) {
 
     ofstream file;
@@ -774,5 +1113,53 @@ bool pTracking::is_used(vector< vector<int> > used, int k, int i) {
     }
 
     return 0;
+
+}
+
+double pTracking::sim_performance() {
+
+    double perf;
+
+    for (int frame=0; frame<all_matches.size(); frame++) {
+        int count = 0;
+        int total = all_matches[frame].size();
+        for (int i=0; i<all_matches[frame].size(); i++) {
+            if(all_matches[frame][i].x==all_matches[frame][i].y)
+                count++;
+        }
+        perf = double(count)/double(total);
+    }
+
+    //cout<<1-perf<<endl;
+
+    return(1-perf);
+
+}
+
+vector<int> pTracking::get_match_counts() {
+    
+    return(match_counts);
+
+}
+
+Mat pTracking::getP() {
+
+    return(P_.clone());
+
+}
+
+// Python wrapper
+BOOST_PYTHON_MODULE(tracking) {
+
+    using namespace boost::python;
+
+    class_<pTracking>("pTracking", init<string, double, double>())
+        .def("set_vars", &pTracking::set_vars)
+        .def("track_frame", &pTracking::track_frame_n)
+        .def("getP", &pTracking::getP)
+        // .def("track_all", &pTracking::track_all)
+        .def("get_match_counts", &pTracking::get_match_counts)
+        .def("write_quiver_data", &pTracking::write_quiver_data)
+    ;
 
 }

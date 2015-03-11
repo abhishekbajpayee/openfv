@@ -7,7 +7,7 @@
 using namespace std;
 using namespace cv;
 
-void init(int argc, char** argv) {
+void init_logging(int argc, char** argv) {
 
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
@@ -374,9 +374,49 @@ saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
         }
     }
 
-    ref.initializeGPU();
-
     return(ref);
+
+}
+
+void addCams(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
+
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
+
+    ref.setF(f);
+
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += xy) {
+        for (double y = -xy; y<=xy; y += xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
+
+}
+
+void addCams4(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
+
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
+
+    ref.setF(f);
+
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += 2*xy) {
+        for (double y = -xy; y<=xy; y += 2*xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
 
 }
 
@@ -393,6 +433,7 @@ void saveScene(string filename, Scene scn) {
 
 void loadScene(string filename, Scene &scn) {
 
+    LOG(INFO)<<"Loading scene from "<<filename;
     ifstream ifile(filename.c_str());
     boost::archive::binary_iarchive ia(ifile);
     ia>>scn;
@@ -422,6 +463,28 @@ vector<double> vortex(double x, double y, double z, double t) {
 
     double r = sqrt(x*x + z*z);
     double theta = atan2(z, x);
+    double dTheta = omega*t;
+    double theta2 = theta+dTheta;
+
+    double x2 = r*cos(theta2); double z2 = r*sin(theta2); double y2 = y;
+
+    vector<double> np;
+    np.push_back(x2); np.push_back(y2); np.push_back(z2);
+
+    return(np);
+
+}
+
+vector<double> burgers_vortex(double x, double y, double z, double t) {
+
+    double tau = 200;
+    double sigma = 0.01;
+    double nu = 1;
+
+    double r = sqrt(x*x + z*z);
+    double theta = atan2(z, x);
+    
+    double omega = (tau/(2*pi*r*r))*(1 - exp(-sigma*r*r/4/nu));
     double dTheta = omega*t;
     double theta2 = theta+dTheta;
 
@@ -635,6 +698,8 @@ string fileIO::getFilename(string filename) {
 // imageIO class functions
 // ----------------------------------------------------
 
+// imageIO class allows writing of a single image or a sequence of
+// images to a certain path
 imageIO::imageIO(string path) {
 
     DIR *dir;
@@ -682,7 +747,7 @@ imageIO::imageIO(string path) {
 
     counter_ = 1;
     prefix_ = string("");
-    ext_ = ".jpg";
+    ext_ = ".tif";
 
 }
 
@@ -723,7 +788,7 @@ void imageIO::operator<< (vector<Mat> imgs) {
         filename<<ext_;
 
         // TODO: specify quality depending on extension
-        imwrite(filename.str(), imgs[i]);
+        imwrite(filename.str(), imgs[i]*255.0);
         counter_++;
 
     }
@@ -742,10 +807,13 @@ BOOST_PYTHON_MODULE(tools) {
     using namespace boost::python;
 
     void (*sPx3)(string, Scene&) = &loadScene;
-    Scene (*sPx4)(string)         = &loadScene;
+    Scene (*sPx4)(string)        = &loadScene;
+
+    saRefocus (*addCams1)(Scene, Camera, double, double, double)        = &addCams;
+    void (*addCams2)(Scene, Camera, double, double, double, saRefocus&) = &addCams;
 
     def("saveScene", saveScene);
     def("loadScene", sPx4);
-    def("addCams", addCams);
+    def("addCams", addCams1);
 
 }
