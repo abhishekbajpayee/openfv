@@ -48,9 +48,12 @@ class multiCamCalibration {
         //
     }
 
- multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff):
-    path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff) {}
-    
+    multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners):
+        path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), skip_frames_(skip), show_corners_flag(show_corners) {}
+ 
+    multiCamCalibration(string path, int hgrid_size, int vgrid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners):
+        path_(path), grid_size_(Size(hgrid_size, vgrid_size)), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), skip_frames_(skip), show_corners_flag(show_corners) {}
+
     // Functions to access calibration data
     int num_cams() { return num_cams_; }
     int num_imgs() { return num_imgs_; }
@@ -155,6 +158,8 @@ class multiCamCalibration {
 
     int pinhole_max_iterations;
     int refractive_max_iterations;
+
+    int skip_frames_;
     
 };
     

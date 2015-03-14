@@ -27,7 +27,7 @@ endif()
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories("/usr/include/python2.7")
 include_directories ("${PROJECT_SOURCE_DIR}/include")
-include_directories ("/usr/local/cuda-5.0/include")
+include_directories ("/usr/local/cuda/include")
 include_directories ("/home/ab9/Apps/Qt/5.2.1/gcc_64/include")
 
 # subdirectories
@@ -38,6 +38,10 @@ if (OPENMP_FOUND)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
+
+# fPIC flags, needed?
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 # prototyping executable
 add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/execs/sa-ptv.cpp)
@@ -50,7 +54,7 @@ add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/execs/calibrate.cpp)
 add_executable (safeRefocus ${PROJECT_SOURCE_DIR}/src/execs/safeRefocus.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
-set (OTHER_LIBS python2.7 tiff ${Boost_GENERAL} ${Boost_PY})
+set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
 set (PROF_LIB profiler)
 set (CUSTOM_LIBS saptv cuda_saptv)
 set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
@@ -62,7 +66,9 @@ target_link_libraries (track ${LIBS})
 target_link_libraries (calibrate ${LIBS})
 target_link_libraries (safeRefocus ${LIBS})
 
+# ---------------
 # Python wrappers
+# ---------------
 
 set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/saptv)
 
@@ -81,3 +87,11 @@ target_link_libraries(tools ${LIBS})
 add_library(tracking SHARED ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
 set_target_properties(tracking PROPERTIES ${PYTHON_PROPS} PREFIX "")
 target_link_libraries(tracking ${LIBS})
+
+add_library(calibration SHARED ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp)
+set_target_properties(calibration PROPERTIES ${PYTHON_PROPS} PREFIX "")
+target_link_libraries(calibration ${LIBS})
+
+# add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
+# set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")
+# target_link_libraries(localization ${LIBS})
