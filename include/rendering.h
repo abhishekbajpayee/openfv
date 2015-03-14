@@ -51,6 +51,7 @@ class Scene {
     void propagateParticles(vector<double> (*func)(double, double, double, double), double t);
 
     Mat getSlice(int zv);
+    vector<Mat> getVolume();
 
     Mat getParticles();
     vector<float> getRefGeom();

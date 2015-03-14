@@ -30,6 +30,7 @@ DEFINE_bool(sp, false, "show particles");
 DEFINE_bool(piv, false, "piv mode");
 DEFINE_bool(param, false, "t param study");
 DEFINE_bool(ref, false, "refractive or not");
+DEFINE_bool(zpad, false, "zero padding or not");
 
 DEFINE_int32(zm, 1, "z method");
 DEFINE_int32(xv, 1, "xv");
@@ -136,7 +137,9 @@ int main(int argc, char** argv) {
         }
         saveScene(filename, scn);
 
-    } else if (FLAGS_find) {
+    } 
+
+    if (FLAGS_find) {
  
         loadScene(FLAGS_scnfile, scn);
         fileIO fo(FLAGS_rfile);
@@ -212,7 +215,9 @@ int main(int argc, char** argv) {
         }
 
 
-    } else if (FLAGS_piv) {
+    } 
+
+    if (FLAGS_piv) {
     
         // scn.create(xv/f, yv/f, zv/f, 1);
         // scn.seedParticles(particles, 1.2);
@@ -301,8 +306,25 @@ int main(int argc, char** argv) {
     }
 
     if (FLAGS_cpiv) {
+        
+        piv3D piv(FLAGS_zpad);
 
-        piv3D piv(FLAGS_vsize);
+        Scene scn;
+        loadScene(FLAGS_scnfile, scn);
+        piv.add_frame(scn.getVolume());
+
+        // vector<Mat> mats;
+        // for (int i = 0; i < 512; i++) {
+        //     Mat_<double> mat = Mat_<double>::ones(512,512);
+        //     mats.push_back(mat);
+        // }
+
+        scn.propagateParticles(burgers_vortex, 1);
+        scn.renderVolume(xv, yv, zv);
+
+        piv.add_frame(scn.getVolume());
+
+        piv.run(FLAGS_vsize);
 
     }
 

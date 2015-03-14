@@ -373,6 +373,12 @@ Mat Scene::getSlice(int zv) {
 
 }
 
+vector<Mat> Scene::getVolume() {
+
+    return(volumeGPU_);
+
+}
+
 Mat Scene::getParticles() {
     return(particles_);
 }
