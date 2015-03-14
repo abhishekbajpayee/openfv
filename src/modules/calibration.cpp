@@ -18,6 +18,12 @@ void multiCamCalibration::initialize() {
     // Standard directories and filenames
     ba_file_ = string("../temp/ba_data.txt");
     result_dir_ = string("calibration_results");
+
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+        LOG(INFO)<<"Current working dir: "<<string(cwd);
+    else
+        LOG(FATAL)<<"getcwd() error!";
     
     run_calib_flag = 0;
     load_results_flag = 0;
@@ -47,7 +53,7 @@ void multiCamCalibration::initialize() {
     }
     if (!result_dir_found) run_calib_flag = 1;
 
-    show_corners_flag = 0;
+    // show_corners_flag = 0;
     results_just_saved_flag = 0;
 
     // Settings for optimization routines
@@ -57,7 +63,7 @@ void multiCamCalibration::initialize() {
 }
 
 void multiCamCalibration::run() {
-    
+
     initialize();
 
     if (run_calib_flag) {
@@ -291,7 +297,7 @@ void multiCamCalibration::read_calib_imgs_mtiff() {
 
         int frame=0;
         int count=0;
-        int skip=50;
+        int skip=skip_frames_;
         while (frame<dircount) {
 
             Mat img;
@@ -644,10 +650,10 @@ void multiCamCalibration::write_BA_data() {
         file<<0<<"\t"<<0<<endl;
     }
     
-    double width = 50;
-    double height = 50;
+    double width = 9*20;
+    double height = 6*20;
     // add back projected point guesses here
-    double z = 30;
+    double z = 200;
     int op1 = (origin_image_id_)*grid_size_.width*grid_size_.height;
     int op2 = op1+grid_size_.width-1;
     int op3 = op1+(grid_size_.width*(grid_size_.height-1));
@@ -672,6 +678,7 @@ void multiCamCalibration::write_BA_data() {
             file<<(double(rand()%50)-(width*0.5))<<"\t";
             file<<(double(rand()%50)-(height*0.5))<<"\t";
             file<<(rand()%50)+z<<"\t"<<endl;
+            // file<<0<<"\t"<<endl;
         }
     }
 
@@ -1647,8 +1654,9 @@ BOOST_PYTHON_MODULE(calibration) {
 
     using namespace boost::python;
 
-    class_<multiCamCalibration>("calibration", init<string, Size, double, int, int, int>())
+    class_<multiCamCalibration>("calibration", init<string, int, int, double, int, int, int, int , int>())
         .def("run", &multiCamCalibration::run)
+        .def("initialize", &multiCamCalibration::initialize)
     ;
 
 }
