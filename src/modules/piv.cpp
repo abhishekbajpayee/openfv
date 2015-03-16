@@ -29,7 +29,7 @@ piv3D::piv3D(int zero_padding) {
 
     frames_ = 0;
 
-    mean_shift_ = 0;
+    mean_shift_ = 1;
     zero_padding_ = zero_padding;
 
 }
@@ -134,6 +134,9 @@ vector<int> piv3D::get_velocity_vector(double *a, int x, int y, int z, double &m
             }
         }
     }
+
+    // Shifting vector around center
+    mx -= (x-1)/2; my -= (y-1)/2; mz -= (z-1)/2;
 
     vector<int> vector;
     vector.push_back(mx); vector.push_back(my); vector.push_back(mz);
