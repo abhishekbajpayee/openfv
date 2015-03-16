@@ -16,6 +16,8 @@
 // #include "cuda_lib.h"
 
 //#include <fftw3.h>
+#include "tools.h"
+
 #include <cufftw.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
@@ -83,20 +85,25 @@ void piv3D::run(int l) {
 
     double s = omp_get_wtime();
     
+    fileIO file("../../velcity.txt");
+
     int count=0;
     for (int i = 0; i < winx.size(); i++) {
         for (int j = 0; j < winy.size(); j++) {
             for (int k = 0; k < winz.size(); k++) {
                 
            
-                LOG(INFO)<<"["<<winx[i][0]<<", "<<winx[i][1]<<"], ["<<winy[j][0]<<", "<<winy[j][1]<<"], ["<<winz[k][0]<<", "<<winz[k][1]<<"]";
-                frames[0].getWindow(winx[i][0], winx[i][1], winy[j][0], winy[j][1], winz[0][0], winz[0][1], i1, zero_padding_);
-                frames[1].getWindow(winx[i][0], winx[i][1], winy[j][0], winy[j][1], winz[0][0], winz[0][1], i2, zero_padding_);
+                VLOG(1)<<"["<<winx[i][0]<<", "<<winx[i][1]<<"], ["<<winy[j][0]<<", "<<winy[j][1]<<"], ["<<winz[k][0]<<", "<<winz[k][1]<<"]";
+                frames[0].getWindow(winx[i][0], winx[i][1], winy[j][0], winy[j][1], winz[k][0], winz[k][1], i1, zero_padding_);
+                frames[1].getWindow(winx[i][0], winx[i][1], winy[j][0], winy[j][1], winz[k][0], winz[k][1], i2, zero_padding_);
                 convolve3D(i1, i2, i3, wx_, wy_, wz_);
 
                 vector<int> mloc; double val;
                 mloc = get_velocity_vector(i3, wx_, wy_, wz_, val);
+                VLOG(1)<<mloc[0]<<", "<<mloc[1]<<", "<<mloc[2];
                 count++;
+
+                file<<winx[i][0]<<"\t"<<winy[j][0]<<"\t"<<winz[k][0]<<"\t"<<mloc[0]<<"\t"<<mloc[1]<<"\t"<<mloc[2]<<"\n";
 
             }
         }
