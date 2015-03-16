@@ -319,7 +319,7 @@ int main(int argc, char** argv) {
         //     mats.push_back(mat);
         // }
 
-        scn.propagateParticles(burgers_vortex, 1);
+        scn.propagateParticles(burgers_vortex, FLAGS_dt);
         scn.renderVolume(xv, yv, zv);
 
         piv.add_frame(scn.getVolume());
