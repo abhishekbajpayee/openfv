@@ -32,13 +32,20 @@ piv3D::piv3D(int zero_padding) {
     mean_shift_ = 1;
     zero_padding_ = zero_padding;
 
+    // Mat a = Mat::zeros(5, 5, CV_32F);
+    // a.at<float>(3,3) = 0.678;
+    // LOG(INFO)<<"value: "<<a.at<float>(3,3);
+
 }
 
 void piv3D::add_frame(vector<Mat> mats) {
 
+    VLOG(1)<<"Adding frame...";
+
     Mat3 vol(mats);
     frames.push_back(vol);
     if (frames_==0) {
+
         zs_ = mats.size();
 
         if (zs_ == 0)
@@ -46,9 +53,12 @@ void piv3D::add_frame(vector<Mat> mats) {
 
         xs_ = mats[0].rows;
         ys_ = mats[0].cols;
+
     }
 
     frames_++;
+
+    VLOG(1)<<"Frames now: "<<frames_;
 
 }
 
@@ -73,19 +83,9 @@ void piv3D::run(int l) {
     i3 = new double[wz_*wz_*wz_];
     o1 = new fftw_complex[wx_*wy_*(wz_/2+1)];
 
-    // // initializing reference
-    // for (int k = 0; k < l; k++) {
-    //     for (int i = 0; i < l; i++) {
-    //         for (int j = 0; j < l; j++) {
-    //             int ind = k+l*(j+l*i);
-    //             i2[ind] = i+j+k+5;
-    //         }
-    //     }
-    // }
-
     double s = omp_get_wtime();
     
-    fileIO file("../../velcity.txt");
+    fileIO file("../../velocity.txt");
 
     int count=0;
     for (int i = 0; i < winx.size(); i++) {
@@ -336,9 +336,9 @@ void Mat3::getWindow(int x1, int x2, int y1, int y2, int z1, int z2, double*& wi
         sx = nx/2; sy = ny/2; sz = nz/2;
         nx *= 2; ny *= 2; nz *= 2;
 
-        for (int i = 0; i <= nx; i++) {
-            for (int j = 0; j <= ny; j++) {
-                for (int k = 0; k <= nz; k++) {
+        for (int i = 0; i < nx; i++) {
+            for (int j = 0; j < ny; j++) {
+                for (int k = 0; k < nz; k++) {
                     int ind = (k + ny*(j + nx*i));
                     win[ind] = 0;
                 }
@@ -351,7 +351,7 @@ void Mat3::getWindow(int x1, int x2, int y1, int y2, int z1, int z2, double*& wi
         for (int j = y1; j <= y2; j++) {
             for (int k = z1; k <= z2; k++) {
                 int ind = (k+sz-z1) + ny*((j+sy-y1) + nx*(i+sx-x1));
-                win[ind] = volume_[k].at<double>(i,j);
+                win[ind] = volume_[k].at<float>(i,j);
             }
         }
     }
