@@ -17,8 +17,8 @@
 #include "typedefs.h"
 // #include "cuda_lib.h"
 
-//#include <fftw3.h>
-#include <cufftw.h>
+#include <fftw3.h>
+//#include <cufftw.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
 
@@ -51,6 +51,7 @@ public:
     
     void run(int);
     void add_frame(vector<Mat>);
+    void batch_test();
 
 protected:
     

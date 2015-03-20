@@ -18,7 +18,8 @@
 //#include <fftw3.h>
 #include "tools.h"
 
-#include <cufftw.h>
+//#include <cufftw.h>
+#include <fftw3.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
 
@@ -300,6 +301,62 @@ void piv3D::mean_shift(double*& a, int n) {
     for (int i = 0; i < n; i++)
         a[i] -= sum;
     
+
+}
+
+void piv3D::batch_test() {
+
+    int N = 32;
+    int n = 8;
+
+    double *i1 = new double[N];
+    for (int i = 0; i < N; i++) {
+        i1[i] = i;
+    }
+
+    int num = 2;
+
+    double *in = new double[n];
+    fftw_complex *o1 = new fftw_complex[n/2+1];   
+
+    fftw_plan plan1;
+    plan1 = fftw_plan_dft_r2c_1d(n, in, o1, FFTW_ESTIMATE);
+
+    cout<<"Input and output arrays from single window runs:"<<endl;
+
+    for (int s = 0; s < 10; s++) {      
+        for (int i = 0; i < n; i++) {
+            in[i] = i1[i+s];
+        } 
+    
+        fftw_execute_dft_r2c(plan1, in, o1);
+    
+        // for (int i = 0; i < n; i++) {
+        //     cout<<in[i]<<"\t";
+        // }
+        // cout<<endl;
+        for (int i = 0; i < n/2+1; i++) {
+            cout<<o1[i][0]<<" + "<<o1[i][1]<<"j, ";
+        }
+        cout<<endl;
+    }
+
+    fftw_plan plan2;
+    int idist = 1;
+    int odist = n/2+1;
+    int size[] = {n};
+    fftw_complex *o2 = new fftw_complex[N];
+    plan2 = fftw_plan_many_dft_r2c(1, size, num, i1, NULL, 1, idist, o2, NULL, 1, odist, FFTW_ESTIMATE);
+    fftw_execute_dft_r2c(plan2, i1, o2);
+
+    cout<<endl<<"Output from batched run:"<<endl;
+    for (int s = 0; s < num; s++) {
+        for (int i = 0; i < n/2+1; i++) {
+            cout<<o2[i+s*(n/2+1)][0]<<" + "<<o2[i+s*(n/2+1)][1]<<"j, ";
+        }
+        cout<<endl;
+    }
+    cout<<endl;
 
 }
 
