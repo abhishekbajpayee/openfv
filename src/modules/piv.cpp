@@ -231,9 +231,10 @@ void piv3D::convolve3D(double *a, double *b, double* &out, int x, int y, int z, 
 
 void piv3D::multiply(fftw_complex *a, fftw_complex *b, fftw_complex*& out, int n) {
 
+    // multiplying the complex conjugate of a with b
     for (int i = 0; i < n; i++) {
-        out[i][0] = a[i][0]*b[i][0] - a[i][1]*b[i][1];
-        out[i][1] = a[i][0]*b[i][1] + a[i][1]*b[i][0];
+        out[i][0] = a[i][0]*b[i][0] + a[i][1]*b[i][1];
+        out[i][1] = a[i][0]*b[i][1] - a[i][1]*b[i][0];
     }
 
 }
