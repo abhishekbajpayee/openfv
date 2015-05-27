@@ -15,11 +15,10 @@
 #include "piv.h"
 // #include "cuda_lib.h"
 
-//#include <fftw3.h>
+// #include <fftw3.h>
 #include "tools.h"
 
-//#include <cufftw.h>
-#include <fftw3.h>
+#include <cufftw.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
 
@@ -82,7 +81,7 @@ void piv3D::run(int l) {
     i1 = new double[wx_*wx_*wx_];
     i2 = new double[wy_*wy_*wy_];
     i3 = new double[wz_*wz_*wz_];
-    o1 = new fftw_complex[wx_*wy_*(wz_/2+1)];
+    // o1 = new fftw_complex[wx_*wy_*(wz_/2+1)];
 
     double s = omp_get_wtime();
     
@@ -94,17 +93,17 @@ void piv3D::run(int l) {
             for (int k = 0; k < winz.size(); k++) {
                 
            
-                VLOG(1)<<"["<<winx[i][0]<<", "<<winx[i][1]<<"], ["<<winy[j][0]<<", "<<winy[j][1]<<"], ["<<winz[k][0]<<", "<<winz[k][1]<<"]";
                 frames[0].getWindow(winx[i][0], winx[i][1], winy[j][0], winy[j][1], winz[k][0], winz[k][1], i1, zero_padding_);
                 frames[1].getWindow(winx[i][0], winx[i][1], winy[j][0], winy[j][1], winz[k][0], winz[k][1], i2, zero_padding_);
-                convolve3D(i1, i2, i3, wx_, wy_, wz_);
+                crossex3D(i1, i2, i3, wx_, wy_, wz_);
 
                 vector<int> mloc; double val;
                 mloc = get_velocity_vector(i3, wx_, wy_, wz_, val);
-                VLOG(1)<<mloc[0]<<", "<<mloc[1]<<", "<<mloc[2];
+                
+                VLOG(1)<<"["<<winx[i][0]<<", "<<winx[i][1]<<"], ["<<winy[j][0]<<", "<<winy[j][1]<<"], ["<<winz[k][0]<<", "<<winz[k][1]<<"]: "<<mloc[0]<<", "<<mloc[1]<<", "<<mloc[2];
                 count++;
 
-                file<<winx[i][0]<<"\t"<<winy[j][0]<<"\t"<<winz[k][0]<<"\t"<<mloc[0]<<"\t"<<mloc[1]<<"\t"<<mloc[2]<<"\n";
+                file<<(winx[i][0]+winx[i][1])/2<<"\t"<<(winy[j][0]+winy[j][1])/2<<"\t"<<(winz[k][0]+winz[k][1])/2<<"\t"<<mloc[0]<<"\t"<<mloc[1]<<"\t"<<mloc[2]<<"\n";
 
             }
         }
@@ -127,7 +126,8 @@ vector<int> piv3D::get_velocity_vector(double *a, int x, int y, int z, double &m
     for (int i = 0; i < x; i++) {
         for (int j = 0; j < y; j++) {
             for (int k = 0; k < z; k++) {
-                int ind = k+y*(j+z*i);
+                // int ind = k+y*(j+z*i);
+                int ind = k+y*(j+x*i);
                 if (a[ind]>maxval) {
                     maxval = a[ind];
                     mx = i; my = j; mz = k;
@@ -136,8 +136,11 @@ vector<int> piv3D::get_velocity_vector(double *a, int x, int y, int z, double &m
         }
     }
 
+    // Modding
+    mx = -x/2 + (mx + x/2)%x; my = -y/2 + (my + y/2)%y; mz = -z/2 + (mz + z/2)%z;
+
     // Shifting vector around center
-    mx -= (x-1)/2; my -= (y-1)/2; mz -= (z-1)/2;
+    // mx -= (x-1)/2; my -= (y-1)/2; mz -= (z-1)/2;
 
     vector<int> vector;
     vector.push_back(mx); vector.push_back(my); vector.push_back(mz);
@@ -145,7 +148,8 @@ vector<int> piv3D::get_velocity_vector(double *a, int x, int y, int z, double &m
 
 }
 
-void piv3D::convolve3D(fftw_complex *a, fftw_complex *b, fftw_complex* &out, int x, int y, int z) {
+// Cross correlation function for complex inputs and outputs
+void piv3D::crossex3D(fftw_complex *a, fftw_complex *b, fftw_complex* &out, int x, int y, int z) {
 
     int n = x * y * z;
     fftw_complex *o1, *o2, *o3;
@@ -160,7 +164,7 @@ void piv3D::convolve3D(fftw_complex *a, fftw_complex *b, fftw_complex* &out, int
     fftw_execute_dft(r2c, b, o2);
 
     // Multiply the FFTs
-    multiply(o1, o2, o3, n);
+    multiply_conjugate(o1, o2, o3, n);
 
     // Inverse FFT
     fftw_execute_dft(c2r, o3, out);
@@ -170,7 +174,11 @@ void piv3D::convolve3D(fftw_complex *a, fftw_complex *b, fftw_complex* &out, int
 
 }
 
-void piv3D::convolve3D(double *a, double *b, double* &out, int x, int y, int z) {
+// Cross correlation function for real inputs and output
+// NOTE: The cross correlation function returns a result that is shifted by half
+// the window size so needs to be taken care of when peak is calculated to find
+// velocity. TODO: Look into whether this is convention or not.
+void piv3D::crossex3D(double *a, double *b, double* &out, int x, int y, int z) {
 
     int n = x * y * (z/2 +1);
     fftw_complex *o1, *o2, *o3;
@@ -190,7 +198,7 @@ void piv3D::convolve3D(double *a, double *b, double* &out, int x, int y, int z) 
     fftw_execute_dft_r2c(r2c, b, o2);
 
     // Multiply the FFTs
-    multiply(o1, o2, o3, n);
+    multiply_conjugate(o1, o2, o3, n);
 
     // Inverse FFT
     fftw_execute_dft_c2r(c2r, o3, out);
@@ -201,7 +209,8 @@ void piv3D::convolve3D(double *a, double *b, double* &out, int x, int y, int z) 
 
 }
 
-void piv3D::convolve3D(double *a, double *b, double* &out, int x, int y, int z, fftw_plan r2c, fftw_plan c2r) {
+// Cross correlation function for real inputs and output based on plan (use for batch fft)
+void piv3D::crossex3D(double *a, double *b, double* &out, int x, int y, int z, fftw_plan r2c, fftw_plan c2r) {
 
     int n = x * y * (z/2 +1);
     fftw_complex *o1, *o2, *o3;
@@ -217,7 +226,7 @@ void piv3D::convolve3D(double *a, double *b, double* &out, int x, int y, int z, 
     fftw_execute_dft_r2c(r2c, b, o2);
 
     // Multiply the FFTs
-    multiply(o1, o2, o3, n);
+    multiply_conjugate(o1, o2, o3, n);
 
     // Inverse FFT
     fftw_execute_dft_c2r(c2r, o3, out);
@@ -229,7 +238,8 @@ void piv3D::convolve3D(double *a, double *b, double* &out, int x, int y, int z, 
 
 }
 
-void piv3D::multiply(fftw_complex *a, fftw_complex *b, fftw_complex*& out, int n) {
+// Multiply complex volume 1 element wise with complex conjugate of complex volume 2
+void piv3D::multiply_conjugate(fftw_complex *a, fftw_complex *b, fftw_complex*& out, int n) {
 
     // multiplying the complex conjugate of a with b
     for (int i = 0; i < n; i++) {
@@ -239,6 +249,7 @@ void piv3D::multiply(fftw_complex *a, fftw_complex *b, fftw_complex*& out, int n
 
 }
 
+// Normalize complex volume
 void piv3D::normalize(fftw_complex*& a, int n) {
 
     for (int i = 0; i < n; i++) {
@@ -247,6 +258,7 @@ void piv3D::normalize(fftw_complex*& a, int n) {
 
 }
 
+// Normalize real volume
 void piv3D::normalize(double*& a, int n) {
 
     for (int i = 0; i < n; i++)
@@ -254,6 +266,7 @@ void piv3D::normalize(double*& a, int n) {
 
 }
 
+// Output real volume
 void piv3D::print3D(double *a, int x, int y, int z) {
 
     for (int k = 0; k < z; k++) {
@@ -275,6 +288,7 @@ void piv3D::print3D(double *a, int x, int y, int z) {
 
 }
 
+// Output complex volume
 void piv3D::print3D(fftw_complex *a, int x, int y, int z) {
 
     for (int k = 0; k < z; k++) {
@@ -290,6 +304,7 @@ void piv3D::print3D(fftw_complex *a, int x, int y, int z) {
 
 }
 
+// Shift levels of real volume so mean is zero
 void piv3D::mean_shift(double*& a, int n) {
 
     double sum = 0;
@@ -361,6 +376,8 @@ void piv3D::batch_test() {
 
 }
 
+// Generate list of window bounds given total size, window size
+// and overlap
 vector< vector<int> > piv3D::get_windows(int s, int w, double overlap) {
 
     vector< vector<int> > outer;
@@ -381,10 +398,12 @@ vector< vector<int> > piv3D::get_windows(int s, int w, double overlap) {
 
 }
 
+// Container to store stack of Mats as 3D volume
 Mat3::Mat3(vector<Mat> volume): volume_(volume) {
 
 }
 
+// Return subvolume from Mat3 volume as pointer array
 void Mat3::getWindow(int x1, int x2, int y1, int y2, int z1, int z2, double*& win, int zero_padding) {
 
     int nx = x2 - x1 + 1; int ny = y2 - y1 + 1; int nz = z2 - z1 + 1;
@@ -409,7 +428,7 @@ void Mat3::getWindow(int x1, int x2, int y1, int y2, int z1, int z2, double*& wi
         for (int j = y1; j <= y2; j++) {
             for (int k = z1; k <= z2; k++) {
                 int ind = (k+sz-z1) + ny*((j+sy-y1) + nx*(i+sx-x1));
-                win[ind] = volume_[k].at<float>(i,j);
+                win[ind] = volume_[k].at<float>(j,i);
             }
         }
     }

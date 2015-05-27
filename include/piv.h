@@ -1,4 +1,4 @@
-// -------------------------------------------------------
+// // -------------------------------------------------------
 // -------------------------------------------------------
 // Synthetic Aperture - Particle Tracking Velocimetry Code
 // --- 3D PIV Library Header ---
@@ -17,8 +17,8 @@
 #include "typedefs.h"
 // #include "cuda_lib.h"
 
-#include <fftw3.h>
-//#include <cufftw.h>
+// #include <fftw3.h>// 
+#include <cufftw.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
 
@@ -58,14 +58,14 @@ protected:
 private:
     
     vector<int> get_velocity_vector(double*, int, int, int, double&);
-    void convolve3D(double*, double*, double*&, int, int, int);
-    void convolve3D(double*, double*, double*&, int, int, int, fftw_plan, fftw_plan);
-    void convolve3D(fftw_complex*, fftw_complex*, fftw_complex*&, int, int, int);
+    void crossex3D(double*, double*, double*&, int, int, int);
+    void crossex3D(double*, double*, double*&, int, int, int, fftw_plan, fftw_plan);
+    void crossex3D(fftw_complex*, fftw_complex*, fftw_complex*&, int, int, int);
 
     vector< vector<int> > get_windows(int, int, double);
 
     // Math
-    void multiply(fftw_complex*, fftw_complex*, fftw_complex*&, int n);
+    void multiply_conjugate(fftw_complex*, fftw_complex*, fftw_complex*&, int n);
     void normalize(fftw_complex*&, int);
     void normalize(double*&, int);
     void mean_shift(double*&, int);

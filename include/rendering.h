@@ -88,7 +88,9 @@ class Scene {
 
     double sigmax_, sigmay_, sigmaz_;
     vector<double> xlims_, ylims_, zlims_;
+    // size of volume in units ([mm] mostly)
     double sx_, sy_, sz_;
+    // size of volume in voxels
     int vx_, vy_, vz_;
     vector<double> voxelsX_, voxelsY_, voxelsZ_;
 

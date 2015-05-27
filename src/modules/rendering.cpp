@@ -359,6 +359,8 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
 
 }
 
+// Get slice from rendered scene or get equivalent of refocused image
+// at given depth
 Mat Scene::getSlice(int zv) {
     
     Mat img;

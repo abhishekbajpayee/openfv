@@ -27,7 +27,9 @@ DEFINE_bool(cpiv, false, "test c++ piv code");
 
 DEFINE_bool(save, false, "save scene");
 DEFINE_bool(sp, false, "show particles");
-DEFINE_bool(piv, false, "piv mode");
+DEFINE_bool(piv, false, "PIV mode");
+DEFINE_bool(renderTest, false, "render volume for PIV in matlab");
+DEFINE_bool(runPIV, false, "run PIV in C++");
 DEFINE_bool(param, false, "t param study");
 DEFINE_bool(ref, false, "refractive or not");
 DEFINE_bool(zpad, false, "zero padding or not");
@@ -42,7 +44,7 @@ DEFINE_int32(hf, 1, "HF method");
 DEFINE_int32(part, 100, "particles");
 DEFINE_int32(cams, 9, "num cams");
 DEFINE_int32(mult, 0, "multiplicative");
-DEFINE_int32(vsize, 128, "volume size for piv test");
+DEFINE_int32(vsize, 64, "volume size for piv test");
 
 DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
 DEFINE_string(rfile, "../temp/default_rfile.txt", "reference file");
@@ -124,6 +126,7 @@ int main(int argc, char** argv) {
     ss<<FLAGS_i<<".obj";
     string filename = ss.str();
 
+    // Create, render and save a scene
     if (FLAGS_save) {
 
         scn.create(xv/f, yv/f, zv/f, 1);
@@ -137,7 +140,7 @@ int main(int argc, char** argv) {
         }
         saveScene(filename, scn);
 
-    } 
+    }
 
     if (FLAGS_find) {
  
@@ -215,82 +218,112 @@ int main(int argc, char** argv) {
         }
 
 
-    } 
+    }
 
     if (FLAGS_piv) {
     
-        // scn.create(xv/f, yv/f, zv/f, 1);
-        // scn.seedParticles(particles, 1.2);
-        // scn.renderVolume(xv, yv, zv);
-        // saveScene(filename, scn);
-        // scn.dumpStack("/home/ab9/projects/stack/piv/ref/1/refocused");
+        // Only read scenes and not generate in piv mode
         
-        loadScene(filename, scn);
-
-        Camera cam;
-        double cf = 35.0; // [mm]
-        cam.init(cf*1200/4.8, xv, yv, 1);
-        cam.setScene(scn);
+        // Read a scene, render camera images, reconstruct, calculate Q
+        // and then dump stack to run PIV in matlab
+        if (FLAGS_renderTest) {
         
-        double d = 1000;
-        double t = FLAGS_t;
-
-        for (int i=0; i<2; i++) {
-
-            saRefocus ref;
-            ref.setF(f);
-        
-            double theta = FLAGS_angle*pi/180.0; 
-            double xy = d*sin(theta);
-            double z = -d*cos(theta);     
-        
-            int cams = FLAGS_cams;
-            double xxy, yxy;
-            if (cams==4) {
-                xxy = 2*xy; yxy = 2*xy;
-            } else if (cams==6) {
-                xxy = xy; yxy = 2*xy;
-            } else {
-                xxy = xy; yxy = xy;
-            }
-
-            for (double x = -xy; x<=xy; x += xxy) {
-                for (double y = -xy; y<=xy; y += yxy) {
-                    cam.setLocation(x, y, z);
-                    Mat P = cam.getP();
-                    Mat C = cam.getC();
-                    Mat img = cam.render();
-                    ref.addView(img, P, C);
+            loadScene(filename, scn);
+    
+            Camera cam;
+            double cf = 35.0; // [mm]
+            cam.init(cf*1200/4.8, xv, yv, 1);
+            cam.setScene(scn);
+            
+            double d = 1000;
+            double t = FLAGS_t;
+    
+            for (int i=0; i<2; i++) {
+    
+                saRefocus ref;
+                ref.setF(f);
+            
+                double theta = FLAGS_angle*pi/180.0;
+                double xy = d*sin(theta);
+                double z = -d*cos(theta);     
+            
+                int cams = FLAGS_cams;
+                double xxy, yxy;
+                if (cams==4) {
+                    xxy = 2*xy; yxy = 2*xy;
+                } else if (cams==6) {
+                    xxy = xy; yxy = 2*xy;
+                } else {
+                    xxy = xy; yxy = xy;
                 }
-            }
-
-            if (FLAGS_live)
-                ref.GPUliveView();
-            else
-                ref.initializeGPU();
+    
+                for (double x = -xy; x<=xy; x += xxy) {
+                    for (double y = -xy; y<=xy; y += yxy) {
+                        cam.setLocation(x, y, z);
+                        Mat P = cam.getP();
+                        Mat C = cam.getC();
+                        Mat img = cam.render();
+                        ref.addView(img, P, C);
+                    }
+                }
+    
+                if (FLAGS_live)
+                    ref.GPUliveView();
+                else
+                    ref.initializeGPU();
+                
+                benchmark bm;
+                bm.benchmarkSA(scn, ref);
+    
+                if (FLAGS_param) {
+    
+                    for (t=100; t<=200; t+=5.0)
+                        LOG(INFO)<<t<<"\t"<<bm.calcQ(t, FLAGS_mult, 0.25);
+                    break;
+    
+                } else {
+    
+                    double q = bm.calcQ(t, FLAGS_mult, 0.25);
+                    LOG(INFO)<<"Q"<<i<<"\t"<<q;
+    
+                    vector<double> zs = linspace(-0.5*zv/f, 0.5*zv/f, zv);
+                    ref.setMult(FLAGS_mult, 0.25);
+                    ref.dump_stack_piv(FLAGS_stackpath, zs[0], zs[zs.size()-1], zs[1]-zs[0], t, "tif", i, q);
+                
+                }
+    
+                scn.propagateParticles(vortex, 0.01);
             
-            benchmark bm;
-            bm.benchmarkSA(scn, ref);
-
-            if (FLAGS_param) {
-
-                for (t=100; t<=200; t+=5.0)
-                    LOG(INFO)<<t<<"\t"<<bm.calcQ(t, FLAGS_mult, 0.25);
-                break;
-
-            } else {
-
-                double q = bm.calcQ(t, FLAGS_mult, 0.25);
-                LOG(INFO)<<"Q"<<i<<"\t"<<q;
-
-                vector<double> zs = linspace(-0.5*zv/f, 0.5*zv/f, zv);
-                ref.setMult(FLAGS_mult, 0.25);
-                ref.dump_stack_piv(FLAGS_stackpath, zs[0], zs[zs.size()-1], zs[1]-zs[0], t, "tif", i, q);
-            
             }
-
-            scn.propagateParticles(vortex, 0.01);
         
+        }
+
+        // Read a scene, propagate particles using velocity field and
+        // run PIV within C++
+        if (FLAGS_runPIV) {
+
+            piv3D piv(FLAGS_zpad);
+    
+            Scene scn;
+            loadScene(FLAGS_scnfile, scn);
+            vector<int> voxels = scn.getVoxelGeom();
+            LOG(INFO)<<"Voxels: "<<voxels[0]<<" x "<<voxels[1]<<" x "<<voxels[2];
+            
+            piv.add_frame(scn.getVolume());
+    
+            // vector<Mat> mats;
+            // for (int i = 0; i < 512; i++) {
+            //     Mat_<double> mat = Mat_<double>::ones(512,512);
+            //     mats.push_back(mat);
+            // }
+    
+            scn.propagateParticles(burgers_vortex, FLAGS_dt);
+            scn.renderVolume(voxels[0], voxels[1], voxels[2]);
+    
+            piv.add_frame(scn.getVolume());
+    
+            piv.run(FLAGS_vsize);
+            
         }
 
     }
@@ -302,29 +335,6 @@ int main(int argc, char** argv) {
         track.track_all();
         //track.plot_all_paths();
         //track.write_quiver_data();
-
-    }
-
-    if (FLAGS_cpiv) {
-        
-        piv3D piv(FLAGS_zpad);
-
-        Scene scn;
-        loadScene(FLAGS_scnfile, scn);
-        piv.add_frame(scn.getVolume());
-
-        // vector<Mat> mats;
-        // for (int i = 0; i < 512; i++) {
-        //     Mat_<double> mat = Mat_<double>::ones(512,512);
-        //     mats.push_back(mat);
-        // }
-
-        scn.propagateParticles(burgers_vortex, FLAGS_dt);
-        scn.renderVolume(xv, yv, zv);
-
-        piv.add_frame(scn.getVolume());
-
-        piv.run(FLAGS_vsize);
 
     }
 
