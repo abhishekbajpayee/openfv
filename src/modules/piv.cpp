@@ -1,3 +1,27 @@
+//  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+//
+//  By downloading, copying, installing or using the software you agree to this license.
+//  If you do not agree to this license, do not download, install,
+//  copy or use the software.
+//
+//                           License Agreement
+//                For Open Source Flow Visualization Library
+//
+// Copyright 2013-2015 Abhishek Bajpayee
+//
+// This file is part of openFV.
+//
+// openFV is free software: you can redistribute it and/or modify it under the terms of the 
+// GNU General Public License as published by the Free Software Foundation, either version 
+// 3 of the License, or (at your option) any later version.
+//
+// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with openFV. 
+// If not, see http://www.gnu.org/licenses/.
+
 // -------------------------------------------------------
 // -------------------------------------------------------
 // Synthetic Aperture - Particle Tracking Velocimetry Code
@@ -25,16 +49,17 @@
 using namespace std;
 using namespace cv;
 
-piv3D::piv3D(int zero_padding) {
+piv3D::piv3D(string resultFile) {
 
     frames_ = 0;
 
+    // Mean shift ON by default for now. TODO: Find out if this makes a difference.
     mean_shift_ = 1;
-    zero_padding_ = zero_padding;
 
-    // Mat a = Mat::zeros(5, 5, CV_32F);
-    // a.at<float>(3,3) = 0.678;
-    // LOG(INFO)<<"value: "<<a.at<float>(3,3);
+    // Zero padding ON by default
+    zero_padding_ = 1;
+
+    resultFile_ = resultFile;
 
 }
 
@@ -62,11 +87,10 @@ void piv3D::add_frame(vector<Mat> mats) {
 
 }
 
-void piv3D::run(int l) {
+void piv3D::run(int l, double overlap) {
 
     wx_ = l; wy_ = l; wz_ = l;
 
-    double overlap = 0.5;
     vector< vector<int> > winx, winy, winz;
     winx = get_windows(xs_, wx_, overlap);
     winy = get_windows(ys_, wy_, overlap);
@@ -76,18 +100,24 @@ void piv3D::run(int l) {
         wx_ *= 2; wy_ *= 2; wz_ *= 2;
     }
 
+    run_pass(winx, winy, winz);
+
+}
+
+void piv3D::run_pass(vector< vector<int> > winx, vector< vector<int> > winy, vector< vector<int> > winz) {
+
     double *i1, *i2, *i3;
     fftw_complex *o1;
     i1 = new double[wx_*wx_*wx_];
     i2 = new double[wy_*wy_*wy_];
     i3 = new double[wz_*wz_*wz_];
-    // o1 = new fftw_complex[wx_*wy_*(wz_/2+1)];
 
     double s = omp_get_wtime();
     
-    fileIO file("../../velocity.txt");
+    fileIO file(resultFile_);
 
     int count=0;
+    //#pragma omp parallel for
     for (int i = 0; i < winx.size(); i++) {
         for (int j = 0; j < winy.size(); j++) {
             for (int k = 0; k < winz.size(); k++) {
@@ -119,6 +149,7 @@ void piv3D::run(int l) {
 
 }
 
+// TODO: z velocity is incorrect and needs to be handled
 vector<int> piv3D::get_velocity_vector(double *a, int x, int y, int z, double &maxval) {
 
     maxval=0;
@@ -136,8 +167,8 @@ vector<int> piv3D::get_velocity_vector(double *a, int x, int y, int z, double &m
         }
     }
 
-    // Modding
-    mx = -x/2 + (mx + x/2)%x; my = -y/2 + (my + y/2)%y; mz = -z/2 + (mz + z/2)%z;
+    // Modding and shifting
+    mx = x/2 - (mx + x/2)%x; my = y/2 - (my + y/2)%y; mz = z/2 - (mz + z/2)%z;
 
     // Shifting vector around center
     // mx -= (x-1)/2; my -= (y-1)/2; mz -= (z-1)/2;
