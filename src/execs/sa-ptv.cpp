@@ -28,8 +28,10 @@ DEFINE_bool(cpiv, false, "test c++ piv code");
 DEFINE_bool(save, false, "save scene");
 DEFINE_bool(sp, false, "show particles");
 DEFINE_bool(piv, false, "PIV mode");
+DEFINE_bool(visualizeField, false, "play movie of velocity field");
 DEFINE_bool(renderTest, false, "render volume for PIV in matlab");
 DEFINE_bool(runPIV, false, "run PIV in C++");
+DEFINE_bool(saveRefStack, false, "save reference stack to run PIV in matlab");
 DEFINE_bool(param, false, "t param study");
 DEFINE_bool(ref, false, "refractive or not");
 DEFINE_bool(zpad, false, "zero padding or not");
@@ -45,6 +47,7 @@ DEFINE_int32(part, 100, "particles");
 DEFINE_int32(cams, 9, "num cams");
 DEFINE_int32(mult, 0, "multiplicative");
 DEFINE_int32(vsize, 64, "volume size for piv test");
+DEFINE_int32(frames, 10, "number of frames to render movie over");
 
 DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
 DEFINE_string(rfile, "../temp/default_rfile.txt", "reference file");
@@ -224,6 +227,33 @@ int main(int argc, char** argv) {
     
         // Only read scenes and not generate in piv mode
         
+        if (FLAGS_visualizeField) {
+            
+            loadScene(FLAGS_scnfile, scn);
+    
+            vector<int> voxels = scn.getVoxelGeom();
+
+            Camera cam;
+            double cf = 35.0; // [mm]
+            cam.init(cf*1200/4.8, voxels[0], voxels[1], 1);
+            cam.setScene(scn);
+            
+            double d = 1000;
+            double t = FLAGS_t;
+    
+            cam.setLocation(-200, -200, -1000);
+            
+            vector<Mat> frames;
+            for (int i=0; i<FLAGS_frames; i++) {
+                Mat img = cam.render();
+                frames.push_back(img);
+                scn.propagateParticles(test_field, FLAGS_dt);
+            }
+
+            Movie mov(frames);
+
+        }
+
         // Read a scene, render camera images, reconstruct, calculate Q
         // and then dump stack to run PIV in matlab
         if (FLAGS_renderTest) {
@@ -302,7 +332,7 @@ int main(int argc, char** argv) {
         // run PIV within C++
         if (FLAGS_runPIV) {
 
-            piv3D piv(FLAGS_zpad);
+            piv3D piv("../temp/velocity.txt");
     
             Scene scn;
             loadScene(FLAGS_scnfile, scn);
@@ -317,12 +347,29 @@ int main(int argc, char** argv) {
             //     mats.push_back(mat);
             // }
     
-            scn.propagateParticles(burgers_vortex, FLAGS_dt);
+            scn.propagateParticles(test_field, FLAGS_dt);
             scn.renderVolume(voxels[0], voxels[1], voxels[2]);
     
             piv.add_frame(scn.getVolume());
     
-            piv.run(FLAGS_vsize);
+            piv.run(FLAGS_vsize, 0.5);
+            
+        }
+
+        // Save reference stacks to run PIV in Matlab
+        if (FLAGS_saveRefStack) {
+    
+            Scene scn;
+            loadScene(FLAGS_scnfile, scn);
+            vector<int> voxels = scn.getVoxelGeom();
+            LOG(INFO)<<"Voxels: "<<voxels[0]<<" x "<<voxels[1]<<" x "<<voxels[2];
+
+            scn.dumpStack("/home/ab9/projects/stack/piv/data/fast/0");
+
+            scn.propagateParticles(burgers_vortex, FLAGS_dt);
+            scn.renderVolume(voxels[0], voxels[1], voxels[2]);
+
+            scn.dumpStack("/home/ab9/projects/stack/piv/data/fast/1");
             
         }
 
