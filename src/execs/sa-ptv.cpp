@@ -364,13 +364,21 @@ int main(int argc, char** argv) {
             vector<int> voxels = scn.getVoxelGeom();
             LOG(INFO)<<"Voxels: "<<voxels[0]<<" x "<<voxels[1]<<" x "<<voxels[2];
 
-            scn.dumpStack("/home/ab9/projects/stack/piv/data/fast/0");
+            string base_path = "/home/ab9/projects/stack/piv/data/";
+            
+            stringstream ss;
+            ss<<base_path<<"ren_test_"<<FLAGS_dt<<"/0/refocused";
+            boost::filesystem::create_directories(ss.str());
+            scn.dumpStack(ss.str());
 
-            scn.propagateParticles(burgers_vortex, FLAGS_dt);
+            scn.propagateParticles(test_field, FLAGS_dt);
             scn.renderVolume(voxels[0], voxels[1], voxels[2]);
 
-            scn.dumpStack("/home/ab9/projects/stack/piv/data/fast/1");
-            
+            ss.str("");
+            ss<<base_path<<"ren_test_"<<FLAGS_dt<<"/1/refocused";
+            boost::filesystem::create_directories(ss.str());
+            scn.dumpStack(ss.str());
+
         }
 
     }

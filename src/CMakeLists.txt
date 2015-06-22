@@ -13,5 +13,7 @@ add_library (saptv modules/optimization.cpp
 	  	   modules/safeRefocusing.cpp
                    modules/piv.cpp)
 
+# TODO: -fopenmp needs to be passed here too
+
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35)
 cuda_add_library (cuda_saptv modules/cuda_lib.cu)
