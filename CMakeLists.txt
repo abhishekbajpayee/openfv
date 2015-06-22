@@ -6,8 +6,11 @@ set (PROJECT_VERSION_MAJOR 1)
 set (PROJECT_VERSION_MINOR 0)
 
 # find required packages
-find_package (OpenCV REQUIRED)
-find_package (CUDA REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(CUDA REQUIRED)
+if(NOT OpenCV_FOUND)
+  message("OPENCV NOT FOUND")
+endif()
 
 # Required Boost Libraries
 find_package(Boost)
@@ -21,17 +24,24 @@ if(Boost_FOUND)
   # set(Boost_SR ${Boost_LIBRARIES})
 elseif(NOT Boost_FOUND)
   message("Boost not found!")
-endif()
+endif() 
+
+set(PROJECT_INCLUDE_DIR	 "${PROJECT_SOURCE_DIR}/include")
+set(PROJECT_SOURCE_DIR   "${PROJECT_SOURCE_DIR}/src")
+
 
 # include directories
 include_directories( ${Boost_INCLUDE_DIR} )
-include_directories("/usr/include/python2.7")
-include_directories ("${PROJECT_SOURCE_DIR}/include")
-include_directories ("/usr/local/cuda/include")
-include_directories ("/home/ab9/Apps/Qt/5.2.1/gcc_64/include")
+include_directories( ${PROJECT_INCLUDE_DIR} )
+include_directories( "/usr/include/python2.7" )
+include_directories( "/usr/include/opencv" )
+include_directories( "/usr/include/eigen3" )
+include_directories( "/usr/local/cuda/include" )
+include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
 # subdirectories
 add_subdirectory (src)
+add_subdirectory (include)
 
 find_package (OpenMP)
 if (OPENMP_FOUND)
@@ -40,18 +50,10 @@ if (OPENMP_FOUND)
 endif()
 
 # fPIC flags, needed?
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+#set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fPIC") - is this supposed to be the following line?:
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-# prototyping executable
-add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/execs/sa-ptv.cpp)
-
-# release files
-add_executable (refocus ${PROJECT_SOURCE_DIR}/src/execs/refocus.cpp)
-add_executable (jobFind ${PROJECT_SOURCE_DIR}/src/execs/jobFind.cpp)
-add_executable (track ${PROJECT_SOURCE_DIR}/src/execs/track.cpp)
-add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/execs/calibrate.cpp)
-add_executable (safeRefocus ${PROJECT_SOURCE_DIR}/src/execs/safeRefocus.cpp)
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
@@ -59,39 +61,9 @@ set (PROF_LIB profiler)
 set (CUSTOM_LIBS saptv cuda_saptv)
 set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
 
-target_link_libraries (sa-ptv ${LIBS})
-target_link_libraries (jobFind ${LIBS})
-target_link_libraries (refocus ${LIBS})
-target_link_libraries (track ${LIBS})
-target_link_libraries (calibrate ${LIBS})
-target_link_libraries (safeRefocus ${LIBS})
-
 # ---------------
 # Python wrappers
 # ---------------
 
 set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/saptv)
 
-add_library(rendering SHARED ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
-set_target_properties(rendering PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(rendering ${LIBS})
-
-add_library(refocusing SHARED ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp)
-set_target_properties(refocusing PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(refocusing ${LIBS})
-
-add_library(tools SHARED ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp)
-set_target_properties(tools PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(tools ${LIBS})
-
-add_library(tracking SHARED ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
-set_target_properties(tracking PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(tracking ${LIBS})
-
-add_library(calibration SHARED ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp)
-set_target_properties(calibration PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(calibration ${LIBS})
-
-# add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
-# set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")
-# target_link_libraries(localization ${LIBS})
