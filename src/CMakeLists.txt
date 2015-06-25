@@ -1,3 +1,4 @@
+
 add_library (saptv 
 		   modules/optimization.cpp
                    modules/calibration.cpp
@@ -18,11 +19,13 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_3
 cuda_add_library (cuda_saptv modules/cuda_lib.cu)
 
 include_directories( ${Boost_INCLUDE_DIR} )
+include_directories( ${PROJECT_INCLUDE_DIR} )
 include_directories( "/usr/include/python2.7" )
 include_directories( "/usr/include/opencv" )
-include_directories( ${PROJECT_INCLUDE_DIR} )
+include_directories( "/usr/include/opencv2" )
+include_directories( "/usr/include/eigen3" )
 include_directories( "/usr/local/cuda/include" )
-include_directories( "/home/ab9/Apps/Qt/5.2.1/gcc_64/include" )
+include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
 
 # prototyping executable
