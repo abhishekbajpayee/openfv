@@ -41,6 +41,11 @@ class camCalibration {
 
 };
 
+/*!
+    Class with functions that allow user to calibrate multiple cameras via bundle
+    adjustment. Contains functionality for both pinhole and refractive scenes. Note
+    that refractive calibration ability is currently of limited robustness.
+*/
 class multiCamCalibration {
  
  public:
@@ -48,34 +53,65 @@ class multiCamCalibration {
         //
     }
 
+    /*! multiCamCalibration constructor
+      \param path Path to where calibration images lie. If the images are in multipage tiff files then
+      this parameters just points to a folder where all (from all cameras) the multipage tiff files lie.
+      If the images are in separate folders then the expected directory structure is:
+      \verbatim embed:rst
+      path/
+      
+        cam1/
+          img1.jpg, img2.jpg, ...
+        cam2/
+          img1.jpg, img2.jpg, ...
+
+        ...
+      \endverbatim
+      where cam1, cam2 etc. and img1, img2 etc. are variable names and can be of user's choice. Supported
+      image types are currently limited but JPEG and TIFF are supported.
+      \param grid_size The number of internal corners in the grid used (x, y)
+      \param grid_size_phys Physical size of one square in the grid. Usually in [mm].
+      \param refractive Flag indicating whether data set is for a refractive set or not
+      \param dummy_mode 
+      \param mtiff Flag indicating whether images are in multipage tiff files or as separate images
+      \param skip Number of frames to skip between each successive frame used
+      \param show_corners Flag to enable displaying of corners in each image after they are found
+    */
     multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners):
         path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), skip_frames_(skip), show_corners_flag(show_corners) {}
  
     multiCamCalibration(string path, int hgrid_size, int vgrid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners):
         path_(path), grid_size_(Size(hgrid_size, vgrid_size)), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), skip_frames_(skip), show_corners_flag(show_corners) {}
-
-    // Functions to access calibration data
-    int num_cams() { return num_cams_; }
-    int num_imgs() { return num_imgs_; }
-    Size grid_size() { return grid_size_; }
-    vector<string> cam_names() { return cam_names_; }
-    refocusing_data refocusing_params() { return refocusing_params_; }
     
     // Functions to run calibration
-    void initialize();
+    /*! Run a calibration job. This automatically calls the initialize() function, functions to
+        read camera names and calibration images (read_cam_names_mtiff(), read_calib_imgs_mtiff() or
+        read_cam_names(), read_calib_imgs()), find_corners() function, functions to calibrate the 
+        cameras, functions to write calibration results to a file. Calling only this function after
+        creating a multiCamCalibration instance should typically suffice to do everything.
+    */
     void run();
+    /*! Initialize a calibration job. This sets initial values of multiple
+        variables such as: maximum iterations for bundle adjustment solver, default names
+        of temporary files created, etc.
+    */
+    void initialize();
     
     // Functions to work with multipage tiff files
+    //! Read camera names if calibration images are in multipage tiff files
     void read_cam_names_mtiff();
+    //! Read images if calibration images are in multipage tiff files
     void read_calib_imgs_mtiff();
 
     // Functions to work with normal directory structure
+    //! Read camera names if calibration images are in folders as separate images
     void read_cam_names();
+    //! Read images if calibration images are in folders as separate images
     void read_calib_imgs();
 
+    //! Find corners in images
     void find_corners();
     void initialize_cams();
-    
     void initialize_cams_ref();
 
     void write_BA_data();
@@ -94,6 +130,17 @@ class multiCamCalibration {
     void write_calib_results_matlab_ref();
 
     void grid_view();
+
+    // Functions to access calibration data
+    //! \return Number of cameras in the data set
+    int num_cams() { return num_cams_; }
+    //! \return Number of images per camera in the data set
+    int num_imgs() { return num_imgs_; }
+    //! \return Size in number of internal corners of grid used    
+    Size grid_size() { return grid_size_; }
+    //! \return Names of cameras (names of folders in which images lie if images are separate or names of the multipage tiff files)
+    vector<string> cam_names() { return cam_names_; }
+    refocusing_data refocusing_params() { return refocusing_params_; }
 
  private:
 
