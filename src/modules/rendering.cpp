@@ -689,6 +689,7 @@ void Camera::project() {
         // TODO: correct this for refractive and decide if needed at all because of diffraction limited imaging
         d = sqrt( pow(C_(0,0)-particles(0,i), 2) + pow(C_(1,0)-particles(1,i), 2) + pow(C_(2,0)-particles(2,i), 2) );
         s_(0,i) = scene_.sigma()*f_/d;
+        VLOG(3)<<"Particle sigma: "<<s_(0,i);
 
     }
 

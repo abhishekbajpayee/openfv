@@ -81,6 +81,8 @@ void loadScene(string filename, Scene &scn);
 
 Scene loadScene(string filename);
 
+vector<double> hill_vortex(double, double, double, double);
+
 vector<double> vortex(double, double, double, double);
 
 vector<double> burgers_vortex(double, double, double, double);

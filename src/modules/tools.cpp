@@ -481,6 +481,43 @@ Scene loadScene(string filename) {
 // Temporary location of particle propagation functions
 // ----------------------------------------------------
 
+vector<double> hill_vortex(double x, double y, double z, double t) {
+    
+    double R = sqrt(x*x + y*y + z*z);
+    double r = sqrt(x*x + z*z);
+    double theta = atan2(z, x);
+    
+    double a = 32; double us = 0.8;
+    double A = 7.5*us/(a*a); // needs tweaking maybe
+    
+    double V = (-A/10)*(4*r*r + 2*y*y - 2*a*a);
+    double U = A*r*y/5;
+    
+    double mag = sqrt(V*V + U*U);
+    
+    double Vo = us*(pow((a*a/(r*r + y*y)), 2.5)*(2*y*y - r*r)/(2*a*a)-1);
+    double Uo = (1.5*us/(a*a))*r*y*pow((a*a/(r*r + y*y)), 2.5);
+    
+    if (R<=a) {
+        Vo = 0; Uo = 0;
+    }
+    
+    double Mo = sqrt(Vo*Vo + Uo*Uo);
+    
+    
+    if (R>a) {
+        V = Vo; U=Uo;
+    }
+    
+    double u = U*cos(theta); double v = V; double w = U*sin(theta);
+    
+    vector<double> np;
+    np.push_back(x+u*t); np.push_back(y+v*t); np.push_back(z+w*t);
+    
+    return(np);
+    
+}
+
 vector<double> vortex(double x, double y, double z, double t) {
 
     double omega = 2.0;
@@ -501,6 +538,20 @@ vector<double> vortex(double x, double y, double z, double t) {
 
 vector<double> burgers_vortex(double x, double y, double z, double t) {
 
+    //
+    Mat_<double> R = Mat_<double>::zeros(3,3);
+    R(0,0) = 1/sqrt(2); R(1,0) = 1/sqrt(2);
+    R(0,1) = -1/sqrt(2); R(1,1) = 1/sqrt(2);
+    R(2,2) = 1;
+
+    Mat_<double> p = Mat_<double>::zeros(3,1);
+    p(0,0) = x; p(1,0) = y, p(2,0) = z;
+    
+    Mat_<double> rp = R*p;
+    
+    x  = rp(0,0); y = rp(1,0); z = rp(2,0);
+    //
+
     double tau = 200;
     double sigma = 0.01;
     double nu = 1;
@@ -514,6 +565,14 @@ vector<double> burgers_vortex(double x, double y, double z, double t) {
 
     double x2 = r*cos(theta2); double z2 = r*sin(theta2); double y2 = y;
 
+    //
+    Mat_<double> p2 = Mat_<double>::zeros(3,1);
+    p2(0,0) = x2; p2(1,0) = y2, p2(2,0) = z2;
+    
+    Mat_<double> p3 = R.inv()*p2;
+    x2 = p3(0,0); y2 = p3(1,0); z2 = p3(2,0);
+    //
+
     vector<double> np;
     np.push_back(x2); np.push_back(y2); np.push_back(z2);
 
@@ -523,12 +582,12 @@ vector<double> burgers_vortex(double x, double y, double z, double t) {
 
 vector<double> test_field(double x, double y, double z, double t) {
 
-    double v = z*1.01;
+    double v = 1.15; //z*1.01;
     double d = v*t;
-    double z2 = z + d;
+    //double z2 = z + d;
 
     vector<double> np;
-    np.push_back(x); np.push_back(y); np.push_back(z2);
+    np.push_back(x+d); np.push_back(y+d); np.push_back(z+d);
 
     return(np);
 
