@@ -48,6 +48,7 @@ DEFINE_int32(cams, 9, "num cams");
 DEFINE_int32(mult, 0, "multiplicative");
 DEFINE_int32(vsize, 64, "volume size for piv test");
 DEFINE_int32(frames, 10, "number of frames to render movie over");
+DEFINE_int32(field, 1, "velocity field to use");
 
 DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
 DEFINE_string(rfile, "../temp/default_rfile.txt", "reference file");
@@ -62,6 +63,7 @@ DEFINE_double(e, 1, "e");
 DEFINE_double(f, 0.05, "f");
 DEFINE_double(rn, 3, "Rn");
 DEFINE_double(rs, 3, "Rs");
+DEFINE_double(multexp, 0.25, "multiplicative exponent");
 
 int main(int argc, char** argv) {
 
@@ -247,7 +249,7 @@ int main(int argc, char** argv) {
             for (int i=0; i<FLAGS_frames; i++) {
                 Mat img = cam.render();
                 frames.push_back(img);
-                scn.propagateParticles(test_field, FLAGS_dt);
+                scn.propagateParticles(burgers_vortex, FLAGS_dt);
             }
 
             Movie mov(frames);
@@ -257,12 +259,14 @@ int main(int argc, char** argv) {
         // Read a scene, render camera images, reconstruct, calculate Q
         // and then dump stack to run PIV in matlab
         if (FLAGS_renderTest) {
-        
-            loadScene(filename, scn);
-    
+
+            loadScene(FLAGS_scnfile, scn);
+            vector<int> voxels = scn.getVoxelGeom();
+            LOG(INFO)<<"Voxels: "<<voxels[0]<<" x "<<voxels[1]<<" x "<<voxels[2];
+
             Camera cam;
             double cf = 35.0; // [mm]
-            cam.init(cf*1200/4.8, xv, yv, 1);
+            cam.init(cf*1200/4.8, voxels[0], voxels[1], 1);
             cam.setScene(scn);
             
             double d = 1000;
@@ -305,6 +309,32 @@ int main(int argc, char** argv) {
                 benchmark bm;
                 bm.benchmarkSA(scn, ref);
     
+                string path = "/home/ab9/projects/stack/piv/render/";
+
+                string prefix;
+                if (FLAGS_field==1) {
+                    prefix = "ref_uniform_";
+                } else if (FLAGS_field==2) {
+                    prefix = "ref_vortexr_";
+                } else if (FLAGS_field==3) {
+                    prefix = "ref_hvortex_";
+                } else {
+                    LOG(FATAL)<<"Invalid velocity field!";
+                }
+
+                stringstream ss;
+                ss<<path<<prefix;
+                ss<<"angle"<<FLAGS_angle;
+                ss<<"_cams"<<cams;
+                ss<<"_mult"<<FLAGS_mult;
+                if (FLAGS_mult) {
+                    ss<<"_"<<FLAGS_multexp;
+                } else {
+                    ss<<"_"<<t;
+                }
+                ss<<"_"<<FLAGS_dt<<"/";
+                boost::filesystem::create_directories(ss.str());
+
                 if (FLAGS_param) {
     
                     for (t=100; t<=200; t+=5.0)
@@ -313,19 +343,57 @@ int main(int argc, char** argv) {
     
                 } else {
     
-                    double q = bm.calcQ(t, FLAGS_mult, 0.25);
+                    double q = bm.calcQ(t, FLAGS_mult, FLAGS_multexp);
                     LOG(INFO)<<"Q"<<i<<"\t"<<q;
     
-                    vector<double> zs = linspace(-0.5*zv/f, 0.5*zv/f, zv);
-                    ref.setMult(FLAGS_mult, 0.25);
-                    ref.dump_stack_piv(FLAGS_stackpath, zs[0], zs[zs.size()-1], zs[1]-zs[0], t, "tif", i, q);
+                    vector<double> zs = linspace(-0.5*voxels[2]/f, 0.5*voxels[2]/f, voxels[2]);
+                    ref.setMult(FLAGS_mult, FLAGS_multexp);
+                    LOG(INFO)<<"Saving frame "<<i<<" to "<<ss.str();
+                    ref.dump_stack_piv(ss.str(), zs[0], zs[zs.size()-1], zs[1]-zs[0], t, "tif", i, q);
                 
                 }
     
-                scn.propagateParticles(vortex, 0.01);
+                if (i==0) {
+                    if (FLAGS_field==1) {
+                        scn.propagateParticles(test_field, FLAGS_dt);
+                    } else if (FLAGS_field==2) {
+                        scn.propagateParticles(burgers_vortex, FLAGS_dt);
+                    } else if (FLAGS_field==3) {
+                        scn.propagateParticles(hill_vortex, FLAGS_dt);
+                    } else {
+                        LOG(FATAL)<<"Invalid velocity field!";
+                    }
+                    scn.renderVolume(voxels[0], voxels[1], voxels[2]);
+                }
             
             }
         
+        }
+
+        // Save reference stacks to run PIV in Matlab
+        if (FLAGS_saveRefStack) {
+    
+            Scene scn;
+            loadScene(FLAGS_scnfile, scn);
+            vector<int> voxels = scn.getVoxelGeom();
+            LOG(INFO)<<"Voxels: "<<voxels[0]<<" x "<<voxels[1]<<" x "<<voxels[2];
+
+            string base_path = "/home/ab9/projects/stack/piv/render/";
+            string prefix = "ren_uniform_";
+            
+            stringstream ss;
+            ss<<base_path<<prefix<<FLAGS_dt<<"/0/refocused";
+            boost::filesystem::create_directories(ss.str());
+            scn.dumpStack(ss.str());
+
+            scn.propagateParticles(test_field, FLAGS_dt);
+            scn.renderVolume(voxels[0], voxels[1], voxels[2]);
+
+            ss.str("");
+            ss<<base_path<<prefix<<FLAGS_dt<<"/1/refocused";
+            boost::filesystem::create_directories(ss.str());
+            scn.dumpStack(ss.str());
+
         }
 
         // Read a scene, propagate particles using velocity field and
@@ -354,31 +422,6 @@ int main(int argc, char** argv) {
     
             piv.run(FLAGS_vsize, 0.5);
             
-        }
-
-        // Save reference stacks to run PIV in Matlab
-        if (FLAGS_saveRefStack) {
-    
-            Scene scn;
-            loadScene(FLAGS_scnfile, scn);
-            vector<int> voxels = scn.getVoxelGeom();
-            LOG(INFO)<<"Voxels: "<<voxels[0]<<" x "<<voxels[1]<<" x "<<voxels[2];
-
-            string base_path = "/home/ab9/projects/stack/piv/data/";
-            
-            stringstream ss;
-            ss<<base_path<<"ren_test_"<<FLAGS_dt<<"/0/refocused";
-            boost::filesystem::create_directories(ss.str());
-            scn.dumpStack(ss.str());
-
-            scn.propagateParticles(test_field, FLAGS_dt);
-            scn.renderVolume(voxels[0], voxels[1], voxels[2]);
-
-            ss.str("");
-            ss<<base_path<<"ren_test_"<<FLAGS_dt<<"/1/refocused";
-            boost::filesystem::create_directories(ss.str());
-            scn.dumpStack(ss.str());
-
         }
 
     }
