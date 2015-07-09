@@ -5,6 +5,8 @@ project (sa-ptv)
 set (PROJECT_VERSION_MAJOR 1)
 set (PROJECT_VERSION_MINOR 0)
 
+option(Build_Samples "Build_Samples" OFF)
+
 # find required packages
 find_package(OpenCV REQUIRED)
 find_package(CUDA REQUIRED)
@@ -27,8 +29,6 @@ elseif(NOT Boost_FOUND)
 endif() 
 
 set(PROJECT_INCLUDE_DIR	 "${PROJECT_SOURCE_DIR}/include")
-set(PROJECT_SOURCE_DIR   "${PROJECT_SOURCE_DIR}/src")
-
 
 # include directories
 include_directories( ${Boost_INCLUDE_DIR} )
@@ -53,6 +53,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -shared")
 
 # subdirectories
 add_subdirectory (src)
+if(Build_Samples)
+  add_subdirectory(samples)
+endif()
 
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
@@ -61,27 +64,27 @@ set (PROF_LIB profiler)
 set (CUSTOM_LIBS saptv cuda_saptv)
 set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
 
-add_library(rendering SHARED ${PROJECT_SOURCE_DIR}/modules/rendering.cpp)
+add_library(rendering SHARED ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
 set_target_properties(rendering PROPERTIES ${PYTHON_PROPS} PREFIX "")
 target_link_libraries(rendering ${LIBS})
 
-add_library(refocusing SHARED ${PROJECT_SOURCE_DIR}/modules/refocusing.cpp)
+add_library(refocusing SHARED ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp)
 set_target_properties(refocusing PROPERTIES ${PYTHON_PROPS} PREFIX "")
 target_link_libraries(refocusing ${LIBS})
 
-add_library(tools SHARED ${PROJECT_SOURCE_DIR}/modules/tools.cpp)
+add_library(tools SHARED ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp)
 set_target_properties(tools PROPERTIES ${PYTHON_PROPS} PREFIX "")
 target_link_libraries(tools ${LIBS})
 
-add_library(tracking SHARED ${PROJECT_SOURCE_DIR}/modules/tracking.cpp)
+add_library(tracking SHARED ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
 set_target_properties(tracking PROPERTIES ${PYTHON_PROPS} PREFIX "")
 target_link_libraries(tracking ${LIBS})
 
-add_library(calibration SHARED ${PROJECT_SOURCE_DIR}/modules/calibration.cpp)
+add_library(calibration SHARED ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp)
 set_target_properties(calibration PROPERTIES ${PYTHON_PROPS} PREFIX "")
 target_link_libraries(calibration ${LIBS})
 
-# add_library(localization SHARED ${PROJECT_SOURCE_DIR}/modules/pLoc.cpp)
+# add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
 # set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")
 # target_link_libraries(localization ${LIBS})
 
