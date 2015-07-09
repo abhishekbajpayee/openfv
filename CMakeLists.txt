@@ -5,13 +5,20 @@ project (sa-ptv)
 set (PROJECT_VERSION_MAJOR 1)
 set (PROJECT_VERSION_MINOR 0)
 
-option(Build_Samples "Build_Samples" OFF)
+option(BUILD_SAMPLES "BUILD_SAMPLES" OFF)
+option(BUILD_PYTHON "BUILD_PYTHON" OFF)
+
+set(PROJECT_INCLUDE_DIR	 "${PROJECT_SOURCE_DIR}/include")
 
 # find required packages
 find_package(OpenCV REQUIRED)
 find_package(CUDA REQUIRED)
 if(NOT OpenCV_FOUND)
   message("OPENCV NOT FOUND")
+endif()
+
+if(POLICY CMP0022)
+  cmake_policy(SET CMP0022 OLD)
 endif()
 
 # Required Boost Libraries
@@ -27,8 +34,6 @@ if(Boost_FOUND)
 elseif(NOT Boost_FOUND)
   message("Boost not found!")
 endif() 
-
-set(PROJECT_INCLUDE_DIR	 "${PROJECT_SOURCE_DIR}/include")
 
 # include directories
 include_directories( ${Boost_INCLUDE_DIR} )
@@ -46,6 +51,12 @@ if (OPENMP_FOUND)
   set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
 endif()
 
+set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
+set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
+set (PROF_LIB profiler)
+set (CUSTOM_LIBS saptv cuda_saptv)
+set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
+
 # fPIC flags, needed?
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -shared")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -shared")
@@ -53,40 +64,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -shared")
 
 # subdirectories
 add_subdirectory (src)
-if(Build_Samples)
+if(BUILD_SAMPLES)
   add_subdirectory(samples)
 endif()
-
-
-set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
-set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
-set (PROF_LIB profiler)
-set (CUSTOM_LIBS saptv cuda_saptv)
-set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
-
-add_library(rendering SHARED ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
-set_target_properties(rendering PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(rendering ${LIBS})
-
-add_library(refocusing SHARED ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp)
-set_target_properties(refocusing PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(refocusing ${LIBS})
-
-add_library(tools SHARED ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp)
-set_target_properties(tools PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(tools ${LIBS})
-
-add_library(tracking SHARED ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
-set_target_properties(tracking PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(tracking ${LIBS})
-
-add_library(calibration SHARED ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp)
-set_target_properties(calibration PROPERTIES ${PYTHON_PROPS} PREFIX "")
-target_link_libraries(calibration ${LIBS})
-
-# add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
-# set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")
-# target_link_libraries(localization ${LIBS})
+if(BUILD_PYTHON)
+  add_subdirectory(lib)
+endif()
 
 # ---------------
 # Python wrappers
