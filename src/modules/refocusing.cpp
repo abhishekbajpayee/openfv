@@ -435,6 +435,8 @@ void saRefocus::GPUliveView() {
     double dz = 0.1;
     double dthresh = 5/255.0;
     double tlimit = 1.0;
+    double mult_exp_limit = 1.0;
+    double mult_thresh = 0.01;
 
     while( 1 ){
         int key = cvWaitKey(10);
@@ -447,12 +449,20 @@ void saRefocus::GPUliveView() {
             } else if( (key & 255)==81 ) {
                 z_ -= dz;
             } else if( (key & 255)==82 ) {
-                if (thresh<tlimit) { 
-                    thresh += dthresh; 
+                if (mult_) {
+                    if (mult_exp_<mult_exp_limit)
+                        mult_exp_ += mult_thresh;
+                } else {
+                    if (thresh<tlimit)
+                        thresh += dthresh; 
                 }
             } else if( (key & 255)==84 ) {
-                if (thresh>0) { 
-                    thresh -= dthresh; 
+                if (mult_) {
+                    if (mult_exp_>0)
+                        mult_exp_ -= mult_thresh;
+                } else {
+                    if (thresh>0)
+                        thresh -= dthresh; 
                 }
             } else if( (key & 255)==46 ) {
                 if (active_frame_<array_all.size()) { 
@@ -498,6 +508,8 @@ void saRefocus::GPUliveView() {
                 crz_ += 1;
             } else if( (key & 255)==110 ) { // n
                 crz_ -= 1;
+            } else if( (key & 255)==32 ) {
+                mult_ = (mult_+1)%2;
             } else if( (key & 255)==27 ) {  // ESC
                 cvDestroyAllWindows();
                 break;
@@ -853,7 +865,7 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
     if (live) {
 
         char title[200];
-        sprintf(title, "T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", thresh*255.0, frame, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+        sprintf(title, "mult = %d, exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_, mult_exp_, thresh*255.0, frame, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
 
         imshow("Result", refocused_host_);
         displayOverlay("Result", title);
@@ -948,7 +960,7 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
     if (live) {
         
         char title[150];
-        sprintf(title, "T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", thresh*255.0, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
+        sprintf(title, "mult = %d, exp = %f, T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", mult_, mult_exp_, thresh*255.0, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
 
         imshow("Result", refocused_host_);
         displayOverlay("Result", title);
