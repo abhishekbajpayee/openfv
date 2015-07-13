@@ -29,7 +29,7 @@ sys.path.append( "/home/ab9/Apps/breathe/" )
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode', 'breathe']
 
 # adding breathe project
-breathe_projects = { "sa-ptv": "/home/ab9/projects/sa-ptv/doc/xml/" }
+breathe_projects = { "sa-ptv": "../xml/" }
 breathe_default_project = "sa-ptv"
 
 # Add any paths that contain templates here, relative to this directory.
