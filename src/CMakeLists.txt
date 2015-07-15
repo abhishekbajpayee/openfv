@@ -1,4 +1,6 @@
-add_library (saptv modules/optimization.cpp
+add_library (saptv 
+		   SHARED
+		   modules/optimization.cpp
                    modules/calibration.cpp
 		   modules/refocusing.cpp
                    modules/pLoc.cpp
@@ -17,3 +19,4 @@ add_library (saptv modules/optimization.cpp
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35)
 cuda_add_library (cuda_saptv modules/cuda_lib.cu)
+
