@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 
     pTracking track(argv[1], rn, rs);
 
-    track.set_vars(rn, rs, e, f);
+    track.set_vars(1, rn, rs, e, f);
 
     track.track_frames(atof(argv[6]), atof(argv[7]));
     //track.track_all();
