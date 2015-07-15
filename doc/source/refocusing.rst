@@ -7,5 +7,5 @@ also be used to calculate refocused images using images rendered via
 the :cpp:class:`Scene` and :cpp:class:`Camera` classes.
 
 .. doxygenclass:: saRefocus
-   :project: sa-ptv
+   :project: openfv
    :members:

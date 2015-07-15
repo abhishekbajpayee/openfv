@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to sa-ptv's documentation!
+Welcome to OpenFV's documentation!
 ==================================
 
 Contents:
@@ -14,6 +14,7 @@ Contents:
    setup
    calibration
    refocusing
+   rendering
 .. 
    doxygenindex::
 
