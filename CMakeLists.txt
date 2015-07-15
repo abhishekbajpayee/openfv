@@ -75,16 +75,6 @@ if (OPENMP_FOUND)
   set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
 endif()
 
-# prototyping executable
-add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/execs/sa-ptv.cpp)
-
-# release files
-add_executable (refocus ${PROJECT_SOURCE_DIR}/src/execs/refocus.cpp)
-add_executable (jobFind ${PROJECT_SOURCE_DIR}/src/execs/jobFind.cpp)
-add_executable (track ${PROJECT_SOURCE_DIR}/src/execs/track.cpp)
-add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/execs/calibrate.cpp)
-add_executable (safeRefocus ${PROJECT_SOURCE_DIR}/src/execs/safeRefocus.cpp)
-
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
 set (PROF_LIB profiler)
