@@ -5,7 +5,6 @@ project (sa-ptv)
 set (PROJECT_VERSION_MAJOR 1)
 set (PROJECT_VERSION_MINOR 0)
 
-option(BUILD_SAMPLES "BUILD_SAMPLES" OFF)
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 
 set(PROJECT_INCLUDE_DIR	 "${PROJECT_SOURCE_DIR}/include")
@@ -64,9 +63,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -shared")
 
 # subdirectories
 
-if(BUILD_SAMPLES)
-  add_subdirectory(samples)
-endif()
 add_subdirectory(lib)
 
 
