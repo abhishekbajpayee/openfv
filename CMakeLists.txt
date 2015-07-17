@@ -63,13 +63,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -shared")
 
 
 # subdirectories
-add_subdirectory (src)
+
 if(BUILD_SAMPLES)
   add_subdirectory(samples)
 endif()
-if(BUILD_PYTHON)
-  add_subdirectory(lib)
-endif()
+add_subdirectory(lib)
+
 
 # ---------------
 # Python wrappers
