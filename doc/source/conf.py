@@ -31,7 +31,7 @@ subprocess.call(['doxygen', '../config'])
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode', 'breathe']
 
 # adding breathe project
-breathe_projects = { "openfv": "../xml/" }
+breathe_projects = { "openfv": "xml/" }
 breathe_default_project = "openfv"
 
 # Add any paths that contain templates here, relative to this directory.
