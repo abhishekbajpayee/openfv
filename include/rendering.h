@@ -76,7 +76,7 @@ class Scene {
     void renderVolumeGPU2(int xv, int yv, int zv);
 
     //! Set the standard deviation of particles in each direction
-    void setParticleSigma(double, double, double);
+    void setParticleSigma(double sx, double sy, double sz);
     /*! Set geometry of scene if refractive interfaces have to be used
       \param zW The z location of the front of glass wall
       \param n1 Refractive index of air
@@ -102,7 +102,9 @@ class Scene {
     */
     void propagateParticles(vector<double> (*func)(double, double, double, double), double t);
 
-    Mat getSlice(int zv);
+    //! Get a slice of volume with index z_ind (based on the size of volume sz and number of voxels zv).
+    Mat getSlice(int z_ind);
+    //! Get the entire rendered volume
     vector<Mat> getVolume();
 
     Mat getParticles();
@@ -180,15 +182,21 @@ class Camera {
       \param gpu Flag to use GPU or not
     */
     void init(double f, int imsx, int imsy, int gpu);
+    //! Attach Scene object to camera
     void setScene(Scene scene);
+    //! Set location of camera
     void setLocation(double x, double y, double z);
+    //! Point camera at point
     void pointAt(double x, double y, double z);
     
+    //! Render image of attached scene
     Mat render();
     void renderCPU();
     void renderGPU();
 
+    //! Get camera matrix of camera
     Mat getP();
+    //! Get location of camera
     Mat getC();
 
  private:
