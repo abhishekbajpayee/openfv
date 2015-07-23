@@ -9,3 +9,7 @@ the :cpp:class:`Scene` and :cpp:class:`Camera` classes.
 .. doxygenclass:: saRefocus
    :project: openfv
    :members:
+
+.. doxygenstruct:: refocus_settings
+   :project: openfv
+   :members:

@@ -32,13 +32,34 @@ using namespace cv;
 
 const double pi = 3.14159;
 
+/*! Settings container passed to saRefocus constructor
+  \param mult Flag to multiplicative refocusing or not
+  \param mult_exp Multiplicative exponent
+  \param thresh Thresholding level to be used (if additive)
+  \param gpu Flag to use a GPU or not
+  \param ref Flag to use refractive refocusing or not
+  \param hf_method Use Homography Fit (HF) method or not
+  \param calib_file_path Path to calibration data file
+  \param images_path Path to directory where images to be refocused lie
+  \param mtiff Images are contained in multipage tiff files or not
+  \param start_frame
+  \param end_frame
+  \param upload_frame
+  \param all_frames
+  \param preprocess Preprocess images after reading or not
+  \param preprocess_file Setting file listing preprocessing steps and settings
+  \param zmin Lower bound on z depth of volume to be reconstructed
+  \param zmax Upper bound on z depth of volume to be reconstructed
+  \param dz Distance between successive refocused images
+  \param save_path Directory where to save refocused stack
+*/
 struct refocus_settings {
 
     int mult; // 1 for Multiplicative
     double mult_exp;
     int gpu; // 1 for GPU
     int ref; // 1 for refractive
-    int corner_method; // 1 to use corner method
+    int hf_method; // 1 to use corner method
 
     string calib_file_path;
 
