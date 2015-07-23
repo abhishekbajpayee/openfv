@@ -29,7 +29,6 @@ project (sa-ptv)
 set (PROJECT_VERSION_MAJOR 1)
 set (PROJECT_VERSION_MINOR 0)
 
-option(BUILD_SAMPLES "BUILD_SAMPLES" OFF)
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 
 set(PROJECT_INCLUDE_DIR	 "${PROJECT_SOURCE_DIR}/include")
@@ -86,13 +85,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -shared")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -shared")
 
 # subdirectories
-add_subdirectory (src)
-if(BUILD_SAMPLES)
-  add_subdirectory(samples)
-endif()
-if(BUILD_PYTHON)
-  add_subdirectory(lib)
-endif()
+
+add_subdirectory(lib)
+
 
 # ---------------
 # Python wrappers
