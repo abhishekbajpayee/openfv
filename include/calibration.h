@@ -72,21 +72,23 @@ class multiCamCalibration {
         //
     }
 
-    multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners):
-        path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), skip_frames_(skip), show_corners_flag(show_corners) {}
+    multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners);
  
     multiCamCalibration(string path, int hgrid_size, int vgrid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners):
         path_(path), grid_size_(Size(hgrid_size, vgrid_size)), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), skip_frames_(skip), show_corners_flag(show_corners) {}
 
-    // Functions to access calibration data
+    // Set functions
+    void set_max_iterations(int num) { pinhole_max_iterations = num; }
+    void set_init_f_value(float val) { init_f_value_ = val; }
+
+    // Get functions
     int num_cams() { return num_cams_; }
     int num_imgs() { return num_imgs_; }
     Size grid_size() { return grid_size_; }
     vector<string> cam_names() { return cam_names_; }
     refocusing_data refocusing_params() { return refocusing_params_; }
     
-    // Functions to run calibration
-    void initialize();
+    // Function to run calibration
     void run();
     
     // Functions to work with multipage tiff files
@@ -180,10 +182,17 @@ class multiCamCalibration {
     int refractive_;
     int mtiff_; // 0 = folders with tif images, 1 = multipage tif files
 
+    // Settings
     int pinhole_max_iterations;
     int refractive_max_iterations;
-
     int skip_frames_;
+    float init_f_value_;
+
+    // Order control variables
+    int cam_names_read_;
+    int images_read_;
+    int corners_found_;
+    int cams_initialized_;
     
 };
     
