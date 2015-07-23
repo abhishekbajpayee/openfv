@@ -11,8 +11,10 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
-sys.path.append( "/home/ab9/Apps/breathe/" )
+import sys, os, subprocess
+
+# Building XML files using doxygen
+subprocess.call(['doxygen', '../config'])
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -29,8 +31,8 @@ sys.path.append( "/home/ab9/Apps/breathe/" )
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode', 'breathe']
 
 # adding breathe project
-breathe_projects = { "sa-ptv": "../xml/" }
-breathe_default_project = "sa-ptv"
+breathe_projects = { "openfv": "xml/" }
+breathe_default_project = "openfv"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -45,7 +47,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'sa-ptv'
+project = u'openfv'
 copyright = u'2014, Abhishek Bajpayee'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -232,8 +234,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'sa-ptv', u'sa-ptv Documentation',
-   u'Abhishek Bajpayee', 'sa-ptv', 'One line description of project.',
+  ('index', 'openfv', u'openfv Documentation',
+   u'Abhishek Bajpayee', 'openfv', 'One line description of project.',
    'Miscellaneous'),
 ]
 

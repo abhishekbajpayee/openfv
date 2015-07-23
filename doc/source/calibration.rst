@@ -7,5 +7,5 @@ can be used to calculate synthetic aperture refocused images or for
 other purposes.
 
 .. doxygenclass:: multiCamCalibration
-   :project: sa-ptv
+   :project: openfv
    :members:
