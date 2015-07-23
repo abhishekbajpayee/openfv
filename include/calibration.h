@@ -73,9 +73,6 @@ class multiCamCalibration {
     }
 
     multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners);
- 
-    multiCamCalibration(string path, int hgrid_size, int vgrid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners):
-        path_(path), grid_size_(Size(hgrid_size, vgrid_size)), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), skip_frames_(skip), show_corners_flag(show_corners) {}
 
     // Set functions
     void set_max_iterations(int num) { pinhole_max_iterations = num; }
