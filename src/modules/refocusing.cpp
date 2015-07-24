@@ -90,7 +90,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.corner_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult), preprocess_(settings.preprocess) {
+    GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult), preprocess_(settings.preprocess) {
 
     if (REF_FLAG) {
         read_calib_data(settings.calib_file_path);

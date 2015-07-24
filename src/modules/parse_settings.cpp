@@ -43,7 +43,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
 
     settings.ref = vm["refractive"].as<int>();
     settings.gpu = vm["use_gpu"].as<int>();
-    settings.corner_method = vm["hf_method"].as<int>();
+    settings.hf_method = vm["hf_method"].as<int>();
     settings.mtiff = vm["mtiff"].as<int>();
     settings.mult = vm["mult"].as<int>();
     if (settings.mult)

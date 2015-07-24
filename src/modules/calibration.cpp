@@ -1712,8 +1712,8 @@ BOOST_PYTHON_MODULE(calibration) {
 
     using namespace boost::python;
 
-    class_<multiCamCalibration>("calibration", init<string, int, int, double, int, int, int, int , int>())
-        .def("run", &multiCamCalibration::run)
-    ;
+    // class_<multiCamCalibration>("calibration", init<string, int, int, double, int, int, int, int , int>())
+    //     .def("run", &multiCamCalibration::run)
+    // ;
 
 }

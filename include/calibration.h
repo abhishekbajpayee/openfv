@@ -108,13 +108,6 @@ class multiCamCalibration {
     void set_max_iterations(int num) { pinhole_max_iterations = num; }
     //! Set initial value for f (focal length) in pixel units for P matrix of cameras. Default is 2500.
     void set_init_f_value(float val) { init_f_value_ = val; }
-
-    // Get functions
-    int num_cams() { return num_cams_; }
-    int num_imgs() { return num_imgs_; }
-    Size grid_size() { return grid_size_; }
-    vector<string> cam_names() { return cam_names_; }
-    refocusing_data refocusing_params() { return refocusing_params_; }
     
     // Function to run calibration
     /*! Run a calibration job. This automatically calls functions to
