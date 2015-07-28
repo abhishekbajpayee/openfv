@@ -94,3 +94,5 @@ add_subdirectory(lib)
 # ---------------
 
 set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/saptv)
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION /usr/local/include/openfv)

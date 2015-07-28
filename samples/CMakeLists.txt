@@ -41,5 +41,17 @@ set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
 set (PROF_LIB profiler)
 set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS} "/home/loganford16/Desktop/openfv/bin/src/libsaptv.so")
 
-add_executable (test ${PROJECT_SOURCE_DIR}/src/test.cpp)
-target_link_libraries (test ${LIBS})
+add_executable (calibrate ${PROJECT_SOURCE_DIR}/src/calibrate.cpp)
+target_link_libraries (calibrate ${LIBS})
+
+add_executable (track ${PROJECT_SOURCE_DIR}/src/track.cpp)
+target_link_libraries (track ${LIBS})
+
+add_executable (refocus ${PROJECT_SOURCE_DIR}/src/refocus.cpp)
+target_link_libraries (refocus ${LIBS})
+
+add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/src/sa-ptv.cpp)
+target_link_libraries (sa-ptv ${LIBS})
+
+add_executable (jobFind ${PROJECT_SOURCE_DIR}/src/jobFind.cpp)
+target_link_libraries (jobFind ${LIBS})

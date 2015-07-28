@@ -44,4 +44,9 @@ if(BUILD_PYTHON)
 # add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
 # set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")
 # target_link_libraries(localization ${LIBS})
+ 
+  install(TARGETS rendering refocusing tools tracking calibration
+          DESTINATION /usr/local/include/openfv/lib)
 endif()
+
+install(TARGETS cuda_saptv saptv DESTINATION /usr/local/include/openfv/lib)
