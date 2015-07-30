@@ -15,7 +15,7 @@ add_library (saptv
 	  	   ${PROJECT_SOURCE_DIR}/src/modules/safeRefocusing.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/piv.cpp)
 
-target_link_libraries( saptv ${LIBS})
+target_link_libraries(saptv ${LIBS})
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35)
 cuda_add_library (cuda_saptv SHARED ${PROJECT_SOURCE_DIR}/src/modules/cuda_lib.cu)
