@@ -1,11 +1,4 @@
-#include "std_include.h"
-
-#include "calibration.h"
-#include "refocusing.h"
-#include "pLoc.h"
-#include "tracking.h"
-#include "tools.h"
-#include "parse_settings.h"
+#include "openfv.h"
 
 using namespace cv;
 using namespace std;

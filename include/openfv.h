@@ -1,4 +1,4 @@
-//Includes all of openFV
+// Includes all of OpenFV
 #include "batchProc.h"
 #include "calibration.h"
 #include "cuda_lib.h"

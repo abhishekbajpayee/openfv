@@ -38,16 +38,17 @@ if(POLICY CMP0022)
 endif()
 
 # Find required packages
-# OpenCV
-find_package(OpenCV REQUIRED)
-if(NOT OpenCV_FOUND)
-  message("OpenCV not found!")
-endif()
 
 # CUDA
 find_package(CUDA REQUIRED)
 if(NOT CUDA_FOUND)
   message("CUDA not found!")
+endif()
+
+# OpenCV
+find_package(OpenCV REQUIRED)
+if(NOT OpenCV_FOUND)
+  message("OpenCV not found!")
 endif()
 
 # Boost Libraries
@@ -94,8 +95,7 @@ set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS}
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-# subdirectories
-
+# Subdirectories
 add_subdirectory(lib)
 
 # ---------------
