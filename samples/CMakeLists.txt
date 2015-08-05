@@ -7,6 +7,12 @@ set (PROJECT_VERSION_MINOR 0)
 
 find_package(OpenCV REQUIRED)
 
+set(CUDA_INC_DIR "/usr/local/cuda/include" CACHE PATH "Path to CUDA Directory")
+set(PYTHON_INC_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
+set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
+set(OFV_INC_DIR "${PROJECT_SOURCE_DIR}/../include" CACHE PATH "Path to OpenFV Include Directory")
+set(OFV_LIB_DIR "${PROJECT_SOURCE_DIR}/../bin/lib" CACHE PATH "Path to OpenFV Lib Directory")
+
 find_package(Boost)
 if(Boost_FOUND)
   find_package ( Boost COMPONENTS program_options filesystem system serialization REQUIRED )
@@ -22,6 +28,7 @@ include_directories( ${OFV_INC_DIR} )
 include_directories( ${PYTHON_INC_DIR} )
 include_directories( ${CUDA_INC_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
+include_directories( ${EIGEN_INC_DIR} )
 
 # Link directories
 link_directories( ${OFV_LIB_DIR} )
@@ -29,7 +36,7 @@ link_directories( ${OFV_LIB_DIR} )
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
 set (PROF_LIB profiler)
-set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS} saptv)
+set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS} saptv cuda_saptv)
 
 add_executable (calibrate ${PROJECT_SOURCE_DIR}/calibrate.cpp)
 target_link_libraries (calibrate ${LIBS})

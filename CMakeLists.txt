@@ -30,8 +30,11 @@ set (PROJECT_VERSION_MAJOR 1)
 set (PROJECT_VERSION_MINOR 0)
 
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
+set(CUDA_INC_DIR "/usr/local/cuda/include" CACHE PATH "Path to CUDA Directory")
+set(PYTHON_INC_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
+set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
 
-set(PROJECT_INCLUDE_DIR	 "${PROJECT_SOURCE_DIR}/include")
+set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
 
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 OLD)
@@ -67,14 +70,14 @@ include_directories( ${PROJECT_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${PYTHON_INC_DIR} )
 include_directories( ${CUDA_INC_DIR} )
+include_directories( ${EIGEN_INC_DIR} )
 
 # This might be useful in the future for when
 # someone has OpenCV in a random location
 # include_directories( ${OCV_INC_DIR} )
 
 # Don't think these are needed because OpenFV
-# doesn't link to Eigen and Qt
-# include_directories( "/usr/include/eigen3" )
+# doesn't link to Qt
 # include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
 # Omitting for now because nothing in OpenFV as
