@@ -195,6 +195,7 @@ class multiCamCalibration {
     vector< vector<Mat> > rvecs_;
     vector< vector<Mat> > tvecs_;
     
+    vector<Mat> cVecs_;
     vector<Mat> rVecs_;
     vector<Mat> tVecs_;
     vector<Mat> K_mats_;
