@@ -237,7 +237,7 @@ void saRefocus::read_calib_data_pin(string path) {
     file>>img_size_.width;
     file>>img_size_.height;
     file>>scale_;
-    file>>warp_factor_;
+    //file>>warp_factor_;
 
     file.close();
 
@@ -994,7 +994,7 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
 
 void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
 
-    z *= warp_factor_;
+    //z *= warp_factor_;
 
     Scalar fact = Scalar(1/double(imgs.size()));
 
@@ -1032,7 +1032,7 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
 
     if (live) {
         char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
+        sprintf(title, "z = %f, thresh = %f, frame = %d", z, thresh, frame);
         putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
         //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
         //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
@@ -1178,7 +1178,7 @@ void saRefocus::calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam) {
     X = hinv*X;
 
     double r = 50;
-    r = r*warp_factor_;
+    //r = r*warp_factor_;
     Mat_<double> X2 = Mat_<double>::zeros(4, height*width);
     for (int j=0; j<X.cols; j++) {
         X2(0,j) = X(0,j);
