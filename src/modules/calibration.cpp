@@ -1105,10 +1105,10 @@ void multiCamCalibration::write_calib_results() {
 
         // WRITING DATA TO RESULTS FILE
         
-        file<<time_stamp_hr_str<<endl;
+        file<<time_stamp_hr_str;
         file<<avg_reproj_error_<<endl;
-        file<<num_cams_<<endl;
         file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_<<endl;
+        file<<num_cams_<<endl;
 
         Mat_<double> rvec = Mat_<double>::zeros(1,3);
         Mat_<double> tvec = Mat_<double>::zeros(3,1);
