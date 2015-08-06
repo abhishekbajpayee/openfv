@@ -224,7 +224,6 @@ class multiCamCalibration {
     int results_just_saved_flag;
     int load_results_flag;
     int dummy_mode_;
-    int refractive_;
     int mtiff_; // 0 = folders with tif images, 1 = multipage tif files
 
     // Settings
