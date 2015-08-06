@@ -1106,8 +1106,9 @@ void multiCamCalibration::write_calib_results() {
         // WRITING DATA TO RESULTS FILE
         
         file<<time_stamp_hr_str<<endl;
-        file<<total_reproj_error_<<endl<<avg_reproj_error_<<endl;
+        file<<avg_reproj_error_<<endl;
         file<<num_cams_<<endl;
+        file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_;
 
         Mat_<double> rvec = Mat_<double>::zeros(1,3);
         Mat_<double> tvec = Mat_<double>::zeros(3,1);
@@ -1138,7 +1139,7 @@ void multiCamCalibration::write_calib_results() {
 
         }
         
-        Mat_<double> P_u = Mat_<double>::zeros(3,4);
+        //Mat_<double> P_u = Mat_<double>::zeros(3,4);
         Mat_<double> P = Mat_<double>::zeros(3,4);
         Mat_<double> rmean = Mat_<double>::zeros(3,3);
         matrixMean(rVecs_, rmean);
@@ -1150,25 +1151,25 @@ void multiCamCalibration::write_calib_results() {
     
             for (int j=0; j<3; j++) {
                 for (int k=0; k<3; k++) {
-                    P_u.at<double>(j,k) = rVecs_[i].at<double>(j,k);
+                    //P_u.at<double>(j,k) = rVecs_[i].at<double>(j,k);
                     P.at<double>(j,k) = R.at<double>(j,k);
                 }
-                P_u.at<double>(j,3) = tVecs_[i].at<double>(0,j);
+                //P_u.at<double>(j,3) = tVecs_[i].at<double>(0,j);
                 P.at<double>(j,3) = tVecs_[i].at<double>(0,j);
             }
             
-            P_u = K*P_u;
+            //P_u = K*P_u;
             P = K*P;
-            refocusing_params_.P_mats_u.push_back(P_u.clone());
+            //refocusing_params_.P_mats_u.push_back(P_u.clone());
             refocusing_params_.P_mats.push_back(P.clone());
 
             // Writing camera names and P matrices to file
             file<<cam_names_[i]<<endl;
             for (int j=0; j<3; j++) {
                 for (int k=0; k<3; k++) {
-                    file<<P_u.at<double>(j,k)<<"\t";
+                    //file<<P_u.at<double>(j,k)<<"\t";
                 }
-                file<<P_u.at<double>(j,3)<<endl;
+                //file<<P_u.at<double>(j,3)<<endl;
             }
             for (int j=0; j<3; j++) {
                 for (int k=0; k<3; k++) {
@@ -1179,7 +1180,10 @@ void multiCamCalibration::write_calib_results() {
 
         }
         
-        file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_<<"\t"<<warp_factor_;
+        file<<refractive_<<endl;
+        if(refractive_) {
+            //file<<geom[0]<<"\t"<<geom[1]<<"\t"<<geom[2]<<"\t"<<geom[3]<<"\t"<<geom[4]<<endl;
+        }
 
         file.close();
 
@@ -1228,8 +1232,9 @@ void multiCamCalibration::write_calib_results_ref() {
         // WRITING DATA TO RESULTS FILE
         
         file<<time_stamp_hr_str<<endl;
-        file<<total_reproj_error_<<endl<<avg_reproj_error_<<endl;
+        file<<avg_reproj_error_<<endl;
         file<<num_cams_<<endl;
+        file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_;
 
         Mat_<double> rvec = Mat_<double>::zeros(1,3);
         Mat_<double> tvec = Mat_<double>::zeros(3,1);
@@ -1260,7 +1265,7 @@ void multiCamCalibration::write_calib_results_ref() {
 
         }
         
-        Mat_<double> P_u = Mat_<double>::zeros(3,4);
+        //Mat_<double> P_u = Mat_<double>::zeros(3,4);
         Mat_<double> P = Mat_<double>::zeros(3,4);
         Mat_<double> rmean = Mat_<double>::zeros(3,3);
         matrixMean(rVecs_, rmean);
@@ -1272,25 +1277,25 @@ void multiCamCalibration::write_calib_results_ref() {
     
             for (int j=0; j<3; j++) {
                 for (int k=0; k<3; k++) {
-                    P_u.at<double>(j,k) = rVecs_[i].at<double>(j,k);
+                    //P_u.at<double>(j,k) = rVecs_[i].at<double>(j,k);
                     P.at<double>(j,k) = R.at<double>(j,k);
                 }
-                P_u.at<double>(j,3) = tVecs_[i].at<double>(0,j);
+                //P_u.at<double>(j,3) = tVecs_[i].at<double>(0,j);
                 P.at<double>(j,3) = tVecs_[i].at<double>(0,j);
             }
             
-            P_u = K*P_u;
+            //P_u = K*P_u;
             P = K*P;
-            refocusing_params_.P_mats_u.push_back(P_u.clone());
+            //refocusing_params_.P_mats_u.push_back(P_u.clone());
             refocusing_params_.P_mats.push_back(P.clone());
 
             // Writing camera names and P matrices to file
             file<<cam_names_[i]<<endl;
             for (int j=0; j<3; j++) {
                 for (int k=0; k<3; k++) {
-                    file<<P_u.at<double>(j,k)<<"\t";
+                    //file<<P_u.at<double>(j,k)<<"\t";
                 }
-                file<<P_u.at<double>(j,3)<<endl;
+                //file<<P_u.at<double>(j,3)<<endl;
             }
             for (int j=0; j<3; j++) {
                 for (int k=0; k<3; k++) {
@@ -1301,7 +1306,10 @@ void multiCamCalibration::write_calib_results_ref() {
 
         }
         
-        file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_<<"\t"<<warp_factor_;
+        file<<refractive_<<endl;
+        if(refractive_) {
+            //file<<geom[0]<<"\t"<<geom[1]<<"\t"<<geom[2]<<"\t"<<geom[3]<<"\t"<<geom[4]<<endl;
+        }
 
         file.close();
 
@@ -1364,11 +1372,14 @@ void multiCamCalibration::load_calib_results() {
     string time_stamp;
     getline(file, time_stamp);
 
-    double reproj_error1, reproj_error2;
-    file>>reproj_error1>>reproj_error2;
+    double  reproj_error;
+    file>>reproj_error;
+    file>>refocusing_params_.img_size.width;
+    file>>refocusing_params_.img_size.height;
+    file>>refocusing_params_.scale;
     file>>refocusing_params_.num_cams;
 
-    Mat_<double> P_u = Mat_<double>::zeros(3,4);
+    //Mat_<double> P_u = Mat_<double>::zeros(3,4);
     Mat_<double> P = Mat_<double>::zeros(3,4);
     string cam_name;
     double tmp;
@@ -1381,9 +1392,9 @@ void multiCamCalibration::load_calib_results() {
         
         for (int j=0; j<3; j++) {
             for (int k=0; k<3; k++) {
-                file>>P_u(j,k);
+                //file>>P_u(j,k);
             }
-            file>>P_u(j,3);
+            //file>>P_u(j,3);
         }
         for (int j=0; j<3; j++) {
             for (int k=0; k<3; k++) {
@@ -1391,15 +1402,19 @@ void multiCamCalibration::load_calib_results() {
             }
             file>>P(j,3);
         }
-        refocusing_params_.P_mats_u.push_back(P_u.clone());
+        //refocusing_params_.P_mats_u.push_back(P_u.clone());
         refocusing_params_.P_mats.push_back(P.clone());
 
     }
 
-    file>>refocusing_params_.img_size.width;
-    file>>refocusing_params_.img_size.height;
-    file>>refocusing_params_.scale;
-    file>>refocusing_params_.warp_factor;
+    file>>refractive_;
+    if(refractive_) {
+        file>>geom[0];
+        file>>geom[1];
+        file>>geom[2];
+        file>>geom[3];
+        file>>geom[4];
+    }
 
     file.close();
 
