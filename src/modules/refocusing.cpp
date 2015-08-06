@@ -291,6 +291,9 @@ void saRefocus::read_imgs(string path) {
    
     }
  
+    VLOG(3)<<"Converting image types to 32 bit float...";
+    initializeRefocus();
+
     LOG(INFO)<<"DONE READING IMAGES"<<endl;
 
 }
@@ -399,6 +402,9 @@ void saRefocus::read_imgs_mtiff(string path) {
         VLOG(1)<<"done! "<<count<<" frames read."<<endl;
 
     }
+
+    VLOG(3)<<"Converting image types to 32 bit float...";
+    initializeRefocus();
 
     LOG(INFO)<<"DONE READING IMAGES"<<endl;
 
@@ -690,8 +696,6 @@ void saRefocus::initializeRefocus() {
 //       calls uploadToGPU() which uploads either a given
 //       frame or all frames to GPU depending on frame_
 void saRefocus::initializeGPU() {
-
-    initializeRefocus();
     
     if (!EXPERT_FLAG) {
 
@@ -715,7 +719,7 @@ void saRefocus::initializeGPU() {
 
 void saRefocus::initializeCPU() {
 
-    initializeRefocus();
+    // stuff
 
 }
 
