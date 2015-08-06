@@ -91,7 +91,7 @@ include_directories( ${EIGEN_INC_DIR} )
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
 set (PROF_LIB profiler)
-set (CUSTOM_LIBS saptv cuda_saptv)
+set (CUSTOM_LIBS openfv cuda_openfv)
 set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
 
 # fPIC flags, needed?
@@ -105,6 +105,6 @@ add_subdirectory(lib)
 # Python wrappers
 # ---------------
 
-set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/saptv)
+set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION /usr/local/include/openfv)

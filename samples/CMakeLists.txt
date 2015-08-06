@@ -36,7 +36,7 @@ link_directories( ${OFV_LIB_DIR} )
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
 set (PROF_LIB profiler)
-set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS} saptv cuda_saptv)
+set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS} openfv cuda_openfv)
 
 add_executable (calibrate ${PROJECT_SOURCE_DIR}/calibrate.cpp)
 target_link_libraries (calibrate ${LIBS})

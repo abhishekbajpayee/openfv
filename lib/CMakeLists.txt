@@ -1,4 +1,4 @@
-add_library (saptv 
+add_library (openfv 
 		   SHARED
 		   ${PROJECT_SOURCE_DIR}/src/modules/optimization.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp
@@ -15,10 +15,10 @@ add_library (saptv
 	  	   ${PROJECT_SOURCE_DIR}/src/modules/safeRefocusing.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/piv.cpp)
 
-target_link_libraries(saptv ${LIBS})
+target_link_libraries(openfv ${LIBS})
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35)
-cuda_add_library (cuda_saptv SHARED ${PROJECT_SOURCE_DIR}/src/modules/cuda_lib.cu)
+cuda_add_library (cuda_openfv SHARED ${PROJECT_SOURCE_DIR}/src/modules/cuda_lib.cu)
 
 if(BUILD_PYTHON)
   add_library(rendering SHARED ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
@@ -49,4 +49,4 @@ if(BUILD_PYTHON)
           DESTINATION /usr/local/include/openfv/lib)
 endif()
 
-install(TARGETS cuda_saptv saptv DESTINATION /usr/local/include/openfv/lib)
+install(TARGETS cuda_openfv openfv DESTINATION /usr/local/include/openfv/lib)
