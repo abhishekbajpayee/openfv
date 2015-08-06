@@ -7,7 +7,7 @@ add_library (saptv
                    ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/visualize.cpp
 		   ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp
-                   ${PROJECT_SOURCE_DIR}/src/modules/batchProc.cpp
+                   #${PROJECT_SOURCE_DIR}/src/modules/batchProc.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/parse_settings.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/parse_safe_settings.cpp

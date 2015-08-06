@@ -90,13 +90,13 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult), preprocess_(settings.preprocess) {
+    GPU_FLAG(settings.gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult), preprocess_(settings.preprocess) {
 
-    if (REF_FLAG) {
-        read_calib_data(settings.calib_file_path);
-    } else {
-        read_calib_data_pin(settings.calib_file_path);
-    }
+    read_calib_data(settings.calib_file_path);
+    
+    //} else {
+    //read_calib_data_pin(settings.calib_file_path);
+    //}
 
     if (mult_) {
         mult_exp_ = settings.mult_exp;
@@ -140,6 +140,17 @@ void saRefocus::read_calib_data(string path) {
 
     LOG(INFO)<<"LOADING REFRACTIVE CALIBRATION DATA...";
 
+    string time_stamp;
+    getline(file, time_stamp);
+    VLOG(3)<<time_stamp;
+
+    double avg_reproj_error_;
+    file>>avg_reproj_error_;
+
+    file>>img_size_.width;
+    file>>img_size_.height;
+    file>>scale_;
+
     file>>num_cams_;
 
     string cam_name;
@@ -168,11 +179,13 @@ void saRefocus::read_calib_data(string path) {
 
     }
 
-    file>>geom[0]; file>>geom[4]; file>>geom[1]; file>>geom[2]; file>>geom[3];
-
-    file>>img_size_.width;
-    file>>img_size_.height;
-    file>>scale_;
+    file>>REF_FLAG;
+    if (REF_FLAG) {
+        LOG(INFO)<<"Calibration is refractive";
+        file>>geom[0]; file>>geom[4]; file>>geom[1]; file>>geom[2]; file>>geom[3];
+    } else {
+        LOG(INFO)<<"Calibration is pinhole";
+    }
 
     LOG(INFO)<<"DONE"<<endl;
 
@@ -986,7 +999,8 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
     Scalar fact = Scalar(1/double(imgs.size()));
 
     Mat H, trans;
-    T_from_P(P_mats_[0], H, z, scale_, img_size_);
+    //T_from_P(P_mats_[0], H, z, scale_, img_size_);
+    calc_refocus_H(0, H);
     warpPerspective(imgs[0][frame], cputemp, H, img_size_);
 
     if (mult_) {
@@ -999,8 +1013,8 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
 
     for (int i=1; i<num_cams_; i++) {
         
-        T_from_P(P_mats_[i], H, z, scale_, img_size_);
-        
+        //T_from_P(P_mats_[i], H, z, scale_, img_size_);
+        calc_refocus_H(i, H);
         warpPerspective(imgs[i][frame], cputemp, H, img_size_);
 
         if (mult_) {

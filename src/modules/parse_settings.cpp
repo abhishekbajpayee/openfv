@@ -11,7 +11,6 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
 
     po::options_description desc("Allowed config file options");
     desc.add_options()
-        ("refractive", po::value<int>(), "ON to use refractive refocusing")
         ("use_gpu", po::value<int>(), "ON to use GPU")
         ("mult", po::value<int>(), "ON to use multiplicative method")
         ("mult_exp", po::value<double>(), "Multiplicative method exponent")
@@ -41,7 +40,6 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     po::store(po::parse_config_file<char>(filename.c_str(), desc), vm);
     po::notify(vm);
 
-    settings.ref = vm["refractive"].as<int>();
     settings.gpu = vm["use_gpu"].as<int>();
     settings.hf_method = vm["hf_method"].as<int>();
     settings.mtiff = vm["mtiff"].as<int>();

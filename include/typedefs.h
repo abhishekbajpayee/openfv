@@ -58,7 +58,6 @@ struct refocus_settings {
     int mult; // 1 for Multiplicative
     double mult_exp;
     int gpu; // 1 for GPU
-    int ref; // 1 for refractive
     int hf_method; // 1 to use corner method
 
     string calib_file_path;
