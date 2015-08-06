@@ -184,8 +184,7 @@ class multiCamCalibration {
     double grid_size_phys_;
     double grid_size_pix_;
     double pix_per_phys_;
-    double warp_factor_;
-    
+        
     vector<string> cam_names_;
     vector< vector<Mat> > calib_imgs_;
     vector< vector< vector<Point3f> > > all_pattern_points_;
@@ -212,6 +211,10 @@ class multiCamCalibration {
     double avg_reproj_error_;
     double avg_error_;
 
+    int refractive_;
+    float geom[5];
+    
+    
     // Option flags
     int solveForDistortion; // TODO: NOT IMPLEMENTED
     int squareGrid; // TODO: NOT IMPLEMENTED
