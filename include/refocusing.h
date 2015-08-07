@@ -49,7 +49,7 @@ using namespace cv;
 
 /*!
   Class with functions that allow user to calculate synthetic aperture refocused
-  images using calibration data.
+  images using calibration data. Test text.
 */
 class saRefocus {
 
@@ -61,7 +61,7 @@ class saRefocus {
     saRefocus();
 
  saRefocus(refocusing_data refocusing_params, int frame, int mult, double mult_exp):
-    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z_(0), thresh(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) { }
+    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z_(0), thresh_(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) { }
 
     /*! saRefocus constructor
       \param settings A refocus_settings struct variable containing all relevant
@@ -114,13 +114,15 @@ class saRefocus {
     */
     Mat refocus(double z, double rx, double ry, double rz, double thresh, int frame);
 
-    void GPUrefocus(double thresh, int live, int frame);
-    void GPUrefocus_ref(double thresh, int live, int frame);
-    void GPUrefocus_ref_corner(double thresh, int live, int frame);
+    void GPUrefocus(int live, int frame);
+    void GPUrefocus_ref(int live, int frame);
+    void GPUrefocus_ref_corner(int live, int frame);
 
-    void CPUrefocus(double z, double thresh, int live, int frame);
-    void CPUrefocus_ref(double z, double thresh, int live, int frame);
-    void CPUrefocus_ref_corner(double z, double thresh, int live, int frame);
+    void CPUrefocus(int live, int frame);
+    void CPUrefocus_ref(int live, int frame);
+    void CPUrefocus_ref_corner(int live, int frame);
+
+    void liveViewWindow(Mat img);
 
     void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
     void dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, double q);
@@ -175,10 +177,12 @@ class saRefocus {
     // Scene geometry params
     float geom[5];
 
+    // Refocusing parameters
     double z_, xs_, ys_, zs_, rx_, ry_, rz_, cxs_, cys_, czs_, crx_, cry_, crz_;
-    double thresh;
+    double thresh_;
     int frame_;
     vector<int> frames_;
+    int mult_;
     double mult_exp_;
     double warp_factor_;
     int active_frame_;
@@ -195,7 +199,6 @@ class saRefocus {
     gpu::GpuMat temp, temp2, refocused, xmap, ymap;
     
     int frame_to_upload_;
-    int mult_;
 
     int GPU_FLAG;
     int REF_FLAG;
