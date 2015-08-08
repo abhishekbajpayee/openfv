@@ -259,6 +259,8 @@ void saRefocus::read_imgs(string path) {
 
     vector<string> img_names;
 
+    if(imgs_read_) {
+
     LOG(INFO)<<"READING IMAGES TO REFOCUS...";
     VLOG(1)<<"\n";
 
@@ -287,7 +289,7 @@ void saRefocus::read_imgs(string path) {
             VLOG(1)<<j<<": "<<img_names[j]<<endl;
             image = imread(img_names[j], 0);
             // image = imread(img_names[i]);
-            Mat imgI;
+            // Mat imgI;
             // preprocess(image, imgI);
             //refocusing_imgs_sub.push_back(imgI.clone());
             refocusing_imgs_sub.push_back(image.clone());
@@ -301,6 +303,7 @@ void saRefocus::read_imgs(string path) {
         path_tmp = "";
 
         VLOG(1)<<"done!\n";
+        imgs_read_ = 1;
    
     }
  
@@ -308,6 +311,10 @@ void saRefocus::read_imgs(string path) {
     initializeRefocus();
 
     LOG(INFO)<<"DONE READING IMAGES"<<endl;
+    }
+    else{
+        LOG(INFO)<<"Images already read!"<<endl;
+    }
 
 }
 
@@ -1602,6 +1609,27 @@ double saRefocus::getQ(vector<Mat> &stack, vector<Mat> &refStack) {
 }
 
 // ---Preprocessing related functions--- //
+
+void saRefocus::apply_preprocess(void (*preprocess_func)(Mat, Mat), string path) {
+
+    if(imgs_read_) {
+        vector<Mat> preprocessed_imgs_sub;
+
+        for(i=0, i<imgs.size(), i++) {
+            Mat im;
+            preprocess_func(imgs.[i], im);
+            preprocessed_imgs_sub.push_back(im);
+        }
+        imgs.clear();
+        imgs.swap(preprocessed_imgs_sub);
+       
+        VLOG(1)<<"done!\n";
+        
+    }
+    else{
+        LOG(INFO)<<"Images must be read before preprocessing!"<<endl;
+    }
+}
 
 void saRefocus::preprocess(Mat in, Mat &out) {
 

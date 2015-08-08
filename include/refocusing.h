@@ -173,6 +173,7 @@ class saRefocus {
     Size img_size_;
     double scale_;
     int num_cams_;
+    int imgs_read_;
     
     // Scene geometry params
     float geom[5];
