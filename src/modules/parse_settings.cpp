@@ -1,6 +1,7 @@
 #include "std_include.h"
 
 #include "refocusing.h"
+#include "tools.h"
 
 using namespace cv;
 using namespace std;
@@ -11,25 +12,24 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
 
     po::options_description desc("Allowed config file options");
     desc.add_options()
-        ("use_gpu", po::value<int>(), "ON to use GPU")
-        ("mult", po::value<int>(), "ON to use multiplicative method")
-        ("mult_exp", po::value<double>(), "Multiplicative method exponent")
-        ("hf_method", po::value<int>(), "ON to use HF method")
-        ("mtiff", po::value<int>(), "ON if data is in multipage tiff files")
-        ("all_frames", po::value<int>(), "ON to process all frames in a multipage tiff file")
-        ("start_frame", po::value<int>(), "first frame in range of frames to process")
-        ("end_frame", po::value<int>(), "last frame in range of frames to process")
-        ("preprocess", po::value<int>(), "ON to use preprocessing")
-        ("preprocess_file", po::value<string>(), "preprocess config file to use")
-        ("upload_frame", po::value<int>()->default_value(-1), "frame to upload to GPU (-1 uploads all frames)")
-        ("calib_file", po::value<string>(), "calibration file to use")
-        ("data_path", po::value<string>(), "path where data is located")
-        ("dump_stack", po::value<int>(), "ON to save stack to path")
-        ("zmin", po::value<double>(), "zmin")
-        ("zmax", po::value<double>(), "zmax")
-        ("dz", po::value<double>(), "dz")
-        ("thresh", po::value<double>(), "threshold level")
-        ("save_path", po::value<string>(), "path where results are saved");
+        ("use_gpu", po::value<int>()->default_value(0), "ON to use GPU")
+        ("mult", po::value<int>()->default_value(0), "ON to use multiplicative method")
+        ("mult_exp", po::value<double>()->default_value(.25), "Multiplicative method exponent")
+        ("hf_method", po::value<int>()->default_value(0), "ON to use HF method")
+        ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
+        //("all_frames", po::value<int>()->default_value(1), "ON to process all frames in a multipage tiff file")
+        //("start_frame", po::value<int>()->default_value(0), "first frame in range of frames to process")
+        ("frames", po::value<string>()->default_value(0), "Array of values in format start, end, skip")
+        //("end_frame", po::value<int>(), "last frame in range of frames to process")
+        //("upload_frame", po::value<int>()->default_value(-1), "frame to upload to GPU (-1 uploads all frames)")
+        ("calib_file", po::value<string>()->default_value(""), "calibration file to use")
+        ("data_path", po::value<string>()->default_value(""), "path where data is located")
+        ("dump_stack", po::value<int>()->default_value(0), "ON to save stack to path")
+        ("zmin", po::value<double>()->default_value(0), "zmin")
+        ("zmax", po::value<double>()->default_value(0), "zmax")
+        ("dz", po::value<double>()->default_value(0), "dz")
+        ("thresh", po::value<double>()->default_value(0), "threshold level")
+        ("save_path", po::value<string>()->default_value(""), "path where results are saved");
 
     if (h) {
         cout<<desc;
@@ -47,20 +47,60 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     if (settings.mult)
         settings.mult_exp = vm["mult_exp"].as<double>();
 
-
-    settings.preprocess = vm["preprocess"].as<int>();
-    if (settings.preprocess)
-        settings.preprocess_file = vm["preprocess_file"].as<string>();
-    
-    settings.all_frames = vm["all_frames"].as<int>();
-    if (!settings.all_frames) {
-        settings.start_frame = vm["start_frame"].as<int>();
-        settings.end_frame = vm["end_frame"].as<int>();
+    vector<int> frames;
+    stringstream frames_stream(vm["frames"].as<string>());
+    int i;
+    while (frames_stream >> i) {
+        frames.push_back(i);
+        
+        if(frames_stream.peek() == ',' || frames_stream.peek() == ' ') {
+            frames_stream.ignore();
+        }
     }
-    settings.upload_frame = vm["upload_frame"].as<int>();
+    if (frames.size() == 0) {
+        settings.start_frame = 0;
+        settings.end_frame = -1;
+        settings.skip = 0;
+    }
+    else if (frames.size() == 1) {
+        settings.start_frame = frames.at(0);
+        settings.end_frame = -1;
+        settings.skip = 0;
+    }
+    else if (frames.size() == 2) {
+        settings.start_frame = frames.at(0);
+        settings.end_frame = frames.at(1);
+        settings.skip = 0;
+    }
+    else if (frames.size() >= 3) {
+        settings.start_frame = frames.at(0);
+        settings.end_frame = frames.at(1);
+        settings.skip = frames.at(2);
+    }
+   
+   
+    // settings.all_frames = vm["all_frames"].as<int>();
+    // if (!settings.all_frames) {
+    //     settings.start_frame = vm["start_frame"].as<int>();
+    //     settings.end_frame = vm["end_frame"].as<int>();
+    // }
+    // settings.upload_frame = vm["upload_frame"].as<int>();
 
     settings.calib_file_path = vm["calib_file"].as<string>();
+    if (settings.calib_file_path.empty()) 
+        LOG(FATAL)<<"calib_file is a REQUIRED Variable";
+    
+    else if (!dirExists(settings.calib_file_path))
+        LOG(FATAL)<<"Calibration File Path does not exist!";
+    
+
     settings.images_path = vm["data_path"].as<string>();
+    if(settings.images_path.empty())
+        LOG(FATAL)<<"data_path is a REQUIRED Variable";
+    
+    else if (!dirExists(settings.images_path))
+        LOG(FATAL)<<"Images Files Path does not exist!";
+    
 
     if (vm["dump_stack"].as<int>()) {
         settings.zmin = vm["zmin"].as<double>();
@@ -68,6 +108,9 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         settings.dz = vm["dz"].as<double>();
         settings.thresh = vm["thresh"].as<double>();
         settings.save_path = vm["save_path"].as<string>();
+        
+        if (settings.save_path.empty()) 
+            LOG(FATAL)<<"save_path is a REQUIRED Variable (dump_stack=1)";
+        
     }
-
 }

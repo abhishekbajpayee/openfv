@@ -58,8 +58,7 @@ saRefocus::saRefocus() {
     EXPERT_FLAG=1;
     frame_=-1;
     mult_=0;
-    preprocess_=0;
-
+    
     frames_.push_back(0);
 
     num_cams_ = 0;
@@ -79,7 +78,6 @@ saRefocus::saRefocus(int num_cams, double f) {
     EXPERT_FLAG=1;
     frame_=-1;
     mult_=0;
-    preprocess_=0;
     
     frames_.push_back(0);
 
@@ -90,7 +88,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult), preprocess_(settings.preprocess) {
+    GPU_FLAG(settings.gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult) {
 
     read_calib_data(settings.calib_file_path);
     
@@ -102,21 +100,14 @@ saRefocus::saRefocus(refocus_settings settings):
         mult_exp_ = settings.mult_exp;
     }
 
-    if (preprocess_) {
-        parse_preprocess_settings(settings.preprocess_file);
-    }
-
     if (MTIFF_FLAG) {
         vector<int> frames;
-        if (settings.all_frames) {
-            ALL_FRAME_FLAG = 1;
-        } else {
-            ALL_FRAME_FLAG = 0;
-            int begin = settings.start_frame;
-            int end = settings.end_frame;
-            for (int i=begin; i<=end; i++)
-                frames_.push_back(i);
-        }
+        
+        int begin = settings.start_frame;
+        int end = settings.end_frame;
+        for (int i=begin; i<=end; i++)
+            frames_.push_back(i);
+       
         read_imgs_mtiff(settings.images_path);
     } else {
         read_imgs(settings.images_path);
@@ -1466,11 +1457,18 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
 
 }
 
-void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type) {
-
+void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type, int frame_skip) {
+   
+    int skip;
+    if(frame_skip<1) {
+        skip = 0;
+    }
+    else {
+        skip = frame_skip;
+    }
     LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
     
-    for (int f=0; f<frames_.size(); f++) {
+    for (int f=0; f<frames_.size(); f+=skip+1) {
         
         stringstream fn;
         fn<<path<<frames_[f];
@@ -1613,15 +1611,20 @@ double saRefocus::getQ(vector<Mat> &stack, vector<Mat> &refStack) {
 void saRefocus::apply_preprocess(void (*preprocess_func)(Mat, Mat), string path) {
 
     if(imgs_read_) {
-        vector<Mat> preprocessed_imgs_sub;
-
-        for(i=0, i<imgs.size(), i++) {
-            Mat im;
-            preprocess_func(imgs.[i], im);
-            preprocessed_imgs_sub.push_back(im);
+        
+        vector<vector<Mat> > imgs_sub;
+        
+        for(int i=0; i<imgs.size(); i++) {
+            vector<Mat> preprocessed_imgs_sub;
+            for(int j=0; j<imgs[i].size(); j++) {
+                Mat im;
+                preprocess_func(imgs[i][j], im);
+                preprocessed_imgs_sub.push_back(im);
+            }
+            imgs_sub.push_back(preprocessed_imgs_sub);
         }
         imgs.clear();
-        imgs.swap(preprocessed_imgs_sub);
+        imgs.swap(imgs_sub);
        
         VLOG(1)<<"done!\n";
         
@@ -1629,72 +1632,6 @@ void saRefocus::apply_preprocess(void (*preprocess_func)(Mat, Mat), string path)
     else{
         LOG(INFO)<<"Images must be read before preprocessing!"<<endl;
     }
-}
-
-void saRefocus::preprocess(Mat in, Mat &out) {
-
-    if (preprocess_) {
-
-        Mat im = in.clone();
-        int tc = 0; int gbc = 0; int anc = 0; int mfc = 0; int sMeanc = 0; int smtzc = 0;
-
-        for (int i=0; i<pp_ops.size(); i++) {
-            
-            Mat im2;
-
-            switch(pp_ops[i]) {
-
-            case 1:
-                threshold(im, im2, thresh_vals[tc], 0, THRESH_TOZERO);
-                VLOG(1)<<"Applied threshold at "<<thresh_vals[tc]<<endl;
-                tc++;
-                break;
-
-            case 2:
-                GaussianBlur(im, im2, Size(gbkernel[gbc], gbkernel[gbc]), gbsigma[gbc]);
-                VLOG(1)<<"Applied gaussianBlur with kernel size "<<gbkernel[gbc]<<" and sigma "<<gbsigma[gbc]<<endl;
-                gbc++;
-                break;
-
-            case 3:
-                adaptiveNorm(im, im2, anwx[anc], anwy[anc]);
-                VLOG(1)<<"Applied adaptiveNorm using window sizes "<<anwx[anc]<<" and "<<anwy[anc]<<endl;
-                anc++;
-                break;
-
-            case 4:
-                medianBlur(im, im2, mfkernel[mfc]);
-                VLOG(1)<<"Applied medianFilter using kernel size "<<mfkernel[mfc]<<endl;
-                mfc++;
-                break;
-
-            case 5:
-                boxFilter(im, im2, -1, Size(sMeankernel[sMeanc], sMeankernel[sMeanc]));
-                VLOG(1)<<"Applied slidingMean using kernel size "<<sMeankernel[sMeanc]<<endl;
-                sMeanc++;
-                break;
-                
-            case 6:
-                slidingMinToZero(im, im2, smtzwx[smtzc], smtzwy[smtzc]);
-                VLOG(1)<<"Applied slidingMinToZero using window sizes "<<smtzwx[smtzc]<<" and "<<smtzwy[smtzc]<<endl;
-                smtzc++;
-                break;
-
-            }
-
-            //qimshow(im2);
-            im = im2.clone();
-
-        }
-
-        out = im.clone();
-
-    } else {
-
-        out = in.clone();
-
-    }
-
 }
 
 void saRefocus::adaptiveNorm(Mat in, Mat &out, int xf, int yf) {
@@ -1758,78 +1695,6 @@ void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
 
         }
     }
-
-}
-
-void saRefocus::parse_preprocess_settings(string path) {
-
-    ifstream file;
-    file.open(path.c_str());
-
-    string op;
-    while (getline(file, op)) {
-
-        // threshold = 1
-        // gaussianBlur = 2
-        // adaptiveNorm = 3
-        // medianFilter = 4
-        // slidingMean = 5
-        // slidingMinToZero = 6
-
-        if (op.compare("threshold")==0) {
-
-            pp_ops.push_back(1);
-            int v1;
-            file>>v1;
-            thresh_vals.push_back(v1);
-
-        } else if (op.compare("gaussianBlur")==0) {
-
-            pp_ops.push_back(2);
-            int v1;   float v2;
-            file>>v1; file>>v2;
-            gbkernel.push_back(v1);
-            gbsigma.push_back(v2);
-
-        } else if (op.compare("adaptiveNorm")==0) {
-
-            pp_ops.push_back(3);
-            int v1;   int v2;
-            file>>v1; file>>v2;
-            anwx.push_back(v1);
-            anwy.push_back(v2);
-
-        } else if (op.compare("medianFilter")==0) {
-
-            pp_ops.push_back(4);
-            int v1;
-            file>>v1;
-            mfkernel.push_back(v1);
-
-        } else if (op.compare("slidingMean")==0) {
-
-            pp_ops.push_back(5);
-            int v1;
-            file>>v1;
-            sMeankernel.push_back(v1);
-
-        } else if (op.compare("slidingMinToZero")==0) {
-
-            pp_ops.push_back(6);
-            int v1;   int v2;
-            file>>v1; file>>v2;
-            smtzwx.push_back(v1);
-            smtzwy.push_back(v2);
-
-        } else {
-
-            LOG(FATAL)<<"Invalid preprocess operation "<<op<<endl;
-
-        }
-
-        getline(file, op);
-
-    } 
 
 }
 

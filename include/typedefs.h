@@ -66,11 +66,10 @@ struct refocus_settings {
     int mtiff; // 1 for using multipage tiffs
     int start_frame;
     int end_frame;
-    int upload_frame;
-    int all_frames;
+    int skip;
     
-    int preprocess;
-    string preprocess_file;
+    
+    
 
     double zmin, zmax, dz, thresh;
     string save_path;

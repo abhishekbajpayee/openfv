@@ -124,7 +124,7 @@ class saRefocus {
 
     void liveViewWindow(Mat img);
 
-    void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
+    void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type, int frame_skip);
     void dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, double q);
     void calculateQ(double zmin, double zmax, double dz, double thresh, int frame, string refPath);
     void return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack);
@@ -150,15 +150,13 @@ class saRefocus {
     void uploadToGPU();
     void uploadToGPU_ref();
 
-    void preprocess(Mat in, Mat &out);
-    void parse_preprocess_settings(string file);
-
     void calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam);
     void calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam);
     void calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H);
     void calc_refocus_H(int cam, Mat &H);
     void img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out);
 
+    void apply_preprocess(void (*preprocess_func)(Mat, Mat), string path);
     void adaptiveNorm(Mat in, Mat &out, int xf, int yf);
     void slidingMinToZero(Mat in, Mat &out, int xf, int yf);
 
@@ -209,18 +207,6 @@ class saRefocus {
     int INVERT_Y_FLAG;
     int EXPERT_FLAG;
     
-    int preprocess_;
-    vector<int> pp_ops;
-    vector<int> thresh_vals;
-    vector<int> gbkernel;
-    vector<float> gbsigma;
-    vector<int> anwx;
-    vector<int> anwy;
-    vector<int> mfkernel;
-    vector<int> sMeankernel;
-    vector<int> smtzwx;
-    vector<int> smtzwy;
-
 };
 
 #endif
