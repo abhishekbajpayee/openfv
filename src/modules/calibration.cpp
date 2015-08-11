@@ -41,7 +41,7 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
 
     // Standard directories and filenames
     // TODO: this use of file needs to go
-    ba_file_ = string("../temp/ba_data.txt");
+    ba_file_ = string("tmp_ba_data.txt");
     result_dir_ = string("calibration_results");
 
     char cwd[1024];
@@ -676,15 +676,21 @@ void multiCamCalibration::initialize_cams() {
 void multiCamCalibration::write_BA_data() {
 
     LOG(INFO)<<"\nWRITING POINT DATA TO FILE...";
+    
     ofstream file;
     file.open(ba_file_.c_str());
+    if (!file)
+        LOG(FATAL)<<"Unable to open file "<<ba_file_<<" to write data!";
 
     int imgs_per_cam = all_corner_points_[0].size();
     int points_per_img = all_corner_points_[0][0].size();
     int num_points = imgs_per_cam*points_per_img;
     int observations = num_points*num_cams_;
 
+    // Calibration set configuration parameters
     file<<num_cams_<<"\t"<<imgs_per_cam<<"\t"<<num_points<<"\t"<<observations<<"\n";
+
+    // Observation points i.e. detected corners
     for (int j=0; j<imgs_per_cam; j++) {
         for (int k=0; k<points_per_img; k++) {
             for (int i=0; i<num_cams_; i++) {
@@ -692,26 +698,26 @@ void multiCamCalibration::write_BA_data() {
             }
         }
     }
+
     double param = 0;
+    
+    // R, T, K and distortion coeffs for each camera
     for (int i=0; i<num_cams_; i++) {
         for (int j=0; j<3; j++) {
             file<<rvecs_[i][0].at<double>(0,j)<<"\t";
-        }
-        
+        }   
         for (int j=0; j<3; j++) {
             file<<tvecs_[i][0].at<double>(0,j)<<"\t";
         }
-        
         file<<cameraMats_[i].at<double>(0,0)<<"\t";
-        
         //for (int j=0; j<2; j++) file<<dist_coeffs[i].at<double>(0,j)<<"\n";
         file<<0<<"\t"<<0<<endl;
     }
     
-    double width = 9*20;
-    double height = 6*20;
+    double width = 6*5;
+    double height = 5*5;
     // add back projected point guesses here
-    double z = 200;
+    double z = 0;
     int op1 = (origin_image_id_)*grid_size_.width*grid_size_.height;
     int op2 = op1+grid_size_.width-1;
     int op3 = op1+(grid_size_.width*(grid_size_.height-1));
@@ -719,6 +725,7 @@ void multiCamCalibration::write_BA_data() {
     const_points_.push_back(op2);
     const_points_.push_back(op3);
     
+    // Initial values for grid points in 3D
     for (int i=0; i<num_points; i++) {
         if (i==op1) {
             file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
@@ -739,10 +746,17 @@ void multiCamCalibration::write_BA_data() {
             // file<<0<<"\t"<<endl;
         }
     }
+    
+
+    /*/ Initializing values for grid points in 3D as all zero
+    for (int i=0; i<num_points; i++) {
+        file<<0<<"\t"<<0<<"\t"<<0<<endl;
+    }
+    */
 
     /*
-    for (int k=0; k<9; k++) {
-    for (int i=0; i<6; i++) {
+    for (int k=0; k<6; k++) {
+    for (int i=0; i<5; i++) {
         for (int j=0; j<5; j++) {
             file<<(5*i)-25<<endl<<(5*j)-20<<endl<<(5*k)-20<<endl;
             //file2<<(5*i)-25<<endl<<(5*j)-20<<endl<<(5*k)-20<<endl;
@@ -753,15 +767,13 @@ void multiCamCalibration::write_BA_data() {
 
     param = 1;
     for (int i=0; i<imgs_per_cam; i++) {
-        if (i==0) {
+        if (i==origin_image_id_) {
             file<<0<<"\t"<<0<<"\t"<<1<<"\t"<<0<<endl;
         } else {
-            
-        for (int j=0; j<4; j++) {
-            file<<param<<"\t";
-        }
-        file<<endl;
-
+            for (int j=0; j<4; j++) {
+                file<<param<<"\t";
+            }
+            file<<endl;
         }
     }
 
@@ -852,10 +864,8 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
     LOG(INFO)<<"\nRUNNING PINHOLE BUNDLE ADJUSTMENT TO CALIBRATE CAMERAS...\n";
     //google::InitGoogleLogging(argv);
     
-    if (!ba_problem.LoadFile(ba_file.c_str())) {
-        std::cerr << "ERROR: unable to open file " << ba_file << "\n";
-        return 1;
-    }
+    if (!ba_problem.LoadFile(ba_file.c_str()))
+        LOG(FATAL)<<"Unable to open file "<<ba_file<<" to read data!";
 
     ba_problem.cx = img_size.width*0.5;
     ba_problem.cy = img_size.height*0.5;
@@ -911,18 +921,24 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
     
     // Fixing a plane to xy plane
     
-    int i=0;
+    int i=origin_image_id_;
+
+    // ceres::CostFunction* cost_function4 = 
+    //     new ceres::NumericDiffCostFunction<zError, ceres::CENTRAL, 1, 3, 3, 3, 3>
+    //     (new zError());
+    // problem.AddResidualBlock(cost_function4,
+    //                          NULL,
+    //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 0,
+    //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx-1),
+    //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)),
+    //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*gridy-1)); 
 
     ceres::CostFunction* cost_function4 = 
-        new ceres::NumericDiffCostFunction<zError, ceres::CENTRAL, 1, 3, 3, 3, 3>
-        (new zError());
-    
+        new ceres::NumericDiffCostFunction<zError2, ceres::CENTRAL, 1, 4>
+        (new zError2());
     problem.AddResidualBlock(cost_function4,
                              NULL,
-                             ba_problem.mutable_points() + 3*gridx*gridy*i + 0,
-                             ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx-1),
-                             ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)),
-                             ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*gridy-1)); 
+                             ba_problem.mutable_planes() + 4*i); 
 
     // Make Ceres automatically detect the bundle structure. Note that the
     // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
@@ -1106,7 +1122,7 @@ void multiCamCalibration::write_calib_results() {
         // WRITING DATA TO RESULTS FILE
         
         file<<time_stamp_hr_str;
-        file<<avg_reproj_error_<<endl;
+        file<<avg_error_<<endl;
         file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_<<endl;
         file<<num_cams_<<endl;
 
@@ -1145,15 +1161,15 @@ void multiCamCalibration::write_calib_results() {
         
         // Mat_<double> P_u = Mat_<double>::zeros(3,4);
         Mat_<double> P = Mat_<double>::zeros(3,4);
-        // Mat_<double> rmean = Mat_<double>::zeros(3,3);
-        // matrixMean(rVecs_, rmean);
-        // Mat rmean_t;
-        // transpose(rmean, rmean_t);
+        Mat_<double> rmean = Mat_<double>::zeros(3,3);
+        matrixMean(rVecs_, rmean);
+        Mat rmean_t;
+        transpose(rmean, rmean_t);
 
         for (int i=0; i<num_cams_; i++) {
 
-            // R = rVecs_[i]*rmean_t;
-            R = rVecs_[i];
+            R = rVecs_[i]*rmean_t;
+            // R = rVecs_[i];
 
             for (int j=0; j<3; j++) {
                 for (int k=0; k<3; k++) {
