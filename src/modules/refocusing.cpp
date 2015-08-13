@@ -295,7 +295,7 @@ void saRefocus::read_imgs(string path) {
                 skip = skip_frame_;
                 if (end>img_names.size()) {
                     LOG(WARNING)<<"End frame is greater than number of frames!" <<endl;   
-                    end = imgs_names.size();
+                    end = img_names.size();
                 }
             }
                 
@@ -446,7 +446,7 @@ void saRefocus::read_imgs_mtiff(string path) {
 
 void saRefocus::GPUliveView() {
 
-    initializeGPU();
+    //initializeGPU();
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
@@ -574,7 +574,7 @@ void saRefocus::GPUliveView() {
 
 void saRefocus::CPUliveView() {
 
-    initializeCPU();
+    //initializeCPU();
 
     if (CORNER_FLAG) {
         LOG(INFO)<<"Using corner based homography fit method..."<<endl;
