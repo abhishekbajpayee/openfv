@@ -56,7 +56,6 @@ saRefocus::saRefocus() {
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
-    frame_=-1;
     mult_=0;
     
     frames_.push_back(0);
@@ -76,7 +75,6 @@ saRefocus::saRefocus(int num_cams, double f) {
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
-    frame_=-1;
     mult_=0;
     
     frames_.push_back(0);
@@ -88,8 +86,9 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult) {
-
+    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip) {
+    
+    imgs_read_ = 0;
     read_calib_data(settings.calib_file_path);
     
     //} else {
@@ -100,17 +99,22 @@ saRefocus::saRefocus(refocus_settings settings):
         mult_exp_ = settings.mult_exp;
     }
 
+   
+           
     if (MTIFF_FLAG) {
-        vector<int> frames;
-        
-        int begin = settings.start_frame;
-        int end = settings.end_frame;
-        for (int i=begin; i<=end; i++)
+
+        if(!ALL_FRAME_FLAG) {
+
+        for (int i=start_frame_; i<=end_frame_; i+=skip_frame_+1)
             frames_.push_back(i);
-       
+        }
         read_imgs_mtiff(settings.images_path);
     } else {
         read_imgs(settings.images_path);
+    }
+
+    if (GPU_FLAG) {
+        initializeGPU(); 
     }
 
     z_ = 0; 
@@ -250,58 +254,80 @@ void saRefocus::read_imgs(string path) {
 
     vector<string> img_names;
 
-    if(imgs_read_) {
+    if(!imgs_read_) {
 
-    LOG(INFO)<<"READING IMAGES TO REFOCUS...";
-    VLOG(1)<<"\n";
+        LOG(INFO)<<"READING IMAGES TO REFOCUS...";
+        VLOG(1)<<"\n";
 
-    for (int i=0; i<num_cams_; i++) {
+        for (int i=0; i<num_cams_; i++) {
 
-        VLOG(1)<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
+            VLOG(1)<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
 
-        string path_tmp;
-        vector<Mat> refocusing_imgs_sub;
+            string path_tmp;
+            vector<Mat> refocusing_imgs_sub;
 
-        path_tmp = path+cam_names_[i]+"/"+img_prefix;
+            path_tmp = path+cam_names_[i]+"/"+img_prefix;
         
-        dir = opendir(path_tmp.c_str());
-        while(ent = readdir(dir)) {
-            temp_name = ent->d_name;
-            if (temp_name.compare(dir1)) {
-                if (temp_name.compare(dir2)) {
-                    string path_img = path_tmp+temp_name;
-                    img_names.push_back(path_img);
+            dir = opendir(path_tmp.c_str());
+            while(ent = readdir(dir)) {
+                temp_name = ent->d_name;
+                if (temp_name.compare(dir1)) {
+                    if (temp_name.compare(dir2)) {
+                        string path_img = path_tmp+temp_name;
+                        img_names.push_back(path_img);
+                    }
                 }
             }
-        }
 
-        sort(img_names.begin(), img_names.end());
-        for (int j=0; j<img_names.size(); j++) {
-            VLOG(1)<<j<<": "<<img_names[j]<<endl;
-            image = imread(img_names[j], 0);
-            // image = imread(img_names[i]);
-            // Mat imgI;
-            // preprocess(image, imgI);
-            //refocusing_imgs_sub.push_back(imgI.clone());
-            refocusing_imgs_sub.push_back(image.clone());
-            if (i==0) {
-                frames_.push_back(j);
+            sort(img_names.begin(), img_names.end());
+
+            int begin;
+            int end;
+            int skip;
+
+            if(ALL_FRAME_FLAG) {
+                begin = 0;
+                end = img_names.size();
+                skip = 0;
+            } else {
+                begin = start_frame_;
+                end = end_frame_+1;
+                skip = skip_frame_;
+                if (end>img_names.size()) {
+                    LOG(WARNING)<<"End frame is greater than number of frames!" <<endl;   
+                    end = imgs_names.size();
+                }
             }
-        }
-        img_names.clear();
+                
+           
 
-        imgs.push_back(refocusing_imgs_sub);
-        path_tmp = "";
+            for (int j=begin; j<end; j+=skip+1) {
+                VLOG(1)<<j<<": "<<img_names.at(j)<<endl;
+                image = imread(img_names.at(j), 0);
+                // image = imread(img_names[i]);
+                // Mat imgI;
+                // preprocess(image, imgI);
+                //refocusing_imgs_sub.push_back(imgI.clone());
+                refocusing_imgs_sub.push_back(image.clone());
+                if (i==0) {
+                    frames_.push_back(j);
+                }
+                
+            }
+            img_names.clear();
 
-        VLOG(1)<<"done!\n";
-        imgs_read_ = 1;
+            imgs.push_back(refocusing_imgs_sub);
+            path_tmp = "";
+
+            VLOG(1)<<"done!\n";
+            imgs_read_ = 1;
    
-    }
+        }
  
-    VLOG(3)<<"Converting image types to 32 bit float...";
-    initializeRefocus();
+        VLOG(3)<<"Converting image types to 32 bit float...";
+        initializeRefocus();
 
-    LOG(INFO)<<"DONE READING IMAGES"<<endl;
+        LOG(INFO)<<"DONE READING IMAGES"<<endl;
     }
     else{
         LOG(INFO)<<"Images already read!"<<endl;
@@ -345,7 +371,7 @@ void saRefocus::read_imgs_mtiff(string path) {
         TIFF* tiff = TIFFOpen(img_names[i].c_str(), "r");
         tiffs.push_back(tiff);
     }
-
+   
     VLOG(1)<<"Counting number of frames...";
     int dircount = 0;
     if (tiffs[0]) {
@@ -367,10 +393,9 @@ void saRefocus::read_imgs_mtiff(string path) {
         VLOG(1)<<"Camera "<<n+1<<"...";
 
         vector<Mat> refocusing_imgs_sub;
-
-        int frame=0; // TODO: check if this is being used at all
+      
         int count=0;
-        int skip=1400;
+      
         
         for (int f=0; f<frames_.size(); f++) {
 
@@ -379,7 +404,7 @@ void saRefocus::read_imgs_mtiff(string path) {
             size_t npixels;
             uint32* raster;
             
-            TIFFSetDirectory(tiffs[n], frames_[f]);
+            TIFFSetDirectory(tiffs[n], frames_.at(f));
 
             TIFFGetField(tiffs[n], TIFFTAG_IMAGEWIDTH, &c);
             TIFFGetField(tiffs[n], TIFFTAG_IMAGELENGTH, &r);
@@ -405,8 +430,6 @@ void saRefocus::read_imgs_mtiff(string path) {
             refocusing_imgs_sub.push_back(img.clone());
             count++;
             
-            frame += skip;
-
         }
 
         imgs.push_back(refocusing_imgs_sub);
@@ -833,29 +856,16 @@ void saRefocus::uploadToGPU() {
         LOG(INFO)<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
     }
 
-    if (frame_>=0) {
-
-        VLOG(1)<<"Uploading frame "<<frame_<<" to GPU..."<<endl;
-        for (int i=0; i<num_cams_; i++) {
-            temp.upload(imgs[i][frame_]);
+   
+          
+    VLOG(1)<<"Uploading all frames to GPU..."<<endl;
+    for (int i=0; i<imgs[0].size(); i++) {
+        for (int j=0; j<num_cams_; j++) {
+            temp.upload(imgs[j][i]);
             array.push_back(temp.clone());
         }
         array_all.push_back(array);
-
-    } else if (frame_==-1) {
-        
-        VLOG(1)<<"Uploading all frames to GPU..."<<endl;
-        for (int i=0; i<imgs[0].size(); i++) {
-            for (int j=0; j<num_cams_; j++) {
-                temp.upload(imgs[j][i]);
-                array.push_back(temp.clone());
-            }
-            array_all.push_back(array);
-            array.clear();
-        }
-        
-    } else {
-        LOG(FATAL)<<"Invalid frame value to visualize!"<<endl;
+        array.clear();
     }
 
     if (!EXPERT_FLAG) {
@@ -1457,29 +1467,22 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
 
 }
 
-void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type, int frame_skip) {
+void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type) {
    
-    int skip;
-    if(frame_skip<1) {
-        skip = 0;
-    }
-    else {
-        skip = frame_skip;
-    }
     LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
     
-    for (int f=0; f<frames_.size(); f+=skip+1) {
+    for (int f=0; f<frames_.size(); f++) {
         
         stringstream fn;
-        fn<<path<<frames_[f];
+        fn<<path<<frames_.at(f);
         mkdir(fn.str().c_str(), S_IRWXU);
 
-        LOG(INFO)<<"Saving frame "<<f<<"...";
+        LOG(INFO)<<"Saving frame "<<frames_.at(f)<<"...";
 
         vector<Mat> stack;
         for (double z=zmin; z<=zmax; z+=dz) {
 
-            Mat img = refocus(z, 0, 0, 0, thresh, f);
+            Mat img = refocus(z, 0, 0, 0, thresh, frames_.at(f));
             //Mat result = refocused_host_.clone();
             stack.push_back(img);
 

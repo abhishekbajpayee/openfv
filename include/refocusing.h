@@ -61,7 +61,7 @@ class saRefocus {
     saRefocus();
 
  saRefocus(refocusing_data refocusing_params, int frame, int mult, double mult_exp):
-    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z_(0), thresh_(0), frame_(frame), mult_(mult), mult_exp_(mult_exp) { }
+    P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z_(0), thresh_(0), mult_(mult), mult_exp_(mult_exp) { }
 
     /*! saRefocus constructor
       \param settings A refocus_settings struct variable containing all relevant
@@ -124,7 +124,7 @@ class saRefocus {
 
     void liveViewWindow(Mat img);
 
-    void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type, int frame_skip);
+    void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
     void dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, double q);
     void calculateQ(double zmin, double zmax, double dz, double thresh, int frame, string refPath);
     void return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack);
@@ -179,12 +179,14 @@ class saRefocus {
     // Refocusing parameters
     double z_, xs_, ys_, zs_, rx_, ry_, rz_, cxs_, cys_, czs_, crx_, cry_, crz_;
     double thresh_;
-    int frame_;
     vector<int> frames_;
     int mult_;
     double mult_exp_;
     double warp_factor_;
     int active_frame_;
+    int start_frame_;
+    int end_frame_;
+    int skip_frame_;
 
     Mat refocused_host_;
 

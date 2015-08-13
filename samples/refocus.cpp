@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     saRefocus refocus(settings);
 
     if (FLAGS_live) {
-        if (settings.gpu) {
+        if (settings.use_gpu) {
             refocus.GPUliveView();
         } else {
             refocus.CPUliveView();
