@@ -46,7 +46,7 @@ if(BUILD_PYTHON)
 # target_link_libraries(localization ${LIBS})
  
   install(TARGETS rendering refocusing tools tracking calibration
-          DESTINATION /usr/local/include/openfv/lib)
+          DESTINATION /usr/local/lib)
 endif()
 
-install(TARGETS cuda_openfv openfv DESTINATION /usr/local/include/openfv/lib)
+install(TARGETS cuda_openfv openfv DESTINATION /usr/local/lib)
