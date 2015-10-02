@@ -41,14 +41,14 @@ set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS}
 add_executable (calibrate ${PROJECT_SOURCE_DIR}/calibrate.cpp)
 target_link_libraries (calibrate ${LIBS})
 
-add_executable (track ${PROJECT_SOURCE_DIR}/track.cpp)
-target_link_libraries (track ${LIBS})
+# add_executable (track ${PROJECT_SOURCE_DIR}/track.cpp)
+# target_link_libraries (track ${LIBS})
 
 add_executable (refocus ${PROJECT_SOURCE_DIR}/refocus.cpp)
 target_link_libraries (refocus ${LIBS})
 
-add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/sa-ptv.cpp)
-target_link_libraries (sa-ptv ${LIBS})
+# add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/sa-ptv.cpp)
+# target_link_libraries (sa-ptv ${LIBS})
 
-add_executable (jobFind ${PROJECT_SOURCE_DIR}/jobFind.cpp)
-target_link_libraries (jobFind ${LIBS})
+# add_executable (jobFind ${PROJECT_SOURCE_DIR}/jobFind.cpp)
+# target_link_libraries (jobFind ${LIBS})
