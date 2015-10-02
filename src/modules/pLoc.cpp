@@ -399,11 +399,7 @@ void pLocalize::write_all_particles(string path) {
 
     stringstream s;
     s<<path<<"particles/";
-    if (s2_.all_frames) {
-        s<<"f_all_";
-    } else {
-        s<<"f"<<s2_.start_frame<<"to"<<s2_.end_frame<<"_";
-    }
+    s<<"f"<<s2_.start_frame<<"to"<<s2_.end_frame<<"_";
     s<<"w"<<window_<<"_";
     s<<"t"<<thresh_<<"_";
     s<<"zm"<<zmethod_<<"_";

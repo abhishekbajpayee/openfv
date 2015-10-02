@@ -29,73 +29,87 @@ project (sa-ptv)
 set (PROJECT_VERSION_MAJOR 1)
 set (PROJECT_VERSION_MINOR 0)
 
-option(BUILD_SAMPLES "BUILD_SAMPLES" OFF)
+# Build Directories
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
+set(CUDA_INC_DIR "/usr/local/cuda/include" CACHE PATH "Path to CUDA Directory")
+set(PYTHON_INC_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
+set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
 
-set(PROJECT_INCLUDE_DIR	 "${PROJECT_SOURCE_DIR}/include")
-
-# find required packages
-find_package(OpenCV REQUIRED)
-find_package(CUDA REQUIRED)
-if(NOT OpenCV_FOUND)
-  message("OPENCV NOT FOUND")
-endif()
+set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
 
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 OLD)
 endif()
 
-# Required Boost Libraries
+# Find required packages
+
+# CUDA
+find_package(CUDA REQUIRED)
+if(NOT CUDA_FOUND)
+  message("CUDA not found!")
+endif()
+
+# OpenCV
+find_package(OpenCV REQUIRED)
+if(NOT OpenCV_FOUND)
+  message("OpenCV not found!")
+endif()
+
+# Boost Libraries
 find_package(Boost)
 if(Boost_FOUND)
   find_package ( Boost COMPONENTS program_options filesystem system serialization REQUIRED )
   set(Boost_GENERAL ${Boost_LIBRARIES})
   find_package ( Boost COMPONENTS python REQUIRED )
   set(Boost_PY ${Boost_LIBRARIES})
-  # for some other day
-  # find_package ( Boost COMPONENTS serialization REQUIRED )
-  # set(Boost_SR ${Boost_LIBRARIES})
 elseif(NOT Boost_FOUND)
   message("Boost not found!")
-endif() 
-
-# include directories
-include_directories( ${Boost_INCLUDE_DIR} )
-include_directories( ${PROJECT_INCLUDE_DIR} )
-include_directories( "/usr/include/python2.7" )
-include_directories( "/usr/include/opencv" )
-include_directories( "/usr/include/opencv2" )
-include_directories( "/usr/include/eigen3" )
-include_directories( "/usr/local/cuda/include" )
-include_directories( "/opt/Qt/5.4/gcc_64/include" )
-
-find_package (OpenMP)
-if (OPENMP_FOUND)
-  set (CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
-  set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
 endif()
+
+# Include directories
+include_directories( ${PROJECT_INCLUDE_DIR} )
+include_directories( ${Boost_INCLUDE_DIR} )
+include_directories( ${PYTHON_INC_DIR} )
+include_directories( ${CUDA_INC_DIR} )
+include_directories( ${EIGEN_INC_DIR} )
+
+# This might be useful in the future for when
+# someone has OpenCV in a random location
+# include_directories( ${OCV_INC_DIR} )
+
+# Don't think these are needed because OpenFV
+# doesn't link to Qt
+# include_directories( "/opt/Qt/5.4/gcc_64/include" )
+
+# Omitting for now because nothing in OpenFV as
+# of now uses OpenMP
+# find_package (OpenMP)
+# if (OPENMP_FOUND)
+#   set (CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
+#   set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
+# endif()
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS python2.7 tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
 set (PROF_LIB profiler)
-set (CUSTOM_LIBS saptv cuda_saptv)
+set (CUSTOM_LIBS openfv cuda_openfv)
 set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
 
 # fPIC flags, needed?
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -shared")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -shared")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-# subdirectories
-add_subdirectory (src)
-if(BUILD_SAMPLES)
-  add_subdirectory(samples)
-endif()
-if(BUILD_PYTHON)
-  add_subdirectory(lib)
-endif()
+# Subdirectories
+add_subdirectory(src)
 
 # ---------------
 # Python wrappers
 # ---------------
 
-set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/saptv)
+set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
+
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION /usr/local/include/openfv)

@@ -60,7 +60,6 @@ void Scene::create(double sx, double sy, double sz, int gpu) {
 
     sx_ = sx; sy_ = sy; sz_ = sz;
     
-    
     REF_FLAG = 0;
     geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0);
 
@@ -385,14 +384,14 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
 
 // Get slice from rendered scene or get equivalent of refocused image
 // at given depth
-Mat Scene::getSlice(int zv) {
+Mat Scene::getSlice(int z_ind) {
     
     Mat img;
 
     if (GPU_FLAG) {
-        img = volumeGPU_[zv];
+        img = volumeGPU_[z_ind];
     } else {
-        img = volumeCPU_[zv];
+        img = volumeCPU_[z_ind];
     }
 
     return(img);

@@ -1,17 +1,4 @@
-#include "std_include.h"
-
-#include "calibration.h"
-#include "refocusing.h"
-#include "rendering.h"
-#include "pLoc.h"
-#include "tracking.h"
-#include "tools.h"
-#include "parse_settings.h"
-#include "optimization.h"
-#include "typedefs.h"
-#include "batchProc.h"
-#include "visualize.h"
-#include "piv.h"
+#include "openfv.h"
 
 #include "cuda_lib.h"
 #include "cuda_profiler_api.h"
