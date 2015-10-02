@@ -29,6 +29,11 @@ project (sa-ptv)
 set (PROJECT_VERSION_MAJOR 1)
 set (PROJECT_VERSION_MINOR 0)
 
+# Build Directories
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 set(CUDA_INC_DIR "/usr/local/cuda/include" CACHE PATH "Path to CUDA Directory")
 set(PYTHON_INC_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
@@ -99,7 +104,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 # Subdirectories
-add_subdirectory(lib)
+add_subdirectory(src)
 
 # ---------------
 # Python wrappers
