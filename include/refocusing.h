@@ -140,6 +140,8 @@ class saRefocus {
     void setHF(int hf);
     void setRefractive(int ref, double zW, double n1, double n2, double n3, double t);
     string showSettings();
+    
+    Mat project_point(int cam, Mat_<double> X);
 
  protected:
     // Vector of vectors that stores images from all cameras and for all time steps

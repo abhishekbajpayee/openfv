@@ -1392,6 +1392,23 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
 }
 
+// Function to project a 3D point into cam^th camera
+// TODO: for now this assumes that scene is already refractive
+Mat saRefocus::project_point(int cam, Mat_<double> X) {
+
+    Mat_<double> X_out = Mat_<double>::zeros(4,1);
+    img_refrac(cam_locations_[cam], X, X_out);
+
+    Mat_<double> proj = P_mats_[cam]*X_out;
+
+    Mat_<double> X_img = Mat_<double>::zeros(2,1);
+    X_img(0,0) = proj(0,0)/proj(2,0);
+    X_img(1,0) = proj(1,0)/proj(2,0);
+
+    return X_img;
+
+}
+
 void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out) {
 
     float zW_ = geom[0]; float n1_ = geom[1]; float n2_ = geom[2]; float n3_ = geom[3]; float t_ = geom[4];
@@ -1849,6 +1866,7 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("showSettings", &saRefocus::showSettings)
         .def("initializeGPU", &saRefocus::initializeGPU)
         .def("refocus", &saRefocus::refocus)
+        .def("project_point", &saRefocus::project_point)
     ;
 
 }
