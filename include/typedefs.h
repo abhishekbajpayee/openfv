@@ -57,23 +57,19 @@ struct refocus_settings {
 
     int mult; // 1 for Multiplicative
     double mult_exp;
-    int gpu; // 1 for GPU
+    int use_gpu; // 1 for GPU
     int hf_method; // 1 to use corner method
+    int all_frames;
 
     string calib_file_path;
-
+    
+    string frames;
     string images_path;
     int mtiff; // 1 for using multipage tiffs
     int start_frame;
     int end_frame;
     int skip;
     
-    
-    
-
-    double zmin, zmax, dz, thresh;
-    string save_path;
-
 };
 
 struct safe_refocus_settings {
