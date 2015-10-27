@@ -1851,12 +1851,19 @@ string saRefocus::showSettings() {
 
 }
 
+Mat saRefocus::getP(int cam) {
+
+    return P_mats_[cam];
+
+}
+
 // Python wrapper
 BOOST_PYTHON_MODULE(refocusing) {
 
     using namespace boost::python;
 
     class_<saRefocus>("saRefocus")
+        .def("read_calib_data", &saRefocus::read_calib_data)
         .def("addView", &saRefocus::addView)
         .def("clearViews", &saRefocus::clearViews)
         .def("setF", &saRefocus::setF)
@@ -1867,6 +1874,7 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("initializeGPU", &saRefocus::initializeGPU)
         .def("refocus", &saRefocus::refocus)
         .def("project_point", &saRefocus::project_point)
+        .def("getP", &saRefocus::getP)
     ;
 
 }
