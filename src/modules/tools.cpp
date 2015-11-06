@@ -945,6 +945,8 @@ Mat mtiffReader::get_frame(int n) {
         _TIFFfree(raster);
     }
             
+    img /= 255;
+
     return(img);
 
 }
