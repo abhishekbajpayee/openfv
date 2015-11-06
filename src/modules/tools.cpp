@@ -915,6 +915,8 @@ mtiffReader::mtiffReader(string path) {
 
 }
 
+int mtiffReader::num_frames() { return num_frames_; }
+
 Mat mtiffReader::get_frame(int n) {
 
     Mat img;
@@ -963,5 +965,10 @@ BOOST_PYTHON_MODULE(tools) {
     def("saveScene", saveScene);
     def("loadScene", sPx4);
     def("addCams", addCams1);
+
+    class_<mtiffReader>("mtiffReader", init<std::string>())
+        .def("num_frames", &mtiffReader::num_frames)
+        .def("get_frame", &mtiffReader::get_frame)
+    ;
 
 }
