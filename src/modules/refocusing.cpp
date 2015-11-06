@@ -1857,6 +1857,12 @@ Mat saRefocus::getP(int cam) {
 
 }
 
+Mat saRefocus::getC(int cam) {
+
+    return cam_locations_[cam];
+
+}
+
 // Python wrapper
 BOOST_PYTHON_MODULE(refocusing) {
 
@@ -1875,6 +1881,7 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("refocus", &saRefocus::refocus)
         .def("project_point", &saRefocus::project_point)
         .def("getP", &saRefocus::getP)
+        .def("getC", &saRefocus::getC)
     ;
 
 }

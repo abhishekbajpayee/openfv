@@ -142,7 +142,8 @@ class saRefocus {
     string showSettings();
     
     Mat project_point(int cam, Mat_<double> X);
-    Mat getP(int cam);
+    Mat getP(int);
+    Mat getC(int);
 
  protected:
     // Vector of vectors that stores images from all cameras and for all time steps
