@@ -897,6 +897,58 @@ void imageIO::setPrefix(string prefix) {
 
 }
 
+mtiffReader::mtiffReader(string path) {
+
+    path_ = path;
+
+    VLOG(1)<<"Opening "<<path<<endl;
+    tiff_ = TIFFOpen(path_.c_str(), "r");
+    
+    num_frames_ = 0;
+    if (tiff_) {
+        VLOG(1)<<"Counting number of frames...";
+	do {
+	    num_frames_++;
+	} while (TIFFReadDirectory(tiff_));
+    }
+    VLOG(1)<<"done! ("<<num_frames_<<" frames found.)"<<endl;
+
+}
+
+Mat mtiffReader::get_frame(int n) {
+
+    Mat img;
+    uint32 c, r;
+    size_t npixels;
+    uint32* raster;
+
+    if (n>=num_frames_) {
+        LOG(WARNING)<<"Multipage tiff file only contains "<<num_frames_<<" frames and frame "<<n<<" requested! Blank image will be returned.";
+        return(img);
+    }
+            
+    TIFFSetDirectory(tiff_, n);
+
+    TIFFGetField(tiff_, TIFFTAG_IMAGEWIDTH, &c);
+    TIFFGetField(tiff_, TIFFTAG_IMAGELENGTH, &r);
+    npixels = r * c;
+    raster = (uint32*) _TIFFmalloc(npixels * sizeof (uint32));
+    if (raster != NULL) {
+        if (TIFFReadRGBAImageOriented(tiff_, c, r, raster, ORIENTATION_TOPLEFT, 0)) {
+            img.create(r, c, CV_32F);
+            for (int i=0; i<r; i++) {
+                for (int j=0; j<c; j++) {
+                    img.at<float>(i,j) = TIFFGetR(raster[i*c+j]);
+                }
+            }
+        }
+        _TIFFfree(raster);
+    }
+            
+    return(img);
+
+}
+
 // Python wrapper
 BOOST_PYTHON_MODULE(tools) {
 
