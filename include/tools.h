@@ -179,11 +179,11 @@ class imageIO {
 class mtiffReader {
     
 public:
-    ~mtiffReader();
+    ~mtiffReader() {}
     mtiffReader(string path);
     Mat get_frame(int);
 
-    int num_frames() { return num_frames_; }
+    int num_frames();
 
 protected:
     
