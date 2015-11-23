@@ -1539,12 +1539,17 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
     
     LOG(INFO)<<"Saving frame "<<f<<"...";
     
+    double t1 = omp_get_wtime();
+
     vector<Mat> stack;
     for (double z=zmin; z<=zmax; z+=dz) {
         Mat img = refocus(z, 0, 0, 0, thresh, 0);
         stack.push_back(img);
     }
-        
+
+    double t2 = omp_get_wtime()-t1;
+    VLOG(1)<<"Time taken for reconstruction: "<<t2;
+
     imageIO io(fn.str());
     io<<stack; stack.clear();
 

@@ -125,6 +125,27 @@ void Scene::seedAxes() {
 
 }
 
+void Scene::seedFromFile(string path) {
+
+    ifstream file;
+    file.open(path.c_str());
+
+    LOG(INFO)<<"Seeding particles...";
+
+    int num;
+    file>>num;
+    particles_ = Mat_<double>::zeros(4, num);
+    
+    double x, y, z;
+    for (int i=0; i<num; i++) {
+        file>>x; file>>y; file>>z;
+        particles_(0,i) = x; particles_(1,i) = y; particles_(2,i) = z; particles_(3,i) = 1;
+    }
+
+    trajectory_.push_back(particles_.clone());
+
+}
+
 void Scene::seedParticles(vector< vector<double> > points) {
 
     LOG(INFO)<<"Seeding particles...";

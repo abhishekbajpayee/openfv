@@ -12,6 +12,8 @@ DEFINE_bool(track, false, "track particles");
 DEFINE_bool(fhelp, false, "show config file options");
 DEFINE_bool(cpiv, false, "test c++ piv code");
 
+DEFINE_bool(seedFile, false, "seed from file");
+DEFINE_bool(seedR, false, "seed R instead of particles");
 DEFINE_bool(save, false, "save scene");
 DEFINE_bool(sp, false, "show particles");
 DEFINE_bool(piv, false, "PIV mode");
@@ -19,6 +21,8 @@ DEFINE_bool(visualizeField, false, "play movie of velocity field");
 DEFINE_bool(renderTest, false, "render volume for PIV in matlab");
 DEFINE_bool(runPIV, false, "run PIV in C++");
 DEFINE_bool(saveRefStack, false, "save reference stack to run PIV in matlab");
+DEFINE_bool(saveCamCalib, false, "save camera calibration file");
+DEFINE_bool(saveTomoSet, false, "save camera calibration file");
 DEFINE_bool(param, false, "t param study");
 DEFINE_bool(ref, false, "refractive or not");
 DEFINE_bool(zpad, false, "zero padding or not");
@@ -37,6 +41,8 @@ DEFINE_int32(vsize, 64, "volume size for piv test");
 DEFINE_int32(frames, 10, "number of frames to render movie over");
 DEFINE_int32(field, 1, "velocity field to use");
 
+DEFINE_string(fileNamePrefix, "../temp/default_pfile.txt", "filename prefix");
+DEFINE_string(seedFilePath, "../temp/default_pfile.txt", "file with list of particles to seed");
 DEFINE_string(pfile, "../temp/default_pfile.txt", "particle file");
 DEFINE_string(rfile, "../temp/default_rfile.txt", "reference file");
 DEFINE_string(scnfile, "../temp/default_scn.obj", "Scene object file");
@@ -110,7 +116,13 @@ int main(int argc, char** argv) {
 
     string path = "/home/ab9/projects/scenes/";
     stringstream ss;
-    ss<<path<<"scene_"<<xv<<"_"<<yv<<"_"<<zv<<"_"<<particles;
+    ss<<path<<"scene_"<<xv<<"_"<<yv<<"_"<<zv<<"_";
+    if (FLAGS_seedR)
+        ss<<"R";
+    else if (FLAGS_seedFile)
+        ss<<FLAGS_fileNamePrefix;
+    else
+        ss<<particles;
     if (FLAGS_ref)
         ss<<"_ref_";
     else
@@ -123,11 +135,21 @@ int main(int argc, char** argv) {
 
         scn.create(xv/f, yv/f, zv/f, 1);
         if (FLAGS_ref) {
-            scn.seedParticles(particles, 0.75);
+            if (FLAGS_seedR)
+                scn.seedR();
+            else if(FLAGS_seedFile)
+                scn.seedFromFile(FLAGS_seedFilePath);
+            else
+                scn.seedParticles(particles, 0.75);
             scn.renderVolume(xv, yv, zv);
             scn.setRefractiveGeom(-100, 1.0, 1.5, 1.33, 5);
         } else {
-            scn.seedParticles(particles, 0.95);
+            if (FLAGS_seedR)
+                scn.seedR();
+            else if(FLAGS_seedFile)
+                scn.seedFromFile(FLAGS_seedFilePath);
+            else
+                scn.seedParticles(particles, 0.95);
             scn.renderVolume(xv, yv, zv);
         }
         saveScene(filename, scn);
@@ -296,7 +318,8 @@ int main(int argc, char** argv) {
                 benchmark bm;
                 bm.benchmarkSA(scn, ref);
     
-                string path = "/home/ab9/projects/stack/piv/render/";
+                // string path = "/home/ab9/projects/stack/piv/render/";
+                string path = "/home/ab9/projects/stack/test/";
 
                 string prefix;
                 if (FLAGS_field==1) {
@@ -352,9 +375,170 @@ int main(int argc, char** argv) {
                     }
                     scn.renderVolume(voxels[0], voxels[1], voxels[2]);
                 }
-            
+
             }
         
+        }
+
+        if (FLAGS_saveCamCalib) {
+
+            string path = "/home/ab9/projects/stack/piv/calibrations/";
+
+            loadScene(FLAGS_scnfile, scn);
+            vector<int> voxels = scn.getVoxelGeom();
+            LOG(INFO)<<"Voxels: "<<voxels[0]<<" x "<<voxels[1]<<" x "<<voxels[2];
+
+            int cams = FLAGS_cams;
+
+            stringstream ss;
+            ss<<path<<"calib_";
+            ss<<"angle"<<FLAGS_angle;
+            ss<<"_cams"<<cams;
+            ss<<".txt";
+
+            ofstream calib_file;
+            calib_file.open(ss.str().c_str());
+            calib_file<<"---DUMMY TIME STAMP---"<<endl;
+            calib_file<<0<<endl;
+            calib_file<<voxels[0]<<"\t"<<voxels[1]<<"\t"<<f<<endl;
+            calib_file<<cams<<endl;
+           
+            Camera cam;
+            double cf = 35.0; // [mm]
+            cam.init(cf*1200/4.8, voxels[0], voxels[1], 1);
+            
+            double d = 1000;
+            double theta = FLAGS_angle*pi/180.0;
+            double xy = d*sin(theta);
+            double z = -d*cos(theta);     
+            
+            double xxy, yxy;
+            if (cams==4) {
+                xxy = 2*xy; yxy = 2*xy;
+            } else if (cams==6) {
+                xxy = xy; yxy = 2*xy;
+            } else {
+                xxy = xy; yxy = xy;
+            }
+
+            int n=1;
+            for (double x = -xy; x<=xy; x += xxy) {
+                for (double y = -xy; y<=xy; y += yxy) {
+                    cam.setLocation(x, y, z);
+                    Mat P = cam.getP();
+                    Mat C = cam.getC();
+
+                    ss.str("");
+                    ss<<"cam"<<n;
+                    calib_file<<ss.str()<<endl;
+                    for (int i=0; i<3; i++) {
+                        for (int j=0; j<4; j++) {
+                            calib_file<<P.at<double>(i,j)<<"\t";
+                        }
+                        calib_file<<endl;
+                    }
+                    calib_file<<C.at<double>(0,0)<<"\t"<<C.at<double>(1,0)<<"\t"<<C.at<double>(2,0)<<endl;
+                    n++;
+
+                }
+            }
+
+            calib_file<<0<<endl;
+            calib_file.close();
+
+        }
+
+        if (FLAGS_saveTomoSet) {
+
+            string path = "/home/ab9/projects/stack/piv/tomo_datasets/";
+
+            loadScene(FLAGS_scnfile, scn);
+            vector<int> voxels = scn.getVoxelGeom();
+            LOG(INFO)<<"Voxels: "<<voxels[0]<<" x "<<voxels[1]<<" x "<<voxels[2];
+
+            int cams = FLAGS_cams;
+
+            // Making dir for folder with camera images
+            string prefix;
+            if (FLAGS_field==1) {
+                prefix = "tomo_uniform_";
+            } else if (FLAGS_field==2) {
+                prefix = "tomo_vortexr_";
+            } else if (FLAGS_field==3) {
+                prefix = "tomo_hvortex_";
+            } else {
+                LOG(FATAL)<<"Invalid velocity field!";
+            }
+
+            stringstream ss;
+            ss<<path<<prefix;
+            ss<<"angle"<<FLAGS_angle;
+            ss<<"_cams"<<cams;
+            ss<<"_"<<FLAGS_dt<<"/";
+            cout<<ss.str()<<endl;
+            VLOG(1)<<"Creating directory "<<ss.str();
+            boost::filesystem::create_directories(ss.str());
+            // ----------------------------------------------
+           
+            Camera cam;
+            double cf = 35.0; // [mm]
+            cam.init(cf*1200/4.8, voxels[0], voxels[1], 1);
+            cam.setScene(scn);
+            
+            double d = 1000;
+            double theta = FLAGS_angle*pi/180.0;
+            double xy = d*sin(theta);
+            double z = -d*cos(theta);     
+            
+            double xxy, yxy;
+            if (cams==4) {
+                xxy = 2*xy; yxy = 2*xy;
+            } else if (cams==6) {
+                xxy = xy; yxy = 2*xy;
+            } else {
+                xxy = xy; yxy = xy;
+            }
+            
+            for (int i=0; i<2; i++) {
+
+                int n=1;
+                for (double x = -xy; x<=xy; x += xxy) {
+                    for (double y = -xy; y<=xy; y += yxy) {
+                        cam.setLocation(x, y, z);
+                        Mat img = cam.render()*255;
+                        
+                        stringstream ss2; ss2<<ss.str();
+                        ss2<<"cam"<<n<<"/";
+                        cout<<ss2.str()<<endl;
+                        if (i==0) {
+                            VLOG(1)<<"Creating directory "<<ss2.str();
+                            boost::filesystem::create_directories(ss2.str());
+                        }
+
+                        ss2<<i<<".tif";
+                        VLOG(1)<<"Writing "<<ss2.str();
+                        imwrite(ss2.str(), img);
+                        
+                        n++;
+
+                    }
+                }
+            
+                if (i==0) {
+                    if (FLAGS_field==1) {
+                        scn.propagateParticles(test_field, FLAGS_dt);
+                    } else if (FLAGS_field==2) {
+                        scn.propagateParticles(burgers_vortex, FLAGS_dt);
+                    } else if (FLAGS_field==3) {
+                        scn.propagateParticles(hill_vortex, FLAGS_dt);
+                    } else {
+                        LOG(FATAL)<<"Invalid velocity field!";
+                    }
+                    scn.renderVolume(voxels[0], voxels[1], voxels[2]);
+                }
+
+            }
+
         }
 
         // Save reference stacks to run PIV in Matlab

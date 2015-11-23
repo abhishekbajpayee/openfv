@@ -88,6 +88,7 @@ class Scene {
 
     void seedR();
     void seedAxes();
+    void seedFromFile(string path);    
     void seedParticles(vector< vector<double> > locations);
     /*! Randomly seed particles in a scene
       \param num Number of particles to seed
