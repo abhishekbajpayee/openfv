@@ -132,6 +132,7 @@ class multiCamCalibration {
 
     //! Find corners in images
     void find_corners();
+
     void initialize_cams();
     void initialize_cams_ref();
 
