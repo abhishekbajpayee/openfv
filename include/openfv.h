@@ -1,21 +1,31 @@
-//Includes all of openFV
-#include "batchProc.h"
+// ----------------------
+// Includes all of OpenFV
+// ----------------------
+
+// Core
+#include "std_include.h"
+#include "typedefs.h"
 #include "calibration.h"
-#include "cuda_lib.h"
-#include "featureDetection.h"
-#include "lib_include.h"
 #include "optimization.h"
-#include "parse_safe_settings.h"
-#include "parse_settings.h"
-#include "piv.h"
-#include "pLoc.h"
-#include "py_sa-ptv.h"
 #include "refocusing.h"
 #include "rendering.h"
-#include "safeRefocusing.h"
 #include "serialization.h"
-#include "std_include.h"
+#include "parse_settings.h"
 #include "tools.h"
+
+// Particle Localization and Tracking
+#include "pLoc.h"
 #include "tracking.h"
-#include "typedefs.h"
+
+// CUDA
+#include "cuda_lib.h"
+
+// Other
+#include "piv.h"
 #include "visualize.h"
+#include "batchProc.h"
+
+// SAFE
+#include "featureDetection.h"
+#include "parse_safe_settings.h"
+#include "safeRefocusing.h"

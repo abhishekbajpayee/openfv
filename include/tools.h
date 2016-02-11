@@ -176,4 +176,23 @@ class imageIO {
 
 };
 
+class mtiffReader {
+    
+public:
+    ~mtiffReader() {}
+    mtiffReader(string path);
+    Mat get_frame(int);
+
+    int num_frames();
+
+protected:
+    
+private:
+    
+    TIFF* tiff_;
+    int num_frames_;
+    string path_;
+
+};
+
 #endif

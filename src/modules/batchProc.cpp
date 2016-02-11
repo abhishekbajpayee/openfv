@@ -43,7 +43,7 @@ void batchFind::run() {
         settings.ref = 1;
         settings.mult = 0;
         settings.mult_exp = 1/9.0;
-        settings.corner_method = 1;
+        settings.hf_method = 1;
         settings.calib_file_path = calib_paths[i];
         settings.images_path = refoc_paths[i];
         settings.mtiff = 1;

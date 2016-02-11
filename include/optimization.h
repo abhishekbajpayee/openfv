@@ -504,6 +504,23 @@ class zError {
     
 };
 
+class zError2 {
+    
+ public:
+ 
+ zError2() {}
+    
+    template <typename T>
+        bool operator()(const T* const p,
+                        T* residuals) const {
+        
+        residuals[0] = pow(p[0]-T(0),2)+pow(p[1]-T(0),2)+pow(p[2]-T(1),2)+pow(p[4]-T(0),2);
+        
+        return true;
+    }
+    
+};
+
 // xy plane constraint
 class xyPlaneError {
     

@@ -56,10 +56,8 @@ saRefocus::saRefocus() {
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
-    frame_=-1;
     mult_=0;
-    preprocess_=0;
-
+    
     frames_.push_back(0);
 
     num_cams_ = 0;
@@ -77,9 +75,7 @@ saRefocus::saRefocus(int num_cams, double f) {
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
-    frame_=-1;
     mult_=0;
-    preprocess_=0;
     
     frames_.push_back(0);
 
@@ -90,36 +86,35 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.gpu), REF_FLAG(settings.ref), CORNER_FLAG(settings.corner_method), MTIFF_FLAG(settings.mtiff), frame_(settings.upload_frame), mult_(settings.mult), preprocess_(settings.preprocess) {
-
-    if (REF_FLAG) {
-        read_calib_data(settings.calib_file_path);
-    } else {
-        read_calib_data_pin(settings.calib_file_path);
-    }
+    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip) {
+    
+    imgs_read_ = 0;
+    read_calib_data(settings.calib_file_path);
+    
+    //} else {
+    //read_calib_data_pin(settings.calib_file_path);
+    //}
 
     if (mult_) {
         mult_exp_ = settings.mult_exp;
     }
 
-    if (preprocess_) {
-        parse_preprocess_settings(settings.preprocess_file);
-    }
-
+   
+           
     if (MTIFF_FLAG) {
-        vector<int> frames;
-        if (settings.all_frames) {
-            ALL_FRAME_FLAG = 1;
-        } else {
-            ALL_FRAME_FLAG = 0;
-            int begin = settings.start_frame;
-            int end = settings.end_frame;
-            for (int i=begin; i<=end; i++)
-                frames_.push_back(i);
+
+        if(!ALL_FRAME_FLAG) {
+
+        for (int i=start_frame_; i<=end_frame_; i+=skip_frame_+1)
+            frames_.push_back(i);
         }
         read_imgs_mtiff(settings.images_path);
     } else {
         read_imgs(settings.images_path);
+    }
+
+    if (GPU_FLAG) {
+        initializeGPU(); 
     }
 
     z_ = 0; 
@@ -139,6 +134,17 @@ void saRefocus::read_calib_data(string path) {
         LOG(FATAL)<<"Could not open calibration file! Terminating..."<<endl;
 
     LOG(INFO)<<"LOADING REFRACTIVE CALIBRATION DATA...";
+
+    string time_stamp;
+    getline(file, time_stamp);
+    VLOG(3)<<time_stamp;
+
+    double avg_reproj_error_;
+    file>>avg_reproj_error_;
+
+    file>>img_size_.width;
+    file>>img_size_.height;
+    file>>scale_;
 
     file>>num_cams_;
 
@@ -168,11 +174,13 @@ void saRefocus::read_calib_data(string path) {
 
     }
 
-    file>>geom[0]; file>>geom[4]; file>>geom[1]; file>>geom[2]; file>>geom[3];
-
-    file>>img_size_.width;
-    file>>img_size_.height;
-    file>>scale_;
+    file>>REF_FLAG;
+    if (REF_FLAG) {
+        LOG(INFO)<<"Calibration is refractive";
+        file>>geom[0]; file>>geom[4]; file>>geom[1]; file>>geom[2]; file>>geom[3];
+    } else {
+        LOG(INFO)<<"Calibration is pinhole";
+    }
 
     LOG(INFO)<<"DONE"<<endl;
 
@@ -224,7 +232,7 @@ void saRefocus::read_calib_data_pin(string path) {
     file>>img_size_.width;
     file>>img_size_.height;
     file>>scale_;
-    file>>warp_factor_;
+    //file>>warp_factor_;
 
     file.close();
 
@@ -246,52 +254,84 @@ void saRefocus::read_imgs(string path) {
 
     vector<string> img_names;
 
-    LOG(INFO)<<"READING IMAGES TO REFOCUS...";
-    VLOG(1)<<"\n";
+    if(!imgs_read_) {
 
-    for (int i=0; i<num_cams_; i++) {
+        LOG(INFO)<<"READING IMAGES TO REFOCUS...";
+        VLOG(1)<<"\n";
 
-        VLOG(1)<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
+        for (int i=0; i<num_cams_; i++) {
 
-        string path_tmp;
-        vector<Mat> refocusing_imgs_sub;
+            VLOG(1)<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
 
-        path_tmp = path+cam_names_[i]+"/"+img_prefix;
+            string path_tmp;
+            vector<Mat> refocusing_imgs_sub;
+
+            path_tmp = path+cam_names_[i]+"/"+img_prefix;
         
-        dir = opendir(path_tmp.c_str());
-        while(ent = readdir(dir)) {
-            temp_name = ent->d_name;
-            if (temp_name.compare(dir1)) {
-                if (temp_name.compare(dir2)) {
-                    string path_img = path_tmp+temp_name;
-                    img_names.push_back(path_img);
+            dir = opendir(path_tmp.c_str());
+            while(ent = readdir(dir)) {
+                temp_name = ent->d_name;
+                if (temp_name.compare(dir1)) {
+                    if (temp_name.compare(dir2)) {
+                        string path_img = path_tmp+temp_name;
+                        img_names.push_back(path_img);
+                    }
                 }
             }
-        }
 
-        sort(img_names.begin(), img_names.end());
-        for (int j=0; j<img_names.size(); j++) {
-            VLOG(1)<<j<<": "<<img_names[j]<<endl;
-            image = imread(img_names[j], 0);
-            // image = imread(img_names[i]);
-            Mat imgI;
-            // preprocess(image, imgI);
-            //refocusing_imgs_sub.push_back(imgI.clone());
-            refocusing_imgs_sub.push_back(image.clone());
-            if (i==0) {
-                frames_.push_back(j);
+            sort(img_names.begin(), img_names.end());
+
+            int begin;
+            int end;
+            int skip;
+
+            if(ALL_FRAME_FLAG) {
+                begin = 0;
+                end = img_names.size();
+                skip = 0;
+            } else {
+                begin = start_frame_;
+                end = end_frame_+1;
+                skip = skip_frame_;
+                if (end>img_names.size()) {
+                    LOG(WARNING)<<"End frame is greater than number of frames!" <<endl;   
+                    end = img_names.size();
+                }
             }
-        }
-        img_names.clear();
+                
+           
 
-        imgs.push_back(refocusing_imgs_sub);
-        path_tmp = "";
+            for (int j=begin; j<end; j+=skip+1) {
+                VLOG(1)<<j<<": "<<img_names.at(j)<<endl;
+                image = imread(img_names.at(j), 0);
+                // image = imread(img_names[i]);
+                // Mat imgI;
+                // preprocess(image, imgI);
+                //refocusing_imgs_sub.push_back(imgI.clone());
+                refocusing_imgs_sub.push_back(image.clone());
+                if (i==0) {
+                    frames_.push_back(j);
+                }
+                
+            }
+            img_names.clear();
 
-        VLOG(1)<<"done!\n";
+            imgs.push_back(refocusing_imgs_sub);
+            path_tmp = "";
+
+            VLOG(1)<<"done!\n";
+            imgs_read_ = 1;
    
-    }
+        }
  
-    LOG(INFO)<<"DONE READING IMAGES"<<endl;
+        VLOG(3)<<"Converting image types to 32 bit float...";
+        initializeRefocus();
+
+        LOG(INFO)<<"DONE READING IMAGES"<<endl;
+    }
+    else{
+        LOG(INFO)<<"Images already read!"<<endl;
+    }
 
 }
 
@@ -331,7 +371,7 @@ void saRefocus::read_imgs_mtiff(string path) {
         TIFF* tiff = TIFFOpen(img_names[i].c_str(), "r");
         tiffs.push_back(tiff);
     }
-
+   
     VLOG(1)<<"Counting number of frames...";
     int dircount = 0;
     if (tiffs[0]) {
@@ -353,10 +393,9 @@ void saRefocus::read_imgs_mtiff(string path) {
         VLOG(1)<<"Camera "<<n+1<<"...";
 
         vector<Mat> refocusing_imgs_sub;
-
-        int frame=0; // TODO: check if this is being used at all
+      
         int count=0;
-        int skip=1400;
+      
         
         for (int f=0; f<frames_.size(); f++) {
 
@@ -365,7 +404,7 @@ void saRefocus::read_imgs_mtiff(string path) {
             size_t npixels;
             uint32* raster;
             
-            TIFFSetDirectory(tiffs[n], frames_[f]);
+            TIFFSetDirectory(tiffs[n], frames_.at(f));
 
             TIFFGetField(tiffs[n], TIFFTAG_IMAGEWIDTH, &c);
             TIFFGetField(tiffs[n], TIFFTAG_IMAGELENGTH, &r);
@@ -391,8 +430,6 @@ void saRefocus::read_imgs_mtiff(string path) {
             refocusing_imgs_sub.push_back(img.clone());
             count++;
             
-            frame += skip;
-
         }
 
         imgs.push_back(refocusing_imgs_sub);
@@ -400,13 +437,16 @@ void saRefocus::read_imgs_mtiff(string path) {
 
     }
 
+    VLOG(3)<<"Converting image types to 32 bit float...";
+    initializeRefocus();
+
     LOG(INFO)<<"DONE READING IMAGES"<<endl;
 
 }
 
 void saRefocus::GPUliveView() {
 
-    initializeGPU();
+    //initializeGPU();
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
@@ -418,18 +458,18 @@ void saRefocus::GPUliveView() {
         LOG(INFO)<<"Using pinhole refocusing..."<<endl;
     }
 
-    active_frame_ = 0; thresh = 0;
+    active_frame_ = 0; thresh_ = 0;
 
     namedWindow("Result", CV_WINDOW_AUTOSIZE);
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
-            GPUrefocus_ref_corner(thresh, 1, active_frame_);
+            GPUrefocus_ref_corner(1, active_frame_);
         } else {
-            GPUrefocus_ref(thresh, 1, active_frame_);
+            GPUrefocus_ref(1, active_frame_);
         }
     } else {
-        GPUrefocus(thresh, 1, active_frame_);
+        GPUrefocus(1, active_frame_);
     }
     
     double dz = 0.1;
@@ -453,16 +493,16 @@ void saRefocus::GPUliveView() {
                     if (mult_exp_<mult_exp_limit)
                         mult_exp_ += mult_thresh;
                 } else {
-                    if (thresh<tlimit)
-                        thresh += dthresh; 
+                    if (thresh_<tlimit)
+                        thresh_ += dthresh; 
                 }
             } else if( (key & 255)==84 ) {
                 if (mult_) {
                     if (mult_exp_>0)
                         mult_exp_ -= mult_thresh;
                 } else {
-                    if (thresh>0)
-                        thresh -= dthresh; 
+                    if (thresh_>0)
+                        thresh_ -= dthresh; 
                 }
             } else if( (key & 255)==46 ) {
                 if (active_frame_<array_all.size()) { 
@@ -518,12 +558,12 @@ void saRefocus::GPUliveView() {
             // Call refocus function
             if(REF_FLAG) {
                 if (CORNER_FLAG) {
-                    GPUrefocus_ref_corner(thresh, 1, active_frame_);
+                    GPUrefocus_ref_corner(1, active_frame_);
                 } else {
-                    GPUrefocus_ref(thresh, 1, active_frame_);
+                    GPUrefocus_ref(1, active_frame_);
                 }
             } else {
-                GPUrefocus(thresh, 1, active_frame_);
+                GPUrefocus(1, active_frame_);
             }
 
         }
@@ -534,7 +574,7 @@ void saRefocus::GPUliveView() {
 
 void saRefocus::CPUliveView() {
 
-    initializeCPU();
+    //initializeCPU();
 
     if (CORNER_FLAG) {
         LOG(INFO)<<"Using corner based homography fit method..."<<endl;
@@ -542,28 +582,116 @@ void saRefocus::CPUliveView() {
         LOG(INFO)<<"Using full refractive calculation method..."<<endl;
     }
 
-    active_frame_ = 0;
+    active_frame_ = 0; thresh_ = 0;
 
     namedWindow("Result", CV_WINDOW_AUTOSIZE);
     if (REF_FLAG) {
         if (CORNER_FLAG) {
-            CPUrefocus_ref_corner(z_, thresh, 1, active_frame_);
+            CPUrefocus_ref_corner(1, active_frame_);
         } else {
-            CPUrefocus_ref(z_, thresh, 1, active_frame_);
+            CPUrefocus_ref(1, active_frame_);
         }
     } else {
-        CPUrefocus(z_, thresh, 1, active_frame_);
+        CPUrefocus(1, active_frame_);
     }
     
-    double dz = 0.5;
+    double dz = 0.1;
     double dthresh = 5/255.0;
     double tlimit = 1.0;
+    double mult_exp_limit = 1.0;
+    double mult_thresh = 0.01;
 
     while( 1 ){
         int key = cvWaitKey(10);
         VLOG(3)<<"Key press: "<<(key & 255)<<endl;
         
         if ( (key & 255)!=255 ) {
+
+            if ( (key & 255)==83 ) {
+                z_ += dz;
+            } else if( (key & 255)==81 ) {
+                z_ -= dz;
+            } else if( (key & 255)==82 ) {
+                if (mult_) {
+                    if (mult_exp_<mult_exp_limit)
+                        mult_exp_ += mult_thresh;
+                } else {
+                    if (thresh_<tlimit)
+                        thresh_ += dthresh; 
+                }
+            } else if( (key & 255)==84 ) {
+                if (mult_) {
+                    if (mult_exp_>0)
+                        mult_exp_ -= mult_thresh;
+                } else {
+                    if (thresh_>0)
+                        thresh_ -= dthresh; 
+                }
+            } else if( (key & 255)==46 ) { // >
+                if (active_frame_<imgs[0].size()) {
+                    active_frame_++; 
+                }
+            } else if( (key & 255)==44 ) { // <
+                if (active_frame_<imgs[0].size()) { 
+                    active_frame_--; 
+                }
+            } else if( (key & 255)==119 ) { // w
+                rx_ += 1;
+            } else if( (key & 255)==113 ) { // q
+                rx_ -= 1;
+            } else if( (key & 255)==115 ) { // s
+                ry_ += 1;
+            } else if( (key & 255)==97 ) {  // a
+                ry_ -= 1;
+            } else if( (key & 255)==120 ) { // x
+                rz_ += 1;
+            } else if( (key & 255)==122 ) { // z
+                rz_ -= 1;
+            } else if( (key & 255)==114 ) { // r
+                xs_ += 1;
+            } else if( (key & 255)==101 ) { // e
+                xs_ -= 1;
+            } else if( (key & 255)==102 ) { // f
+                ys_ += 1;
+            } else if( (key & 255)==100 ) { // d
+                ys_ -= 1;
+            } else if( (key & 255)==118 ) { // v
+                zs_ += 1;
+            } else if( (key & 255)==99 ) {  // c
+                zs_ -= 1;
+            } else if( (key & 255)==117 ) { // u
+                crx_ += 1;
+            } else if( (key & 255)==121 ) { // y
+                crx_ -= 1;
+            } else if( (key & 255)==106 ) { // j
+                cry_ += 1;
+            } else if( (key & 255)==104 ) { // h
+                cry_ -= 1;
+            } else if( (key & 255)==109 ) { // m
+                crz_ += 1;
+            } else if( (key & 255)==110 ) { // n
+                crz_ -= 1;
+            } else if( (key & 255)==32 ) {
+                mult_ = (mult_+1)%2;
+            } else if( (key & 255)==27 ) {  // ESC
+                cvDestroyAllWindows();
+                break;
+            }
+            
+            // Call refocus function
+            if(REF_FLAG) {
+                if (CORNER_FLAG) {
+                    CPUrefocus_ref_corner(1, active_frame_);
+                } else {
+                    CPUrefocus_ref(1, active_frame_);
+                }
+            } else {
+                CPUrefocus(1, active_frame_);
+            }
+
+        }
+
+        /*if ( (key & 255)!=255 ) {
 
             if ( (key & 255)==83 ) {
                 z_ += dz;
@@ -600,7 +728,7 @@ void saRefocus::CPUliveView() {
                 CPUrefocus(z_, thresh, 1, active_frame_);
             }
 
-        }
+            }*/
 
     }
 
@@ -612,27 +740,27 @@ Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh,
     rx_ = rx;
     ry_ = ry;
     rz_ = rz;
-    thresh /= 255.0;
+    thresh_ = thresh/255.0;
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
             if (GPU_FLAG) {
-                GPUrefocus_ref_corner(thresh, 0, frame);
+                GPUrefocus_ref_corner(0, frame);
             } else {
-                CPUrefocus_ref_corner(z_, thresh, 0, frame);
+                CPUrefocus_ref_corner(0, frame);
             }
         } else {
             if (GPU_FLAG) {
-                GPUrefocus_ref(thresh, 0, frame);
+                GPUrefocus_ref(0, frame);
             } else {
-                CPUrefocus_ref(z_, thresh, 0, frame);
+                CPUrefocus_ref(0, frame);
             }
         }
     } else {
         if (GPU_FLAG) {
-            GPUrefocus(thresh, 0, frame);
+            GPUrefocus(0, frame);
         } else {
-            CPUrefocus(z_, thresh, 0, frame);
+            CPUrefocus(0, frame);
         }
     }
 
@@ -690,8 +818,6 @@ void saRefocus::initializeRefocus() {
 //       calls uploadToGPU() which uploads either a given
 //       frame or all frames to GPU depending on frame_
 void saRefocus::initializeGPU() {
-
-    initializeRefocus();
     
     if (!EXPERT_FLAG) {
 
@@ -715,7 +841,7 @@ void saRefocus::initializeGPU() {
 
 void saRefocus::initializeCPU() {
 
-    initializeRefocus();
+    // stuff
 
 }
 
@@ -730,29 +856,16 @@ void saRefocus::uploadToGPU() {
         LOG(INFO)<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
     }
 
-    if (frame_>=0) {
-
-        VLOG(1)<<"Uploading frame "<<frame_<<" to GPU..."<<endl;
-        for (int i=0; i<num_cams_; i++) {
-            temp.upload(imgs[i][frame_]);
+   
+          
+    VLOG(1)<<"Uploading all frames to GPU..."<<endl;
+    for (int i=0; i<imgs[0].size(); i++) {
+        for (int j=0; j<num_cams_; j++) {
+            temp.upload(imgs[j][i]);
             array.push_back(temp.clone());
         }
         array_all.push_back(array);
-
-    } else if (frame_==-1) {
-        
-        VLOG(1)<<"Uploading all frames to GPU..."<<endl;
-        for (int i=0; i<imgs[0].size(); i++) {
-            for (int j=0; j<num_cams_; j++) {
-                temp.upload(imgs[j][i]);
-                array.push_back(temp.clone());
-            }
-            array_all.push_back(array);
-            array.clear();
-        }
-        
-    } else {
-        LOG(FATAL)<<"Invalid frame value to visualize!"<<endl;
+        array.clear();
     }
 
     if (!EXPERT_FLAG) {
@@ -805,7 +918,7 @@ void saRefocus::uploadToGPU_ref() {
 
 // ---GPU Refocusing Functions Begin--- //
 
-void saRefocus::GPUrefocus(double thresh, int live, int frame) {
+void saRefocus::GPUrefocus(int live, int frame) {
 
     int curve = 0;
 
@@ -858,26 +971,19 @@ void saRefocus::GPUrefocus(double thresh, int live, int frame) {
 
     }
     
-    gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
+    gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
 
     Mat refocused_host_(refocused);
     
-    if (live) {
-
-        char title[200];
-        sprintf(title, "mult = %d, exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_, mult_exp_, thresh*255.0, frame, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
-
-        imshow("Result", refocused_host_);
-        displayOverlay("Result", title);
-
-    }
+    if (live)
+        liveViewWindow(refocused_host_);
 
     //refocused_host_.convertTo(result, CV_8U);
     result_ = refocused_host_.clone();
 
 }
 
-void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
+void saRefocus::GPUrefocus_ref(int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
     //Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
@@ -891,8 +997,8 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
         
         if (i==0) {
             Mat M; 
-            xmap.download(M); writeMat(M, "../temp/xmap.txt");
-            ymap.download(M); writeMat(M, "../temp/ymap.txt");
+            xmap.download(M); // writeMat(M, "../temp/xmap.txt");
+            ymap.download(M); // writeMat(M, "../temp/ymap.txt");
         }
 
         gpu::multiply(temp, fact, temp2);
@@ -900,22 +1006,18 @@ void saRefocus::GPUrefocus_ref(double thresh, int live, int frame) {
         
     }
     
-    gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
+    gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
 
     refocused.download(refocused_host_);
     
-    if (live) {
-        char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z_, thresh*255.0, frame);
-        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        imshow("Result", refocused_host_);
-    }
+    if (live)
+        liveViewWindow(refocused_host_);
     
     result_ = refocused_host_.clone();
 
 }
 
-void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
+void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
     // Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
@@ -924,7 +1026,7 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
     
     Mat H;
     calc_ref_refocus_H(cam_locations_[0], z_, 0, H);
-    writeMat(H, "../temp/Hcust.txt");
+    // writeMat(H, "../temp/Hcust.txt");
     gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
     
 
@@ -951,21 +1053,12 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
 
     }
 
-    gpu::threshold(refocused, refocused, thresh, 0, THRESH_TOZERO);
+    gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
 
     refocused.download(refocused_host_);
 
-    //imwrite("../temp/refocused1.jpg", refocused_host_);
-
-    if (live) {
-        
-        char title[150];
-        sprintf(title, "mult = %d, exp = %f, T = %f, frame = %d, z = %f, xs = %f, ys = %f, zs = %f, rx = %f, ry = %f. rz = %f", mult_, mult_exp_, thresh*255.0, frame, z_, xs_, ys_, zs_, rx_, ry_, rz_);
-
-        imshow("Result", refocused_host_);
-        displayOverlay("Result", title);
-
-    }
+    if (live)
+        liveViewWindow(refocused_host_);
 
     result_ = refocused_host_.clone();
 
@@ -975,14 +1068,15 @@ void saRefocus::GPUrefocus_ref_corner(double thresh, int live, int frame) {
 
 // ---CPU Refocusing Functions Begin--- //
 
-void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
+void saRefocus::CPUrefocus(int live, int frame) {
 
-    z *= warp_factor_;
+    //z *= warp_factor_;
 
     Scalar fact = Scalar(1/double(imgs.size()));
 
     Mat H, trans;
-    T_from_P(P_mats_[0], H, z, scale_, img_size_);
+    //T_from_P(P_mats_[0], H, z, scale_, img_size_);
+    calc_refocus_H(0, H);
     warpPerspective(imgs[0][frame], cputemp, H, img_size_);
 
     if (mult_) {
@@ -995,8 +1089,8 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
 
     for (int i=1; i<num_cams_; i++) {
         
-        T_from_P(P_mats_[i], H, z, scale_, img_size_);
-        
+        //T_from_P(P_mats_[i], H, z, scale_, img_size_);
+        calc_refocus_H(i, H);
         warpPerspective(imgs[i][frame], cputemp, H, img_size_);
 
         if (mult_) {
@@ -1008,29 +1102,23 @@ void saRefocus::CPUrefocus(double z, double thresh, int live, int frame) {
         }
     }
     
-    threshold(cpurefocused, cpurefocused, thresh, 0, THRESH_TOZERO);
+    threshold(cpurefocused, cpurefocused, thresh_, 0, THRESH_TOZERO);
 
     Mat refocused_host_(cpurefocused);
 
-    if (live) {
-        char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z/warp_factor_, thresh, frame);
-        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        //line(refocused_host_, Point(646,482-5), Point(646,482+5), Scalar(255,0,0));
-        //line(refocused_host_, Point(646-5,482), Point(646+5,482), Scalar(255,0,0));
-        imshow("Result", refocused_host_);
-    }
+    if (live)        
+        liveViewWindow(refocused_host_);
 
     //refocused_host_.convertTo(result_, CV_8U);
     result_ = refocused_host_.clone();
 
 }
 
-void saRefocus::CPUrefocus_ref(double z, double thresh, int live, int frame) {
+void saRefocus::CPUrefocus_ref(int live, int frame) {
 
     Mat_<double> x = Mat_<double>::zeros(img_size_.height, img_size_.width);
     Mat_<double> y = Mat_<double>::zeros(img_size_.height, img_size_.width);
-    calc_ref_refocus_map(cam_locations_[0], z, x, y, 0);
+    calc_ref_refocus_map(cam_locations_[0], z_, x, y, 0);
 
     Mat res, xmap, ymap;
     x.convertTo(xmap, CV_32FC1);
@@ -1041,7 +1129,7 @@ void saRefocus::CPUrefocus_ref(double z, double thresh, int live, int frame) {
     
     for (int i=1; i<num_cams_; i++) {
 
-        calc_ref_refocus_map(cam_locations_[i], z, x, y, i);
+        calc_ref_refocus_map(cam_locations_[i], z_, x, y, i);
         x.convertTo(xmap, CV_32FC1);
         y.convertTo(ymap, CV_32FC1);
 
@@ -1051,22 +1139,20 @@ void saRefocus::CPUrefocus_ref(double z, double thresh, int live, int frame) {
         
     }
 
-    if (live) {
-        char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z, thresh, frame);
-        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        imshow("Result", refocused_host_);
-    }
+    // TODO: thresholding missing?
+
+    if (live)
+        liveViewWindow(refocused_host_);
 
     //refocused_host_.convertTo(result_, CV_8U);
     result_ = refocused_host_.clone();
 
 }
 
-void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int frame) {
+void saRefocus::CPUrefocus_ref_corner(int live, int frame) {
 
     Mat H;
-    calc_ref_refocus_H(cam_locations_[0], z, 0, H);
+    calc_ref_refocus_H(cam_locations_[0], z_, 0, H);
 
     Mat res;
     warpPerspective(imgs[0][frame], res, H, img_size_);
@@ -1074,18 +1160,16 @@ void saRefocus::CPUrefocus_ref_corner(double z, double thresh, int live, int fra
     
     for (int i=1; i<num_cams_; i++) {
 
-        calc_ref_refocus_H(cam_locations_[i], z, i, H);
+        calc_ref_refocus_H(cam_locations_[i], z_, i, H);
         warpPerspective(imgs[i][frame], res, H, img_size_);
         refocused_host_ += res.clone()/9.0;
         
     }
 
-    if (live) {
-        char title[50];
-        sprintf(title, "z = %f, thresh = %f, frame = %d", z, thresh, frame);
-        putText(refocused_host_, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
-        imshow("Result", refocused_host_);
-    }
+    // TODO: thresholding missing?
+
+    if (live)
+        liveViewWindow(refocused_host_);
 
     //refocused_host_.convertTo(result_, CV_8U);
     result_ = refocused_host_.clone();
@@ -1160,7 +1244,7 @@ void saRefocus::calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam) {
     X = hinv*X;
 
     double r = 50;
-    r = r*warp_factor_;
+    //r = r*warp_factor_;
     Mat_<double> X2 = Mat_<double>::zeros(4, height*width);
     for (int j=0; j<X.cols; j++) {
         X2(0,j) = X(0,j);
@@ -1308,6 +1392,23 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
 }
 
+// Function to project a 3D point into cam^th camera
+// TODO: for now this assumes that scene is already refractive
+Mat saRefocus::project_point(int cam, Mat_<double> X) {
+
+    Mat_<double> X_out = Mat_<double>::zeros(4,1);
+    img_refrac(cam_locations_[cam], X, X_out);
+
+    Mat_<double> proj = P_mats_[cam]*X_out;
+
+    Mat_<double> X_img = Mat_<double>::zeros(2,1);
+    X_img(0,0) = proj(0,0)/proj(2,0);
+    X_img(1,0) = proj(1,0)/proj(2,0);
+
+    return X_img;
+
+}
+
 void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out) {
 
     float zW_ = geom[0]; float n1_ = geom[1]; float n2_ = geom[2]; float n3_ = geom[3]; float t_ = geom[4];
@@ -1384,21 +1485,21 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
 }
 
 void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type) {
-
+   
     LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
     
     for (int f=0; f<frames_.size(); f++) {
         
         stringstream fn;
-        fn<<path<<frames_[f];
+        fn<<path<<frames_.at(f);
         mkdir(fn.str().c_str(), S_IRWXU);
 
-        LOG(INFO)<<"Saving frame "<<f<<"...";
+        LOG(INFO)<<"Saving frame "<<frames_.at(f)<<"...";
 
         vector<Mat> stack;
         for (double z=zmin; z<=zmax; z+=dz) {
 
-            Mat img = refocus(z, 0, 0, 0, thresh, f);
+            Mat img = refocus(z, 0, 0, 0, thresh, frames_.at(f));
             //Mat result = refocused_host_.clone();
             stack.push_back(img);
 
@@ -1438,12 +1539,17 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
     
     LOG(INFO)<<"Saving frame "<<f<<"...";
     
+    double t1 = omp_get_wtime();
+
     vector<Mat> stack;
     for (double z=zmin; z<=zmax; z+=dz) {
         Mat img = refocus(z, 0, 0, 0, thresh, 0);
         stack.push_back(img);
     }
-        
+
+    double t2 = omp_get_wtime()-t1;
+    VLOG(1)<<"Time taken for reconstruction: "<<t2;
+
     imageIO io(fn.str());
     io<<stack; stack.clear();
 
@@ -1452,6 +1558,16 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
     //}
 
     LOG(INFO)<<"SAVING COMPLETE!"<<endl;
+
+}
+
+void saRefocus::liveViewWindow(Mat img) {
+
+    char title[200];
+    sprintf(title, "mult = %d, exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_, mult_exp_, thresh_*255.0, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+
+    imshow("Live View", img);
+    displayOverlay("Live View", title);
 
 }
 
@@ -1517,70 +1633,30 @@ double saRefocus::getQ(vector<Mat> &stack, vector<Mat> &refStack) {
 
 // ---Preprocessing related functions--- //
 
-void saRefocus::preprocess(Mat in, Mat &out) {
+void saRefocus::apply_preprocess(void (*preprocess_func)(Mat, Mat), string path) {
 
-    if (preprocess_) {
-
-        Mat im = in.clone();
-        int tc = 0; int gbc = 0; int anc = 0; int mfc = 0; int sMeanc = 0; int smtzc = 0;
-
-        for (int i=0; i<pp_ops.size(); i++) {
-            
-            Mat im2;
-
-            switch(pp_ops[i]) {
-
-            case 1:
-                threshold(im, im2, thresh_vals[tc], 0, THRESH_TOZERO);
-                VLOG(1)<<"Applied threshold at "<<thresh_vals[tc]<<endl;
-                tc++;
-                break;
-
-            case 2:
-                GaussianBlur(im, im2, Size(gbkernel[gbc], gbkernel[gbc]), gbsigma[gbc]);
-                VLOG(1)<<"Applied gaussianBlur with kernel size "<<gbkernel[gbc]<<" and sigma "<<gbsigma[gbc]<<endl;
-                gbc++;
-                break;
-
-            case 3:
-                adaptiveNorm(im, im2, anwx[anc], anwy[anc]);
-                VLOG(1)<<"Applied adaptiveNorm using window sizes "<<anwx[anc]<<" and "<<anwy[anc]<<endl;
-                anc++;
-                break;
-
-            case 4:
-                medianBlur(im, im2, mfkernel[mfc]);
-                VLOG(1)<<"Applied medianFilter using kernel size "<<mfkernel[mfc]<<endl;
-                mfc++;
-                break;
-
-            case 5:
-                boxFilter(im, im2, -1, Size(sMeankernel[sMeanc], sMeankernel[sMeanc]));
-                VLOG(1)<<"Applied slidingMean using kernel size "<<sMeankernel[sMeanc]<<endl;
-                sMeanc++;
-                break;
-                
-            case 6:
-                slidingMinToZero(im, im2, smtzwx[smtzc], smtzwy[smtzc]);
-                VLOG(1)<<"Applied slidingMinToZero using window sizes "<<smtzwx[smtzc]<<" and "<<smtzwy[smtzc]<<endl;
-                smtzc++;
-                break;
-
+    if(imgs_read_) {
+        
+        vector<vector<Mat> > imgs_sub;
+        
+        for(int i=0; i<imgs.size(); i++) {
+            vector<Mat> preprocessed_imgs_sub;
+            for(int j=0; j<imgs[i].size(); j++) {
+                Mat im;
+                preprocess_func(imgs[i][j], im);
+                preprocessed_imgs_sub.push_back(im);
             }
-
-            //qimshow(im2);
-            im = im2.clone();
-
+            imgs_sub.push_back(preprocessed_imgs_sub);
         }
-
-        out = im.clone();
-
-    } else {
-
-        out = in.clone();
-
+        imgs.clear();
+        imgs.swap(imgs_sub);
+       
+        VLOG(1)<<"done!\n";
+        
     }
-
+    else{
+        LOG(INFO)<<"Images must be read before preprocessing!"<<endl;
+    }
 }
 
 void saRefocus::adaptiveNorm(Mat in, Mat &out, int xf, int yf) {
@@ -1644,78 +1720,6 @@ void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
 
         }
     }
-
-}
-
-void saRefocus::parse_preprocess_settings(string path) {
-
-    ifstream file;
-    file.open(path.c_str());
-
-    string op;
-    while (getline(file, op)) {
-
-        // threshold = 1
-        // gaussianBlur = 2
-        // adaptiveNorm = 3
-        // medianFilter = 4
-        // slidingMean = 5
-        // slidingMinToZero = 6
-
-        if (op.compare("threshold")==0) {
-
-            pp_ops.push_back(1);
-            int v1;
-            file>>v1;
-            thresh_vals.push_back(v1);
-
-        } else if (op.compare("gaussianBlur")==0) {
-
-            pp_ops.push_back(2);
-            int v1;   float v2;
-            file>>v1; file>>v2;
-            gbkernel.push_back(v1);
-            gbsigma.push_back(v2);
-
-        } else if (op.compare("adaptiveNorm")==0) {
-
-            pp_ops.push_back(3);
-            int v1;   int v2;
-            file>>v1; file>>v2;
-            anwx.push_back(v1);
-            anwy.push_back(v2);
-
-        } else if (op.compare("medianFilter")==0) {
-
-            pp_ops.push_back(4);
-            int v1;
-            file>>v1;
-            mfkernel.push_back(v1);
-
-        } else if (op.compare("slidingMean")==0) {
-
-            pp_ops.push_back(5);
-            int v1;
-            file>>v1;
-            sMeankernel.push_back(v1);
-
-        } else if (op.compare("slidingMinToZero")==0) {
-
-            pp_ops.push_back(6);
-            int v1;   int v2;
-            file>>v1; file>>v2;
-            smtzwx.push_back(v1);
-            smtzwy.push_back(v2);
-
-        } else {
-
-            LOG(FATAL)<<"Invalid preprocess operation "<<op<<endl;
-
-        }
-
-        getline(file, op);
-
-    } 
 
 }
 
@@ -1852,12 +1856,25 @@ string saRefocus::showSettings() {
 
 }
 
+Mat saRefocus::getP(int cam) {
+
+    return P_mats_[cam];
+
+}
+
+Mat saRefocus::getC(int cam) {
+
+    return cam_locations_[cam];
+
+}
+
 // Python wrapper
 BOOST_PYTHON_MODULE(refocusing) {
 
     using namespace boost::python;
 
     class_<saRefocus>("saRefocus")
+        .def("read_calib_data", &saRefocus::read_calib_data)
         .def("addView", &saRefocus::addView)
         .def("clearViews", &saRefocus::clearViews)
         .def("setF", &saRefocus::setF)
@@ -1867,6 +1884,9 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("showSettings", &saRefocus::showSettings)
         .def("initializeGPU", &saRefocus::initializeGPU)
         .def("refocus", &saRefocus::refocus)
+        .def("project_point", &saRefocus::project_point)
+        .def("getP", &saRefocus::getP)
+        .def("getC", &saRefocus::getC)
     ;
 
 }

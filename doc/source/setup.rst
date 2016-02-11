@@ -7,15 +7,22 @@ of Linux.
 
 OpenFV depends on the following packages:
 
+<<<<<<< HEAD
 #. CMake 2.8 or higher
 #. Git
 #. GCC 4.4.x or higher
+=======
+#. CMake 2.8 +
+#. Git
+#. GCC 4.4.x +
+>>>>>>> d8dfed300a176d86db37557a45660dbdd4f85820
 #. Python 2.7
 #. Qt4 +
 #. CUDA toolkit 6 +
 #. Boost Libraries
 #. libtiff4 +
 #. gperftools
+<<<<<<< HEAD
 #. Glog, Google Log 0.3.1 +
 #. SuiteSparse
 #. Atlas
@@ -24,6 +31,15 @@ OpenFV depends on the following packages:
 #. OpenCV 2.4.10 or earlier (3.0+ not yet supported) built with Python, Qt, and CUDA
 
    * Some versions may not be compatable. In such a case, please notify us.
+=======
+#. Glog
+#. SuiteSparse
+#. Atlas
+#. Eigen 3.2.2 +
+#. Google Log 0.3.1 +
+#. Ceres Solver
+#. OpenCV 2.4.10 (3.0 not yet supported) built with Python, Qt, and CUDA
+>>>>>>> d8dfed300a176d86db37557a45660dbdd4f85820
 
 
 Setting up on an Ubuntu machine
