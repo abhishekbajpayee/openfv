@@ -40,31 +40,6 @@
 #include "optimization.h"
 #include "typedefs.h"
 
-class camCalibration {
-
- public:
-    
-    ~camCalibration() {
-        //
-    }
-
-    camCalibration() {
-        //
-    }
-
-    // Function declarations
-    void calibrateCamera(vector< vector<Point2f> > corner_points, Size img_size, Mat &K, Mat &rvec, Mat &tvec);
-
- protected:
-
-    // Inheritable stuff
-
- private: 
-
-    // Private functions and variables
-
-};
-
 /*!
     Class with functions that allow user to calibrate multiple cameras via bundle
     adjustment. Contains functionality for both pinhole and refractive scenes. Note
@@ -146,10 +121,10 @@ class multiCamCalibration {
 
     void write_calib_results();
     void write_calib_results_ref();
-    void load_calib_results();
+    // void load_calib_results();
 
-    void write_calib_results_matlab();
-    void write_calib_results_matlab_ref();
+    // void write_calib_results_matlab();
+    // void write_calib_results_matlab_ref();
 
     void grid_view();
 
@@ -162,7 +137,8 @@ class multiCamCalibration {
     Size grid_size() { return grid_size_; }
     //! \return Names of cameras (names of folders in which images lie if images are separate or names of the multipage tiff files)
     vector<string> cam_names() { return cam_names_; }
-    refocusing_data refocusing_params() { return refocusing_params_; }
+    
+    // refocusing_data refocusing_params() { return refocusing_params_; }
 
  private:
 
@@ -204,7 +180,7 @@ class multiCamCalibration {
     
     vector<int> const_points_;
 
-    refocusing_data refocusing_params_;
+    // refocusing_data refocusing_params_;
 
     baProblem ba_problem_;
     baProblem_plane ba_problem_ref_;
@@ -241,5 +217,30 @@ class multiCamCalibration {
     int cams_initialized_;
     
 };
+
+class camCalibration {
+
+ public:
     
+    ~camCalibration() {
+        //
+    }
+
+    camCalibration() {
+        //
+    }
+
+    // Function declarations
+    void calibrateCamera(vector< vector<Point2f> > corner_points, Size img_size, Mat &K, Mat &rvec, Mat &tvec);
+
+ protected:
+
+    // Inheritable stuff
+
+ private: 
+
+    // Private functions and variables
+
+};
+
 #endif
