@@ -32,39 +32,29 @@ using namespace cv;
 
 const double pi = 3.14159;
 
-/*! Settings container passed to saRefocus constructor
-  \param mult Flag to multiplicative refocusing or not
-  \param mult_exp Multiplicative exponent
-  \param thresh Thresholding level to be used (if additive)
-  \param gpu Flag to use a GPU or not
-  \param ref Flag to use refractive refocusing or not
-  \param hf_method Use Homography Fit (HF) method or not
-  \param calib_file_path Path to calibration data file
-  \param images_path Path to directory where images to be refocused lie
-  \param mtiff Images are contained in multipage tiff files or not
-  \param start_frame
-  \param end_frame
-  \param upload_frame
-  \param all_frames
-  \param preprocess Preprocess images after reading or not
-  \param preprocess_file Setting file listing preprocessing steps and settings
-  \param zmin Lower bound on z depth of volume to be reconstructed
-  \param zmax Upper bound on z depth of volume to be reconstructed
-  \param dz Distance between successive refocused images
-  \param save_path Directory where to save refocused stack
-*/
+/*! Settings container passed to saRefocus constructor. */
 struct refocus_settings {
-
-    int mult; // 1 for Multiplicative
-    double mult_exp;
-    int use_gpu; // 1 for GPU
-    int hf_method; // 1 to use corner method
-    int all_frames;
-
-    string calib_file_path;
     
-    string frames;
+    //! Flag to use multiplicative refocusing
+    int mult; // 1 for Multiplicative
+
+    //! Multiplicative exponent
+    double mult_exp;
+
+    //! Flag to use a GPU or not
+    int use_gpu; // 1 for GPU
+
+    //! Use Homography Fit (HF) method or not
+    int hf_method; // 1 to use corner method
+
+    //! Path to calibration data file
+    string calib_file_path;
+    //! Path to directory where images to be refocused are
     string images_path;
+  
+    //! ?
+    int all_frames;
+    string frames;
     int mtiff; // 1 for using multipage tiffs
     int start_frame;
     int end_frame;
@@ -89,6 +79,61 @@ struct safe_refocus_settings {
 
 };
 
+/*! Settings container passed to pLocalize constructor. */
+struct localizer_settings {
+    
+    /*! Window size to use around a given pixel
+      to search for particle peak */
+    int window;
+    //! variables
+    double zmin, zmax, dz;
+    double thresh;
+    int zmethod;
+    int show_particles;
+    int cluster_size;
+    
+};
+
+// TODO: consider making size a fractional where max intensity
+//       defines how much of a pixel to count
+/*! Data type for a particle in 2D. Carries 3D location, 
+    average intensity and size in pixels. Used during
+    particle localization. */
+struct particle2d {
+
+    //! x coordinate of particle
+    double x;
+    //! y coordinate of particle
+    double y;
+    //! z coordinate of particle
+    double z;
+    //! Average intensity of particle
+    double I;
+    //! Size of particle in pixels
+    int size;
+};
+
+// Data type to store the bounds of a volume
+// in which particles in a given frame are
+// contained
+struct volume {
+    double x1;
+    double x2;
+    double y1;
+    double y2;
+    double z1;
+    double z2;
+    double v;
+};
+
+struct particle_path {
+    
+    int start_frame;
+    vector<int> path;
+    
+};
+
+/*
 struct refocusing_data {
     vector<Mat> P_mats_u; // Unaligned P matrices
     vector<Mat> P_mats;
@@ -112,54 +157,12 @@ struct refocusing_data_ref {
     double zW;
 };
 
-struct localizer_settings {
-    
-    int window;
-    double zmin, zmax, dz;
-    double thresh;
-    int zmethod;
-    int show_particles;
-    int cluster_size;
-    
-};
-
-struct particle_path {
-    
-    int start_frame;
-    vector<int> path;
-    
-};
-
-// Data type for a particle in 2D:
-// carries 3D location, average intensity and size in pixels
-// TODO: consider making size a fractional where max intensity
-//       defines how much of a pixel to count
-struct particle2d {
-    double x;
-    double y;
-    double z;
-    double I;
-    int size;
-};
-
-// Data type to store the bounds of a volume
-// in which particles in a given frame are
-// contained
-struct volume {
-    double x1;
-    double x2;
-    double y1;
-    double y2;
-    double z1;
-    double z2;
-    double v;
-};
-
 struct voxel {
     int x;
     int y;
     int z;
     double I;
 };
+*/
 
 #endif

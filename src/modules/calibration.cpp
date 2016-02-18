@@ -127,17 +127,17 @@ void multiCamCalibration::run() {
             write_calib_results();
         }
         
-        if (refractive_) {
-            write_calib_results_matlab_ref();
-        } else {
-            write_calib_results_matlab();
-        }
+        // if (refractive_) {
+        //     write_calib_results_matlab_ref();
+        // } else {
+        //     write_calib_results_matlab();
+        // }
         
     }
     
-    if (load_results_flag) {
-        load_calib_results();
-    }
+    // if (load_results_flag) {
+    //     load_calib_results();
+    // }
     
     LOG(INFO)<<"\nCALIBRATION COMPLETE!\n";
 
@@ -182,7 +182,7 @@ void multiCamCalibration::read_cam_names() {
     }
 
     num_cams_ = cam_names_.size();
-    refocusing_params_.num_cams = num_cams_;
+    // refocusing_params_.num_cams = num_cams_;
 
     cam_names_read_ = 1;
 
@@ -223,7 +223,7 @@ void multiCamCalibration::read_cam_names_mtiff() {
     }
 
     num_cams_ = cam_names_.size();
-    refocusing_params_.num_cams = num_cams_;
+    // refocusing_params_.num_cams = num_cams_;
 
     cam_names_read_ = 1;
 
@@ -300,7 +300,7 @@ void multiCamCalibration::read_calib_imgs() {
  
         num_imgs_ = calib_imgs_[0].size();
         img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
-        refocusing_params_.img_size = img_size_;
+        // refocusing_params_.img_size = img_size_;
 
         LOG(INFO)<<"\nDONE READING IMAGES!\n\n";
         images_read_ = 1;
@@ -480,7 +480,7 @@ void multiCamCalibration::find_corners() {
 
         get_grid_size_pix();
         pix_per_phys_ = grid_size_pix_/grid_size_phys_;
-        refocusing_params_.scale = pix_per_phys_;
+        // refocusing_params_.scale = pix_per_phys_;
 
         LOG(INFO)<<"\nCORNER FINDING COMPLETE!\n\n";
         corners_found_ = 1;
@@ -1141,7 +1141,7 @@ void multiCamCalibration::write_calib_results() {
 
             Rodrigues(rvec, R);
             
-            refocusing_params_.cam_names.push_back(cam_names_[i]);
+            // refocusing_params_.cam_names.push_back(cam_names_[i]);
             
             K(0,0) = camera_params[(i*num_cams_)+6];
             K(1,1) = camera_params[(i*num_cams_)+6];
@@ -1182,8 +1182,8 @@ void multiCamCalibration::write_calib_results() {
             
             // P_u = K*P_u;
             P = K*P;
-            // refocusing_params_.P_mats_u.push_back(P_u.clone());
-            refocusing_params_.P_mats.push_back(P.clone());
+            // // refocusing_params_.P_mats_u.push_back(P_u.clone());
+            // refocusing_params_.P_mats.push_back(P.clone());
 
             // Writing camera names and P matrices to file
             file<<cam_names_[i]<<endl;
@@ -1276,7 +1276,7 @@ void multiCamCalibration::write_calib_results_ref() {
 
             Rodrigues(rvec, R);
             
-            refocusing_params_.cam_names.push_back(cam_names_[i]);
+            // refocusing_params_.cam_names.push_back(cam_names_[i]);
             
             K(0,0) = camera_params[(i*num_cams_)+6];
             K(1,1) = camera_params[(i*num_cams_)+6];
@@ -1311,8 +1311,8 @@ void multiCamCalibration::write_calib_results_ref() {
             
             //P_u = K*P_u;
             P = K*P;
-            //refocusing_params_.P_mats_u.push_back(P_u.clone());
-            refocusing_params_.P_mats.push_back(P.clone());
+            // // refocusing_params_.P_mats_u.push_back(P_u.clone());
+            // refocusing_params_.P_mats.push_back(P.clone());
 
             // Writing camera names and P matrices to file
             file<<cam_names_[i]<<endl;
@@ -1343,7 +1343,7 @@ void multiCamCalibration::write_calib_results_ref() {
     }
 
 }
-
+/* Probably not needed anymore
 void multiCamCalibration::load_calib_results() {
 
     ifstream file;
@@ -1399,17 +1399,21 @@ void multiCamCalibration::load_calib_results() {
 
     double  reproj_error;
     file>>reproj_error;
-    file>>refocusing_params_.img_size.width;
-    file>>refocusing_params_.img_size.height;
-    file>>refocusing_params_.scale;
-    file>>refocusing_params_.num_cams;
+    file>>img_size_.width;
+    file>>img_size_.height;
+    // file>>refocusing_params_.img_size.width;
+    // file>>refocusing_params_.img_size.height;
+    file>>pix_per_phys_;
+    // file>>refocusing_params_.scale;
+    file>>num_cams_;
+    // file>>refocusing_params_.num_cams;
 
     //Mat_<double> P_u = Mat_<double>::zeros(3,4);
     Mat_<double> P = Mat_<double>::zeros(3,4);
     string cam_name;
     double tmp;
     
-    for (int i=0; i<refocusing_params_.num_cams; i++) {
+    for (int i=0; i<num_cams_; i++) {
         
         for (int j=0; j<2; j++) getline(file, cam_name);
         
@@ -1446,7 +1450,9 @@ void multiCamCalibration::load_calib_results() {
     LOG(INFO)<<"\nCALIBRATION RESULTS LOADED!\n";
 
 }
+*/
 
+/* Probably not needed anymore
 // Write BA results to files so Matlab can read them and plot world points and
 // camera locations
 void multiCamCalibration::write_calib_results_matlab() {
@@ -1534,7 +1540,9 @@ void multiCamCalibration::write_calib_results_matlab() {
     file5.close();
 
 }
+*/
 
+/* Probably not needed anymore
 // Write BA results to files so Matlab can read them and plot world points and
 // camera locations for refractive calibration
 void multiCamCalibration::write_calib_results_matlab_ref() {
@@ -1610,6 +1618,7 @@ void multiCamCalibration::write_calib_results_matlab_ref() {
     file5.close();
 
 }
+*/
 
 void multiCamCalibration::grid_view() {
 
