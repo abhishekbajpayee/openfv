@@ -79,7 +79,7 @@ code.
     }
 
 We then add a few more lines of code to our ``main`` function. We call
-the :class:cpp:`multiCamCalibration` constructor using the data that
+the :cpp:class:`multiCamCalibration` constructor using the data that
 will be passed to the code through the command line flags defined
 earlier and then run the calibration process. The fourth argument to
 the constructor being ``1`` indicates that the easy or dummy mode will
@@ -151,7 +151,7 @@ You can now run the calibration code by executing:
 
 .. code-block:: bash
 
-   $  ./calibrate --path /path/to/openfv-sample-data/pinhole_calibration_data/ --hgrid 6 --vgrid 5
+   $ ./calibrate --path /path/to/openfv-sample-data/pinhole_calibration_data/ --hgrid 6 --vgrid 5
 
 The default values for the rest of the command line flags will be used
 since the dataset in ``pinhole_calibration_data`` is not refractive,
@@ -165,6 +165,116 @@ should ideally be of the order of 1 or less (the lesser the better).
 Refocusing Tutorial
 -------------------
 
-Refocusing tutorial here
+This tutorial details a sample that utilizes :cpp:class:`saRefocus` to
+refocus images from a camera array. The source code discussed in this 
+tutorial is in the ``refocus.cpp`` file in the ``samples`` folder in 
+the ``openfv`` root.
+
+
+We first include ``openfv.h`` which includes all headers required for
+an ``openfv`` project.
+
+.. code-block:: cpp
+
+    #include "openfv.h"    
+
+We then define the use of the ``cv`` and ``std`` namespaces.
+
+.. code-block:: cpp
+
+   using namespace cv;
+   using namespace std;
+
+Define command line variables .
+
+.. code-block:: cpp
+    
+    DEFINE_bool(live, false, "live refocusing");
+    DEFINE_bool(fhelp, false, "show config file options");
+
+    DEFINE_bool(dump_stack, false, "dump stack");
+    DEFINE_string(save_path, "", "stack save path");
+    DEFINE_double(zmin, -10, "zmin");
+    DEFINE_double(zmax, 10, "zmax");
+    DEFINE_double(dz, 0.1, "dz");
+    DEFINE_double(thresh, 0, "thresholding level");
+
+We define our ``main`` function, parse command line flags and
+initialize ``glog`` logging.
+
+.. code-block:: cpp
+
+    int main(int argc, char** argv) {
+
+        google::ParseCommandLineFlags(&argc, &argv, true);
+        google::InitGoogleLogging(argv[0]);
+        FLAGS_logtostderr=1;
+    
+    }
+
+Next, we define a ``refocus_settings`` variable to store the settings
+from our refocus config file, and call the :cpp:class:`saRefocus` 
+constructor.
+
+.. code-block:: cpp
+ 
+    refocus_settings settings;
+    parse_refocus_settings(string(argv[1]), settings, FLAGS_fhelp);
+    saRefocus refocus(settings);
+
+We then check if the user specified for this to be a live-refocusing
+session, and if so whether or not a GPU is to be used in computation.
+
+.. code-block:: cpp
+
+    if (FLAGS_live) {
+        if (settings.use_gpu) {
+            refocus.GPUliveView();
+        } else {
+            refocus.CPUliveView();
+        }
+    } 
+
+Lastly, if the user has specified to ``dump_stack``, and if so we
+``initializeGPU`` and dump the stack in accordance with the defined
+command line variables.
+
+.. code-block:: cpp
+
+     if (FLAGS_dump_stack) {
+        refocus.initializeGPU();
+        refocus.dump_stack(FLAGS_save_path, FLAGS_zmin, FLAGS_zmax, FLAGS_dz, FLAGS_thresh, "tif");
+    }
+
+Our final ``main`` function:
+
+.. code-block:: cpp
+
+    int main(int argc, char** argv) {
+
+        google::ParseCommandLineFlags(&argc, &argv, true);
+        google::InitGoogleLogging(argv[0]);
+        FLAGS_logtostderr=1;
+
+        refocus_settings settings;
+        parse_refocus_settings(string(argv[1]), settings, FLAGS_fhelp);
+        saRefocus refocus(settings);
+
+        if (FLAGS_live) {
+            if (settings.use_gpu) {
+                refocus.GPUliveView();
+            } else {
+                refocus.CPUliveView();
+            }
+        } 
+
+        if (FLAGS_dump_stack) {
+            refocus.initializeGPU();
+            refocus.dump_stack(FLAGS_save_path, FLAGS_zmin, FLAGS_zmax, FLAGS_dz, FLAGS_thresh, "tif");
+        }
+
+        return 1;
+
+    }
 
 
