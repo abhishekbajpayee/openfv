@@ -35,15 +35,16 @@ const double pi = 3.14159;
 /*! Settings container passed to saRefocus constructor. */
 struct refocus_settings {
     
+    // Flag indicating if data is in mtiff format files
+    int mtiff; // 1 for using multipage tiffs
+
     //! Flag to use multiplicative refocusing
     int mult; // 1 for Multiplicative
-
     //! Multiplicative exponent
     double mult_exp;
 
     //! Flag to use a GPU or not
     int use_gpu; // 1 for GPU
-
     //! Use Homography Fit (HF) method or not
     int hf_method; // 1 to use corner method
 
@@ -52,12 +53,14 @@ struct refocus_settings {
     //! Path to directory where images to be refocused are
     string images_path;
   
-    //! ?
+    // string frames;
+    //! Flag indicating if all frames in the input data should be processed
     int all_frames;
-    string frames;
-    int mtiff; // 1 for using multipage tiffs
+    //! Start frame number (used if all_frames is set to 0)
     int start_frame;
+    //! End frame number (used if all_frames is set to 0)
     int end_frame;
+    //! Successive frames to skip (used if all_frames is set to 0)
     int skip;
     
 };
@@ -85,11 +88,18 @@ struct localizer_settings {
     /*! Window size to use around a given pixel
       to search for particle peak */
     int window;
-    //! variables
-    double zmin, zmax, dz;
+    //! Starting z depth of particle search region
+    double zmin;
+    //! Ending z depth of particle search region
+    double zmax;
+    //! dz between each successive refocused depth
+    double dz;
+    //! Amount by which to threshold the refocused images
     double thresh;
+    //! Method used to calculate the z coordinate of a particle cluster
     int zmethod;
     int show_particles;
+    //! Critical cluster size above which to consider a cluster a particle
     int cluster_size;
     
 };
