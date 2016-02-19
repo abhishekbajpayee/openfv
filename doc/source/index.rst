@@ -16,8 +16,10 @@ Contents:
    calibration
    refocusing
    rendering
-   data_types
    tools
+   data_types
+   file_formats
+
 .. 
    doxygenindex::
 
