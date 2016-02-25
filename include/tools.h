@@ -79,23 +79,23 @@ Mat cross(Mat_<double>, Mat_<double>);
 
 Mat normalize(Mat_<double>);
 
-saRefocus addCams(Scene, Camera, double, double, double);
+// saRefocus addCams(Scene, Camera, double, double, double);
 
-void addCams(Scene, Camera, double, double, double, saRefocus&);
+// void addCams(Scene, Camera, double, double, double, saRefocus&);
 
-void addCams4(Scene, Camera, double, double, double, saRefocus&);
+// void addCams4(Scene, Camera, double, double, double, saRefocus&);
 
-/*! Save a Scene object to a binary file
- \param filename Name of file to save object to
- \param scn Object of scene class to save
- */
-void saveScene(string filename, Scene scn);
+// /*! Save a Scene object to a binary file
+//  \param filename Name of file to save object to
+//  \param scn Object of scene class to save
+//  */
+// void saveScene(string filename, Scene scn);
 
-/*! Load a Scene object from a binary file
- \param filename Name of file to read object from
- \param scn Object of scene class to read into
- */
-void loadScene(string filename, Scene &scn);
+// /*! Load a Scene object from a binary file
+//  \param filename Name of file to read object from
+//  \param scn Object of scene class to read into
+//  */
+// void loadScene(string filename, Scene &scn);
 
 // Scene loadScene(string filename);
 

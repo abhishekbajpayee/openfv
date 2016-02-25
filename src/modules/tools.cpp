@@ -378,104 +378,104 @@ Mat normalize(Mat_<double> A) {
 
 }
 
-saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
+// saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
 
-    // convert from degrees to radians
-    theta = theta*pi/180.0;
+//     // convert from degrees to radians
+//     theta = theta*pi/180.0;
 
-    saRefocus ref;
-    ref.setF(f);
+//     saRefocus ref;
+//     ref.setF(f);
 
-    double xy = d*sin(theta);
-    double z = -d*cos(theta);
-    for (double x = -xy; x<=xy; x += xy) {
-        for (double y = -xy; y<=xy; y += xy) {
-            cam.setLocation(x, y, z);
-            Mat img = cam.render();
-            Mat P = cam.getP();
-            Mat C = cam.getC();
-            ref.addView(img, P, C);
-        }
-    }
+//     double xy = d*sin(theta);
+//     double z = -d*cos(theta);
+//     for (double x = -xy; x<=xy; x += xy) {
+//         for (double y = -xy; y<=xy; y += xy) {
+//             cam.setLocation(x, y, z);
+//             Mat img = cam.render();
+//             Mat P = cam.getP();
+//             Mat C = cam.getC();
+//             ref.addView(img, P, C);
+//         }
+//     }
 
-    return(ref);
+//     return(ref);
 
-}
+// }
 
-void addCams(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
+// void addCams(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
 
-    // convert from degrees to radians
-    theta = theta*pi/180.0;
+//     // convert from degrees to radians
+//     theta = theta*pi/180.0;
 
-    ref.setF(f);
+//     ref.setF(f);
 
-    double xy = d*sin(theta);
-    double z = -d*cos(theta);
-    for (double x = -xy; x<=xy; x += xy) {
-        for (double y = -xy; y<=xy; y += xy) {
-            cam.setLocation(x, y, z);
-            Mat img = cam.render();
-            Mat P = cam.getP();
-            Mat C = cam.getC();
-            ref.addView(img, P, C);
-        }
-    }
+//     double xy = d*sin(theta);
+//     double z = -d*cos(theta);
+//     for (double x = -xy; x<=xy; x += xy) {
+//         for (double y = -xy; y<=xy; y += xy) {
+//             cam.setLocation(x, y, z);
+//             Mat img = cam.render();
+//             Mat P = cam.getP();
+//             Mat C = cam.getC();
+//             ref.addView(img, P, C);
+//         }
+//     }
 
-}
+// }
 
-void addCams4(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
+// void addCams4(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
 
-    // convert from degrees to radians
-    theta = theta*pi/180.0;
+//     // convert from degrees to radians
+//     theta = theta*pi/180.0;
 
-    ref.setF(f);
+//     ref.setF(f);
 
-    double xy = d*sin(theta);
-    double z = -d*cos(theta);
-    for (double x = -xy; x<=xy; x += 2*xy) {
-        for (double y = -xy; y<=xy; y += 2*xy) {
-            cam.setLocation(x, y, z);
-            Mat img = cam.render();
-            Mat P = cam.getP();
-            Mat C = cam.getC();
-            ref.addView(img, P, C);
-        }
-    }
+//     double xy = d*sin(theta);
+//     double z = -d*cos(theta);
+//     for (double x = -xy; x<=xy; x += 2*xy) {
+//         for (double y = -xy; y<=xy; y += 2*xy) {
+//             cam.setLocation(x, y, z);
+//             Mat img = cam.render();
+//             Mat P = cam.getP();
+//             Mat C = cam.getC();
+//             ref.addView(img, P, C);
+//         }
+//     }
 
-}
+// }
 
-void saveScene(string filename, Scene scn) {
+// void saveScene(string filename, Scene scn) {
 
-    // TODO: add some check as to whether or not this saving worked
-    ofstream ofile(filename.c_str());
-    boost::archive::binary_oarchive oa(ofile);
-    oa<<scn;
-    ofile.close();
-    LOG(INFO)<<"Scene saved at "<<filename;
+//     // TODO: add some check as to whether or not this saving worked
+//     ofstream ofile(filename.c_str());
+//     boost::archive::binary_oarchive oa(ofile);
+//     oa<<scn;
+//     ofile.close();
+//     LOG(INFO)<<"Scene saved at "<<filename;
 
-}
+// }
 
-void loadScene(string filename, Scene &scn) {
+// void loadScene(string filename, Scene &scn) {
 
-    LOG(INFO)<<"Loading scene from "<<filename;
-    ifstream ifile(filename.c_str());
-    boost::archive::binary_iarchive ia(ifile);
-    ia>>scn;
-    ifile.close();
+//     LOG(INFO)<<"Loading scene from "<<filename;
+//     ifstream ifile(filename.c_str());
+//     boost::archive::binary_iarchive ia(ifile);
+//     ia>>scn;
+//     ifile.close();
 
-}
+// }
 
-Scene loadScene(string filename) {
+// Scene loadScene(string filename) {
 
-    Scene scn;
-    ifstream ifile(filename.c_str());
-    boost::archive::binary_iarchive ia(ifile);
-    ia>>scn;
-    ifile.close();
+//     Scene scn;
+//     ifstream ifile(filename.c_str());
+//     boost::archive::binary_iarchive ia(ifile);
+//     ia>>scn;
+//     ifile.close();
 
-    return(scn);
+//     return(scn);
 
-}
+// }
 
 // ----------------------------------------------------
 // Temporary location of particle propagation functions
@@ -958,15 +958,15 @@ BOOST_PYTHON_MODULE(tools) {
 
     using namespace boost::python;
 
-    void (*sPx3)(string, Scene&) = &loadScene;
-    Scene (*sPx4)(string)        = &loadScene;
+    // void (*sPx3)(string, Scene&) = &loadScene;
+    // Scene (*sPx4)(string)        = &loadScene;
 
-    saRefocus (*addCams1)(Scene, Camera, double, double, double)        = &addCams;
-    void (*addCams2)(Scene, Camera, double, double, double, saRefocus&) = &addCams;
+    // saRefocus (*addCams1)(Scene, Camera, double, double, double)        = &addCams;
+    // void (*addCams2)(Scene, Camera, double, double, double, saRefocus&) = &addCams;
 
-    def("saveScene", saveScene);
-    def("loadScene", sPx4);
-    def("addCams", addCams1);
+    // def("saveScene", saveScene);
+    // def("loadScene", sPx4);
+    // def("addCams", addCams1);
 
     class_<mtiffReader>("mtiffReader", init<std::string>())
         .def("num_frames", &mtiffReader::num_frames)
