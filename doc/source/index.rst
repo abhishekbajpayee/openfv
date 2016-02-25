@@ -16,7 +16,8 @@ Contents:
    calibration
    refocusing
    rendering
-   tools
+   utility_functions
+   utility_classes
    data_types
    file_formats
 

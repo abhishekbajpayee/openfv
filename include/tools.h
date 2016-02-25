@@ -33,6 +33,10 @@
 using namespace std;
 using namespace cv;
 
+/*! Initialize logging via glog. Should be called at the start of
+  the main() function to enable logging since most output in openFV
+  is routed to the glog library.
+ */
 void init_logging(int argc, char** argv);
 
 void T_from_P(Mat P, Mat &H, double z, double scale, Size img_size);
@@ -45,6 +49,9 @@ Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P);
 
 double dist(Point3f p1, Point3f p2);
 
+/*! Display an image and wait for Esc press
+  \param image Image to display
+ */
 void qimshow(Mat image);
 
 void qimshow2(vector<Mat> imgs);
@@ -63,6 +70,9 @@ void listDir(string, vector<string> &);
 
 void readImgStack(vector<string>, vector<Mat> &);
 
+/*! Function to generate a given number of linearly spaced points
+  between specified lower and upper limits
+*/
 vector<double> linspace(double, double, int);
 
 Mat cross(Mat_<double>, Mat_<double>);
@@ -75,11 +85,19 @@ void addCams(Scene, Camera, double, double, double, saRefocus&);
 
 void addCams4(Scene, Camera, double, double, double, saRefocus&);
 
+/*! Save a Scene object to a binary file
+ \param filename Name of file to save object to
+ \param scn Object of scene class to save
+ */
 void saveScene(string filename, Scene scn);
 
+/*! Load a Scene object from a binary file
+ \param filename Name of file to read object from
+ \param scn Object of scene class to read into
+ */
 void loadScene(string filename, Scene &scn);
 
-Scene loadScene(string filename);
+// Scene loadScene(string filename);
 
 vector<double> hill_vortex(double, double, double, double);
 
@@ -107,8 +125,7 @@ class Movie {
 
 };
 
-// File IO class
-
+//! Class to enable easy writing of data to files
 class fileIO {
 
  public:
@@ -117,13 +134,28 @@ class fileIO {
         file.close(); 
     }
 
+    /*! Constructor to create a file to write data to. This
+      also checks whether or not the path to the file being
+      created exists or not which determines whether the file
+      is successfully created or not. In case the path is not
+      valid or for some other reason the constructor is unable
+      to create the specified file, all output is routed to a
+      temporary file.
+      \param filename Name of file to write data to
+     */
     fileIO(string filename);
 
+    //! Write int type to file
     fileIO& operator<< (int);
+    //! Write float type to file
     fileIO& operator<< (float);
+    //! Write double type to file
     fileIO& operator<< (double);
+    //! Write a string to the file
     fileIO& operator<< (string);
+    //! Write a const char* to file
     fileIO& operator<< (const char*);
+    //! Write a vector of int variables to file
     fileIO& operator<< (vector<int>);
     fileIO& operator<< (vector< vector<int> >);
     fileIO& operator<< (vector<float>);
@@ -143,7 +175,6 @@ class fileIO {
  private:
 
     string getFilename(string filename);
-
     ofstream file;
 
 };
