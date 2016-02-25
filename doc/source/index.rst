@@ -15,7 +15,6 @@ Contents:
    setup
    calibration
    refocusing
-   rendering
    utility_functions
    utility_classes
    data_types
