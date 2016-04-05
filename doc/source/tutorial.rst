@@ -278,3 +278,9 @@ Our final ``main`` function:
     }
 
 
+.. figure:: refocusingScreenShot.png
+   :scale: 50 %
+
+   Running refocus sample live on sample_config.cfg
+
+   ..
