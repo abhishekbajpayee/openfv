@@ -23,6 +23,9 @@ Contents:
 .. 
    doxygenindex::
 
+Note: This documentation is only partially complete
+as of now. We will be making updates on a weekly basis.
+
 Indices and tables
 ==================
 
