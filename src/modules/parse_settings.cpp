@@ -88,20 +88,29 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     // }
     // settings.upload_frame = vm["upload_frame"].as<int>();
 
-    settings.calib_file_path = vm["calib_file_path"].as<string>();
+    boost::filesystem::path calibP(filename);
+    boost::filesystem::path imgsP(filename);
+
+    calibP.remove_leaf() /= vm["calib_file_path"].as<string>();
+    imgsP.remove_leaf() /= vm["images_path"].as<string>();
+
+    
+    settings.calib_file_path = calibP.string();
     if (settings.calib_file_path.empty()) {
         LOG(FATAL)<<"calib_file is a REQUIRED Variable";
     }
     // else if (!dirExists(settings.calib_file_path)) {
-    //     LOG(FATAL)<<"Calibration File Path does not exist!";
+    //    LOG(FATAL)<<"Calibration File Path does not exist!";
     // }
-
-    settings.images_path = vm["images_path"].as<string>();
+    
+     
+    settings.images_path = imgsP.string();
     if(settings.images_path.empty()) {
         LOG(FATAL)<<"data_path is a REQUIRED Variable";
     }
-    else if (!dirExists(settings.images_path)) {
-        LOG(FATAL)<<"Images Files Path does not exist!";
-    }    
+    //else if (!dirExists(settings.images_path)) {
+    //    LOG(FATAL)<<"Images Files Path does not exist!";
+    // } 
+
   
 }
