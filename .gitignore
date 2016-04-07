@@ -6,6 +6,7 @@ python/*.txt
 
 bin/*
 temp/*
+doc/build/*
 
 # emacs temp files
 *~
