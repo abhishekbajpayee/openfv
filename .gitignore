@@ -4,9 +4,13 @@ matlab/data_files/
 matlab/*.txt
 python/*.txt
 
-bin/*
-temp/*
-doc/build/*
+bin
+temp
+doc/build
+doc/source/html
+doc/source/latex
+doc/source/xml
+_site
 
 # emacs temp files
 *~
