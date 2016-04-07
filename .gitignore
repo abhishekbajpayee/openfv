@@ -6,10 +6,6 @@ python/*.txt
 
 bin
 temp
-doc/build
-doc/source/html
-doc/source/latex
-doc/source/xml
 _site
 
 # emacs temp files

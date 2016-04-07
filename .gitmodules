@@ -1,0 +1,3 @@
+[submodule "openfv-docs"]
+	path = openfv-docs
+	url = git@github.com:abhishekbajpayee/openfv-docs.git
