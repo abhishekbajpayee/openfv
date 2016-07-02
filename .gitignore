@@ -4,8 +4,9 @@ matlab/data_files/
 matlab/*.txt
 python/*.txt
 
-bin/*
-temp/*
+bin
+temp
+_site
 
 # emacs temp files
 *~
