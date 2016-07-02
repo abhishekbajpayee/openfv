@@ -133,6 +133,7 @@ class saRefocus {
     double getQ(vector<Mat> &stack, vector<Mat> &refStack);
 
     // Expert mode functions
+    void setStdevThresh(int flag);
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);
     void addView(Mat img, Mat P, Mat location);
     void addViews(vector< vector<Mat> > frames, vector<Mat> Ps, vector<Mat> locations);
@@ -162,6 +163,8 @@ class saRefocus {
     void calc_refocus_H(int cam, Mat &H);
     void img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out);
 
+    void threshold_image(Mat &refocused);
+    void threshold_image(GpuMat &refocused);
     void apply_preprocess(void (*preprocess_func)(Mat, Mat), string path);
     void adaptiveNorm(Mat in, Mat &out, int xf, int yf);
     void slidingMinToZero(Mat in, Mat &out, int xf, int yf);
@@ -214,6 +217,9 @@ class saRefocus {
     int ALL_FRAME_FLAG;
     int INVERT_Y_FLAG;
     int EXPERT_FLAG;
+    // TODO: Enable setting this flag outside expert mode. Will need
+    // to add a variable to the refocus_settings struct.
+    int STDEV_THRESH;
     
 };
 

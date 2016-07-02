@@ -56,6 +56,7 @@ saRefocus::saRefocus() {
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
+    STDEV_THRESH=0;
     mult_=0;
     
     frames_.push_back(0);
@@ -98,8 +99,6 @@ saRefocus::saRefocus(refocus_settings settings):
     if (mult_) {
         mult_exp_ = settings.mult_exp;
     }
-
-   
            
     if (MTIFF_FLAG) {
 
@@ -446,7 +445,7 @@ void saRefocus::read_imgs_mtiff(string path) {
 
 void saRefocus::GPUliveView() {
 
-    //initializeGPU();
+    initializeGPU();
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
@@ -473,8 +472,16 @@ void saRefocus::GPUliveView() {
     }
     
     double dz = 0.1;
-    double dthresh = 5/255.0;
-    double tlimit = 1.0;
+    double dthresh, tulimit, tllimit;
+    if (STDEV_THRESH) {
+        dthresh = 0.1;
+        tulimit = 5.0;
+        tllimit = -1.0;
+    } else {
+        dthresh = 5/255.0;
+        tulimit = 1.0;
+        tllimit = 0.0;
+    }
     double mult_exp_limit = 1.0;
     double mult_thresh = 0.01;
 
@@ -493,7 +500,7 @@ void saRefocus::GPUliveView() {
                     if (mult_exp_<mult_exp_limit)
                         mult_exp_ += mult_thresh;
                 } else {
-                    if (thresh_<tlimit)
+                    if (thresh_<tulimit)
                         thresh_ += dthresh; 
                 }
             } else if( (key & 255)==84 ) {
@@ -501,7 +508,7 @@ void saRefocus::GPUliveView() {
                     if (mult_exp_>0)
                         mult_exp_ -= mult_thresh;
                 } else {
-                    if (thresh_>0)
+                    if (thresh_>tllimit)
                         thresh_ -= dthresh; 
                 }
             } else if( (key & 255)==46 ) {
@@ -970,8 +977,19 @@ void saRefocus::GPUrefocus(int live, int frame) {
         }
 
     }
-    
-    gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
+
+    // TODO: Remove once validated that everything seems to be working!
+    // if (STDEV_THRESH) {
+    //     Scalar mean, stdev;
+    //     gpu::multiply(refocused, Scalar(255, 255, 255), temp); temp.convertTo(temp2, CV_8UC1);
+    //     gpu::meanStdDev(temp2, mean, stdev);
+    //     VLOG(3)<<"Thresholding at: "<<mean[0]+thresh_*stdev[0];
+    //     gpu::threshold(refocused, refocused, (mean[0]+thresh_*stdev[0])/255, 0, THRESH_TOZERO);
+    // } else {
+    //     gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
+    // }
+
+    threshold_image(refocused);
 
     Mat refocused_host_(refocused);
     
@@ -1006,7 +1024,7 @@ void saRefocus::GPUrefocus_ref(int live, int frame) {
         
     }
     
-    gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
+    threshold_image(refocused);
 
     refocused.download(refocused_host_);
     
@@ -1053,7 +1071,7 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     }
 
-    gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
+    threshold_image(refocused);
 
     refocused.download(refocused_host_);
 
@@ -1564,7 +1582,11 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
 void saRefocus::liveViewWindow(Mat img) {
 
     char title[200];
-    sprintf(title, "mult = %d, exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_, mult_exp_, thresh_*255.0, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+    if (STDEV_THRESH) {
+        sprintf(title, "mult = %d, exp = %f, T = %f (x StDev), frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_, mult_exp_, thresh_, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+    } else { 
+        sprintf(title, "mult = %d, exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_, mult_exp_, thresh_*255.0, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+    }
 
     imshow("Live View", img);
     displayOverlay("Live View", title);
@@ -1631,7 +1653,27 @@ double saRefocus::getQ(vector<Mat> &stack, vector<Mat> &refStack) {
 
 }
 
-// ---Preprocessing related functions--- //
+// ---Preprocessing / Image Processing related functions--- //
+
+void saRefocus::threshold_image(Mat &img) {
+
+    // add code here and later replace for CPU functions
+
+}
+
+void saRefocus::threshold_image(GpuMat &refocused) {
+
+    if (STDEV_THRESH) {
+        Scalar mean, stdev;
+        gpu::multiply(refocused, Scalar(255, 255, 255), temp); temp.convertTo(temp2, CV_8UC1);
+        gpu::meanStdDev(temp2, mean, stdev);
+        VLOG(3)<<"Thresholding at: "<<mean[0]+thresh_*stdev[0];
+        gpu::threshold(refocused, refocused, (mean[0]+thresh_*stdev[0])/255, 0, THRESH_TOZERO);
+    } else {
+        gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
+    }
+
+}
 
 void saRefocus::apply_preprocess(void (*preprocess_func)(Mat, Mat), string path) {
 
@@ -1724,6 +1766,12 @@ void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
 }
 
 // ---Expert mode functions--- //
+
+void saRefocus::setStdevThresh(int flag) {
+
+    STDEV_THRESH = 1;
+
+}
 
 void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats, vector<Mat> cam_locations) {
 
