@@ -940,7 +940,7 @@ void saRefocus::GPUrefocus(int live, int frame) {
 
     // add warp factor stuff
 
-    Scalar fact = Scalar(1/double(array_all[frame].size()));
+    Scalar fact = Scalar(1/double(num_cams_));
 
     Mat H, trans;
 
@@ -1094,8 +1094,7 @@ void saRefocus::CPUrefocus(int live, int frame) {
 
     //z *= warp_factor_;
 
-    // TODO: change this to use num_cams_
-    Scalar fact = Scalar(1/double(imgs.size()));
+    Scalar fact = Scalar(1/double(num_cams_));
 
     Mat H, trans;
     //T_from_P(P_mats_[0], H, z, scale_, img_size_);
