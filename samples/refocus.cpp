@@ -8,6 +8,7 @@ DEFINE_bool(fhelp, false, "show config file options");
 
 DEFINE_bool(dump_stack, false, "dump stack");
 DEFINE_string(save_path, "", "stack save path");
+DEFINE_string(config_file, "", "config file path");
 DEFINE_double(zmin, -10, "zmin");
 DEFINE_double(zmax, 10, "zmax");
 DEFINE_double(dz, 0.1, "dz");
@@ -20,7 +21,7 @@ int main(int argc, char** argv) {
     FLAGS_logtostderr=1;
 
     refocus_settings settings;
-    parse_refocus_settings(string(argv[1]), settings, FLAGS_fhelp);
+    parse_refocus_settings(FLAGS_config_file, settings, FLAGS_fhelp);
     saRefocus refocus(settings);
 
     if (FLAGS_live) {
