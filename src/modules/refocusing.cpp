@@ -747,7 +747,11 @@ Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh,
     rx_ = rx;
     ry_ = ry;
     rz_ = rz;
-    thresh_ = thresh/255.0;
+    if (STDEV_THRESH) {
+        thresh_ = thresh;
+    } else {
+        thresh_ = thresh/255.0;
+    }
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
