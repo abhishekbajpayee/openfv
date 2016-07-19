@@ -1094,6 +1094,7 @@ void saRefocus::CPUrefocus(int live, int frame) {
 
     //z *= warp_factor_;
 
+    // TODO: change this to use num_cams_
     Scalar fact = Scalar(1/double(imgs.size()));
 
     Mat H, trans;
@@ -1147,7 +1148,7 @@ void saRefocus::CPUrefocus_ref(int live, int frame) {
     y.convertTo(ymap, CV_32FC1);
     remap(imgs[0][frame], res, xmap, ymap, INTER_LINEAR);
 
-    refocused_host_ = res.clone()/9.0;
+    refocused_host_ = res.clone()/double(num_cams_);
     
     for (int i=1; i<num_cams_; i++) {
 
@@ -1157,7 +1158,7 @@ void saRefocus::CPUrefocus_ref(int live, int frame) {
 
         remap(imgs[i][frame], res, xmap, ymap, INTER_LINEAR);
 
-        refocused_host_ += res.clone()/9.0;
+        refocused_host_ += res.clone()/double(num_cams_);
         
     }
 
@@ -1178,13 +1179,13 @@ void saRefocus::CPUrefocus_ref_corner(int live, int frame) {
 
     Mat res;
     warpPerspective(imgs[0][frame], res, H, img_size_);
-    refocused_host_ = res.clone()/9.0;
+    refocused_host_ = res.clone()/double(num_cams_);
     
     for (int i=1; i<num_cams_; i++) {
 
         calc_ref_refocus_H(cam_locations_[i], z_, i, H);
         warpPerspective(imgs[i][frame], res, H, img_size_);
-        refocused_host_ += res.clone()/9.0;
+        refocused_host_ += res.clone()/double(num_cams_);
         
     }
 
