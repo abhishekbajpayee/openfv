@@ -1542,19 +1542,17 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
 
 }
 
-void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, double q) {
+void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, vector<Mat> &returnStack) {
 
     LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
-    
-    //for (int f=0; f<frames_.size(); f++) {
         
     stringstream fn;
     fn<<path<<f;
     mkdir(fn.str().c_str(), S_IRWXU);
 
-    string qfn = fn.str() + "/q.txt";
-    fileIO qio(qfn);
-    qio<<q;
+    // string qfn = fn.str() + "/q.txt";
+    // fileIO qio(qfn);
+    // qio<<q;
 
     fn<<"/refocused";
     mkdir(fn.str().c_str(), S_IRWXU);
@@ -1573,11 +1571,13 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
     VLOG(1)<<"Time taken for reconstruction: "<<t2;
 
     imageIO io(fn.str());
-    io<<stack; stack.clear();
+    io<<stack; 
+
+    returnStack = stack;
+
+    stack.clear();
 
     LOG(INFO)<<"done!"<<endl;
-
-    //}
 
     LOG(INFO)<<"SAVING COMPLETE!"<<endl;
 

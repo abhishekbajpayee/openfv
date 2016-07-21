@@ -179,7 +179,9 @@ void Scene::seedParticles(int num, double factor) {
 
     if (CIRC_VOL_FLAG) {
         
+        // double R = sqrt(pow(0.5*sx_,2)+pow(0.5*sy_,2)+pow(0.5*sz_,2))*factor;
         double R = 0.5*sx_*factor;
+        LOG(INFO)<<"R: "<<R;
         int i = 0;
         while (i < num) {
 
@@ -187,7 +189,7 @@ void Scene::seedParticles(int num, double factor) {
             y = (double(rand()%res)/double(res))*factor*sy_ - 0.5*factor*sy_;
             z = (double(rand()%res)/double(res))*factor*sz_ - 0.5*factor*sz_;
 
-            if (sqrt(x*x + z*z)<R) {
+            if (sqrt(x*x + y*y + z*z)<R) {
                 particles_(0,i) = x; particles_(1,i) = y; particles_(2,i) = z; particles_(3,i) = 1;
                 i++;
             }
