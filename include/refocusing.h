@@ -133,6 +133,7 @@ class saRefocus {
     double getQ(vector<Mat> &stack, vector<Mat> &refStack);
 
     // Expert mode functions
+    void setSingleCamDebug(int flag);
     void setStdevThresh(int flag);
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);
     void addView(Mat img, Mat P, Mat location);
@@ -147,6 +148,7 @@ class saRefocus {
     Mat project_point(int cam, Mat_<double> X);
     Mat getP(int);
     Mat getC(int);
+    vector< vector<Mat> > getCamStacks();
 
  protected:
     // Vector of vectors that stores images from all cameras and for all time steps
@@ -182,6 +184,7 @@ class saRefocus {
     int num_cams_;
     int imgs_read_;
     vector<Mat> stack_;
+    vector< vector<Mat> > cam_stacks_;
     
     // Scene geometry params
     float geom[5];
@@ -221,6 +224,7 @@ class saRefocus {
     // TODO: Enable setting this flag outside expert mode. Will need
     // to add a variable to the refocus_settings struct.
     int STDEV_THRESH;
+    int SINGLE_CAM_DEBUG;
     
 };
 

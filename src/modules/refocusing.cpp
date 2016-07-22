@@ -57,6 +57,7 @@ saRefocus::saRefocus() {
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
     STDEV_THRESH=0;
+    SINGLE_CAM_DEBUG=0;
     mult_=0;
     
     frames_.push_back(0);
@@ -951,6 +952,10 @@ void saRefocus::GPUrefocus(int live, int frame) {
         //T_from_P(P_mats_[0], H, z_, scale_, img_size_);
         calc_refocus_H(0, H);
         gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
+        if (SINGLE_CAM_DEBUG) {
+            Mat single_cam_img(temp);
+            cam_stacks_[0].push_back(single_cam_img.clone());
+        }
     }
 
     if (mult_) {
@@ -970,6 +975,10 @@ void saRefocus::GPUrefocus(int live, int frame) {
             //T_from_P(P_mats_[i], H, z, scale_, img_size_);
             calc_refocus_H(i, H);       
             gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
+            if (SINGLE_CAM_DEBUG) {
+                Mat single_cam_img(temp);
+                cam_stacks_[i].push_back(single_cam_img.clone());
+            }
         }
 
         if (mult_) {
@@ -981,17 +990,6 @@ void saRefocus::GPUrefocus(int live, int frame) {
         }
 
     }
-
-    // TODO: Remove once validated that everything seems to be working!
-    // if (STDEV_THRESH) {
-    //     Scalar mean, stdev;
-    //     gpu::multiply(refocused, Scalar(255, 255, 255), temp); temp.convertTo(temp2, CV_8UC1);
-    //     gpu::meanStdDev(temp2, mean, stdev);
-    //     VLOG(3)<<"Thresholding at: "<<mean[0]+thresh_*stdev[0];
-    //     gpu::threshold(refocused, refocused, (mean[0]+thresh_*stdev[0])/255, 0, THRESH_TOZERO);
-    // } else {
-    //     gpu::threshold(refocused, refocused, thresh_, 0, THRESH_TOZERO);
-    // }
 
     threshold_image(refocused);
 
@@ -1771,6 +1769,19 @@ void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
 
 // ---Expert mode functions--- //
 
+void saRefocus::setSingleCamDebug(int flag) {
+
+    if (!num_cams_)
+        LOG(FATAL)<<"No camera views have been added yet! Single camera debugging has no way of knowing how to initalize containers.";
+
+    SINGLE_CAM_DEBUG = 1;
+
+    vector<Mat> empty_stack;
+    for (int i=0; i<num_cams_; i++)
+        cam_stacks_.push_back(empty_stack);
+
+}
+
 void saRefocus::setStdevThresh(int flag) {
 
     STDEV_THRESH = 1;
@@ -1917,6 +1928,12 @@ Mat saRefocus::getP(int cam) {
 Mat saRefocus::getC(int cam) {
 
     return cam_locations_[cam];
+
+}
+
+vector< vector<Mat> > saRefocus::getCamStacks() {
+
+    return cam_stacks_;
 
 }
 
