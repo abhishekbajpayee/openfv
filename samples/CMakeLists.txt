@@ -36,7 +36,7 @@ link_directories( ${OFV_LIB_DIR} )
 
 set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
 set (OTHER_LIBS tiff cufft cufftw ${Boost_GENERAL} ${Boost_PY})
-set (PROF_LIB profiler)
+set (PROF_LIBS profiler)
 set (LIBS ${CUSTOM_LIBS} ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS} ${PYTHON_LIBS} openfv cuda_openfv)
 
 # add_executable (tomo ${PROJECT_SOURCE_DIR}/tomotest.cpp)
@@ -48,11 +48,8 @@ target_link_libraries (calibrate ${LIBS})
 # add_executable (track ${PROJECT_SOURCE_DIR}/track.cpp)
 # target_link_libraries (track ${LIBS})
 
-# add_executable (refocus ${PROJECT_SOURCE_DIR}/refocus.cpp)
-# target_link_libraries (refocus ${LIBS})
-
-add_executable (sa-ptv ${PROJECT_SOURCE_DIR}/sa-ptv.cpp)
-target_link_libraries (sa-ptv ${LIBS})
+add_executable (refocus ${PROJECT_SOURCE_DIR}/refocus.cpp)
+target_link_libraries (refocus ${LIBS})
 
 # add_executable (jobFind ${PROJECT_SOURCE_DIR}/jobFind.cpp)
 # target_link_libraries (jobFind ${LIBS})
