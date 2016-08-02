@@ -123,6 +123,8 @@ saRefocus::saRefocus(refocus_settings settings):
     cxs_ = 0; cys_ = 0; czs_ = 0;
     crx_ = 0; cry_ = 0; crz_ = 0;
 
+    STDEV_THRESH = 0;
+
 }
 
 void saRefocus::read_calib_data(string path) {
