@@ -43,6 +43,9 @@
 using namespace std;
 using namespace cv;
 
+/*!
+    Class with functions that allow a user to find particles in a refocused volume.
+*/
 class pLocalize {
 
  public:
@@ -51,13 +54,23 @@ class pLocalize {
 
     }
 
+    /*! pLocalize constructor
+        \param s A localizer_settings struct variable containing all relevant settings for the localizer
+        \param refocus An saRefocus object that has been initialized with data etc.
+        \param s2 A refocus_settings struct variable. This is the same variable that is passed to the saRefocus class constructor.
+    */
     pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s2);
 
     vector<Point3f> detected_particles() { return particles_; }
 
     void run();
 
+    /*! Find particles in all in all frames in the sequence. This is like calling the find_particles_3d() function for each frame.
+    */
     void find_particles_all_frames();
+    /*! Find particles in the volume. The depth extents between which particles are found are specified in the localizer settings.
+        \param frame The frame number in which to find the particles.
+    */
     void find_particles_3d(int frame);
     
     void save_refocus(int frame);

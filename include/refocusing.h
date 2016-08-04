@@ -49,7 +49,7 @@ using namespace cv;
 
 /*!
   Class with functions that allow user to calculate synthetic aperture refocused
-  images using calibration data. Test text.
+  images using calibration data.
 */
 class saRefocus {
 
