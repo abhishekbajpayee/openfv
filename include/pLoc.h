@@ -61,6 +61,7 @@ class pLocalize {
     */
     pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s2);
 
+    /*! Return detected particles */
     vector<Point3f> detected_particles() { return particles_; }
 
     void run();
@@ -84,7 +85,13 @@ class pLocalize {
     void find_particles(Mat image, vector<Point2f> &points_out);
     void refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out);
 
+    /*! Write particles to file
+        \param path Path of file to write particles to
+    */
     void write_all_particles_to_file(string path);
+    /*! Write particles to a folder. This is different from the write_all_particles_to_file() function in that this accepts a path to a directory and write particles in a file inside a folder called particles in the path. Note that the path and a folder called particles must exist. The filename is determined automatically based on the relevant settings being used.
+        \param path Path of folder to write file in. This path must contain another folder called particles in it.
+    */
     void write_all_particles(string path);
     void write_particles_to_file(string path);
     void write_clusters(vector<particle2d> &particles3D_, string path);
