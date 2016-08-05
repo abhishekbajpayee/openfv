@@ -96,10 +96,10 @@ struct localizer_settings {
     double dz;
     //! Amount by which to threshold the refocused images
     double thresh;
-    //! Method used to calculate the z coordinate of a particle cluster
+    //! Method used to calculate the z coordinate of a particle cluster. 1 is for mean z location, 2 is for a quadratic fit (poly2) and 3 is for a gaussian fit.
     int zmethod;
     int show_particles;
-    //! Critical cluster size above which to consider a cluster a particle
+    //! Critical cluster size above which to consider a cluster a particle. As of now, regardless of cluster size, a maximum physical z extent of 2.5 mm is used to determine is a detected 2D particle is part of a 3D particle cluster or not.
     int cluster_size;
     
 };

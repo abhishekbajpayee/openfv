@@ -43,6 +43,9 @@
 using namespace std;
 using namespace cv;
 
+/*! 
+    Class with functions to track particles using relaxation based method.
+*/
 class pTracking {
 
  public:
@@ -50,19 +53,38 @@ class pTracking {
 
     }
 
+    /*! pTracking constructor
+        \param particle_file Path of file containing list of particles
+        \param Rn Neighborhood threshold
+        \param Rs Search threshold
+    */
     pTracking(string particle_file, double Rn, double Rs);
     
+    /*! Function to reset relevant variables
+        \param method
+        \param rn Neighborhood threshold
+        \param rs Search threshold
+        \param e Relaxation set parameter E from [1]
+        \param f Relaxation set parameter F from [1]
+    */
     void set_vars(int method, double rn, double rs, double e, double f);
 
     void initialize();
     void read_points();
 
+    /*! Track particles between given frames
+        \param start Starting frame
+        \param end Ending frame
+    */
     void track_frames(int start, int end);
+    /*! Track particles over all the frames in the input file */
     void track_all();
     vector<Point2i> track_frame(int f1, int f2, int &count);
     void track_frame_n(int f1, int f2);
 
+    /*! Find paths longer than a certain length l in time frames */
     void find_long_paths(int l);
+    /*! Find paths exactly of length l in time frames */
     void find_sized_paths(int l);
     void plot_long_paths();
     void plot_sized_paths();
@@ -71,7 +93,6 @@ class pTracking {
     void write_quiver_data();
     void write_tracking_result();
     void write_all_paths(string path);
-
     void write_long_quiver(string path, int l);
 
     double sim_performance();
