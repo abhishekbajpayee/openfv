@@ -38,7 +38,7 @@
 #include <algorithm>
 #include <ctime>
 #include <sys/stat.h>
-#include <omp.h>
+// #include <omp.h>
 
 // Tiff library
 #include <tiffio.h>
