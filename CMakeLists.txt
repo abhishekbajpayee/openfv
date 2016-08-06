@@ -36,15 +36,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
-option(FIND_OPENCV "FIND_OPENCV" ON)
 
 set(CUDA_INC_DIR "/usr/local/cuda/include" CACHE PATH "Path to CUDA Directory")
 set(PYTHON_INC_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
 set(PYTHON_LIBS "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
 set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
-set(OpenCV_LIBS "" CACHE PATH "Path to OpenCV Libraries")
-set(OpenCV_INCLUDE_DIRS "" CACHE PATH "Path to OpenCV Libraries")
 
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
 
@@ -60,18 +57,10 @@ if(NOT CUDA_FOUND)
   message("CUDA not found!")
 endif()
 
-# OpenCV
-if(FIND_OPENCV)
-  find_package(OpenCV REQUIRED)
-  message("OpenCV Libraries: " ${OpenCV_LIBS})
-  message("OpenCV Include Directories: " ${OpenCV_INCLUDE_DIRS})
-else()
-  message("Setting OpenCV location manually! Make sure the following locations are correct for OpenCV Libraries and Include Files:")
-  message("OpenCV Libraries: " ${OpenCV_LIBS})
-  message("OpenCV Include Directories: " ${OpenCV_INCLUDE_DIRS})
-  include_directories( ${OpenCV_INCLUDE_DIRS} )
-  set(OpenCV_FOUND True)
-endif()
+# Find OpenCV
+find_package(OpenCV REQUIRED)
+message("OpenCV Libraries: " ${OpenCV_LIBS})
+message("OpenCV Include Directories: " ${OpenCV_INCLUDE_DIRS})
 if(NOT OpenCV_FOUND)
   message("OpenCV not found!")
 endif()
