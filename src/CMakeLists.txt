@@ -38,34 +38,34 @@ add_library (openfv SHARED
 	  	   ${PROJECT_SOURCE_DIR}/src/modules/safeRefocusing.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/piv.cpp)
 
-target_link_libraries(openfv ${LIBS} cuda_openfv)
+target_link_libraries(openfv cuda_openfv ${LIBS})
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35)
 cuda_add_library (cuda_openfv SHARED ${PROJECT_SOURCE_DIR}/src/modules/cuda_lib.cu)
-# target_link_libraries(cuda_openfv stdc++)
 
-set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
 
 if(BUILD_PYTHON)
+  set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
+
   add_library(rendering SHARED ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
   set_target_properties(rendering PROPERTIES ${PYTHON_PROPS} PREFIX "")
-  target_link_libraries(rendering ${ALL_LIBS})
+  target_link_libraries(rendering ${OFV_LIBS} ${LIBS})
 
   add_library(refocusing SHARED ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp)
   set_target_properties(refocusing PROPERTIES ${PYTHON_PROPS} PREFIX "")
-  target_link_libraries(refocusing ${ALL_LIBS})
+  target_link_libraries(refocusing ${OFV_LIBS} ${LIBS})
 
   add_library(tools SHARED ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp)
   set_target_properties(tools PROPERTIES ${PYTHON_PROPS} PREFIX "")
-  target_link_libraries(tools ${ALL_LIBS})
+  target_link_libraries(tools ${OFV_LIBS} ${LIBS})
 
   add_library(tracking SHARED ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
   set_target_properties(tracking PROPERTIES ${PYTHON_PROPS} PREFIX "")
-  target_link_libraries(tracking ${ALL_LIBS})
+  target_link_libraries(tracking ${OFV_LIBS} ${LIBS})
 
   add_library(calibration SHARED ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp)
   set_target_properties(calibration PROPERTIES ${PYTHON_PROPS} PREFIX "")
-  target_link_libraries(calibration ${ALL_LIBS})
+  target_link_libraries(calibration ${OFV_LIBS} ${LIBS})
 
   # add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
   # set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")

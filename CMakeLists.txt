@@ -24,10 +24,10 @@
 
 cmake_minimum_required (VERSION 2.8)
 
-project (sa-ptv)
+project (openfv)
 
-set (PROJECT_VERSION_MAJOR 1)
-set (PROJECT_VERSION_MINOR 0)
+set (PROJECT_VERSION_MAJOR 0)
+set (PROJECT_VERSION_MINOR 1)
 
 # Build Directories
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -37,22 +37,21 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 
-# set(CUDA_INC_DIR "/usr/local/cuda/include" CACHE PATH "Path to CUDA Directory")
 set(PYTHON_INC_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
 set(PYTHON_LIBS "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
 set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
-
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
 
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 OLD)
 endif()
 
-# Find required packages
+# FIND REQUIRED PACKAGES
 
 # CUDA
 find_package(CUDA REQUIRED)
+message("---CUDA---")
 message("CUDA Libraries: " ${CUDA_LIBRARIES})
 message("CUDA Include Dirs: " ${CUDA_INCLUDE_DIRS})
 if(NOT CUDA_FOUND)
@@ -61,6 +60,7 @@ endif()
 
 # Find OpenCV
 find_package(OpenCV REQUIRED)
+message("---OpenCV---")
 message("OpenCV Libraries: " ${OpenCV_LIBS})
 message("OpenCV Include Dirs: " ${OpenCV_INCLUDE_DIRS})
 if(NOT OpenCV_FOUND)
@@ -87,7 +87,6 @@ endif()
 include_directories( ${PROJECT_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${PYTHON_INC_DIR} )
-# include_directories( ${CUDA_INC_DIR} )
 include_directories( ${EIGEN_INC_DIR} )
 
 # Don't think these are needed because OpenFV
@@ -103,11 +102,10 @@ include_directories( ${EIGEN_INC_DIR} )
 # endif()
 
 set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack) # protobuf lgomp (removed)
-set (OTHER_LIBS ${TIFF_LIBRARIES} cufft cufftw ${Boost_GENERAL} ${Boost_PY})
+set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY} cufft cufftw)
 set (PROF_LIB profiler)
-set (CUSTOM_LIBS openfv cuda_openfv)
 set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${PYTHON_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
-set (ALL_LIBS ${CUSTOM_LIBS} ${LIBS})
+set (OFV_LIBS openfv cuda_openfv)
 
 # fPIC flags, needed?
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
