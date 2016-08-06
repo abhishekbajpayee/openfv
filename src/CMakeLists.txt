@@ -22,8 +22,7 @@
 # You should have received a copy of the GNU General Public License along with openFV. 
 # If not, see http://www.gnu.org/licenses/.
 
-add_library (openfv 
-		   SHARED
+add_library (openfv SHARED
 		   ${PROJECT_SOURCE_DIR}/src/modules/optimization.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp
 		   ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp
@@ -39,10 +38,13 @@ add_library (openfv
 	  	   ${PROJECT_SOURCE_DIR}/src/modules/safeRefocusing.cpp
                    ${PROJECT_SOURCE_DIR}/src/modules/piv.cpp)
 
-target_link_libraries(openfv ${LIBS})
+target_link_libraries(openfv ${LIBS} cuda_openfv)
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35)
 cuda_add_library (cuda_openfv SHARED ${PROJECT_SOURCE_DIR}/src/modules/cuda_lib.cu)
+# target_link_libraries(cuda_openfv stdc++)
+
+set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
 
 if(BUILD_PYTHON)
   add_library(rendering SHARED ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)

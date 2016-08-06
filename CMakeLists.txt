@@ -37,7 +37,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 
-set(CUDA_INC_DIR "/usr/local/cuda/include" CACHE PATH "Path to CUDA Directory")
+# set(CUDA_INC_DIR "/usr/local/cuda/include" CACHE PATH "Path to CUDA Directory")
 set(PYTHON_INC_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
 set(PYTHON_LIBS "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
 set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
@@ -53,6 +53,8 @@ endif()
 
 # CUDA
 find_package(CUDA REQUIRED)
+message("CUDA Libraries: " ${CUDA_LIBRARIES})
+message("CUDA Include Dirs: " ${CUDA_INCLUDE_DIRS})
 if(NOT CUDA_FOUND)
   message("CUDA not found!")
 endif()
@@ -60,7 +62,7 @@ endif()
 # Find OpenCV
 find_package(OpenCV REQUIRED)
 message("OpenCV Libraries: " ${OpenCV_LIBS})
-message("OpenCV Include Directories: " ${OpenCV_INCLUDE_DIRS})
+message("OpenCV Include Dirs: " ${OpenCV_INCLUDE_DIRS})
 if(NOT OpenCV_FOUND)
   message("OpenCV not found!")
 endif()
@@ -85,12 +87,8 @@ endif()
 include_directories( ${PROJECT_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${PYTHON_INC_DIR} )
-include_directories( ${CUDA_INC_DIR} )
+# include_directories( ${CUDA_INC_DIR} )
 include_directories( ${EIGEN_INC_DIR} )
-
-# This might be useful in the future for when
-# someone has OpenCV in a random location
-# include_directories( ${OCV_INC_DIR} )
 
 # Don't think these are needed because OpenFV
 # doesn't link to Qt
@@ -118,11 +116,5 @@ set(CMAKE_INSTALL_PREFIX "/usr/local/openfv")
 
 # Subdirectories
 add_subdirectory(src)
-
-# ---------------
-# Python wrappers
-# ---------------
-
-set (PYTHON_PROPS Boost_USE_STATIC_RUNTIME OFF Boost_USE_MULTITHREADING ON LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)

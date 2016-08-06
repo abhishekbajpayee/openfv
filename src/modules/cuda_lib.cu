@@ -44,7 +44,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
 #include <iostream>
-#include <omp.h>
 
 #include "cuda_lib.h"
 
