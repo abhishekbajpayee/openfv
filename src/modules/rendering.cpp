@@ -559,6 +559,7 @@ void Camera::init(double f, int imsx, int imsy, int gpu) {
     K_(2,2) = 1;
 
     GPU_FLAG = gpu;
+    CUSTOM_PARTICLE_SIGMA = 0;
 
 }
 
@@ -589,6 +590,13 @@ void Camera::pointAt(double x, double y, double z) {
     t_ = -R_*C_;
 
     P_ = K_*Rt();
+
+}
+
+void Camera::setCustomParticleSigma(double sigma) {
+
+    CUSTOM_PARTICLE_SIGMA = 1;
+    custom_sigma_ = sigma;
 
 }
 
@@ -737,8 +745,12 @@ void Camera::project() {
         p_(1,i) = proj(1,i);
         
         // TODO: correct this for refractive and decide if needed at all because of diffraction limited imaging
-        d = sqrt( pow(C_(0,0)-particles(0,i), 2) + pow(C_(1,0)-particles(1,i), 2) + pow(C_(2,0)-particles(2,i), 2) );
-        s_(0,i) = scene_.sigma()*f_/d;
+        if (CUSTOM_PARTICLE_SIGMA) {
+            s_(0,i) = custom_sigma_;
+        } else {
+            d = sqrt( pow(C_(0,0)-particles(0,i), 2) + pow(C_(1,0)-particles(1,i), 2) + pow(C_(2,0)-particles(2,i), 2) );
+            s_(0,i) = scene_.sigma()*f_/d;
+        }
         VLOG(3)<<"Particle sigma: "<<s_(0,i);
 
     }

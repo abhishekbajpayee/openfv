@@ -40,8 +40,10 @@
 #include <sys/stat.h>
 // #include <omp.h>
 
-// Tiff library
-#include <tiffio.h>
+// Tiff library (included in namespace because of typedef conflict with some OpenCV versions)
+namespace libtiff {
+    #include <tiffio.h>
+}
 
 // Ceres Solver headers
 #include <ceres/ceres.h>

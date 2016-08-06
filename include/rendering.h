@@ -195,6 +195,8 @@ class Camera {
     //! Point camera at point
     void pointAt(double x, double y, double z);
     
+    void setCustomParticleSigma(double sigma);
+
     //! Render image of attached scene
     Mat render();
     void renderCPU();
@@ -234,6 +236,10 @@ class Camera {
     int REF_FLAG;
     int GPU_FLAG;
     vector<float> geom_;
+
+    // Expert mode stuff
+    int CUSTOM_PARTICLE_SIGMA;
+    double custom_sigma_;
 
 };
 

@@ -8,7 +8,7 @@
 #include "calibration.h"
 #include "optimization.h"
 #include "refocusing.h"
-// #include "rendering.h"
+#include "rendering.h"
 #include "serialization.h"
 #include "parse_settings.h"
 #include "tools.h"

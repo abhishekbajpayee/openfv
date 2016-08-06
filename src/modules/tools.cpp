@@ -24,12 +24,13 @@
 
 #include "std_include.h"
 #include "refocusing.h"
-// #include "rendering.h"
+#include "rendering.h"
 #include "typedefs.h"
 #include "tools.h"
 
 using namespace std;
 using namespace cv;
+using namespace libtiff;
 
 void init_logging(int argc, char** argv) {
 
@@ -378,104 +379,104 @@ Mat normalize(Mat_<double> A) {
 
 }
 
-// saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
+saRefocus addCams(Scene scn, Camera cam, double theta, double d, double f) {
 
-//     // convert from degrees to radians
-//     theta = theta*pi/180.0;
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
 
-//     saRefocus ref;
-//     ref.setF(f);
+    saRefocus ref;
+    ref.setF(f);
 
-//     double xy = d*sin(theta);
-//     double z = -d*cos(theta);
-//     for (double x = -xy; x<=xy; x += xy) {
-//         for (double y = -xy; y<=xy; y += xy) {
-//             cam.setLocation(x, y, z);
-//             Mat img = cam.render();
-//             Mat P = cam.getP();
-//             Mat C = cam.getC();
-//             ref.addView(img, P, C);
-//         }
-//     }
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += xy) {
+        for (double y = -xy; y<=xy; y += xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
 
-//     return(ref);
+    return(ref);
 
-// }
+}
 
-// void addCams(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
+void addCams(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
 
-//     // convert from degrees to radians
-//     theta = theta*pi/180.0;
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
 
-//     ref.setF(f);
+    ref.setF(f);
 
-//     double xy = d*sin(theta);
-//     double z = -d*cos(theta);
-//     for (double x = -xy; x<=xy; x += xy) {
-//         for (double y = -xy; y<=xy; y += xy) {
-//             cam.setLocation(x, y, z);
-//             Mat img = cam.render();
-//             Mat P = cam.getP();
-//             Mat C = cam.getC();
-//             ref.addView(img, P, C);
-//         }
-//     }
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += xy) {
+        for (double y = -xy; y<=xy; y += xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
 
-// }
+}
 
-// void addCams4(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
+void addCams4(Scene scn, Camera cam, double theta, double d, double f, saRefocus& ref) {
 
-//     // convert from degrees to radians
-//     theta = theta*pi/180.0;
+    // convert from degrees to radians
+    theta = theta*pi/180.0;
 
-//     ref.setF(f);
+    ref.setF(f);
 
-//     double xy = d*sin(theta);
-//     double z = -d*cos(theta);
-//     for (double x = -xy; x<=xy; x += 2*xy) {
-//         for (double y = -xy; y<=xy; y += 2*xy) {
-//             cam.setLocation(x, y, z);
-//             Mat img = cam.render();
-//             Mat P = cam.getP();
-//             Mat C = cam.getC();
-//             ref.addView(img, P, C);
-//         }
-//     }
+    double xy = d*sin(theta);
+    double z = -d*cos(theta);
+    for (double x = -xy; x<=xy; x += 2*xy) {
+        for (double y = -xy; y<=xy; y += 2*xy) {
+            cam.setLocation(x, y, z);
+            Mat img = cam.render();
+            Mat P = cam.getP();
+            Mat C = cam.getC();
+            ref.addView(img, P, C);
+        }
+    }
 
-// }
+}
 
-// void saveScene(string filename, Scene scn) {
+void saveScene(string filename, Scene scn) {
 
-//     // TODO: add some check as to whether or not this saving worked
-//     ofstream ofile(filename.c_str());
-//     boost::archive::binary_oarchive oa(ofile);
-//     oa<<scn;
-//     ofile.close();
-//     LOG(INFO)<<"Scene saved at "<<filename;
+    // TODO: add some check as to whether or not this saving worked
+    ofstream ofile(filename.c_str());
+    boost::archive::binary_oarchive oa(ofile);
+    oa<<scn;
+    ofile.close();
+    LOG(INFO)<<"Scene saved at "<<filename;
 
-// }
+}
 
-// void loadScene(string filename, Scene &scn) {
+void loadScene(string filename, Scene &scn) {
 
-//     LOG(INFO)<<"Loading scene from "<<filename;
-//     ifstream ifile(filename.c_str());
-//     boost::archive::binary_iarchive ia(ifile);
-//     ia>>scn;
-//     ifile.close();
+    LOG(INFO)<<"Loading scene from "<<filename;
+    ifstream ifile(filename.c_str());
+    boost::archive::binary_iarchive ia(ifile);
+    ia>>scn;
+    ifile.close();
 
-// }
+}
 
-// Scene loadScene(string filename) {
+Scene loadScene(string filename) {
 
-//     Scene scn;
-//     ifstream ifile(filename.c_str());
-//     boost::archive::binary_iarchive ia(ifile);
-//     ia>>scn;
-//     ifile.close();
+    Scene scn;
+    ifstream ifile(filename.c_str());
+    boost::archive::binary_iarchive ia(ifile);
+    ia>>scn;
+    ifile.close();
 
-//     return(scn);
+    return(scn);
 
-// }
+}
 
 // ----------------------------------------------------
 // Temporary location of particle propagation functions
@@ -588,6 +589,21 @@ vector<double> test_field(double x, double y, double z, double t) {
 
     vector<double> np;
     np.push_back(x+d); np.push_back(y+d); np.push_back(z+d);
+
+    return(np);
+
+}
+
+// Directional field
+vector<double> dir_field(double x, double y, double z, double t) {
+
+    double v = 0.3125;
+    double c = 10.0;
+    double dy = (v*x + c)*t;
+    double dz = 0.5*(v*z + c)*t;
+
+    vector<double> np;
+    np.push_back(x); np.push_back(y+dy); np.push_back(z+dz);
 
     return(np);
 
