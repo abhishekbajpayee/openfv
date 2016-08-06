@@ -104,7 +104,7 @@ include_directories( ${EIGEN_INC_DIR} )
 #   set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
 # endif()
 
-set (CERES_LIBS ceres glog gflags cholmod protobuf cxsparse gomp blas lapack)
+set (CERES_LIBS ceres glog gflags cholmod cxsparse gomp blas lapack) # protobuf (removed)
 set (OTHER_LIBS ${TIFF_LIBRARIES} cufft cufftw ${Boost_GENERAL} ${Boost_PY})
 set (PROF_LIB profiler)
 set (CUSTOM_LIBS openfv cuda_openfv)
