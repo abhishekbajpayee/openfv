@@ -112,7 +112,7 @@ void piv3D::run_pass(vector< vector<int> > winx, vector< vector<int> > winy, vec
     i2 = new double[wy_*wy_*wy_];
     i3 = new double[wz_*wz_*wz_];
 
-    double s = omp_get_wtime();
+    // double s = omp_get_wtime();
     
     fileIO file(resultFile_);
 
@@ -139,13 +139,13 @@ void piv3D::run_pass(vector< vector<int> > winx, vector< vector<int> > winy, vec
         }
     }
 
-    double time = omp_get_wtime()-s;
+    // double time = omp_get_wtime()-s;
 
     // print3D(i1, l, l, l);
     // print3D(i2, l, l, l);
     // print3D(i3, l, l, l);
 
-    LOG(INFO)<<time<<", "<<time/count;
+    // LOG(INFO)<<time<<", "<<time/count;
 
 }
 

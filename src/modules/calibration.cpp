@@ -595,9 +595,9 @@ void multiCamCalibration::initialize_cams_ref() {
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = refractive_max_iterations;
     
-    int threads = omp_get_num_procs();
-    options.num_threads = threads;
-    LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
+    // int threads = omp_get_num_procs();
+    // options.num_threads = threads;
+    // LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;
     options.function_tolerance = 1E-8;
@@ -948,9 +948,9 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = pinhole_max_iterations;
     
-    int threads = omp_get_num_procs();
-    options.num_threads = threads;
-    LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
+    // int threads = omp_get_num_procs();
+    // options.num_threads = threads;
+    // LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;
     options.function_tolerance = 1E-8;
@@ -1020,9 +1020,9 @@ double multiCamCalibration::run_BA_refractive(baProblem_plane &ba_problem, strin
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = 100; //refractive_max_iterations;
     
-    int threads = omp_get_num_procs();
-    options.num_threads = threads-2;
-    LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
+    // int threads = omp_get_num_procs();
+    // options.num_threads = threads-2;
+    // LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;
     options.function_tolerance = 1E-8;
