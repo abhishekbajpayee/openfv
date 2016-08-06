@@ -37,8 +37,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 
-set(PYTHON_INC_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
-set(PYTHON_LIBS "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
+set(PYTHON_INCLUDE_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
+set(PYTHON_LIBRARIES "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
 set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
@@ -86,7 +86,7 @@ endif()
 # Include directories
 include_directories( ${PROJECT_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
-include_directories( ${PYTHON_INC_DIR} )
+include_directories( ${PYTHON_INCLUDE_DIR} )
 include_directories( ${EIGEN_INC_DIR} )
 
 # Don't think these are needed because OpenFV
@@ -104,7 +104,7 @@ include_directories( ${EIGEN_INC_DIR} )
 set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack) # protobuf lgomp (removed)
 set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY} cufft cufftw)
 set (PROF_LIB profiler)
-set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${PYTHON_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
+set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${PYTHON_LIBRARIES} ${CERES_LIBS} ${OpenCV_LIBS})
 set (OFV_LIBS openfv cuda_openfv)
 
 # fPIC flags, needed?
