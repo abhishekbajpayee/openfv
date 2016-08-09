@@ -157,6 +157,11 @@ void saRefocus::read_calib_data(string path) {
         
         for (int i=0; i<2; i++) getline(file, cam_name);
         VLOG(3)<<"cam_names_["<<n<<"] = "<<cam_name<<endl;
+        // Clean \r at end of cam_name
+        if (cam_name[cam_name.length()-1] == '\r') {
+            VLOG(3)<<"Seems like calibration file was created in a windows env. Removing carriage return at end.";
+            cam_name.erase(cam_name.length()-1);
+        }
         cam_names_.push_back(cam_name);
 
         Mat_<double> P_mat = Mat_<double>::zeros(3,4);
