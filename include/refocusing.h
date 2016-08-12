@@ -133,6 +133,7 @@ class saRefocus {
     double getQ(vector<Mat> &stack, vector<Mat> &refStack);
 
     // Expert mode functions
+    void setGPU(int id);
     void setSingleCamDebug(int flag);
     void setStdevThresh(int flag);
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);

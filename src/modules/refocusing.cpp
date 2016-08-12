@@ -1565,7 +1565,7 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
     
     LOG(INFO)<<"Saving frame "<<f<<"...";
     
-    // double t1 = omp_get_wtime();
+    double t1 = omp_get_wtime();
 
     vector<Mat> stack;
     for (double z=zmin; z<=zmax; z+=dz) {
@@ -1573,8 +1573,8 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
         stack.push_back(img);
     }
 
-    // double t2 = omp_get_wtime()-t1;
-    // VLOG(1)<<"Time taken for reconstruction: "<<t2;
+    double t2 = omp_get_wtime()-t1;
+    VLOG(1)<<"Time taken for reconstruction: "<<t2;
 
     imageIO io(fn.str());
     io<<stack; 
@@ -1776,6 +1776,12 @@ void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
 }
 
 // ---Expert mode functions--- //
+
+void saRefocus::setGPU(int id) {
+
+    gpu::setDevice(id);
+
+}
 
 void saRefocus::setSingleCamDebug(int flag) {
 
