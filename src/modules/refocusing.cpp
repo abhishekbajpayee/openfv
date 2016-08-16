@@ -750,44 +750,6 @@ void saRefocus::CPUliveView() {
 
 }
 
-Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh, int frame) {
-
-    z_ = z;
-    rx_ = rx;
-    ry_ = ry;
-    rz_ = rz;
-    if (STDEV_THRESH) {
-        thresh_ = thresh;
-    } else {
-        thresh_ = thresh/255.0;
-    }
-
-    if (REF_FLAG) {
-        if (CORNER_FLAG) {
-            if (GPU_FLAG) {
-                GPUrefocus_ref_corner(0, frame);
-            } else {
-                CPUrefocus_ref_corner(0, frame);
-            }
-        } else {
-            if (GPU_FLAG) {
-                GPUrefocus_ref(0, frame);
-            } else {
-                CPUrefocus_ref(0, frame);
-            }
-        }
-    } else {
-        if (GPU_FLAG) {
-            GPUrefocus(0, frame);
-        } else {
-            CPUrefocus(0, frame);
-        }
-    }
-
-    return(result_);
-
-}
-
 void saRefocus::initializeRefocus() {
 
     // This functions converts any incoming datatype images to
@@ -841,14 +803,14 @@ void saRefocus::initializeGPU() {
     
     if (!EXPERT_FLAG) {
 
-        LOG(INFO)<<endl<<"INITIALIZING GPU..."<<endl;
+        LOG(INFO)<<"INITIALIZING GPU..."<<endl;
 
         LOG(INFO)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
     
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
     
         LOG(INFO)<<"---"<<gpuDevice.name()<<"---"<<endl;
-        LOG(INFO)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB"<<endl;
+        LOG(INFO)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB";
     }
 
     uploadToGPU();
@@ -873,7 +835,7 @@ void saRefocus::uploadToGPU() {
     if (!EXPERT_FLAG) {
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
         double free_mem_GPU = gpuDevice.freeMemory()/pow(1024.0,2);
-        LOG(INFO)<<"Free Memory before: "<<free_mem_GPU<<" MB"<<endl;
+        LOG(INFO)<<"Free Memory before: "<<free_mem_GPU<<" MB";
     }
 
    
@@ -890,7 +852,7 @@ void saRefocus::uploadToGPU() {
 
     if (!EXPERT_FLAG) {
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
-        LOG(INFO)<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB"<<endl<<endl;
+        LOG(INFO)<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB";
     }
 
 }
@@ -933,6 +895,44 @@ void saRefocus::uploadToGPU_ref() {
     }
 
     LOG(INFO)<<"done!"<<endl;
+
+}
+
+Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh, int frame) {
+
+    z_ = z;
+    rx_ = rx;
+    ry_ = ry;
+    rz_ = rz;
+    if (STDEV_THRESH) {
+        thresh_ = thresh;
+    } else {
+        thresh_ = thresh/255.0;
+    }
+
+    if (REF_FLAG) {
+        if (CORNER_FLAG) {
+            if (GPU_FLAG) {
+                GPUrefocus_ref_corner(0, frame);
+            } else {
+                CPUrefocus_ref_corner(0, frame);
+            }
+        } else {
+            if (GPU_FLAG) {
+                GPUrefocus_ref(0, frame);
+            } else {
+                CPUrefocus_ref(0, frame);
+            }
+        }
+    } else {
+        if (GPU_FLAG) {
+            GPUrefocus(0, frame);
+        } else {
+            CPUrefocus(0, frame);
+        }
+    }
+
+    return(result_);
 
 }
 
@@ -1048,13 +1048,12 @@ void saRefocus::GPUrefocus_ref(int live, int frame) {
 void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
-    // Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
     Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
+    // Mat blank(img_size_.height, img_size_.width, CV_8U, Scalar(0));
     refocused.upload(blank);
     
     Mat H;
     calc_ref_refocus_H(cam_locations_[0], z_, 0, H);
-    // writeMat(H, "../temp/Hcust.txt");
     gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
     
 
@@ -1081,14 +1080,14 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     }
 
-    threshold_image(refocused);
+    // threshold_image(refocused);
 
     refocused.download(refocused_host_);
 
     if (live)
         liveViewWindow(refocused_host_);
 
-    result_ = refocused_host_.clone();
+    result_ = refocused_host_;
 
 }
 
@@ -1445,11 +1444,14 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
     for (int i=0; i<3; i++)
         c[i] = Xcam.at<double>(0,i);
 
+    double a[3];
+    double b[3];
+    double point[3];
+    double rp, dp, phi, ra, rb, da, db;
+    double f, g, dfdra, dfdrb, dgdra, dgdrb;
+
     for (int n=0; n<X.cols; n++) {
 
-        double a[3];
-        double b[3];
-        double point[3];
         for (int i=0; i<3; i++)
             point[i] = X(i,n);
 
@@ -1459,20 +1461,18 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
         b[0] = c[0] + (point[0]-c[0])*(t_+zW_-c[2])/(point[2]-c[2]);
         b[1] = c[1] + (point[1]-c[1])*(t_+zW_-c[2])/(point[2]-c[2]);
         b[2] = t_+zW_;
-        
-        double rp = sqrt( pow(point[0]-c[0],2) + pow(point[1]-c[1],2) );
-        double dp = point[2]-b[2];
-        double phi = atan2(point[1]-c[1],point[0]-c[0]);
 
-        double ra = sqrt( pow(a[0]-c[0],2) + pow(a[1]-c[1],2) );
-        double rb = sqrt( pow(b[0]-c[0],2) + pow(b[1]-c[1],2) );
-        double da = a[2]-c[2];
-        double db = b[2]-a[2];
-        
-        double f, g, dfdra, dfdrb, dgdra, dgdrb;
+        rp = sqrt( pow(point[0]-c[0],2) + pow(point[1]-c[1],2) );
+        dp = point[2]-b[2];
+        phi = atan2(point[1]-c[1],point[0]-c[0]);
+
+        ra = sqrt( pow(a[0]-c[0],2) + pow(a[1]-c[1],2) );
+        rb = sqrt( pow(b[0]-c[0],2) + pow(b[1]-c[1],2) );
+        da = a[2]-c[2];
+        db = b[2]-a[2];
         
         // Newton Raphson loop to solve for Snell's law
-        double tol=1E-8;
+        // double tol=1E-8;
 
         for (int i=0; i<20; i++) {
 
@@ -1509,6 +1509,71 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
         X_out(3,n) = 1.0;
 
     }
+
+    // for (int n=0; n<X.cols; n++) {
+
+    //     double a[3];
+    //     double b[3];
+    //     double point[3];
+    //     for (int i=0; i<3; i++)
+    //         point[i] = X(i,n);
+
+    //     a[0] = c[0] + (point[0]-c[0])*(zW_-c[2])/(point[2]-c[2]);
+    //     a[1] = c[1] + (point[1]-c[1])*(zW_-c[2])/(point[2]-c[2]);
+    //     a[2] = zW_;
+    //     b[0] = c[0] + (point[0]-c[0])*(t_+zW_-c[2])/(point[2]-c[2]);
+    //     b[1] = c[1] + (point[1]-c[1])*(t_+zW_-c[2])/(point[2]-c[2]);
+    //     b[2] = t_+zW_;
+
+    //     double rp = sqrt( pow(point[0]-c[0],2) + pow(point[1]-c[1],2) );
+    //     double dp = point[2]-b[2];
+    //     double phi = atan2(point[1]-c[1],point[0]-c[0]);
+
+    //     double ra = sqrt( pow(a[0]-c[0],2) + pow(a[1]-c[1],2) );
+    //     double rb = sqrt( pow(b[0]-c[0],2) + pow(b[1]-c[1],2) );
+    //     double da = a[2]-c[2];
+    //     double db = b[2]-a[2];
+        
+    //     double f, g, dfdra, dfdrb, dgdra, dgdrb;
+        
+    //     // Newton Raphson loop to solve for Snell's law
+    //     double tol=1E-8;
+
+    //     for (int i=0; i<20; i++) {
+
+    //         f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( (n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
+    //         g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( (n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );
+            
+    //         dfdra = ( (1.0)/sqrt(pow(ra,2)+pow(da,2)) )
+    //             - ( pow(ra,2)/pow(pow(ra,2)+pow(da,2),1.5) )
+    //             + ( (n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) )
+    //             - ( (n2_/n1_)*(ra-rb)*(2*ra-2*rb)/(2*pow(pow(ra-rb,2)+pow(db,2),1.5)) );
+
+    //         dfdrb = ( (n2_/n1_)*(ra-rb)*(2*ra-2*rb)/(2*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+    //             - ( (n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) );
+
+    //         dgdra = ( (ra-rb)*(2*ra-2*rb)/(2*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+    //             - ( (1.0)/sqrt(pow(ra-rb,2)+pow(db,2)) );
+
+    //         dgdrb = ( (1.0)/sqrt(pow(ra-rb,2)+pow(db,2)) )
+    //             + ( (n3_/n2_)/sqrt(pow(rb-rp,2)+pow(dp,2)) )
+    //             - ( (ra-rb)*(2*ra-2*rb)/(2*pow(pow(ra-rb,2)+pow(db,2),1.5)) )
+    //             - ( (n3_/n2_)*(rb-rp)*(2*rb-2*rp)/(2*pow(pow(rb-rp,2)+pow(dp,2),1.5)) );
+
+    //         ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
+    //         rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
+
+    //     }
+
+    //     a[0] = ra*cos(phi) + c[0];
+    //     a[1] = ra*sin(phi) + c[1];
+
+    //     X_out(0,n) = a[0];
+    //     X_out(1,n) = a[1];
+    //     X_out(2,n) = a[2];
+    //     X_out(3,n) = 1.0;
+
+    // }
 
 }
 
@@ -1631,10 +1696,29 @@ void saRefocus::calculateQ(double zmin, double zmax, double dz, double thresh, i
 
 void saRefocus::return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack) {
 
+    double t1 = omp_get_wtime();
+
     for (double z=zmin; z<=zmax+(dz*0.5); z+=dz) {
         Mat img = refocus(z, 0, 0, 0, thresh, frame);
         stack.push_back(img);
     }
+
+    double t2 = omp_get_wtime()-t1;
+    VLOG(1)<<"Time taken for reconstruction: "<<t2;
+
+}
+
+void saRefocus::return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack, double &time) {
+
+    double t1 = omp_get_wtime();
+
+    for (double z=zmin; z<=zmax+(dz*0.5); z+=dz) {
+        Mat img = refocus(z, 0, 0, 0, thresh, frame);
+        stack.push_back(img);
+    }
+
+    time = omp_get_wtime()-t1;
+    VLOG(1)<<"Time taken for reconstruction: "<<time;
 
 }
 
