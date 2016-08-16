@@ -1052,12 +1052,14 @@ void pTracking::write_quiver_data() {
 
 }
 
-void pTracking::write_tracking_result() {
+void pTracking::write_tracking_result(string prefix) {
 
     string qpath("");
     for (int i=0; i<path_.size()-4; i++) {
         qpath += path_[i];
     }
+    qpath += "_";
+    qpath += prefix;
     qpath += "_result.txt";
 
     ofstream file;
