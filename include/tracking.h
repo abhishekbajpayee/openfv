@@ -91,7 +91,32 @@ class pTracking {
     void plot_all_paths();
 
     void write_quiver_data();
-    void write_tracking_result();
+
+    /*! Write tracking results to file. The output filename and location is automatically 
+      generated based on the path and name of the input particle file passed to the 
+      pTracking constructor. For example, if the particle_file is 
+      ``/home/user/project/particles.txt`` and the prefix string passed is ``prefix`` then
+      then tracking results are saved in ``/home/user/project/particles_prefix_result.txt``.
+      The format of this results file is:
+      \verbatim embed:rst
+      .. code ::
+
+          <number of time frames>
+          <number of matches in frame 1>
+          <index of particle in frame 1>TAB<index of match particle in frame 2>
+          <index of particle in frame 1>TAB<index of match particle in frame 2>
+          ...
+          <number of matches in frame 2>
+          <index of particle in frame 2>TAB<index of match particle in frame 3>
+          <index of particle in frame 2>TAB<index of match particle in frame 3>
+          ...
+          ...
+      \endverbatim
+      where the "\t" between particle indices is a TAB character and the indices are of 
+      particles in the particles file used.
+      \param prefix String of text to add to the output filename
+    */
+    void write_tracking_result(string prefix);
     void write_all_paths(string path);
     void write_long_quiver(string path, int l);
 
