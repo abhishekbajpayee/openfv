@@ -50,6 +50,9 @@ using namespace cv;
 using namespace libtiff;
 
 saRefocus::saRefocus() {
+    
+    LOG(INFO)<<"Refocusing object created in expert mode";
+    LOG(INFO)<<"Note: requires manual tweaking of parameters!";
 
     GPU_FLAG=1;
     REF_FLAG=0;
@@ -60,10 +63,10 @@ saRefocus::saRefocus() {
     STDEV_THRESH=0;
     SINGLE_CAM_DEBUG=0;
     mult_=0;
-    
     frames_.push_back(0);
-
     num_cams_ = 0;
+    IMG_REFRAC_TOL = 1E-9;
+    MAX_NR_ITERS = 20;
 
 }
 
@@ -78,13 +81,12 @@ saRefocus::saRefocus(int num_cams, double f) {
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
-    mult_=0;
-    
+    mult_=0;   
     frames_.push_back(0);
-
     num_cams_ = num_cams;
-
     scale_ = f;
+    IMG_REFRAC_TOL = 1E-9;
+    MAX_NR_ITERS = 20;
 
 }
 
@@ -125,6 +127,9 @@ saRefocus::saRefocus(refocus_settings settings):
     crx_ = 0; cry_ = 0; crz_ = 0;
 
     STDEV_THRESH = 0;
+
+    IMG_REFRAC_TOL = 1E-9;
+    MAX_NR_ITERS = 20;
 
 }
 
@@ -1467,9 +1472,12 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
         db = b[2]-a[2];
         
         // Newton Raphson loop to solve for Snell's law
-        // double tol=1E-8;
-
-        for (int i=0; i<20; i++) {
+        double tol = IMG_REFRAC_TOL;
+        double ra1, rb1, res;
+        ra1 = ra; rb1 = rb;
+        VLOG(3)<<"img_refrac() Newton Raphson solver progress:";
+        int i;
+        for (i=0; i<MAX_NR_ITERS; i++) {
 
             f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( (n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
             g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( (n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );
@@ -1493,7 +1501,19 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
             ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
             rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
 
+            res = abs(ra1-ra)+abs(rb1-rb);
+            VLOG(3)<<(i+1)<<": "<<res;
+            ra1 = ra; rb1 = rb;
+            if (res < tol) {
+                VLOG(3)<<"Tolerance reached. Terminating solver...";
+                break;
+            }
+
         }
+
+        VLOG(2)<<"# NR iterations to convergence: "<<(i+1);
+        if (i+1==MAX_NR_ITERS)
+            LOG(WARNING)<<"Maximum iterations were reached for the NR solver in img_refrac()";
 
         a[0] = ra*cos(phi) + c[0];
         a[1] = ra*sin(phi) + c[1];

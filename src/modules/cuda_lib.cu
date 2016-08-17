@@ -122,9 +122,12 @@ __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_
     float da = a[2]-c[2];
     float db = b[2]-a[2];
     
-    //float f, g; 
     float dfdra, dfdrb, dgdra, dgdrb;
-        
+    
+    float tol = 1E-9;
+    float ra1, rb1, res;
+    ra1 = ra; rb1 = rb;
+
     // Newton Raphson loop to solve for Snell's law
     for (int i=0; i<20; i++) {
         
@@ -150,6 +153,11 @@ __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_
         ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
         rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
         
+        res = abs(ra1-ra)+abs(rb1-rb);
+        ra1 = ra; rb1 = rb;
+        if (res < tol)
+            break;
+
     }
 
     a[0] = ra*cos(phi) + c[0];

@@ -227,6 +227,8 @@ class saRefocus {
     // to add a variable to the refocus_settings struct.
     int STDEV_THRESH;
     int SINGLE_CAM_DEBUG;
+    double IMG_REFRAC_TOL;
+    int MAX_NR_ITERS;
     
 };
 
