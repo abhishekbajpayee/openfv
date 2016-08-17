@@ -134,9 +134,9 @@ void saRefocus::read_calib_data(string path) {
 
     file.open(path.c_str());
     if(file.fail())
-        LOG(FATAL)<<"Could not open calibration file! Terminating..."<<endl;
+        LOG(FATAL)<<"Could not open calibration file! Terminating...";
 
-    LOG(INFO)<<"LOADING REFRACTIVE CALIBRATION DATA...";
+    LOG(INFO)<<"LOADING CALIBRATION DATA...";
 
     string time_stamp;
     getline(file, time_stamp);
@@ -184,13 +184,13 @@ void saRefocus::read_calib_data(string path) {
 
     file>>REF_FLAG;
     if (REF_FLAG) {
-        LOG(INFO)<<"Calibration is refractive";
+        VLOG(1)<<"Calibration is refractive";
         file>>geom[0]; file>>geom[4]; file>>geom[1]; file>>geom[2]; file>>geom[3];
     } else {
-        LOG(INFO)<<"Calibration is pinhole";
+        VLOG(1)<<"Calibration is pinhole";
     }
 
-    LOG(INFO)<<"DONE"<<endl;
+    VLOG(1)<<"DONE READING CALIBRATION DATA";
 
 }
 
@@ -199,7 +199,7 @@ void saRefocus::read_calib_data_pin(string path) {
     ifstream file;
     file.open(path.c_str());
     if(file.fail())
-        LOG(FATAL)<<"Could not open calibration file! Termintation..."<<endl;
+        LOG(FATAL)<<"Could not open calibration file! Termintation...";
 
     LOG(INFO)<<"LOADING PINHOLE CALIBRATION DATA...";
 
@@ -244,8 +244,6 @@ void saRefocus::read_calib_data_pin(string path) {
 
     file.close();
 
-    LOG(INFO)<<"DONE"<<endl;
-
 }
 
 void saRefocus::read_imgs(string path) {
@@ -265,7 +263,6 @@ void saRefocus::read_imgs(string path) {
     if(!imgs_read_) {
 
         LOG(INFO)<<"READING IMAGES TO REFOCUS...";
-        VLOG(1)<<"\n";
 
         for (int i=0; i<num_cams_; i++) {
 
@@ -315,7 +312,7 @@ void saRefocus::read_imgs(string path) {
                 // image = imread(img_names[i]);
                 // Mat imgI;
                 // preprocess(image, imgI);
-                //refocusing_imgs_sub.push_back(imgI.clone());
+                // refocusing_imgs_sub.push_back(imgI.clone());
                 refocusing_imgs_sub.push_back(image.clone());
                 if (i==0) {
                     frames_.push_back(j);
@@ -332,12 +329,10 @@ void saRefocus::read_imgs(string path) {
    
         }
  
-        VLOG(3)<<"Converting image types to 32 bit float...";
         initializeRefocus();
 
-        LOG(INFO)<<"DONE READING IMAGES"<<endl;
-    }
-    else{
+        VLOG(1)<<"DONE READING IMAGES"<<endl;
+    } else {
         LOG(INFO)<<"Images already read!"<<endl;
     }
 
@@ -346,7 +341,6 @@ void saRefocus::read_imgs(string path) {
 void saRefocus::read_imgs_mtiff(string path) {
     
     LOG(INFO)<<"READING IMAGES TO REFOCUS...";
-    VLOG(1)<<"\n";
 
     DIR *dir;
     struct dirent *ent;
@@ -445,10 +439,9 @@ void saRefocus::read_imgs_mtiff(string path) {
 
     }
 
-    VLOG(3)<<"Converting image types to 32 bit float...";
     initializeRefocus();
 
-    LOG(INFO)<<"DONE READING IMAGES"<<endl;
+    VLOG(1)<<"DONE READING IMAGES"<<endl;
 
 }
 
@@ -758,6 +751,8 @@ void saRefocus::initializeRefocus() {
     // on the datatype
     // TODO: add ability to handle more data types
 
+    VLOG(3)<<"Converting image types to 32 bit float...";
+
     int type = imgs[0][0].type();
 
     for (int i=0; i<imgs.size(); i++) {
@@ -792,7 +787,7 @@ void saRefocus::initializeRefocus() {
         }
     }
 
-    //preprocess();
+    // preprocess();
 
 }
 
@@ -805,12 +800,12 @@ void saRefocus::initializeGPU() {
 
         LOG(INFO)<<"INITIALIZING GPU..."<<endl;
 
-        LOG(INFO)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
+        VLOG(1)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
     
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
     
-        LOG(INFO)<<"---"<<gpuDevice.name()<<"---"<<endl;
-        LOG(INFO)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB";
+        VLOG(1)<<"---"<<gpuDevice.name()<<"---"<<endl;
+        VLOG(1)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB";
     }
 
     uploadToGPU();
@@ -835,7 +830,7 @@ void saRefocus::uploadToGPU() {
     if (!EXPERT_FLAG) {
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
         double free_mem_GPU = gpuDevice.freeMemory()/pow(1024.0,2);
-        LOG(INFO)<<"Free Memory before: "<<free_mem_GPU<<" MB";
+        VLOG(1)<<"Free Memory before: "<<free_mem_GPU<<" MB";
     }
 
    
@@ -852,14 +847,14 @@ void saRefocus::uploadToGPU() {
 
     if (!EXPERT_FLAG) {
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
-        LOG(INFO)<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB";
+        VLOG(1)<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB";
     }
 
 }
 
 void saRefocus::uploadToGPU_ref() {
 
-    LOG(INFO)<<"Uploading data required by full refocusing method to GPU...";
+    VLOG(1)<<"Uploading data required by full refocusing method to GPU...";
 
     Mat_<float> D = Mat_<float>::zeros(3,3);
     D(0,0) = scale_; D(1,1) = scale_;
@@ -894,7 +889,7 @@ void saRefocus::uploadToGPU_ref() {
         ymaps.push_back(ymap.clone());
     }
 
-    LOG(INFO)<<"done!"<<endl;
+    VLOG(1)<<"done!";
 
 }
 
