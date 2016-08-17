@@ -45,7 +45,7 @@ typedef struct {
 } point;
 
 // Kernels
-__global__ void calc_refocus_map_kernel(PtrStepSzf xmap, PtrStepSzf ymap, float z, int n);
+__global__ void calc_refocus_map_kernel(PtrStepSzf xmap, PtrStepSzf ymap, float z, int n, int rows, int cols);
 
 __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_);
 
@@ -54,7 +54,7 @@ __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g);
 // Host wrappers
 void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][12], float geom[5]);
 
-void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i);
+void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i, int rows, int cols);
 
 void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z);
 

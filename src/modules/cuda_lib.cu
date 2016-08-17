@@ -61,7 +61,7 @@ __constant__ float n3_;
 __constant__ float t_;
 
 
-__global__ void calc_refocus_map_kernel(PtrStepSzf xmap, PtrStepSzf ymap, float z, int n) {
+__global__ void calc_refocus_map_kernel(PtrStepSzf xmap, PtrStepSzf ymap, float z, int n, int rows, int cols) {
 
     /*
 
@@ -74,21 +74,25 @@ __global__ void calc_refocus_map_kernel(PtrStepSzf xmap, PtrStepSzf ymap, float 
     int j = blockIdx.x * blockDim.x + threadIdx.x;
     int i = blockIdx.y * blockDim.y + threadIdx.y;
 
-    point p;
-    p.x = Hinv[0]*j + Hinv[1]*i + Hinv[2];
-    p.y = Hinv[3]*j + Hinv[4]*i + Hinv[5];
-    p.z = z;
-    
-    point Xcam;
-    Xcam.x = PX[n][0]; Xcam.y = PX[n][1]; Xcam.z = PX[n][2];
+    if (j < cols && i < rows) {
 
-    float f, g;
-    point a = point_refrac_fast(Xcam, p, f, g);
-    
-    xmap.ptr(i)[j] = (P[n][0]*a.x + P[n][1]*a.y + P[n][2]*a.z + P[n][3])/(P[n][8]*a.x + P[n][9]*a.y + P[n][10]*a.z + P[n][11]);
-    ymap.ptr(i)[j] = (P[n][4]*a.x + P[n][5]*a.y + P[n][6]*a.z + P[n][7])/(P[n][8]*a.x + P[n][9]*a.y + P[n][10]*a.z + P[n][11]);
+        point p;
+        p.x = Hinv[0]*j + Hinv[1]*i + Hinv[2];
+        p.y = Hinv[3]*j + Hinv[4]*i + Hinv[5];
+        p.z = z;
+        
+        point Xcam;
+        Xcam.x = PX[n][0]; Xcam.y = PX[n][1]; Xcam.z = PX[n][2];
+        
+        float f, g;
+        point a = point_refrac_fast(Xcam, p, f, g);
+        
+        xmap.ptr(i)[j] = (P[n][0]*a.x + P[n][1]*a.y + P[n][2]*a.z + P[n][3])/(P[n][8]*a.x + P[n][9]*a.y + P[n][10]*a.z + P[n][11]);
+        ymap.ptr(i)[j] = (P[n][4]*a.x + P[n][5]*a.y + P[n][6]*a.z + P[n][7])/(P[n][8]*a.x + P[n][9]*a.y + P[n][10]*a.z + P[n][11]);
 
-    //printf("residuals %f, %f\n", f, g);
+        //printf("residuals %f, %f\n", f, g);
+
+    }
 
 }
 
@@ -245,13 +249,16 @@ void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][1
 
 }
 
-void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i) {
+void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i, int rows, int cols) {
 
-    //dim3 grid(80, 50); dim3 block(16, 16);
-    dim3 grid(50, 50); dim3 block(10, 10);
+    dim3 block(32, 32);
+    dim3 grid(ceil(cols/16), ceil(rows/16));
+
+    // dim3 grid(80, 50); dim3 block(16, 16);
+    // dim3 grid(50, 50); dim3 block(10, 10);
 
     if (!cudaGetLastError()) {
-        calc_refocus_map_kernel<<<grid, block>>>(xmap, ymap, z, i);
+        calc_refocus_map_kernel<<<grid, block>>>(xmap, ymap, z, i, rows, cols);
     } else {
         std::cout<<cudaGetErrorString(cudaGetLastError())<<std::endl;
     }
@@ -259,14 +266,14 @@ void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i) {
 
 }
 
-void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z) {
+// void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z) {
 
-    dim3 grid(80, 50); dim3 block(16, 16);
+//     dim3 grid(80, 50); dim3 block(16, 16);
 
-    for (int i=0; i<1; i++)
-        calc_refocus_map_kernel<<<grid, block>>>(xmaps[i], ymaps[i], z, i);
+//     for (int i=0; i<1; i++)
+//         calc_refocus_map_kernel<<<grid, block>>>(xmaps[i], ymaps[i], z, i);
 
-    cudaDeviceSynchronize();
+//     cudaDeviceSynchronize();
 
-}
+// }
 

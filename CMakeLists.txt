@@ -36,6 +36,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
+option(FAST_MATH "FAST_MATH" OFF)
 
 set(PYTHON_INCLUDE_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
 set(PYTHON_LIBRARIES "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
@@ -110,6 +111,12 @@ set (OFV_LIBS openfv cuda_openfv)
 # fPIC flags, needed?
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+if (FAST_MATH)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
+endif()
+
 set(CMAKE_INSTALL_PREFIX "/usr/local/openfv")
 
 # Subdirectories

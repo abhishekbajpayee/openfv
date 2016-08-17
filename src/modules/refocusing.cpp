@@ -1015,7 +1015,7 @@ void saRefocus::GPUrefocus_ref(int live, int frame) {
     
     for (int i=0; i<num_cams_; i++) {
 
-        gpu_calc_refocus_map(xmap, ymap, z_, i);
+        gpu_calc_refocus_map(xmap, ymap, z_, i, img_size_.height, img_size_.width);
         gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
         
         if (i==0) {
