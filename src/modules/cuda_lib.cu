@@ -129,7 +129,7 @@ __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_
     ra1 = ra; rb1 = rb;
 
     // Newton Raphson loop to solve for Snell's law
-    for (int i=0; i<20; i++) {
+    for (int i=0; i<10; i++) {
         
         f = ( ra/sqrt((ra*ra)+(da*da)) ) - ( (n2_/n1_)*(rb-ra)/sqrt((rb-ra)*(rb-ra) + (db*db)) );
         g = ( (rb-ra)/sqrt((rb-ra)*(rb-ra)+(db*db)) ) - ( (n3_/n2_)*(rp-rb)/sqrt((rp-rb)*(rp-rb)+(dp*dp)) );
@@ -196,11 +196,14 @@ __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g) {
     float da = acz;
     float db = b[2]-a[2]; // TODO
     
-    //float f, g; 
     float dfdra, dfdrb, dgdra, dgdrb;
     float rasq, dasq, dbsq, dpsq, rbra, rbrasq, rprb, rprbsq;
     float n2n1 = n2_/n1_; float n3n2 = n3_/n2_;
     dasq = da*da; dbsq = db*db; dpsq = dp*dp;
+
+    float tol = 1E-9;
+    float ra1, rb1, res;
+    ra1 = ra; rb1 = rb;
 
     // Newton Raphson loop to solve for Snell's law
     for (int i=0; i<10; i++) {
@@ -231,6 +234,11 @@ __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g) {
         ra = ra - ( (f*dgdrb - g*dfdrb)/(dfdra*dgdrb - dfdrb*dgdra) );
         rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
         
+        res = abs(ra1-ra)+abs(rb1-rb);
+        ra1 = ra; rb1 = rb;
+        if (res < tol)
+            break;
+
     }
 
     a[0] = ra*cos(phi) + c[0];
