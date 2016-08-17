@@ -134,9 +134,11 @@ class saRefocus {
     double getQ(vector<Mat> &stack, vector<Mat> &refStack);
 
     // Expert mode functions
+    void setBenchmarkMode(int);
+    void setIntImgMode(int);
     void setGPU(int id);
-    void setSingleCamDebug(int flag);
-    void setStdevThresh(int flag);
+    void setSingleCamDebug(int);
+    void setStdevThresh(int);
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);
     void addView(Mat img, Mat P, Mat location);
     void addViews(vector< vector<Mat> > frames, vector<Mat> Ps, vector<Mat> locations);
@@ -229,6 +231,8 @@ class saRefocus {
     int SINGLE_CAM_DEBUG;
     double IMG_REFRAC_TOL;
     int MAX_NR_ITERS;
+    int BENCHMARK_MODE;
+    int INT_IMG_MODE;
     
 };
 

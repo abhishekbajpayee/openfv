@@ -67,6 +67,8 @@ saRefocus::saRefocus() {
     num_cams_ = 0;
     IMG_REFRAC_TOL = 1E-9;
     MAX_NR_ITERS = 20;
+    BENCHMARK_MODE = 0;
+    INT_IMG_MODE = 0;
 
 }
 
@@ -87,6 +89,8 @@ saRefocus::saRefocus(int num_cams, double f) {
     scale_ = f;
     IMG_REFRAC_TOL = 1E-9;
     MAX_NR_ITERS = 20;
+    BENCHMARK_MODE = 0;
+    INT_IMG_MODE = 0;
 
 }
 
@@ -95,10 +99,6 @@ saRefocus::saRefocus(refocus_settings settings):
     
     imgs_read_ = 0;
     read_calib_data(settings.calib_file_path);
-    
-    //} else {
-    //read_calib_data_pin(settings.calib_file_path);
-    //}
 
     if (mult_) {
         mult_exp_ = settings.mult_exp;
@@ -130,6 +130,9 @@ saRefocus::saRefocus(refocus_settings settings):
 
     IMG_REFRAC_TOL = 1E-9;
     MAX_NR_ITERS = 20;
+
+    BENCHMARK_MODE = 0;
+    INT_IMG_MODE = 0;
 
 }
 
@@ -452,7 +455,7 @@ void saRefocus::read_imgs_mtiff(string path) {
 
 void saRefocus::GPUliveView() {
 
-    initializeGPU();
+    // initializeGPU();
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
@@ -767,6 +770,8 @@ void saRefocus::initializeRefocus() {
             switch(type) {
 
             case CV_8U:
+                if (INT_IMG_MODE)
+                    break;
                 imgs[i][j].convertTo(img, CV_32F);
                 img /= 255.0;
                 imgs[i][j] = img.clone();
@@ -1014,9 +1019,13 @@ void saRefocus::GPUrefocus(int live, int frame) {
 void saRefocus::GPUrefocus_ref(int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
-    //Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
-    Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
-    refocused.upload(blank);
+    if (INT_IMG_MODE) {
+        Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+        refocused.upload(blank);
+    } else {
+        Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
+        refocused.upload(blank);
+    }
     
     for (int i=0; i<num_cams_; i++) {
 
@@ -1034,23 +1043,29 @@ void saRefocus::GPUrefocus_ref(int live, int frame) {
         
     }
     
-    threshold_image(refocused);
+    if (!BENCHMARK_MODE)
+        threshold_image(refocused);
 
     refocused.download(refocused_host_);
     
     if (live)
         liveViewWindow(refocused_host_);
     
-    result_ = refocused_host_.clone();
+    // result_ = refocused_host_.clone();
+    result_ = refocused_host_;
 
 }
 
 void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     Scalar fact = Scalar(1/double(num_cams_));
-    Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
-    // Mat blank(img_size_.height, img_size_.width, CV_8U, Scalar(0));
-    refocused.upload(blank);
+    if (INT_IMG_MODE) {
+        Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+        refocused.upload(blank);
+    } else {
+        Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
+        refocused.upload(blank);
+    }
     
     Mat H;
     calc_ref_refocus_H(cam_locations_[0], z_, 0, H);
@@ -1080,7 +1095,8 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     }
 
-    // threshold_image(refocused);
+    if (!BENCHMARK_MODE)
+        threshold_image(refocused);
 
     refocused.download(refocused_host_);
 
@@ -1136,7 +1152,6 @@ void saRefocus::CPUrefocus(int live, int frame) {
     if (live)        
         liveViewWindow(refocused_host_);
 
-    //refocused_host_.convertTo(result_, CV_8U);
     result_ = refocused_host_.clone();
 
 }
@@ -1171,7 +1186,6 @@ void saRefocus::CPUrefocus_ref(int live, int frame) {
     if (live)
         liveViewWindow(refocused_host_);
 
-    //refocused_host_.convertTo(result_, CV_8U);
     result_ = refocused_host_.clone();
 
 }
@@ -1198,7 +1212,6 @@ void saRefocus::CPUrefocus_ref_corner(int live, int frame) {
     if (live)
         liveViewWindow(refocused_host_);
 
-    //refocused_host_.convertTo(result_, CV_8U);
     result_ = refocused_host_.clone();
 
 }
@@ -1875,6 +1888,20 @@ void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
 }
 
 // ---Expert mode functions--- //
+
+void saRefocus::setBenchmarkMode(int flag) {
+    
+    LOG(WARNING)<<"Benchmarking mode is ON now! Thresholding might not work...";
+    BENCHMARK_MODE = flag;
+
+}
+
+void saRefocus::setIntImgMode(int flag) {
+
+    LOG(WARNING)<<"Integer image mode is ON now! Might break things in random places...";
+    INT_IMG_MODE = flag;
+
+}
 
 void saRefocus::setGPU(int id) {
 
