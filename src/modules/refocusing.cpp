@@ -373,27 +373,21 @@ void saRefocus::read_imgs_mtiff(string path) {
     }
 
     sort(img_names.begin(), img_names.end());
-    vector<TIFF*> tiffs;
+    vector<mtiffReader> tiffs;
 
     VLOG(1)<<"Images in path:"<<endl;
     for (int i=0; i<img_names.size(); i++) {
         VLOG(1)<<img_names[i]<<endl;
-        TIFF* tiff = TIFFOpen(img_names[i].c_str(), "r");
+        mtiffReader tiff(img_names[i]);
+        VLOG(2)<<tiff.num_frames()<<" frames in file.";
         tiffs.push_back(tiff);
     }
    
-    VLOG(1)<<"Counting number of frames...";
-    int dircount = 0;
-    if (tiffs[0]) {
-	do {
-	    dircount++;
-	} while (TIFFReadDirectory(tiffs[0]));
-    }
-    VLOG(1)<<"done! ("<<dircount<<" frames found.)"<<endl<<endl;
+    // TODO: add check for whether all tiffs are equal in size or not
 
     if (ALL_FRAME_FLAG) {
         VLOG(1)<<"READING ALL FRAMES..."<<endl;
-        for (int i=0; i<dircount; i++)
+        for (int i=0; i<tiffs[0].num_frames(); i++)
             frames_.push_back(i);
     }
 
@@ -403,43 +397,11 @@ void saRefocus::read_imgs_mtiff(string path) {
         VLOG(1)<<"Camera "<<n+1<<"...";
 
         vector<Mat> refocusing_imgs_sub;
-      
         int count=0;
-      
-        
         for (int f=0; f<frames_.size(); f++) {
-
-            Mat img, img2;
-            uint32 c, r;
-            size_t npixels;
-            uint32* raster;
-            
-            TIFFSetDirectory(tiffs[n], frames_.at(f));
-
-            TIFFGetField(tiffs[n], TIFFTAG_IMAGEWIDTH, &c);
-            TIFFGetField(tiffs[n], TIFFTAG_IMAGELENGTH, &r);
-            npixels = r * c;
-            raster = (uint32*) _TIFFmalloc(npixels * sizeof (uint32));
-            if (raster != NULL) {
-                if (TIFFReadRGBAImageOriented(tiffs[n], c, r, raster, ORIENTATION_TOPLEFT, 0)) {
-                    img.create(r, c, CV_32F);
-                    for (int i=0; i<r; i++) {
-                        for (int j=0; j<c; j++) {
-                            img.at<float>(i,j) = TIFFGetR(raster[i*c+j]);
-                        }
-                    }
-                }
-                _TIFFfree(raster);
-            }
-            
-            // img.convertTo(img2, CV_8U);
-            Mat imgI;
-            // preprocess(img2, imgI);
-            
-            // imshow("img to push", imgI); waitKey(0);
+            Mat img = tiffs[n].get_frame(frames_.at(f));            
             refocusing_imgs_sub.push_back(img.clone());
             count++;
-            
         }
 
         imgs.push_back(refocusing_imgs_sub);
