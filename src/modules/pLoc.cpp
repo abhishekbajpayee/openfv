@@ -43,7 +43,7 @@ using namespace std;
 using namespace cv;
 
 pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s2):
-    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), zmethod_(s.zmethod), refocus_(refocus), s2_(s2), show_particles_(s.show_particles), cluster_size_(s.cluster_size) {
+    window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), zmethod_(s.zmethod), refocus_(refocus), s2_(s2), show_particles_(s.show_particles), show_refocused_(s.show_refocused), cluster_size_(s.cluster_size) {
     
     zext_ = 2.5;
 
@@ -87,6 +87,9 @@ void pLocalize::find_particles_3d(int frame) {
         cout<<"\r"<<1+int((i-zmin_)*100.0/(zmax_-zmin_))<<"%"<<flush;
         //cout<<"\r"<<i<<flush;
         Mat image = refocus_.refocus(i, rx, ry, rz, thresh_, frame);
+        if (show_refocused_) {
+            qimshow(image);
+        }
 
         find_particles(image, points);
         // Mat img; draw_points(image, img, points); qimshow(img);

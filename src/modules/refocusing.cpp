@@ -1013,8 +1013,7 @@ void saRefocus::GPUrefocus_ref(int live, int frame) {
     if (live)
         liveViewWindow(refocused_host_);
     
-    // result_ = refocused_host_.clone();
-    result_ = refocused_host_;
+    result_ = refocused_host_.clone();
 
 }
 
@@ -1065,7 +1064,7 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
     if (live)
         liveViewWindow(refocused_host_);
 
-    result_ = refocused_host_;
+    result_ = refocused_host_.clone();
 
 }
 

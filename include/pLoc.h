@@ -124,6 +124,7 @@ class pLocalize {
     refocus_settings s2_;
 
     int show_particles_;
+    int show_refocused_;
 
 };
 
