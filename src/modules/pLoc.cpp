@@ -80,19 +80,18 @@ void pLocalize::find_particles_3d(int frame) {
 
     double rx = 0; double ry = 0; double rz = 0;
 
-    cout<<"Searching for particles through volume at frame "<<frame<<"..."<<endl;
+    VLOG(2)<<"Searching for particles through volume at frame "<<frame<<"..."<<endl;
 
     for (float i=zmin_; i<=zmax_; i += dz_) {
         
-        cout<<"\r"<<1+int((i-zmin_)*100.0/(zmax_-zmin_))<<"%"<<flush;
-        //cout<<"\r"<<i<<flush;
+        VLOG(3)<<1+int((i-zmin_)*100.0/(zmax_-zmin_))<<"%"<<flush;
+
         Mat image = refocus_.refocus(i, rx, ry, rz, thresh_, frame);
         if (show_refocused_) {
             qimshow(image);
         }
 
         find_particles(image, points);
-        // Mat img; draw_points(image, img, points); qimshow(img);
 
         refine_subpixel(image, points, particles);
         if (show_particles_) {

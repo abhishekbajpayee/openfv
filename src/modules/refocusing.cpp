@@ -96,6 +96,12 @@ saRefocus::saRefocus(int num_cams, double f) {
 
 saRefocus::saRefocus(refocus_settings settings):
     GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip) {
+
+    STDEV_THRESH = 0;
+    IMG_REFRAC_TOL = 1E-9;
+    MAX_NR_ITERS = 20;
+    BENCHMARK_MODE = 0;
+    INT_IMG_MODE = 0;
     
     imgs_read_ = 0;
     read_calib_data(settings.calib_file_path);
@@ -125,14 +131,6 @@ saRefocus::saRefocus(refocus_settings settings):
     rx_ = 0; ry_ = 0; rz_ = 0;
     cxs_ = 0; cys_ = 0; czs_ = 0;
     crx_ = 0; cry_ = 0; crz_ = 0;
-
-    STDEV_THRESH = 0;
-
-    IMG_REFRAC_TOL = 1E-9;
-    MAX_NR_ITERS = 20;
-
-    BENCHMARK_MODE = 0;
-    INT_IMG_MODE = 0;
 
 }
 
@@ -459,7 +457,7 @@ void saRefocus::GPUliveView() {
 
     while( 1 ){
         int key = cvWaitKey(10);
-        VLOG(3)<<"Key press: "<<(key & 255)<<endl;
+        VLOG(4)<<"Key press: "<<(key & 255)<<endl;
 
         if ( (key & 255)!=255 ) {
 
@@ -721,8 +719,6 @@ void saRefocus::initializeRefocus() {
     // on the datatype
     // TODO: add ability to handle more data types
 
-    VLOG(3)<<"Converting image types to 32 bit float...";
-
     int type = imgs[0][0].type();
 
     for (int i=0; i<imgs.size(); i++) {
@@ -732,29 +728,41 @@ void saRefocus::initializeRefocus() {
             switch(type) {
 
             case CV_8U:
-                if (INT_IMG_MODE)
+                if (INT_IMG_MODE) {
                     break;
+                }
+                if (i==0 && j==0) {
+                    VLOG(3)<<"Converting images from CV_8U type to CV_32F type...";
+                }
                 imgs[i][j].convertTo(img, CV_32F);
                 img /= 255.0;
                 imgs[i][j] = img.clone();
                 break;
 
             case CV_16U:
+                if (i==0 && j==0) {
+                    VLOG(3)<<"Converting images from CV_16U type to CV_32F type...";
+                }
                 imgs[i][j].convertTo(img, CV_32F);
                 img /= 65535.0;
                 imgs[i][j] = img.clone();
                 break;
 
             case CV_32F:
+                if (i==0 && j==0) {
+                    VLOG(3)<<"Images already CV_32F type...";
+                }
                 break;
 
             case CV_64F:
+                if (i==0 && j==0) {
+                    VLOG(3)<<"Converting images from CV_64F type to CV_32F type...";
+                }
                 imgs[i][j].convertTo(img, CV_32F);
                 imgs[i][j] = img.clone();
                 break;
 
             }
-
 
         }
     }
@@ -1449,7 +1457,7 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
         double tol = IMG_REFRAC_TOL;
         double ra1, rb1, res;
         ra1 = ra; rb1 = rb;
-        VLOG(3)<<"img_refrac() Newton Raphson solver progress:";
+        VLOG(4)<<"img_refrac() Newton Raphson solver progress:";
         int i;
         for (i=0; i<MAX_NR_ITERS; i++) {
 
@@ -1476,16 +1484,16 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
             rb = rb - ( (g*dfdra - f*dgdra)/(dfdra*dgdrb - dfdrb*dgdra) );
 
             res = abs(ra1-ra)+abs(rb1-rb);
-            VLOG(3)<<(i+1)<<": "<<res;
+            VLOG(4)<<(i+1)<<": "<<res;
             ra1 = ra; rb1 = rb;
             if (res < tol) {
-                VLOG(3)<<"Tolerance reached. Terminating solver...";
+                VLOG(4)<<"Tolerance reached. Terminating solver...";
                 break;
             }
 
         }
 
-        VLOG(2)<<"# NR iterations to convergence: "<<(i+1);
+        VLOG(3)<<"# NR iterations to convergence: "<<(i+1);
         if (i+1==MAX_NR_ITERS)
             LOG(WARNING)<<"Maximum iterations were reached for the NR solver in img_refrac()";
 
