@@ -199,6 +199,7 @@ class saRefocus {
     vector<int> frames_;
     int mult_;
     double mult_exp_;
+    int minLOS_;
     double warp_factor_;
     int active_frame_;
     int start_frame_;

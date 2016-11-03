@@ -63,6 +63,7 @@ saRefocus::saRefocus() {
     STDEV_THRESH=0;
     SINGLE_CAM_DEBUG=0;
     mult_=0;
+    minLOS_=0;
     frames_.push_back(0);
     num_cams_ = 0;
     IMG_REFRAC_TOL = 1E-9;
@@ -83,7 +84,8 @@ saRefocus::saRefocus(int num_cams, double f) {
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
-    mult_=0;   
+    mult_=0;
+    minLOS_=0;
     frames_.push_back(0);
     num_cams_ = num_cams;
     scale_ = f;
@@ -95,7 +97,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip) {
+  GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minLOS_(settings.minLOS), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip) {
 
     STDEV_THRESH = 0;
     IMG_REFRAC_TOL = 1E-9;
@@ -1043,6 +1045,8 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     if (mult_) {
         gpu::pow(temp, mult_exp_, temp2);
+    } else if (minLOS_) {
+        gpu::multiply(temp, Scalar(1), temp2);
     } else {
         gpu::multiply(temp, fact, temp2);
     }
@@ -1057,7 +1061,9 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
         if (mult_) {
             gpu::pow(temp, mult_exp_, temp2);
             gpu::multiply(refocused, temp2, refocused);
-        } else {
+        } else if (minLOS_) {
+	    gpu::min(refocused, temp, refocused);
+	} else {
             gpu::multiply(temp, fact, temp2);
             gpu::add(refocused, temp2, refocused);
         }

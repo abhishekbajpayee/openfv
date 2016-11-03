@@ -43,6 +43,9 @@ struct refocus_settings {
     //! Multiplicative exponent
     double mult_exp;
 
+    //! Flag for minLOS (minimum line of sight) reconstruction
+    int minLOS; // 1 for minimum line of sight
+
     //! Flag to use a GPU or not
     int use_gpu; // 1 for GPU
     //! Use Homography Fit (HF) method or not
