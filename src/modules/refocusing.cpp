@@ -431,9 +431,6 @@ void saRefocus::GPUliveView() {
 
     active_frame_ = 0; thresh_ = 0;
 
-    // test shift until input generalized
-    //ys_ = 125;
-
     // set up larger image for getting shifted region
     img_size_.height = img_size_.height + 2*abs(ys_);
     img_size_.width = img_size_.width + 2*abs(xs_);
@@ -1609,9 +1606,14 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
 
 }
 
-void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type) {
+void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, int shiftx, int shifty, string type) {
    
     LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
+
+    xs_ = shiftx;
+    ys_ = shifty;
+    img_size_.height = img_size_.height + 2*abs(ys_);
+    img_size_.width = img_size_.width + 2*abs(xs_);
     
     for (int f=0; f<frames_.size(); f++) {
         
