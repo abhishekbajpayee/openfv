@@ -39,7 +39,7 @@
 
 using namespace libtiff;
 
-multiCamCalibration::multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners): path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), skip_frames_(skip), show_corners_flag(show_corners) {
+multiCamCalibration::multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners): path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), mp4_(mp4), skip_frames_(skip), start_frame_(start_frame), end_frame_(end_frame), show_corners_flag(show_corners) {
 
     // Standard directories and filenames
     // TODO: this use of file needs to go
@@ -100,7 +100,10 @@ void multiCamCalibration::run() {
 
     if (run_calib_flag) {
 
-        if (mtiff_) {
+        if (mp4_) {
+            read_cam_names_mp4();
+            read_calib_imgs_mp4();
+        } else if (mtiff_) {
             read_cam_names_mtiff();
             read_calib_imgs_mtiff();
         } else {
@@ -226,6 +229,46 @@ void multiCamCalibration::read_cam_names_mtiff() {
 
     num_cams_ = cam_names_.size();
     // refocusing_params_.num_cams = num_cams_;
+
+    cam_names_read_ = 1;
+
+}
+
+void multiCamCalibration::read_cam_names_mp4() {
+
+    DIR *dir;
+    struct dirent *ent;
+
+    string dir1(".");
+    string dir2("..");
+    string temp_name;
+
+    dir = opendir(path_.c_str());
+    while(ent = readdir(dir)) {
+        temp_name = ent->d_name;
+        if (temp_name.compare(dir1)) {
+            if (temp_name.compare(dir2)) {
+                if (temp_name.compare(temp_name.size()-3,3,"MP4") == 0) {
+                    cam_names_.push_back(temp_name);
+                }
+            }
+        }
+    }
+    
+    sort(cam_names_.begin(), cam_names_.end());
+
+    for (int i=0; i<cam_names_.size(); i++) VLOG(1)<<"Camera "<<i+1<<": "<<cam_names_[i]<<endl;
+
+    if (dummy_mode_) {
+        int id;
+        LOG(INFO)<<"Enter the center camera number: ";
+        cin>>id;
+        center_cam_id_ = id-1;
+    } else {
+        center_cam_id_ = 3;
+    }
+
+    num_cams_ = cam_names_.size();
 
     cam_names_read_ = 1;
 
@@ -394,6 +437,61 @@ void multiCamCalibration::read_calib_imgs_mtiff() {
 
 }
 
+void multiCamCalibration::read_calib_imgs_mp4() {
+
+    for (int i=0; i<cam_names_.size(); i++) {
+
+        string file_path = path_+cam_names_[i];
+        LOG(INFO)<<"Opening "<<file_path;
+        VideoCapture cap(file_path); // open the default camera
+        if(!cap.isOpened())  // check if we succeeded
+            LOG(FATAL)<<"Could not open " + file_path;
+
+        int total_frames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+        VLOG(1)<<"Total frames: "<<total_frames;
+
+        int count = 0;
+        int counter = 0;
+        Mat frame, frame2;
+
+        // skip initial frames
+        while(counter<start_frame_-1) {
+            cap >> frame; counter++;
+        }
+        VLOG(3)<<counter<<" frames skipped";
+
+        vector<Mat> calib_imgs_sub;
+        while(counter<=end_frame_) {
+            // Mat frame;
+            cap >> frame; counter++;
+            VLOG(3)<<counter<<"\'th frame read";
+            cvtColor(frame, frame2, CV_BGR2GRAY);
+            frame2.convertTo(frame2, CV_8U);
+            calib_imgs_sub.push_back(frame2.clone()); // store frame
+            count++;
+
+            VLOG(3)<<"Skipping...";
+            int skipped = 0;
+            while(skipped<skip_frames_) {
+                cap >> frame; counter++;
+                skipped++;
+            }
+            VLOG(3)<<"Counter at: "<<counter;
+        }
+
+        calib_imgs_.push_back(calib_imgs_sub);
+        LOG(INFO)<<"done! "<<count<<" frames read."<<endl;
+
+    }
+
+    num_imgs_ = calib_imgs_[0].size();
+    img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
+
+    LOG(INFO)<<"\nDONE READING IMAGES!\n\n";
+    images_read_ = 1;
+
+}
+
 // TODO: add square grid correction capability again
 void multiCamCalibration::find_corners() {
 
@@ -417,7 +515,7 @@ void multiCamCalibration::find_corners() {
             for (int j=0; j<imgs_temp.size(); j++) {
 
                 //equalizeHist(imgs_temp[j], scene);
-                scene = imgs_temp[j];//*255.0;
+                scene = imgs_temp[j]; //*255.0;
                 //scene.convertTo(scene, CV_8U);
                 bool found = findChessboardCorners(scene, grid_size_, points, CV_CALIB_CB_ADAPTIVE_THRESH);
             
@@ -431,7 +529,7 @@ void multiCamCalibration::find_corners() {
                         scene_drawn = scene;
                         cvtColor(scene_drawn, scene_drawn, CV_GRAY2RGB);
                         drawChessboardCorners(scene_drawn, grid_size_, points, found);
-                        namedWindow("Pattern", CV_WINDOW_AUTOSIZE);
+                        namedWindow("Pattern", CV_WINDOW_NORMAL);
                         imshow("Pattern", scene_drawn);
                         waitKey(0);
                         cvDestroyWindow("Pattern");

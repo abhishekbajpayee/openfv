@@ -76,7 +76,7 @@ class multiCamCalibration {
       \param skip Number of frames to skip between each successive frame used
       \param show_corners Flag to enable displaying of corners in each image after they are found
     */
-    multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int skip, int show_corners);
+    multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners);
 
     // Set functions
     //! Set maximum iterations for the bundle adjustment optimization. Default is 100.
@@ -92,6 +92,12 @@ class multiCamCalibration {
         creating a multiCamCalibration instance should typically suffice to do everything.
     */
     void run();
+
+    // Functions to work with mp4 input files
+    //! Read camera names if calibration images are in mp4 files
+    void read_cam_names_mp4();
+    //! Read images if calibration images are in mp4 files
+    void read_calib_imgs_mp4();
     
     // Functions to work with multipage tiff files
     //! Read camera names if calibration images are in multipage tiff files
@@ -203,11 +209,14 @@ class multiCamCalibration {
     int load_results_flag;
     int dummy_mode_;
     int mtiff_; // 0 = folders with tif images, 1 = multipage tif files
+    int mp4_;
 
     // Settings
     int pinhole_max_iterations;
     int refractive_max_iterations;
     int skip_frames_;
+    int start_frame_;
+    int end_frame_;
     float init_f_value_;
 
     // Order control variables
