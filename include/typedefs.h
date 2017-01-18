@@ -35,7 +35,7 @@ const double pi = 3.14159;
 /*! Settings container passed to saRefocus constructor. */
 struct refocus_settings {
     
-    // Flag indicating if data is in mtiff format files
+    //! Flag indicating if data is in mtiff format files
     int mtiff; // 1 for using multipage tiffs
 
     //! Flag to use multiplicative refocusing
@@ -63,6 +63,31 @@ struct refocus_settings {
     //! Successive frames to skip (used if all_frames is set to 0)
     int skip;
     
+};
+
+struct calibration_settings {
+
+    //! Path to directory where input images / videos lie
+    string images_path;
+    //! Number of corners in grid (horizontal x vertical)
+    Size grid_size;
+    //! Physical size of grid in [mm]
+    double grid_size_phys;
+
+    //! Flag indicating if calibration refractive or not
+    int refractive;
+    //! Flag indicating if calibration data is in mtiff files or not
+    int mtiff;
+    //! Flag indicating if calibration data is in mp4 files or not
+    int mp4;
+
+    //! Frames to skip between successive reads
+    int skip;
+    //! Number of the frame to start reading at
+    int start_frame;
+    //! Number of the frame to end reading at
+    int end_frame;
+
 };
 
 struct safe_refocus_settings {

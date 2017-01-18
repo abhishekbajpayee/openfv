@@ -78,12 +78,18 @@ class multiCamCalibration {
     */
     multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners);
 
+    multiCamCalibration(calibration_settings settings);
+
     // Set functions
     //! Set maximum iterations for the bundle adjustment optimization. Default is 100.
     void set_max_iterations(int num) { pinhole_max_iterations = num; }
     //! Set initial value for f (focal length) in pixel units for P matrix of cameras. Default is 2500.
     void set_init_f_value(float val) { init_f_value_ = val; }
-    
+    //! Turn dummy mode on (1) or off. Default is off.
+    void set_dummy_mode(int flag) { dummy_mode_ = flag; }
+    //! Turn showing found corners on (1) or off. Default is off.
+    void show_corners(int flag) { show_corners_flag = flag; }
+
     // Function to run calibration
     /*! Run a calibration job. This automatically calls functions to
         read camera names and calibration images (read_cam_names_mtiff(), read_calib_imgs_mtiff() or
@@ -200,7 +206,7 @@ class multiCamCalibration {
     
     
     // Option flags
-    int solveForDistortion; // TODO: NOT IMPLEMENTED
+    int solveForDistortion_;
     int squareGrid; // TODO: NOT IMPLEMENTED
     int saveCornerImgs; // TODO: NOT IMPLEMENTED
     int show_corners_flag;

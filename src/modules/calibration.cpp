@@ -87,12 +87,19 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
     pinhole_max_iterations = 100;
     refractive_max_iterations = 100;
     init_f_value_ = 2500;
+    solveForDistortion_ = 0;
 
     // Initializing order control variables
     cam_names_read_ = 0;
     images_read_ = 0;
     corners_found_ = 0; 
     cams_initialized_ = 0;
+
+}
+
+multiCamCalibration::multiCamCalibration(calibration_settings settings) {
+
+    // Need to add code here
 
 }
 
@@ -451,32 +458,27 @@ void multiCamCalibration::read_calib_imgs_mp4() {
         VLOG(1)<<"Total frames: "<<total_frames;
 
         int count = 0;
-        int counter = 0;
         Mat frame, frame2;
 
-        // skip initial frames
-        while(counter<start_frame_-1) {
-            cap >> frame; counter++;
-        }
-        VLOG(3)<<counter<<" frames skipped";
-
+        cap.set(CV_CAP_PROP_POS_FRAMES, start_frame_-1);
+        VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);       
+        
         vector<Mat> calib_imgs_sub;
-        while(counter<=end_frame_) {
-            // Mat frame;
-            cap >> frame; counter++;
-            VLOG(3)<<counter<<"\'th frame read";
+        while(cap.get(CV_CAP_PROP_POS_FRAMES)<=end_frame_) {
+
+            cap >> frame; 
+            VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
+
             cvtColor(frame, frame2, CV_BGR2GRAY);
             frame2.convertTo(frame2, CV_8U);
             calib_imgs_sub.push_back(frame2.clone()); // store frame
             count++;
 
             VLOG(3)<<"Skipping...";
-            int skipped = 0;
-            while(skipped<skip_frames_) {
-                cap >> frame; counter++;
-                skipped++;
-            }
-            VLOG(3)<<"Counter at: "<<counter;
+            VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
+            cap.set(CV_CAP_PROP_POS_FRAMES, cap.get(CV_CAP_PROP_POS_FRAMES)+skip_frames_);
+            VLOG(3)<<"Location after skipping: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
+
         }
 
         calib_imgs_.push_back(calib_imgs_sub);
@@ -542,8 +544,10 @@ void multiCamCalibration::find_corners() {
                     corner_points.push_back(points);
 
                     if (show_corners_flag) {
-                        namedWindow("Pattern not found!", CV_WINDOW_AUTOSIZE);
+                        namedWindow("Pattern not found!", CV_WINDOW_NORMAL);
                         imshow("Pattern not found!", scene);
+                        waitKey(0);
+                        cvDestroyWindow("Pattern not found!");
                     }
                     LOG(WARNING)<<"pattern not found!\n";
                 }
@@ -979,16 +983,33 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
         // Each Residual block takes a point and a camera as input and outputs a 2
         // dimensional residual. Internally, the cost function stores the observed
         // image location and compares the reprojection against the observation.
-        ceres::CostFunction* cost_function1 =
-            new ceres::AutoDiffCostFunction<pinholeReprojectionError, 2, 9, 3>
-            (new pinholeReprojectionError(ba_problem.observations()[2 * i + 0],
-                                          ba_problem.observations()[2 * i + 1],
-                                          ba_problem.cx, ba_problem.cy, ba_problem.num_cameras()));
+        if (solveForDistortion_) {
+
+            ceres::CostFunction* cost_function1 =
+                new ceres::AutoDiffCostFunction<pinholeReprojectionError_dist, 2, 9, 3>
+                (new pinholeReprojectionError_dist(ba_problem.observations()[2 * i + 0],
+                                                   ba_problem.observations()[2 * i + 1],
+                                                   ba_problem.cx, ba_problem.cy, ba_problem.num_cameras()));
         
-        problem.AddResidualBlock(cost_function1,
-                                 NULL,
-                                 ba_problem.mutable_camera_for_observation(i),
-                                 ba_problem.mutable_point_for_observation(i));
+            problem.AddResidualBlock(cost_function1,
+                                     NULL,
+                                     ba_problem.mutable_camera_for_observation(i),
+                                     ba_problem.mutable_point_for_observation(i));
+
+        } else {
+
+            ceres::CostFunction* cost_function1 =
+                new ceres::AutoDiffCostFunction<pinholeReprojectionError, 2, 9, 3>
+                (new pinholeReprojectionError(ba_problem.observations()[2 * i + 0],
+                                              ba_problem.observations()[2 * i + 1],
+                                              ba_problem.cx, ba_problem.cy, ba_problem.num_cameras()));
+        
+            problem.AddResidualBlock(cost_function1,
+                                     NULL,
+                                     ba_problem.mutable_camera_for_observation(i),
+                                     ba_problem.mutable_point_for_observation(i));
+
+        }
 
         ceres::CostFunction* cost_function2 =
             new ceres::AutoDiffCostFunction<planeError, 1, 3, 4>

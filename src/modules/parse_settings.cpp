@@ -114,3 +114,66 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
 
   
 }
+
+void parse_calibration_settings(string filename, calibration_settings &settings, bool h) {
+
+    namespace po = boost::program_options;
+
+    po::options_description desc("Allowed config file options");
+    desc.add_options()
+        ("images_path", po::value<string>()->default_value(""), "path where data is located")
+        ("refractive", po::value<int>()->default_value(0), "ON if calibration data is refractive")
+        ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
+        ("mp4", po::value<int>()->default_value(0), "ON if data is in mp4 files")
+        ("hgrid", po::value<int>()->default_value(5), "Horizontal number of corners in the grid")
+        ("vgrid", po::value<int>()->default_value(5), "Vertical number of corners in the grid")
+        ("grid_size_phys", po::value<double>()->default_value(5), "Physical size of grid in [mm]")
+        ("skip", po::value<int>()->default_value(1), "Number of frames to skip (used mostly when mtiff on)")
+        ("frames", po::value<string>()->default_value(""), "Array of values in format start, end, skip")
+        ;
+
+    if (h) {
+        cout<<desc;
+        exit(1);
+    }
+
+    po::variables_map vm;
+    po::store(po::parse_config_file<char>(filename.c_str(), desc), vm);
+    po::notify(vm);
+
+    settings.refractive = vm["refractive"].as<int>();
+    settings.mtiff = vm["mtiff"].as<int>();
+    settings.skip = vm["skip"].as<int>();
+    settings.mp4 = vm["mp4"].as<int>();
+    if (settings.mp4) {
+        vector<int> frames;
+        stringstream frames_stream(vm["frames"].as<string>());
+        int i;
+        while (frames_stream >> i) {
+            frames.push_back(i);
+            
+            if(frames_stream.peek() == ',' || frames_stream.peek() == ' ') {
+                frames_stream.ignore();
+            }
+        }
+        if (frames.size() == 3) {
+            settings.start_frame = frames.at(0);
+            settings.end_frame = frames.at(1);
+            settings.skip = frames.at(2);
+        } else {
+            LOG(FATAL)<<"frames expects 3 comma or space separated values";
+        }
+    }
+    if (settings.start_frame<0) {
+        LOG(FATAL)<<"Can't have starting frame less than 0. Terminating..."<<endl;
+    }
+   
+    boost::filesystem::path imgsP(filename);
+    imgsP.remove_leaf() /= vm["images_path"].as<string>();
+     
+    settings.images_path = imgsP.string();
+    if(settings.images_path.empty()) {
+        LOG(FATAL)<<"images_path is a REQUIRED variable";
+    }
+  
+}
