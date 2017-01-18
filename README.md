@@ -92,6 +92,7 @@ Roadmap
 - Add tomo reconstruction and window deformation enabled PIV code (MATLAB)
 
 ### Phase 2
+- Add tests that ensure functionality is not breaking due to updates
 - Remove MATLAB code and call underlying algorithms (in Fortran) from Python
 - Eliminate use of Intel MKL (in Fortran code) and replace with FFTW
 - Start establishing a framework for effective benchmarking and comparison of different algorithms using the exact same data / inputs
