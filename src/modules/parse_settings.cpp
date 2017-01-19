@@ -77,38 +77,60 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         settings.skip = frames.at(2);
         settings.all_frames = 0;
     }
-   if (settings.start_frame<0) {
-            LOG(FATAL)<<"Can't have starting frame less than 0. Terminating..."<<endl;
-        }
-   
+    if (settings.start_frame<0) {
+        LOG(FATAL)<<"Can't have starting frame less than 0. Terminating..."<<endl;
+    }
+    
     // settings.all_frames = vm["all_frames"].as<int>();
     // if (!settings.all_frames) {
     //     settings.start_frame = vm["start_frame"].as<int>();
     //     settings.end_frame = vm["end_frame"].as<int>();
     // }
     // settings.upload_frame = vm["upload_frame"].as<int>();
-
-    boost::filesystem::path calibP(filename);
-    boost::filesystem::path imgsP(filename);
-
-    calibP.remove_leaf() /= vm["calib_file_path"].as<string>();
-    imgsP.remove_leaf() /= vm["images_path"].as<string>();
-
     
-    settings.calib_file_path = calibP.string();
-    if (settings.calib_file_path.empty()) {
-        LOG(FATAL)<<"calib_file is a REQUIRED Variable";
+    boost::filesystem::path calibP(vm["calibration_file_path"].as<string>());
+    if(calibP.string().empty()) {
+        LOG(FATAL)<<"calibration_file_path is a REQUIRED variable";
     }
+    if (calibP.is_absolute()) {
+        settings.calib_file_path = calibP.string();
+    } else {
+        boost::filesystem::path config_file_path(filename);
+        config_file_path.remove_leaf() /= calibP.string();
+        settings.calib_file_path = config_file_path.string();
+    }
+
+    boost::filesystem::path imgsP(vm["images_path"].as<string>());
+    if(imgsP.string().empty()) {
+        LOG(FATAL)<<"images_path is a REQUIRED variable";
+    }
+    if (imgsP.is_absolute()) {
+        settings.images_path = imgsP.string();
+    } else {
+        boost::filesystem::path config_file_path(filename);
+        config_file_path.remove_leaf() /= imgsP.string();
+        settings.images_path = config_file_path.string();
+    }
+
+    // boost::filesystem::path calibP(filename);
+    // boost::filesystem::path imgsP(filename);
+
+    // calibP.remove_leaf() /= vm["calib_file_path"].as<string>();
+    // imgsP.remove_leaf() /= vm["images_path"].as<string>();
+    
+    // settings.calib_file_path = calibP.string();
+    // if (settings.calib_file_path.empty()) {
+    //     LOG(FATAL)<<"calib_file is a REQUIRED Variable";
+    // }
     // else if (!dirExists(settings.calib_file_path)) {
     //    LOG(FATAL)<<"Calibration File Path does not exist!";
     // }
-    
      
-    settings.images_path = imgsP.string();
-    if(settings.images_path.empty()) {
-        LOG(FATAL)<<"data_path is a REQUIRED Variable";
-    }
-    //else if (!dirExists(settings.images_path)) {
+    // settings.images_path = imgsP.string();
+    // if(settings.images_path.empty()) {
+    //     LOG(FATAL)<<"data_path is a REQUIRED Variable";
+    // }
+    // else if (!dirExists(settings.images_path)) {
     //    LOG(FATAL)<<"Images Files Path does not exist!";
     // } 
 
@@ -141,6 +163,8 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     po::store(po::parse_config_file<char>(filename.c_str(), desc), vm);
     po::notify(vm);
 
+    settings.grid_size = Size(vm["hgrid"].as<int>(), vm["vgrid"].as<int>());
+    settings.grid_size_phys = vm["grid_size_phys"].as<double>();
     settings.refractive = vm["refractive"].as<int>();
     settings.mtiff = vm["mtiff"].as<int>();
     settings.skip = vm["skip"].as<int>();
@@ -167,13 +191,17 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     if (settings.start_frame<0) {
         LOG(FATAL)<<"Can't have starting frame less than 0. Terminating..."<<endl;
     }
-   
-    boost::filesystem::path imgsP(filename);
-    imgsP.remove_leaf() /= vm["images_path"].as<string>();
-     
-    settings.images_path = imgsP.string();
-    if(settings.images_path.empty()) {
+    
+    boost::filesystem::path imgsP(vm["images_path"].as<string>());
+    if(imgsP.string().empty()) {
         LOG(FATAL)<<"images_path is a REQUIRED variable";
+    }
+    if (imgsP.is_absolute()) {
+        settings.images_path = imgsP.string();
+    } else {
+        boost::filesystem::path config_file_path(filename);
+        config_file_path.remove_leaf() /= imgsP.string();
+        settings.images_path = config_file_path.string();
     }
   
 }

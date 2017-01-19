@@ -98,8 +98,73 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
 }
 
 multiCamCalibration::multiCamCalibration(calibration_settings settings) {
+    
+    path_ = settings.images_path;
+    grid_size_ = settings.grid_size;
+    grid_size_phys_ = settings.grid_size_phys;
+    refractive_ = settings.refractive;
+    mtiff_ = settings.mtiff;
+    mp4_ = settings.mp4;
+    skip_frames_ = settings.skip;
+    start_frame_ = settings.start_frame;
+    end_frame_ = settings.end_frame;
 
-    // Need to add code here
+    dummy_mode_ = 0;
+    show_corners_flag = 0;
+
+    // Standard directories and filenames
+    // TODO: this use of file needs to go
+    ba_file_ = string("tmp_ba_data.txt");
+    result_dir_ = string("calibration_results");
+
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+        LOG(INFO)<<"Current working dir: "<<string(cwd);
+    else
+        LOG(FATAL)<<"getcwd() error!";
+    
+    run_calib_flag = 0;
+    load_results_flag = 0;
+
+    VLOG(1)<<"Checking for previous calibration results in "<<path_;
+    int result_dir_found = 0;
+    DIR *dir;
+    struct dirent *ent;
+    string temp_name;
+    dir = opendir(path_.c_str());
+
+    int choice;
+    while(ent = readdir(dir)) {
+        temp_name = ent->d_name;
+        if (!temp_name.compare(result_dir_)) {
+            result_dir_found = 1;
+            LOG(INFO)<<"\'"<<result_dir_<<"\' directory found in "<<path_<<"! Calibration has already been performed earlier. Please select what to do...\n1) Run calibration again\n2) Read results\nEnter your choice (1/2): ";
+            cin>>choice;
+            if (choice==1) {
+                run_calib_flag = 1;
+            } else if (choice==2) {
+                load_results_flag = 1;
+            } else {
+                LOG(INFO)<<"Invalid choice!\n";
+            }
+        }
+    }
+    if (!result_dir_found) run_calib_flag = 1;
+
+    // show_corners_flag = 0;
+    results_just_saved_flag = 0;
+
+    // Default settings for optimization routines
+    pinhole_max_iterations = 100;
+    refractive_max_iterations = 100;
+    init_f_value_ = 2500;
+    solveForDistortion_ = 0;
+
+    // Initializing order control variables
+    cam_names_read_ = 0;
+    images_read_ = 0;
+    corners_found_ = 0; 
+    cams_initialized_ = 0;
 
 }
 
