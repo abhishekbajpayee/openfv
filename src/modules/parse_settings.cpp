@@ -17,6 +17,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("mult_exp", po::value<double>()->default_value(.25), "Multiplicative method exponent")
         ("hf_method", po::value<int>()->default_value(0), "ON to use HF method")
         ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
+        ("mp4", po::value<int>()->default_value(0), "ON if data is in mp4 files")
         //("all_frames", po::value<int>()->default_value(1), "ON to process all frames in a multipage tiff file")
         //("start_frame", po::value<int>()->default_value(0), "first frame in range of frames to process")
         ("frames", po::value<string>()->default_value(""), "Array of values in format start, end, skip")
@@ -44,6 +45,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.use_gpu = vm["use_gpu"].as<int>();
     settings.hf_method = vm["hf_method"].as<int>();
     settings.mtiff = vm["mtiff"].as<int>();
+    settings.mp4 = vm["mp4"].as<int>();
     settings.mult = vm["mult"].as<int>();
     if (settings.mult)
         settings.mult_exp = vm["mult_exp"].as<double>();
@@ -88,9 +90,9 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     // }
     // settings.upload_frame = vm["upload_frame"].as<int>();
     
-    boost::filesystem::path calibP(vm["calibration_file_path"].as<string>());
+    boost::filesystem::path calibP(vm["calib_file_path"].as<string>());
     if(calibP.string().empty()) {
-        LOG(FATAL)<<"calibration_file_path is a REQUIRED variable";
+        LOG(FATAL)<<"calib_file_path is a REQUIRED variable";
     }
     if (calibP.is_absolute()) {
         settings.calib_file_path = calibP.string();
@@ -144,9 +146,11 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     po::options_description desc("Allowed config file options");
     desc.add_options()
         ("images_path", po::value<string>()->default_value(""), "path where data is located")
+        ("corners_file", po::value<string>()->default_value(""), "file where to write corners")
         ("refractive", po::value<int>()->default_value(0), "ON if calibration data is refractive")
         ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
         ("mp4", po::value<int>()->default_value(0), "ON if data is in mp4 files")
+        ("distortion", po::value<int>()->default_value(0), "ON if radial distortion should be accounted for")
         ("hgrid", po::value<int>()->default_value(5), "Horizontal number of corners in the grid")
         ("vgrid", po::value<int>()->default_value(5), "Vertical number of corners in the grid")
         ("grid_size_phys", po::value<double>()->default_value(5), "Physical size of grid in [mm]")
@@ -166,6 +170,7 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     settings.grid_size = Size(vm["hgrid"].as<int>(), vm["vgrid"].as<int>());
     settings.grid_size_phys = vm["grid_size_phys"].as<double>();
     settings.refractive = vm["refractive"].as<int>();
+    settings.distortion = vm["distortion"].as<int>();
     settings.mtiff = vm["mtiff"].as<int>();
     settings.skip = vm["skip"].as<int>();
     settings.mp4 = vm["mp4"].as<int>();
@@ -204,4 +209,6 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
         settings.images_path = config_file_path.string();
     }
   
+    settings.corners_file_path = vm["corners_file"].as<string>();
+
 }
