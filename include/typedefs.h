@@ -37,7 +37,8 @@ struct refocus_settings {
     
     //! Flag indicating if data is in mtiff format files
     int mtiff; // 1 for using multipage tiffs
-
+    //! Flag indicating if data is in mp4 videos
+    int mp4; // 1 for using mp4 data
     //! Flag to use multiplicative refocusing
     int mult; // 1 for Multiplicative
     //! Multiplicative exponent
@@ -69,6 +70,8 @@ struct calibration_settings {
 
     //! Path to directory where input images / videos lie
     string images_path;
+    //! Path to file where detected corners should be written
+    string corners_file_path;
     //! Number of corners in grid (horizontal x vertical)
     Size grid_size;
     //! Physical size of grid in [mm]
@@ -80,6 +83,10 @@ struct calibration_settings {
     int mtiff;
     //! Flag indicating if calibration data is in mp4 files or not
     int mp4;
+    //! Flag indicating if radial distortion should be accounted for or not
+    int distortion;
+    //! Flag indicating if corners should be written to file or not
+    int write_corners;
 
     //! Frames to skip between successive reads
     int skip;
