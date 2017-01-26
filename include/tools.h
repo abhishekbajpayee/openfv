@@ -215,10 +215,11 @@ class imageIO {
 class mtiffReader {
     
 public:
+
     ~mtiffReader() {}
     mtiffReader(string path);
-    Mat get_frame(int);
 
+    Mat get_frame(int);
     int num_frames();
 
 protected:
@@ -228,6 +229,28 @@ private:
     TIFF* tiff_;
     int num_frames_;
     string path_;
+
+};
+
+class mp4Reader {
+    
+public:
+
+    ~mp4Reader() {}
+    mp4Reader(string path);
+    mp4Reader(string path, int color);
+
+    Mat get_frame(int);
+    int num_frames();
+
+protected:
+    
+private:
+    
+    VideoCapture cap_;
+    int num_frames_;
+    string path_;
+    int color_;
 
 };
 

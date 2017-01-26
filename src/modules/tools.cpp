@@ -987,6 +987,57 @@ Mat mtiffReader::get_frame(int n) {
 
 }
 
+mp4Reader::mp4Reader(string path) {
+
+    path_ = path;
+    color_ = 0;
+    cap_.open(path_);
+    if (!cap_.isOpened())
+        LOG(FATAL)<<"Could not open "<<path;
+
+    num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
+    VLOG(1)<<"Total number of frames in "<<path<<": "<<num_frames_;
+
+}
+
+mp4Reader::mp4Reader(string path, int color) {
+
+    path_ = path;
+    color_ = color;
+    cap_.open(path_);
+    if (!cap_.isOpened())
+        LOG(FATAL)<<"Could not open "<<path;
+
+    num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
+    VLOG(1)<<"Total number of frames in "<<path<<": "<<num_frames_;
+
+}
+
+int mp4Reader::num_frames() { return num_frames_; }
+
+Mat mp4Reader::get_frame(int n) {
+
+    Mat frame, img;
+
+    if (n>=num_frames_) {
+        LOG(WARNING)<<"mp4 file only contains "<<num_frames_<<" frames and frame "<<n<<" requested! Blank image will be returned.";
+        return(img);
+    }
+
+    cap_.set(CV_CAP_PROP_POS_FRAMES, n);
+    cap_ >> frame;
+    
+    if (color_) {
+        img = frame.clone();
+    } else {
+        cvtColor(frame, img, CV_BGR2GRAY);
+        img.convertTo(img, CV_8U);
+    }
+    
+    return img;
+
+}
+
 // Python wrapper
 BOOST_PYTHON_MODULE(tools) {
 
