@@ -89,6 +89,13 @@ class multiCamCalibration {
     void set_dummy_mode(int flag) { dummy_mode_ = flag; }
     //! Turn showing found corners on (1) or off. Default is off.
     void show_corners(int flag) { show_corners_flag = flag; }
+    /*! Remove constraints (1) of fixed principal point and initial guesses on camera initialization
+      Default is on.
+    */
+    void freeCamInit(int flag) { freeCamInit_ = flag; }
+    
+    void setCenterCam(int cam) { center_cam_id_ = cam; }
+    void initGridViews(int flag) { initGridViews_ = flag; }
 
     // Function to run calibration
     /*! Run a calibration job. This automatically calls functions to
@@ -122,6 +129,9 @@ class multiCamCalibration {
 
     void initialize_cams();
     void initialize_cams_ref();
+    
+    // void average_camera_params(vector<Mat>, vector<Mat>, Mat&, Mat&);
+    void adjust_pattern_points(vector< vector<Point3f> >&, Mat, Mat, vector<Mat>, vector<Mat>, Mat, Mat);
 
     void write_BA_data();
     void write_BA_data_ref();
@@ -133,6 +143,7 @@ class multiCamCalibration {
 
     void write_calib_results();
     void write_calib_results_ref();
+    void write_kalibr_imgs(string);
     // void load_calib_results();
 
     // void write_calib_results_matlab();
@@ -158,6 +169,7 @@ class multiCamCalibration {
     void get_grid_size_pix();
 
     string path_;
+    string corners_file_path_;
     string ba_file_;
     string result_dir_;
     string result_file_;
@@ -176,6 +188,7 @@ class multiCamCalibration {
         
     vector<string> cam_names_;
     vector< vector<Mat> > calib_imgs_;
+    vector< vector<double> > tstamps_;
     vector< vector< vector<Point3f> > > all_pattern_points_;
     vector< vector< vector<Point2f> > > all_corner_points_;
     vector< vector< vector<Point2f> > > all_corner_points_raw_;
@@ -183,6 +196,8 @@ class multiCamCalibration {
     vector<Mat> dist_coeffs_;
     vector< vector<Mat> > rvecs_;
     vector< vector<Mat> > tvecs_;
+    // vector<Mat> rvecs_avg_;
+    // vector<Mat> tvecs_avg_;
     
     vector<Mat> cVecs_;
     vector<Mat> rVecs_;
@@ -207,6 +222,9 @@ class multiCamCalibration {
     
     // Option flags
     int solveForDistortion_;
+    int freeCamInit_;
+    // int averageCams_;
+    int initGridViews_;
     int squareGrid; // TODO: NOT IMPLEMENTED
     int saveCornerImgs; // TODO: NOT IMPLEMENTED
     int show_corners_flag;
