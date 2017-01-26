@@ -134,6 +134,24 @@ Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P) {
 
 }
 
+Mat build_camera_matrix(Mat K, Mat rvec, Mat tvec) {
+
+    Mat R; Rodrigues(rvec, R);
+
+    Mat_<double> P = Mat_<double>::zeros(3,4);
+
+    for (int i=0; i<3; i++) {
+        for (int j=0; j<3; j++) {
+            P(i,j) = R.at<double>(i,j);
+        }
+        P(i,3) = tvec.at<double>(0,i);
+    }
+    P = K*P;
+
+    return P;
+
+}
+
 double dist(Point3f p1, Point3f p2) {
 
     double distance = sqrt(pow(p2.x-p1.x,2) + pow(p2.y-p1.y,2) + pow(p2.z-p1.z,2));
