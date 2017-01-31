@@ -39,6 +39,7 @@
 #include "std_include.h"
 #include "optimization.h"
 #include "typedefs.h"
+#include "tools.h"
 
 /*!
     Class with functions that allow user to calibrate multiple cameras via bundle
@@ -75,9 +76,11 @@ class multiCamCalibration {
       \param mtiff Flag indicating whether images are in multipage tiff files or as separate images
       \param skip Number of frames to skip between each successive frame used
       \param show_corners Flag to enable displaying of corners in each image after they are found
-    */
+    
     multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners);
-
+    */
+    
+    // TODO: document this constructor!
     multiCamCalibration(calibration_settings settings);
 
     // Set functions
@@ -144,12 +147,13 @@ class multiCamCalibration {
     void write_calib_results();
     void write_calib_results_ref();
     void write_kalibr_imgs(string);
-    // void load_calib_results();
 
     // void write_calib_results_matlab();
     // void write_calib_results_matlab_ref();
 
     void grid_view();
+    void grid_view_mp4();
+    void update_grid_view_mp4();
 
     // Functions to access calibration data
     //! \return Number of cameras in the data set
@@ -187,6 +191,7 @@ class multiCamCalibration {
     double pix_per_phys_;
         
     vector<string> cam_names_;
+    vector<int> shifts_;
     vector< vector<Mat> > calib_imgs_;
     vector< vector<double> > tstamps_;
     vector< vector< vector<Point3f> > > all_pattern_points_;
@@ -219,7 +224,6 @@ class multiCamCalibration {
     int refractive_;
     float geom[5];
     
-    
     // Option flags
     int solveForDistortion_;
     int freeCamInit_;
@@ -249,6 +253,12 @@ class multiCamCalibration {
     int corners_found_;
     int cams_initialized_;
     
+    // Grid view variables
+    int gframe_;
+    int gskip_;
+    int active_cam_;
+    vector<mp4Reader> mfs_;
+
 };
 
 class camCalibration {

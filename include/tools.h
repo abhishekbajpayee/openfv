@@ -242,6 +242,7 @@ public:
 
     Mat get_frame(int);
     int num_frames();
+    double time_stamp(int);
 
 protected:
     

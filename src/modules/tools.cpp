@@ -22,10 +22,10 @@
 // You should have received a copy of the GNU General Public License along with openFV. 
 // If not, see http://www.gnu.org/licenses/.
 
-#include "std_include.h"
-#include "refocusing.h"
-#include "rendering.h"
-#include "typedefs.h"
+// #include "std_include.h"
+// #include "refocusing.h"
+// #include "rendering.h"
+// #include "typedefs.h"
 #include "tools.h"
 
 using namespace std;
@@ -1015,6 +1015,8 @@ mp4Reader::mp4Reader(string path, int color) {
 
 int mp4Reader::num_frames() { return num_frames_; }
 
+double mp4Reader::time_stamp(int n) { return cap_.get(CV_CAP_PROP_POS_MSEC); }
+
 Mat mp4Reader::get_frame(int n) {
 
     Mat frame, img;
@@ -1034,6 +1036,7 @@ Mat mp4Reader::get_frame(int n) {
         img.convertTo(img, CV_8U);
     }
     
+    VLOG(3)<<n<<"\'th frame read.";
     return img;
 
 }

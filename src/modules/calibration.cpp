@@ -33,12 +33,14 @@
 // -------------------------------------------------------
 // -------------------------------------------------------
 
+// #include "optimization.h"
+// #include "tools.h"
+
 #include "calibration.h"
-#include "optimization.h"
-#include "tools.h"
 
 using namespace libtiff;
 
+/*
 multiCamCalibration::multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners): path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), mp4_(mp4), skip_frames_(skip), start_frame_(start_frame), end_frame_(end_frame), show_corners_flag(show_corners) {
 
     // Standard directories and filenames
@@ -67,14 +69,15 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
         temp_name = ent->d_name;
         if (!temp_name.compare(result_dir_)) {
             result_dir_found = 1;
-            LOG(INFO)<<"\'"<<result_dir_<<"\' directory found in "<<path_<<"! Calibration has already been performed earlier. Please select what to do...\n1) Run calibration again\n2) Read results\nEnter your choice (1/2): ";
+            LOG(INFO)<<"\'"<<result_dir_<<"\' directory found in "<<path_<<"! It seems that calibration has already been performed earlier. Run calibration again (y/n)?: ";
             cin>>choice;
+            LOG(INFO)<<choice;
             if (choice==1) {
                 run_calib_flag = 1;
             } else if (choice==2) {
                 load_results_flag = 1;
             } else {
-                LOG(INFO)<<"Invalid choice!\n";
+                LOG(FATAL)<<"Invalid choice!\n";
             }
         }
     }
@@ -96,6 +99,7 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
     cams_initialized_ = 0;
 
 }
+*/
 
 multiCamCalibration::multiCamCalibration(calibration_settings settings) {
     
@@ -137,19 +141,17 @@ multiCamCalibration::multiCamCalibration(calibration_settings settings) {
     string temp_name;
     dir = opendir(path_.c_str());
 
-    int choice;
+    char choice;
     while(ent = readdir(dir)) {
         temp_name = ent->d_name;
         if (!temp_name.compare(result_dir_)) {
             result_dir_found = 1;
-            LOG(INFO)<<"\'"<<result_dir_<<"\' directory found in "<<path_<<"! Calibration has already been performed earlier. Please select what to do...\n1) Run calibration again\n2) Read results\nEnter your choice (1/2): ";
+            LOG(INFO)<<"\'"<<result_dir_<<"\' directory found in "<<path_<<"! Is seems like calibration has already been performed earlier. Run calibration again (y/n)?";
             cin>>choice;
-            if (choice==1) {
+            if (choice=='y') {
                 run_calib_flag = 1;
-            } else if (choice==2) {
-                load_results_flag = 1;
             } else {
-                LOG(INFO)<<"Invalid choice!\n";
+                LOG(FATAL)<<"Invalid choice or n entered! Calibration termination...";
             }
         }
     }
@@ -329,6 +331,7 @@ void multiCamCalibration::read_cam_names_mp4() {
             if (temp_name.compare(dir2)) {
                 if (temp_name.compare(temp_name.size()-3,3,"MP4") == 0) {
                     cam_names_.push_back(temp_name);
+                    shifts_.push_back(0);
                 }
             }
         }
@@ -521,38 +524,46 @@ void multiCamCalibration::read_calib_imgs_mp4() {
     for (int i=0; i<cam_names_.size(); i++) {
 
         string file_path = path_+cam_names_[i];
-        LOG(INFO)<<"Opening "<<file_path;
-        VideoCapture cap(file_path); // open the default camera
-        if(!cap.isOpened())  // check if we succeeded
-            LOG(FATAL)<<"Could not open " + file_path;
+        mp4Reader mf(file_path);
 
-        int total_frames = cap.get(CV_CAP_PROP_FRAME_COUNT);
-        VLOG(1)<<"Total frames: "<<total_frames;
+        // LOG(INFO)<<"Opening "<<file_path;
+        // VideoCapture cap(file_path); // open the default camera
+        // if(!cap.isOpened())  // check if we succeeded
+        //     LOG(FATAL)<<"Could not open " + file_path;
+
+        // int total_frames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+        // VLOG(1)<<"Total frames: "<<total_frames;
 
         int count = 0;
         Mat frame, frame2;
 
-        cap.set(CV_CAP_PROP_POS_FRAMES, start_frame_-1);
-        VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);       
+        // cap.set(CV_CAP_PROP_POS_FRAMES, start_frame_-1);
+        // VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);       
         
         vector<Mat> calib_imgs_sub;
         vector<double> tstamps_sub;
-        while(cap.get(CV_CAP_PROP_POS_FRAMES)<=end_frame_) {
+        int skip = 0;
+        while(start_frame_ + skip <= end_frame_) {
 
-            cap >> frame; 
-            VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
+            Mat frame = mf.get_frame(start_frame_ + skip);
 
-            tstamps_sub.push_back(cap.get(CV_CAP_PROP_POS_MSEC));
+            // cap >> frame; 
+            // VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
 
-            cvtColor(frame, frame2, CV_BGR2GRAY);
-            frame2.convertTo(frame2, CV_8U);
-            calib_imgs_sub.push_back(frame2.clone()); // store frame
+            // tstamps_sub.push_back(cap.get(CV_CAP_PROP_POS_MSEC));
+            tstamps_sub.push_back(mf.time_stamp(start_frame_ + skip));
+
+            // cvtColor(frame, frame2, CV_BGR2GRAY);
+            // frame2.convertTo(frame2, CV_8U);
+
+            calib_imgs_sub.push_back(frame.clone()); // store frame
             count++;
 
-            VLOG(3)<<"Skipping...";
-            VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
-            cap.set(CV_CAP_PROP_POS_FRAMES, cap.get(CV_CAP_PROP_POS_FRAMES)+skip_frames_);
-            VLOG(3)<<"Location after skipping: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
+            skip += skip_frames_;
+
+            // VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
+            // cap.set(CV_CAP_PROP_POS_FRAMES, cap.get(CV_CAP_PROP_POS_FRAMES)+skip_frames_);
+            // VLOG(3)<<"Location after skipping: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
 
         }
 
@@ -2045,6 +2056,105 @@ void multiCamCalibration::grid_view() {
 
 }
 
+void multiCamCalibration::grid_view_mp4() {
+
+    read_cam_names_mp4();
+    for (int i=0; i<cam_names_.size(); i++) {
+        string file_path = path_+cam_names_[i];
+        mp4Reader mf(file_path);
+        mfs_.push_back(mf);
+    }
+
+    gframe_ = 0;
+    gskip_ = 1;
+    active_cam_ = 0;
+
+    namedWindow("Grid View", CV_WINDOW_AUTOSIZE | CV_GUI_EXPANDED);
+    update_grid_view_mp4();
+
+    while(1) {
+
+        int key = cvWaitKey(10);
+        VLOG(4)<<"Key press: "<<(key & 255);
+
+        int pkey = key & 255;
+        if (pkey!=255) {
+
+            if (pkey==83) {
+                gframe_ += gskip_;
+            } else if (pkey==81) {
+                gframe_ = max(0, gframe_-gskip_);
+            } else if (pkey==82) {
+                gskip_ *= 10;
+            } else if (pkey==84) {
+                gskip_ = max(1, gskip_/10);
+            } else if (pkey>=49 && pkey<=57) {
+                if (pkey-49<shifts_.size())
+                    active_cam_ = pkey-49;
+            } else if (pkey==61) {
+                shifts_[active_cam_]++;
+            } else if (pkey==84) {
+                shifts_[active_cam_]--;
+            } else if (pkey==27) {
+                cvDestroyAllWindows();
+                break;
+            }
+
+            update_grid_view_mp4();
+
+        }
+
+    }
+
+}
+
+void multiCamCalibration::update_grid_view_mp4() {
+
+    int f1 = 1;
+    int ow = 1920*f1;
+    int oh = 1080*f1;
+
+    int f2 = 1;
+    if (cam_names_.size()==2) {
+        f2 = 2;
+    } else if (cam_names_.size()>=3) {
+        f2 = 3;
+    }
+
+    if (cam_names_.size()>9)
+        LOG(WARNING)<<"Grid view will malfunction because it assumes a max 3x3 grid (9 cameras)!";
+
+    Mat grid;
+    grid.create(oh, ow, CV_8U);
+
+    for (int i=0; i<cam_names_.size(); i++) {
+        Mat img = mfs_[i].get_frame(gframe_+shifts_[i]);
+        Mat small;
+        double w = ow/f2;
+        double h = w*img.rows/img.cols;
+        resize(img, small, Size(w, h));
+        int r = floor(i/3);
+        int c = i%3;
+        small.copyTo(grid.colRange(c*w, (c+1)*w).rowRange(r*h, (r+1)*h));
+    }
+
+    stringstream title;
+    title<<"frame = "<<gframe_;
+    title<<", skip = "<<gskip_;
+    title<<", active_cam = "<<active_cam_;
+    title<<", shifts = (";
+    for (int i=0; i<shifts_.size(); i++) {
+        title<<shifts_[i];
+        if (i<shifts_.size()-1)
+            title<<",";
+    }
+    title<<")";
+
+    imshow("Grid View", grid);
+    displayOverlay("Grid View", title.str().c_str());
+
+}
+
 // Function to get grid edge size in pixels
 // Work: - write so that function uses a specific image that defines reference plane
 void multiCamCalibration::get_grid_size_pix() {
@@ -2091,6 +2201,19 @@ void multiCamCalibration::get_grid_size_pix() {
     LOG(INFO)<<"GRID SIZE: "<<grid_size_pix_<<" pixels\n";
 
 }
+
+// Helper / UI functions
+/*
+void multiCamCalibration::view_calibration_data() {
+
+    if (!mp4_)
+        LOG(FATAL)<<"This function only works for data in mp4 files for now!";
+
+    read_cam_names_mp4();
+    
+
+}
+*/
 
 // Python wrapper
 BOOST_PYTHON_MODULE(calibration) {

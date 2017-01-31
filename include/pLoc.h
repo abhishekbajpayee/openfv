@@ -39,6 +39,8 @@
 #include "std_include.h"
 #include "refocusing.h"
 #include "typedefs.h"
+#include "optimization.h"
+#include "visualize.h"
 
 using namespace std;
 using namespace cv;

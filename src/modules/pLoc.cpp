@@ -33,11 +33,11 @@
 // -------------------------------------------------------
 // -------------------------------------------------------
 
-#include "std_include.h"
-#include "refocusing.h"
-#include "typedefs.h"
+// #include "std_include.h"
+// #include "refocusing.h"
+// #include "typedefs.h"
+// #include "visualize.h"
 #include "pLoc.h"
-#include "visualize.h"
 
 using namespace std;
 using namespace cv;
