@@ -63,6 +63,7 @@ saRefocus::saRefocus() {
     STDEV_THRESH=0;
     SINGLE_CAM_DEBUG=0;
     mult_=0;
+    minLOS_=0;
     frames_.push_back(0);
     num_cams_ = 0;
     IMG_REFRAC_TOL = 1E-9;
@@ -83,7 +84,8 @@ saRefocus::saRefocus(int num_cams, double f) {
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
-    mult_=0;   
+    mult_=0;
+    minLOS_=0;
     frames_.push_back(0);
     num_cams_ = num_cams;
     scale_ = f;
@@ -95,7 +97,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip) {
+  GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minLOS_(settings.minLOS), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip) {
 
     STDEV_THRESH = 0;
     IMG_REFRAC_TOL = 1E-9;
@@ -429,6 +431,10 @@ void saRefocus::GPUliveView() {
 
     active_frame_ = 0; thresh_ = 0;
 
+    // set up larger image for getting shifted region
+    img_size_.height = img_size_.height + 2*abs(ys_);
+    img_size_.width = img_size_.width + 2*abs(xs_);
+
     namedWindow("Result", CV_WINDOW_AUTOSIZE);
 
     if (REF_FLAG) {
@@ -502,12 +508,28 @@ void saRefocus::GPUliveView() {
             } else if( (key & 255)==122 ) { // z
                 rz_ -= 1;
             } else if( (key & 255)==114 ) { // r
-                xs_ += 1;
+	        if (xs_ >= 0) {
+		  img_size_.width += 2;
+		} else {
+		  img_size_.width -= 2;}
+	        xs_ += 1; 
             } else if( (key & 255)==101 ) { // e
+	        if (xs_ > 0) {
+		    img_size_.width -= 2;
+		} else {
+		    img_size_.width += 2; }
                 xs_ -= 1;
             } else if( (key & 255)==102 ) { // f
-                ys_ += 1;
+	        if (ys_ >= 0) {
+		  img_size_.height += 2;
+		} else {
+		  img_size_.height -= 2;}               
+		ys_ += 1;
             } else if( (key & 255)==100 ) { // d
+	        if (ys_ > 0) {
+		  img_size_.height -= 2;
+		} else {
+		  img_size_.height += 2;}
                 ys_ -= 1;
             } else if( (key & 255)==118 ) { // v
                 zs_ += 1;
@@ -1040,9 +1062,13 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
     calc_ref_refocus_H(cam_locations_[0], z_, 0, H);
     gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
     
-
+    
+    //cout<<temp.size()<<endl;
+ 
     if (mult_) {
         gpu::pow(temp, mult_exp_, temp2);
+    } else if (minLOS_) {
+        gpu::multiply(temp, Scalar(1), temp2);
     } else {
         gpu::multiply(temp, fact, temp2);
     }
@@ -1057,11 +1083,17 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
         if (mult_) {
             gpu::pow(temp, mult_exp_, temp2);
             gpu::multiply(refocused, temp2, refocused);
-        } else {
+        } else if (minLOS_) {
+	    gpu::min(refocused, temp, refocused);
+	} else {
             gpu::multiply(temp, fact, temp2);
             gpu::add(refocused, temp2, refocused);
         }
 
+    }
+
+    if ((xs_!=0) | (ys_!=0)) {
+        refocused = refocused(Rect(std::max(0,int(2*xs_)),std::max(0,int(2*ys_)),img_size_.width-2*abs(xs_),img_size_.height-2*abs(ys_)));
     }
 
     if (!BENCHMARK_MODE)
@@ -1299,7 +1331,7 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
     Mat_<double> A = X.clone();
 
     X = hinv*X;
-
+    
     for (int i=0; i<X.cols; i++)
         X(2,i) = z;
 
@@ -1312,7 +1344,7 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
 
     //cout<<"Projecting to find final map"<<endl;
     Mat_<double> proj = P_mats_[cam]*X_out;
-
+   
     Point2f src, dst;
     vector<Point2f> sp, dp;
     int i, j;
@@ -1323,7 +1355,7 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
         sp.push_back(src); dp.push_back(dst);
     }
-
+   
     H = getPerspectiveTransform(dp, sp);
     //H = findHomography(dp, sp, 0);
     //H = D*H;
@@ -1574,9 +1606,14 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
 
 }
 
-void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type) {
+void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, int shiftx, int shifty, string type) {
    
     LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
+
+    xs_ = shiftx;
+    ys_ = shifty;
+    img_size_.height = img_size_.height + 2*abs(ys_);
+    img_size_.width = img_size_.width + 2*abs(xs_);
     
     for (int f=0; f<frames_.size(); f++) {
         

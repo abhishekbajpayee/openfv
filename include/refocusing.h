@@ -126,7 +126,7 @@ class saRefocus {
 
     void liveViewWindow(Mat img);
 
-    void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
+    void dump_stack(string path, double zmin, double zmax, double dz, double thresh, int shiftx, int shifty, string type);
     void dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, vector<Mat> &returnStack);
     void calculateQ(double zmin, double zmax, double dz, double thresh, int frame, string refPath);
     void return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack);
@@ -199,6 +199,7 @@ class saRefocus {
     vector<int> frames_;
     int mult_;
     double mult_exp_;
+    int minLOS_;
     double warp_factor_;
     int active_frame_;
     int start_frame_;
