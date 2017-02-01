@@ -541,7 +541,8 @@ void multiCamCalibration::read_calib_imgs_mp4() {
         // VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);       
         
         vector<Mat> calib_imgs_sub;
-        vector<double> tstamps_sub;
+        vector<string> tstamps_sub;
+        time_t result = time(NULL);
         int skip = 0;
         while(start_frame_ + skip <= end_frame_) {
 
@@ -551,7 +552,17 @@ void multiCamCalibration::read_calib_imgs_mp4() {
             // VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
 
             // tstamps_sub.push_back(cap.get(CV_CAP_PROP_POS_MSEC));
-            tstamps_sub.push_back(mf.time_stamp(start_frame_ + skip));
+            
+            // convert msec to s + nsec
+            double t, it, ft; t = mf.time_stamp(start_frame_ + skip)/1000; ft = modf(t, &it);
+            stringstream ss; ss<<ft; string fts = ss.str().substr(2);
+            int len = fts.length();
+            ss.str(""); ss<<(int(result)+int(it))<<fts;
+            for (int i=0; i<9-fts.length(); i++)
+                ss<<"0";
+            tstamps_sub.push_back(ss.str());
+
+            // tstamps_sub.push_back(mf.time_stamp(start_frame_ + skip));
 
             // cvtColor(frame, frame2, CV_BGR2GRAY);
             // frame2.convertTo(frame2, CV_8U);

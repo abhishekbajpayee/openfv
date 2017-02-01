@@ -193,7 +193,7 @@ class multiCamCalibration {
     vector<string> cam_names_;
     vector<int> shifts_;
     vector< vector<Mat> > calib_imgs_;
-    vector< vector<double> > tstamps_;
+    vector< vector<string> > tstamps_;
     vector< vector< vector<Point3f> > > all_pattern_points_;
     vector< vector< vector<Point2f> > > all_corner_points_;
     vector< vector< vector<Point2f> > > all_corner_points_raw_;
