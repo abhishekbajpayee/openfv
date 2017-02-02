@@ -16,7 +16,7 @@ The following packages are **required** for building OpenFV:
 7. Glog, Google Log 0.3.1 +
 8. Ceres Solver, Eigen 3.2.2 +, Atlas, SuiteSparse
 9. OpenCV 2.4.10 or earlier (3.0+ not yet supported) built with Python
-   Qt, (build w/ CUDA if GPU is available)
+   (build wtih Qt and CUDA if Qt libraries and GPU available)
 
 The following packages are **optional** for building OpenFV:
 
@@ -26,47 +26,33 @@ The following packages are **optional** for building OpenFV:
 
 *   Some versions may not be compatable. In such a case, please let us know
 
-
-
 Set-up on an Ubuntu Machine
 ===========================
 
 ### 14.04
 
-
 <pre><code>$ sudo apt-get install qt5-default libtiff5-dev libgoogle-glog-dev </code></pre>
-   
 
 ### 12.04
 
-
-
 <pre><code>$ sudo apt-get install qt4-dev-tools libtiff4-dev </code></pre>
 
-* install <a href="https://google-glog.googlecode.com/svn/trunk/INSTALL">glog</a>
-
+* Install <a href="https://google-glog.googlecode.com/svn/trunk/INSTALL">glog</a>
 
 ### General Setup
 
 <pre><code>$ sudo apt-get install cmake build-essential libboost-all-dev libgoogle-perftools-dev google-perftools libeigen3-dev libatlas-base-dev libsuitesparse-dev </code></pre> 
 
-* install <a href="http://ceres-solver.org/building.html">ceres</a>
+* Install <a href="http://ceres-solver.org/building.html">ceres</a>
 
-<p>After installing ceres, run the following commands in your build directory</p>
+After installing ceres, run the following commands in your build directory
 
 <pre><code>$ cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC ../ceres-solver-1.10.0 && make && sudo make install </code></pre>
 
-* install <a href="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf">cuda toolkit</a>
+* Install <a href="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf">cuda toolkit</a>
 
-* install <a href="http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html">opencv 2.4.10</a>
-<p>After installing opencv 2.4.10, change into the directory and run the following commands</p>
-
-
-
-<pre><code>$ mkdir build_dir && cd build_dir && cmake -D CUDA_GENERATION=Kepler -D WITH_QT=ON ..
-$ make && sudo make install
-</code></pre>
-
+* Install <a href="http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html">opencv 2.4.10</a>
+As mentioned earlier, be sure to build OpenCV with the <code>-D WITH_CUDA=ON</code> and <code>-D WITH_QT=ON</code> in case a GPU and Qt libraries are available.
 
 ### OpenFV Installation
 
