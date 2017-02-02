@@ -1,22 +1,28 @@
 OpenFV Setup
 ============
 
-<p>Below are basic instructions on how to get started with using
+Below are basic instructions on how to get started with using
 OpenFV. This documentation assumes that you have a basic working knowledge
 of Linux.
 
-OpenFV depends on the following packages:</p>
+The following packages are **required** for building OpenFV:
 
 1. CMake 2.8 or higher
 2. Git
 3. GCC 4.4.x or higher
 4. Python 2.7
 5. Qt4 +
-6. CUDA toolkit 6 +
-7. Boost Libraries, libtiff4 +, gperftools
-8. Glog, Google Log 0.3.1 +
-9. Ceres Solver, Eigen 3.2.2 +, Atlas, SuiteSparse
-10. OpenCV 2.4.10 or earlier (3.0+ not yet supported) built with Python, Qt, and CUDA
+6. Boost Libraries, libtiff4 +
+7. Glog, Google Log 0.3.1 +
+8. Ceres Solver, Eigen 3.2.2 +, Atlas, SuiteSparse
+9. OpenCV 2.4.10 or earlier (3.0+ not yet supported) built with Python
+   Qt, (build w/ CUDA if GPU is available)
+
+The following packages are **optional** for building OpenFV:
+
+1. CUDA toolkit 6 + w/ a supported GPU (if build without CUDA, all reconstruction and refocusing routines will be run on CPU and hence will be much slower)
+2. Qt4 + (any live view routines will not work if Qt is not available and OpenCV is not built with Qt)
+3. gperftools
 
 *   Some versions may not be compatable. In such a case, please let us know
 
