@@ -33,17 +33,8 @@
 // -------------------------------------------------------
 // -------------------------------------------------------
 
-#include "std_include.h"
-#include "calibration.h"
 #include "refocusing.h"
 #include "tools.h"
-#include "cuda_lib.h"
-#include "visualize.h"
-
-#include <Eigen/Core>
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
 
 using namespace std;
 using namespace cv;
@@ -95,13 +86,19 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip) {
+    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), MP4_FLAG(settings.mp4) {
+    
+#ifdef WITHOUT_CUDA
+    if (GPU_FLAG)
+        LOG(FATAL)<<"OpenFV was compiled without GPU support! Switch GPU option to OFF.";
+#endif
 
     STDEV_THRESH = 0;
     IMG_REFRAC_TOL = 1E-9;
     MAX_NR_ITERS = 20;
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
+    SINGLE_CAM_DEBUG = 0;
     
     imgs_read_ = 0;
     read_calib_data(settings.calib_file_path);
@@ -109,8 +106,17 @@ saRefocus::saRefocus(refocus_settings settings):
     if (mult_) {
         mult_exp_ = settings.mult_exp;
     }
-           
-    if (MTIFF_FLAG) {
+    
+    if (MP4_FLAG) {
+
+        if(!ALL_FRAME_FLAG) {
+
+        for (int i=start_frame_; i<=end_frame_; i+=skip_frame_+1)
+            frames_.push_back(i);
+        }
+        read_imgs_mp4(settings.images_path);
+
+    } else if (MTIFF_FLAG) {
 
         if(!ALL_FRAME_FLAG) {
 
@@ -118,13 +124,16 @@ saRefocus::saRefocus(refocus_settings settings):
             frames_.push_back(i);
         }
         read_imgs_mtiff(settings.images_path);
+
     } else {
         read_imgs(settings.images_path);
     }
 
+#ifndef WITHOUT_CUDA
     if (GPU_FLAG) {
         initializeGPU(); 
     }
+#endif
 
     z_ = 0; 
     xs_ = 0; ys_ = 0; zs_ = 0; 
@@ -413,139 +422,48 @@ void saRefocus::read_imgs_mtiff(string path) {
 
 }
 
-void saRefocus::GPUliveView() {
+void saRefocus::read_imgs_mp4(string path) {
 
-    // initializeGPU();
+    for (int i=0; i<cam_names_.size(); i++) {
 
-    if (REF_FLAG) {
-        if (CORNER_FLAG) {
-            LOG(INFO)<<"Using corner based homography fit method..."<<endl;
-        } else {
-            LOG(INFO)<<"Using full refractive calculation method..."<<endl;
-        }
-    } else {
-        LOG(INFO)<<"Using pinhole refocusing..."<<endl;
-    }
+        string file_path = path+cam_names_[i];
+        LOG(INFO)<<"Opening "<<file_path;
+        VideoCapture cap(file_path); // open the default camera
+        if(!cap.isOpened())  // check if we succeeded
+            LOG(FATAL)<<"Could not open " + file_path;
 
-    active_frame_ = 0; thresh_ = 0;
+        int total_frames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+        VLOG(1)<<"Total frames: "<<total_frames;
 
-    namedWindow("Result", CV_WINDOW_AUTOSIZE);
+        Mat frame, frame2;
+                
+        vector<Mat> refocusing_imgs_sub;
+        for (int f=0; f<frames_.size(); f++) {
+        // while(cap.get(CV_CAP_PROP_POS_FRAMES)<=end_frame_) {
 
-    if (REF_FLAG) {
-        if (CORNER_FLAG) {
-            GPUrefocus_ref_corner(1, active_frame_);
-        } else {
-            GPUrefocus_ref(1, active_frame_);
-        }
-    } else {
-        GPUrefocus(1, active_frame_);
-    }
-    
-    double dz = 0.1;
-    double dthresh, tulimit, tllimit;
-    if (STDEV_THRESH) {
-        dthresh = 0.1;
-        tulimit = 5.0;
-        tllimit = -1.0;
-    } else {
-        dthresh = 5/255.0;
-        tulimit = 1.0;
-        tllimit = 0.0;
-    }
-    double mult_exp_limit = 1.0;
-    double mult_thresh = 0.01;
+            VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
+            cap.set(CV_CAP_PROP_POS_FRAMES, frames_.at(f));
+            VLOG(3)<<"Location after skipping: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
 
-    while( 1 ){
-        int key = cvWaitKey(10);
-        VLOG(4)<<"Key press: "<<(key & 255)<<endl;
+            cap >> frame;
+            VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
 
-        if ( (key & 255)!=255 ) {
-
-            if ( (key & 255)==83 ) {
-                z_ += dz;
-            } else if( (key & 255)==81 ) {
-                z_ -= dz;
-            } else if( (key & 255)==82 ) {
-                if (mult_) {
-                    if (mult_exp_<mult_exp_limit)
-                        mult_exp_ += mult_thresh;
-                } else {
-                    if (thresh_<tulimit)
-                        thresh_ += dthresh; 
-                }
-            } else if( (key & 255)==84 ) {
-                if (mult_) {
-                    if (mult_exp_>0)
-                        mult_exp_ -= mult_thresh;
-                } else {
-                    if (thresh_>tllimit)
-                        thresh_ -= dthresh; 
-                }
-            } else if( (key & 255)==46 ) {
-                if (active_frame_<array_all.size()) { 
-                    active_frame_++; 
-                }
-            } else if( (key & 255)==44 ) {
-                if (active_frame_<array_all.size()) { 
-                    active_frame_--; 
-                }
-            } else if( (key & 255)==119 ) { // w
-                rx_ += 1;
-            } else if( (key & 255)==113 ) { // q
-                rx_ -= 1;
-            } else if( (key & 255)==115 ) { // s
-                ry_ += 1;
-            } else if( (key & 255)==97 ) {  // a
-                ry_ -= 1;
-            } else if( (key & 255)==120 ) { // x
-                rz_ += 1;
-            } else if( (key & 255)==122 ) { // z
-                rz_ -= 1;
-            } else if( (key & 255)==114 ) { // r
-                xs_ += 1;
-            } else if( (key & 255)==101 ) { // e
-                xs_ -= 1;
-            } else if( (key & 255)==102 ) { // f
-                ys_ += 1;
-            } else if( (key & 255)==100 ) { // d
-                ys_ -= 1;
-            } else if( (key & 255)==118 ) { // v
-                zs_ += 1;
-            } else if( (key & 255)==99 ) {  // c
-                zs_ -= 1;
-            } else if( (key & 255)==117 ) { // u
-                crx_ += 1;
-            } else if( (key & 255)==121 ) { // y
-                crx_ -= 1;
-            } else if( (key & 255)==106 ) { // j
-                cry_ += 1;
-            } else if( (key & 255)==104 ) { // h
-                cry_ -= 1;
-            } else if( (key & 255)==109 ) { // m
-                crz_ += 1;
-            } else if( (key & 255)==110 ) { // n
-                crz_ -= 1;
-            } else if( (key & 255)==32 ) {
-                mult_ = (mult_+1)%2;
-            } else if( (key & 255)==27 ) {  // ESC
-                cvDestroyAllWindows();
-                break;
-            }
-            
-            // Call refocus function
-            if(REF_FLAG) {
-                if (CORNER_FLAG) {
-                    GPUrefocus_ref_corner(1, active_frame_);
-                } else {
-                    GPUrefocus_ref(1, active_frame_);
-                }
-            } else {
-                GPUrefocus(1, active_frame_);
-            }
+            cvtColor(frame, frame2, CV_BGR2GRAY);
+            frame2.convertTo(frame2, CV_8U);
+            refocusing_imgs_sub.push_back(frame2.clone()); // store frame
 
         }
 
+        imgs.push_back(refocusing_imgs_sub);
+
     }
+
+    // num_imgs_ = calib_imgs_[0].size();
+    img_size_ = Size(imgs[0][0].cols, imgs[0][0].rows);
+
+    initializeRefocus();
+
+    LOG(INFO)<<"\nDONE READING IMAGES!\n\n";
 
 }
 
@@ -561,7 +479,8 @@ void saRefocus::CPUliveView() {
 
     active_frame_ = 0; thresh_ = 0;
 
-    namedWindow("Result", CV_WINDOW_AUTOSIZE);
+    namedWindow("Live View", CV_WINDOW_AUTOSIZE);
+
     if (REF_FLAG) {
         if (CORNER_FLAG) {
             CPUrefocus_ref_corner(1, active_frame_);
@@ -771,36 +690,71 @@ void saRefocus::initializeRefocus() {
 
 }
 
-// TODO: This function prints free memory on GPU and then
-//       calls uploadToGPU() which uploads either a given
-//       frame or all frames to GPU depending on frame_
-void saRefocus::initializeGPU() {
-    
-    if (!EXPERT_FLAG) {
-
-        LOG(INFO)<<"INITIALIZING GPU..."<<endl;
-
-        VLOG(1)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
-    
-        gpu::DeviceInfo gpuDevice(gpu::getDevice());
-    
-        VLOG(1)<<"---"<<gpuDevice.name()<<"---"<<endl;
-        VLOG(1)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB";
-    }
-
-    uploadToGPU();
-
-    if (REF_FLAG)
-        if (!CORNER_FLAG)
-            uploadToGPU_ref();
-
-}
-
 void saRefocus::initializeCPU() {
 
     // stuff
 
 }
+
+Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh, int frame) {
+
+    z_ = z;
+    rx_ = rx;
+    ry_ = ry;
+    rz_ = rz;
+    if (STDEV_THRESH) {
+        thresh_ = thresh;
+    } else {
+        thresh_ = thresh/255.0;
+    }
+
+    if (REF_FLAG) {
+        if (CORNER_FLAG) {
+
+#ifndef WITHOUT_CUDA
+            if (GPU_FLAG) {
+                GPUrefocus_ref_corner(0, frame);
+            } 
+#endif
+
+            if (!GPU_FLAG) {
+                CPUrefocus_ref_corner(0, frame);
+            }
+
+        } else {
+
+#ifndef WITHOUT_CUDA
+            if (GPU_FLAG) {
+                GPUrefocus_ref(0, frame);
+            } 
+#endif
+
+            if (!GPU_FLAG) {
+                CPUrefocus_ref(0, frame);
+            }
+
+        }
+    } else {
+
+#ifndef WITHOUT_CUDA
+        if (GPU_FLAG) {
+            GPUrefocus(0, frame);
+        } 
+#endif
+
+        if (!GPU_FLAG) {
+            CPUrefocus(0, frame);
+        }
+
+    }
+
+    return(result_);
+
+}
+
+#ifndef WITHOUT_CUDA
+
+// ---GPU Refocusing Functions Begin--- //
 
 // TODO: Right now this function just starts uploading images
 //       without checking if there is enough free memory on GPU
@@ -872,46 +826,6 @@ void saRefocus::uploadToGPU_ref() {
     VLOG(1)<<"done!";
 
 }
-
-Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh, int frame) {
-
-    z_ = z;
-    rx_ = rx;
-    ry_ = ry;
-    rz_ = rz;
-    if (STDEV_THRESH) {
-        thresh_ = thresh;
-    } else {
-        thresh_ = thresh/255.0;
-    }
-
-    if (REF_FLAG) {
-        if (CORNER_FLAG) {
-            if (GPU_FLAG) {
-                GPUrefocus_ref_corner(0, frame);
-            } else {
-                CPUrefocus_ref_corner(0, frame);
-            }
-        } else {
-            if (GPU_FLAG) {
-                GPUrefocus_ref(0, frame);
-            } else {
-                CPUrefocus_ref(0, frame);
-            }
-        }
-    } else {
-        if (GPU_FLAG) {
-            GPUrefocus(0, frame);
-        } else {
-            CPUrefocus(0, frame);
-        }
-    }
-
-    return(result_);
-
-}
-
-// ---GPU Refocusing Functions Begin--- //
 
 void saRefocus::GPUrefocus(int live, int frame) {
 
@@ -1075,6 +989,206 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
     result_ = refocused_host_.clone();
 
 }
+
+void saRefocus::GPUliveView() {
+
+    // initializeGPU();
+
+    if (REF_FLAG) {
+        if (CORNER_FLAG) {
+            LOG(INFO)<<"Using corner based homography fit method..."<<endl;
+        } else {
+            LOG(INFO)<<"Using full refractive calculation method..."<<endl;
+        }
+    } else {
+        LOG(INFO)<<"Using pinhole refocusing..."<<endl;
+    }
+
+    active_frame_ = 0; 
+    thresh_ = 0;
+    dz_ = 0.1;
+    double dthresh, tulimit, tllimit;
+    if (STDEV_THRESH) {
+        dthresh = 0.1;
+        tulimit = 5.0;
+        tllimit = -1.0;
+    } else {
+        dthresh = 5/255.0;
+        tulimit = 1.0;
+        tllimit = 0.0;
+    }
+    double mult_exp_limit = 1.0;
+    double mult_thresh = 0.01;
+
+    namedWindow("Live View", CV_WINDOW_AUTOSIZE | CV_GUI_EXPANDED);
+
+    createButton("Multiplicative", cb_mult, this, CV_CHECKBOX, mult_);
+    createButton("Z+", cb_zplus, this, CV_PUSH_BUTTON);
+    createButton("Z-", cb_zminus, this, CV_PUSH_BUTTON);
+
+    updateLiveFrame();
+
+    while( 1 ){
+        int key = cvWaitKey(10);
+        VLOG(4)<<"Key press: "<<(key & 255)<<endl;
+
+        if ( (key & 255)!=255 ) {
+
+            if ( (key & 255)==83 ) {
+                z_ += dz_;
+            } else if( (key & 255)==81 ) {
+                z_ -= dz_;
+            } else if( (key & 255)==82 ) {
+                if (mult_) {
+                    if (mult_exp_<mult_exp_limit)
+                        mult_exp_ += mult_thresh;
+                } else {
+                    if (thresh_<tulimit)
+                        thresh_ += dthresh; 
+                }
+            } else if( (key & 255)==84 ) {
+                if (mult_) {
+                    if (mult_exp_>0)
+                        mult_exp_ -= mult_thresh;
+                } else {
+                    if (thresh_>tllimit)
+                        thresh_ -= dthresh; 
+                }
+            } else if( (key & 255)==46 ) {
+                if (active_frame_<array_all.size()) { 
+                    active_frame_++; 
+                }
+            } else if( (key & 255)==44 ) {
+                if (active_frame_<array_all.size()) { 
+                    active_frame_--; 
+                }
+            } else if( (key & 255)==119 ) { // w
+                rx_ += 1;
+            } else if( (key & 255)==113 ) { // q
+                rx_ -= 1;
+            } else if( (key & 255)==115 ) { // s
+                ry_ += 1;
+            } else if( (key & 255)==97 ) {  // a
+                ry_ -= 1;
+            } else if( (key & 255)==120 ) { // x
+                rz_ += 1;
+            } else if( (key & 255)==122 ) { // z
+                rz_ -= 1;
+            } else if( (key & 255)==114 ) { // r
+                xs_ += 1;
+            } else if( (key & 255)==101 ) { // e
+                xs_ -= 1;
+            } else if( (key & 255)==102 ) { // f
+                ys_ += 1;
+            } else if( (key & 255)==100 ) { // d
+                ys_ -= 1;
+            } else if( (key & 255)==118 ) { // v
+                zs_ += 1;
+            } else if( (key & 255)==99 ) {  // c
+                zs_ -= 1;
+            } else if( (key & 255)==117 ) { // u
+                crx_ += 1;
+            } else if( (key & 255)==121 ) { // y
+                crx_ -= 1;
+            } else if( (key & 255)==106 ) { // j
+                cry_ += 1;
+            } else if( (key & 255)==104 ) { // h
+                cry_ -= 1;
+            } else if( (key & 255)==109 ) { // m
+                crz_ += 1;
+            } else if( (key & 255)==110 ) { // n
+                crz_ -= 1;
+            } else if( (key & 255)==32 ) {
+                mult_ = (mult_+1)%2;
+            } else if( (key & 255)==27 ) {  // ESC
+                cvDestroyAllWindows();
+                break;
+            }
+            
+            updateLiveFrame();
+
+            // Call refocus function
+            // if(REF_FLAG) {
+            //     if (CORNER_FLAG) {
+            //         GPUrefocus_ref_corner(1, active_frame_);
+            //     } else {
+            //         GPUrefocus_ref(1, active_frame_);
+            //     }
+            // } else {
+            //     GPUrefocus(1, active_frame_);
+            // }
+
+        }
+
+    }
+
+}
+
+void saRefocus::cb_mult(int state, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->mult_ = state;
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_zplus(int state, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->z_ += ref->dz_;
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_zminus(int state, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->z_ -= ref->dz_;
+    ref->updateLiveFrame();
+
+}
+
+// TODO: This function prints free memory on GPU and then
+//       calls uploadToGPU() which uploads either a given
+//       frame or all frames to GPU depending on frame_
+void saRefocus::initializeGPU() {
+    
+    if (!EXPERT_FLAG) {
+
+        LOG(INFO)<<"INITIALIZING GPU..."<<endl;
+
+        VLOG(1)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
+    
+        gpu::DeviceInfo gpuDevice(gpu::getDevice());
+    
+        VLOG(1)<<"---"<<gpuDevice.name()<<"---"<<endl;
+        VLOG(1)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB";
+    }
+
+    uploadToGPU();
+
+    if (REF_FLAG)
+        if (!CORNER_FLAG)
+            uploadToGPU_ref();
+
+}
+
+void saRefocus::updateLiveFrame() {
+
+    // Call refocus function
+    if(REF_FLAG) {
+        if (CORNER_FLAG) {
+            GPUrefocus_ref_corner(1, active_frame_);
+        } else {
+            GPUrefocus_ref(1, active_frame_);
+        }
+    } else {
+        GPUrefocus(1, active_frame_);
+    }
+
+}
+
+#endif
 
 // ---GPU Refocusing Functions End--- //
 
@@ -1752,6 +1866,7 @@ void saRefocus::threshold_image(Mat &img) {
 
 }
 
+#ifndef WITHOUT_CUDA
 void saRefocus::threshold_image(GpuMat &refocused) {
 
     if (STDEV_THRESH) {
@@ -1765,6 +1880,7 @@ void saRefocus::threshold_image(GpuMat &refocused) {
     }
 
 }
+#endif
 
 void saRefocus::apply_preprocess(void (*preprocess_func)(Mat, Mat), string path) {
 
@@ -2060,7 +2176,9 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("setHF", &saRefocus::setHF)
         .def("setRefractive", &saRefocus::setRefractive)
         .def("showSettings", &saRefocus::showSettings)
+#ifndef WITHOUT_CUDA
         .def("initializeGPU", &saRefocus::initializeGPU)
+#endif
         .def("refocus", &saRefocus::refocus)
         .def("project_point", &saRefocus::project_point)
         .def("getP", &saRefocus::getP)

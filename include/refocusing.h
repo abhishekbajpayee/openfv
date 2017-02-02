@@ -37,10 +37,15 @@
 #define REFOCUSING_LIBRARY
 
 #include "std_include.h"
-#include "calibration.h"
 #include "typedefs.h"
-#include "cuda_lib.h"
+// #include "tools.h"
+// #include "visualize.h"
 
+#ifndef WITHOUT_CUDA
+#include "cuda_lib.h"
+#endif
+
+#include <Eigen/Core>
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
 
@@ -92,17 +97,12 @@ class saRefocus {
     void read_imgs(string path);
     //! Read images when they are in multipage TIFF files
     void read_imgs_mtiff(string path);
+    //! Read images when they are in mp4 files
+    void read_imgs_mp4(string path);
 
     void CPUliveView();
-    //! Start refocusing live view (requires Qt)
-    void GPUliveView();
 
     void initializeRefocus();
-    /*! Initialize everything required to calculate refocused images on GPU.
-      This is automatically called by GPUliveView() but needs to be explicitly
-      called when live view is not being started.
-    */
-    void initializeGPU();
     void initializeCPU();
 
     /*! Calculate a refocused image
@@ -116,14 +116,27 @@ class saRefocus {
     */
     Mat refocus(double z, double rx, double ry, double rz, double thresh, int frame);
 
+#ifndef WITHOUT_CUDA
+    //! Start refocusing live view (requires Qt)
+    void GPUliveView();
+    /*! Initialize everything required to calculate refocused images on GPU.
+      This is automatically called by GPUliveView() but needs to be explicitly
+      called when live view is not being started.
+    */
+    void initializeGPU();
     void GPUrefocus(int live, int frame);
     void GPUrefocus_ref(int live, int frame);
     void GPUrefocus_ref_corner(int live, int frame);
+#endif
 
     void CPUrefocus(int live, int frame);
     void CPUrefocus_ref(int live, int frame);
     void CPUrefocus_ref_corner(int live, int frame);
 
+    static void cb_mult(int, void*);
+    static void cb_zplus(int, void*);
+    static void cb_zminus(int, void*);
+    void updateLiveFrame();
     void liveViewWindow(Mat img);
 
     void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
@@ -160,9 +173,6 @@ class saRefocus {
 
  private:
 
-    void uploadToGPU();
-    void uploadToGPU_ref();
-
     void calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam);
     void calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam);
     void calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H);
@@ -170,10 +180,15 @@ class saRefocus {
     void img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out);
 
     void threshold_image(Mat &refocused);
-    void threshold_image(GpuMat &refocused);
     void apply_preprocess(void (*preprocess_func)(Mat, Mat), string path);
     void adaptiveNorm(Mat in, Mat &out, int xf, int yf);
     void slidingMinToZero(Mat in, Mat &out, int xf, int yf);
+
+#ifndef WITHOUT_CUDA
+    void uploadToGPU();
+    void uploadToGPU_ref();
+    void threshold_image(GpuMat &refocused);
+#endif
 
     // Refocusing result
     Mat result_;
@@ -194,7 +209,7 @@ class saRefocus {
     float geom[5];
 
     // Refocusing parameters
-    double z_, xs_, ys_, zs_, rx_, ry_, rz_, cxs_, cys_, czs_, crx_, cry_, crz_;
+    double z_, dz_, xs_, ys_, zs_, rx_, ry_, rz_, cxs_, cys_, czs_, crx_, cry_, crz_;
     double thresh_;
     vector<int> frames_;
     int mult_;
@@ -209,19 +224,22 @@ class saRefocus {
 
     Mat cputemp; Mat cputemp2; Mat cpurefocused;
 
+#ifndef WITHOUT_CUDA
     vector<gpu::GpuMat> array;
     vector<gpu::GpuMat> P_mats_gpu;
     vector<gpu::GpuMat> cam_locations_gpu;
     vector<gpu::GpuMat> xmaps, ymaps;
     vector< vector<gpu::GpuMat> > array_all;
     gpu::GpuMat temp, temp2, refocused, xmap, ymap;
-    
+#endif
+
     int frame_to_upload_;
 
     int GPU_FLAG;
     int REF_FLAG;
     int CORNER_FLAG; // Flag to use corner based homography fit method
     int MTIFF_FLAG;
+    int MP4_FLAG;
     int ALL_FRAME_FLAG;
     int INVERT_Y_FLAG;
     int EXPERT_FLAG;

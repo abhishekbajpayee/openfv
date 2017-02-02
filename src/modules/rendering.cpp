@@ -33,15 +33,8 @@
 // -------------------------------------------------------
 // -------------------------------------------------------
 
-#include "std_include.h"
-#include "tools.h"
-#include "refocusing.h"
 #include "rendering.h"
-
-// #include <Eigen/Core>
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
+#include "tools.h"
 
 using namespace std;
 using namespace cv;
@@ -70,13 +63,20 @@ void Scene::create(double sx, double sy, double sz, int gpu) {
 
     GPU_FLAG = gpu;
 
+#ifdef WITHOUT_CUDA
+    if (GPU_FLAG)
+        LOG(FATAL)<<"OpenFV was built without CUDA! Switch GPU option to OFF.";
+#endif
+
     CIRC_VOL_FLAG = 0;
 
 }
 
+#ifndef WITHOUT_CUDA
 void Scene::setGpuFlag(int gpu) {
     GPU_FLAG = gpu;
 }
+#endif
 
 void Scene::setCircVolFlag(int flag) {
     CIRC_VOL_FLAG = flag;
@@ -231,9 +231,12 @@ void Scene::propagateParticles(vector<double> (*func)(double, double, double, do
 
 void Scene::renderVolume(int xv, int yv, int zv) {
 
+#ifndef WITHOUT_CUDA
     if (GPU_FLAG) {
         renderVolumeGPU2(xv, yv, zv);
-    } else {
+    }
+#endif
+    if (!GPU_FLAG) {
         renderVolumeCPU(xv, yv, zv);
     }
 
@@ -293,6 +296,8 @@ double Scene::f(double x, double y, double z) {
     return(intensity);
 
 }
+
+#ifndef WITHOUT_CUDA
 
 void Scene::renderVolumeGPU(int xv, int yv, int zv) {
 
@@ -433,6 +438,8 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
 
 }
 
+#endif
+
 // Get slice from rendered scene or get equivalent of refocused image
 // at given depth
 Mat Scene::getSlice(int z_ind) {
@@ -559,6 +566,12 @@ void Camera::init(double f, int imsx, int imsy, int gpu) {
     K_(2,2) = 1;
 
     GPU_FLAG = gpu;
+
+#ifdef WITHOUT_CUDA
+    if (GPU_FLAG)
+        LOG(FATAL)<<"OpenFV was compiled without CUDA! Switch GPU option to OFF.";
+#endif
+
     CUSTOM_PARTICLE_SIGMA = 0;
 
 }
@@ -611,9 +624,13 @@ void Camera::setScene(Scene scene) {
 
 Mat Camera::render() {
 
+#ifndef WITHOUT_CUDA
     if (GPU_FLAG) {
         renderGPU();
-    } else {
+    } 
+#endif
+
+    if (!GPU_FLAG) {
         renderCPU();
     }
 
@@ -657,6 +674,7 @@ double Camera::f(double x, double y) {
 
 }
 
+#ifndef WITHOUT_CUDA
 void Camera::renderGPU() {
 
     project();
@@ -706,6 +724,7 @@ void Camera::renderGPU() {
     render_ = result.clone();
 
 }
+#endif
 
 Mat Camera::getP() {
     return(P_.clone());
@@ -847,6 +866,7 @@ Mat Camera::Rt() {
 
 }
 
+/*
 void benchmark::benchmarkSA(Scene scn, saRefocus refocus) {
 
     scene_ = scn;
@@ -895,6 +915,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
     return(Q);
 
 }
+*/
 
 // Python wrapper
 BOOST_PYTHON_MODULE(rendering) {
@@ -906,7 +927,9 @@ BOOST_PYTHON_MODULE(rendering) {
 
     class_<Scene>("Scene")
         .def("create", &Scene::create)
+#ifndef WITHOUT_CUDA
         .def("setGpuFlag", &Scene::setGpuFlag)
+#endif
         .def("seedR", &Scene::seedR)
         .def("seedParticles", sPx2)
         .def("setParticleSigma", &Scene::setParticleSigma)
@@ -924,9 +947,11 @@ BOOST_PYTHON_MODULE(rendering) {
         .def("getC", &Camera::getC)
     ;
 
+    /*
     class_<benchmark>("benchmark")
         .def("benchmarkSA", &benchmark::benchmarkSA)
         .def("calcQ", &benchmark::calcQ)
     ;
+    */
 
 }

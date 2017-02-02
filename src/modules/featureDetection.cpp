@@ -2,8 +2,11 @@
 
 #include "std_include.h"
 #include "tools.h"
-#include "cuda_lib.h"
 #include "visualize.h"
+
+#ifndef WITHOUT_CUDA
+#include "cuda_lib.h"
+#endif
 
 #include <Eigen/Core>
 

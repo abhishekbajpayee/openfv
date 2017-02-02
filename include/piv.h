@@ -39,9 +39,7 @@
 #include "std_include.h"
 #include "calibration.h"
 #include "typedefs.h"
-// #include "cuda_lib.h"
 
-// #include <fftw3.h>// 
 #include <cufftw.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>

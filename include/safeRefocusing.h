@@ -6,7 +6,10 @@
 #include "std_include.h"
 #include "calibration.h"
 #include "typedefs.h"
+
+#ifndef WITHOUT_CUDA
 #include "cuda_lib.h"
+#endif
 
 #include "refocusing.h"
 

@@ -66,17 +66,23 @@ class Scene {
       \param gpu Flag to use GPU or not. If turned on, this will run all calculations using a Scene object on a GPU.
     */
     void create(double sx, double sy, double sz, int gpu);
+
+#ifndef WITHOUT_CUDA
     //! Set gpu flag explicitly
     void setGpuFlag(int gpu);
-    
+#endif
+
     //! Set flag to seed particles in a cylindrical region in the specified bounds
     void setCircVolFlag(int flag);
 
     //! Render all voxels of the volume
     void renderVolume(int xv, int yv, int zv);
     void renderVolumeCPU(int xv, int yv, int zv);
+
+#ifndef WITHOUT_CUDA
     void renderVolumeGPU(int xv, int yv, int zv);
     void renderVolumeGPU2(int xv, int yv, int zv);
+#endif
 
     //! Set the standard deviation of particles in each direction
     void setParticleSigma(double sx, double sy, double sz);
@@ -158,9 +164,11 @@ class Scene {
     vector<Mat> volumeGPU_;
     vector<Mat> volumeCPU_;
 
+#ifndef WITHOUT_CUDA
     gpu::GpuMat gx, gy;
     gpu::GpuMat tmp1, tmp2, tmp3, tmp4;
     gpu::GpuMat slice;
+#endif
 
     int REF_FLAG;
     int GPU_FLAG;
@@ -200,7 +208,10 @@ class Camera {
     //! Render image of attached scene
     Mat render();
     void renderCPU();
+
+#ifndef WITHOUT_CUDA
     void renderGPU();
+#endif
 
     //! Get camera matrix of camera
     Mat getP();
@@ -230,7 +241,9 @@ class Camera {
     Mat_<double> p_;
     Mat_<double> s_;
 
+#ifndef WITHOUT_CUDA
     gpu::GpuMat gx, gy, tmp1, tmp2, img;
+#endif
 
     Scene scene_;
     int REF_FLAG;
@@ -243,6 +256,7 @@ class Camera {
 
 };
 
+/*
 class benchmark {
 
  public:
@@ -261,5 +275,6 @@ class benchmark {
     saRefocus refocus_;
 
 };
+*/
 
 #endif

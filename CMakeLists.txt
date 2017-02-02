@@ -37,6 +37,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 option(FAST_MATH "FAST_MATH" OFF)
+option(WITH_CUDA "WITH_CUDA" ON)
 
 set(PYTHON_INCLUDE_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
 set(PYTHON_LIBRARIES "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
@@ -56,7 +57,13 @@ message("---CUDA---")
 message("CUDA Libraries: " ${CUDA_LIBRARIES})
 message("CUDA Include Dirs: " ${CUDA_INCLUDE_DIRS})
 if(NOT CUDA_FOUND)
-  message("CUDA not found!")
+  message("CUDA not found! CUDA components will not be built.")
+  add_definitions(-DWITHOUT_CUDA)
+endif()
+
+if (NOT WITH_CUDA)
+  message("WITH_CUDA set of OFF. CUDA components will not be built.")
+  add_definitions(-DWITHOUT_CUDA)
 endif()
 
 # Find OpenCV
@@ -103,10 +110,15 @@ include_directories( ${EIGEN_INC_DIR} )
 # endif()
 
 set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack gomp) # protobuf lgomp (removed)
-set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY} cufft cufftw)
+set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY})
+if (WITH_CUDA)
+  set(OTHER_LIBS ${OTHER_LIBS} cufft cufftw)
+  set (OFV_LIBS openfv cuda_openfv)
+else()
+  set (OFV_LIBS openfv)
+endif()
 set (PROF_LIB profiler)
 set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${PYTHON_LIBRARIES} ${CERES_LIBS} ${OpenCV_LIBS})
-set (OFV_LIBS openfv cuda_openfv)
 
 # fPIC flags, needed?
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")

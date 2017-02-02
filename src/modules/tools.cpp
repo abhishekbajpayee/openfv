@@ -22,10 +22,6 @@
 // You should have received a copy of the GNU General Public License along with openFV. 
 // If not, see http://www.gnu.org/licenses/.
 
-// #include "std_include.h"
-// #include "refocusing.h"
-// #include "rendering.h"
-// #include "typedefs.h"
 #include "tools.h"
 
 using namespace std;
