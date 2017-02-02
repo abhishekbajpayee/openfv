@@ -37,21 +37,22 @@ Set-up on an Ubuntu Machine
 
 <pre><code>$ sudo apt-get install qt4-dev-tools libtiff4-dev </code></pre>
 
-* Install <a href="https://google-glog.googlecode.com/svn/trunk/INSTALL">glog</a>
+* Install <a href="https://google-glog.googlecode.com/svn/trunk/INSTALL">Glog</a>
 
 ### General Setup
 
 <pre><code>$ sudo apt-get install cmake build-essential libboost-all-dev libgoogle-perftools-dev google-perftools libeigen3-dev libatlas-base-dev libsuitesparse-dev </code></pre> 
 
-* Install <a href="http://ceres-solver.org/building.html">ceres</a>
+* Download <a href="http://ceres-solver.org/building.html">Ceres Solver</a>
 
-After installing ceres, run the following commands in your build directory
+After downloading Ceres Solver, run the following commands in your build directory
 
 <pre><code>$ cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC ../ceres-solver-1.10.0 && make && sudo make install </code></pre>
 
-* Install <a href="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf">cuda toolkit</a>
+* Install <a href="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf">CUDA Toolkit</a>
 
-* Install <a href="http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html">opencv 2.4.10</a>
+* Install <a href="http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html">OpenCV 2.4.10</a>
+<br/>
 As mentioned earlier, be sure to build OpenCV with the <code>-D WITH_CUDA=ON</code> and <code>-D WITH_QT=ON</code> in case a GPU and Qt libraries are available.
 
 ### OpenFV Installation
