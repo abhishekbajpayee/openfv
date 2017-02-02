@@ -52,13 +52,14 @@ endif()
 # FIND REQUIRED PACKAGES
 
 # CUDA
-find_package(CUDA REQUIRED)
+find_package(CUDA)
 message("---CUDA---")
 message("CUDA Libraries: " ${CUDA_LIBRARIES})
 message("CUDA Include Dirs: " ${CUDA_INCLUDE_DIRS})
 if(NOT CUDA_FOUND)
   message("CUDA not found! CUDA components will not be built.")
   add_definitions(-DWITHOUT_CUDA)
+  set(WITH_CUDA OFF)
 endif()
 
 if (NOT WITH_CUDA)
