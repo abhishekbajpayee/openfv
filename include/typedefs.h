@@ -64,6 +64,17 @@ struct refocus_settings {
     //! Successive frames to skip (used if all_frames is set to 0)
     int skip;
     
+    //! Time shift values for each camera
+    vector<int> shifts;
+
+    //! Flag indicating if calibration images should be resized or not
+    int resize_images;
+    //! Factor by which to resize calibration images
+    double rf;
+
+    //! Whether calibration file is out of Kalibr
+    int kalibr;
+
 };
 
 struct calibration_settings {
@@ -94,6 +105,14 @@ struct calibration_settings {
     int start_frame;
     //! Number of the frame to end reading at
     int end_frame;
+
+    //! Time shift values for each camera
+    vector<int> shifts;
+
+    //! Flag indicating if calibration images should be resized or not
+    int resize_images;
+    //! Factor by which to resize calibration images
+    double rf;
 
 };
 

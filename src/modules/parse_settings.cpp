@@ -18,13 +18,17 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("hf_method", po::value<int>()->default_value(0), "ON to use HF method")
         ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
         ("mp4", po::value<int>()->default_value(0), "ON if data is in mp4 files")
-        //("all_frames", po::value<int>()->default_value(1), "ON to process all frames in a multipage tiff file")
-        //("start_frame", po::value<int>()->default_value(0), "first frame in range of frames to process")
         ("frames", po::value<string>()->default_value(""), "Array of values in format start, end, skip")
-        //("end_frame", po::value<int>(), "last frame in range of frames to process")
-        //("upload_frame", po::value<int>()->default_value(-1), "frame to upload to GPU (-1 uploads all frames)")
         ("calib_file_path", po::value<string>()->default_value(""), "calibration file to use")
         ("images_path", po::value<string>()->default_value(""), "path where data is located")
+        ("shifts", po::value<string>()->default_value(""), "path where data is located")
+        ("resize_images", po::value<int>()->default_value(0), "ON to resize all input images")
+        ("rf", po::value<double>()->default_value(1.0), "Factor to resize input images by")
+        ("kalibr", po::value<int>()->default_value(0), "ON to use Kalibr calibration output")
+        // ("all_frames", po::value<int>()->default_value(1), "ON to process all frames in a multipage tiff file")
+        // ("start_frame", po::value<int>()->default_value(0), "first frame in range of frames to process")
+        // ("end_frame", po::value<int>(), "last frame in range of frames to process")
+        // ("upload_frame", po::value<int>()->default_value(-1), "frame to upload to GPU (-1 uploads all frames)")
         // ("dump_stack", po::value<int>()->default_value(0), "ON to save stack to path")
         // ("zmin", po::value<double>()->default_value(0), "zmin")
         // ("zmax", po::value<double>()->default_value(0), "zmax")
@@ -47,8 +51,10 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.mtiff = vm["mtiff"].as<int>();
     settings.mp4 = vm["mp4"].as<int>();
     settings.mult = vm["mult"].as<int>();
-    if (settings.mult)
-        settings.mult_exp = vm["mult_exp"].as<double>();
+    settings.mult_exp = vm["mult_exp"].as<double>();
+    settings.resize_images = vm["resize_images"].as<int>();
+    settings.rf = vm["rf"].as<double>();
+    settings.kalibr = vm["kalibr"].as<int>();
 
     vector<int> frames;
     stringstream frames_stream(vm["frames"].as<string>());
@@ -83,6 +89,18 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         LOG(FATAL)<<"Can't have starting frame less than 0. Terminating..."<<endl;
     }
     
+    // Reading time shift values
+    vector<int> shifts;
+    stringstream shifts_stream(vm["shifts"].as<string>());
+    while (shifts_stream >> i) {
+        shifts.push_back(i);
+        if(shifts_stream.peek() == ',' || shifts_stream.peek() == ' ') {
+            shifts_stream.ignore();
+        }
+    }
+    settings.shifts = shifts;
+
+
     // settings.all_frames = vm["all_frames"].as<int>();
     // if (!settings.all_frames) {
     //     settings.start_frame = vm["start_frame"].as<int>();
@@ -156,6 +174,9 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
         ("grid_size_phys", po::value<double>()->default_value(5), "Physical size of grid in [mm]")
         ("skip", po::value<int>()->default_value(1), "Number of frames to skip (used mostly when mtiff on)")
         ("frames", po::value<string>()->default_value(""), "Array of values in format start, end, skip")
+        ("shifts", po::value<string>()->default_value(""), "Array of time shift values separated by commas")
+        ("resize_images", po::value<int>()->default_value(0), "ON if calibration images should be resized")
+        ("rf", po::value<double>()->default_value(1), "Factor by which to resize calibration images")
         ;
 
     if (h) {
@@ -173,30 +194,43 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     settings.distortion = vm["distortion"].as<int>();
     settings.mtiff = vm["mtiff"].as<int>();
     settings.skip = vm["skip"].as<int>();
+    settings.resize_images = vm["resize_images"].as<int>();
+    settings.rf = vm["rf"].as<double>();
     settings.mp4 = vm["mp4"].as<int>();
-    if (settings.mp4) {
-        vector<int> frames;
-        stringstream frames_stream(vm["frames"].as<string>());
-        int i;
-        while (frames_stream >> i) {
-            frames.push_back(i);
+
+    vector<int> frames;
+    stringstream frames_stream(vm["frames"].as<string>());
+    int i;
+    while (frames_stream >> i) {
+        frames.push_back(i);
             
-            if(frames_stream.peek() == ',' || frames_stream.peek() == ' ') {
-                frames_stream.ignore();
-            }
-        }
-        if (frames.size() == 3) {
-            settings.start_frame = frames.at(0);
-            settings.end_frame = frames.at(1);
-            settings.skip = frames.at(2);
-        } else {
-            LOG(FATAL)<<"frames expects 3 comma or space separated values";
+        if(frames_stream.peek() == ',' || frames_stream.peek() == ' ') {
+            frames_stream.ignore();
         }
     }
+    if (frames.size() == 3) {
+        settings.start_frame = frames.at(0);
+        settings.end_frame = frames.at(1);
+        settings.skip = frames.at(2);
+    } else {
+        LOG(FATAL)<<"frames expects 3 comma or space separated values";
+    }
+
     if (settings.start_frame<0) {
         LOG(FATAL)<<"Can't have starting frame less than 0. Terminating..."<<endl;
     }
     
+    // Reading time shift values
+    vector<int> shifts;
+    stringstream shifts_stream(vm["shifts"].as<string>());
+    while (shifts_stream >> i) {
+        shifts.push_back(i);
+        if(shifts_stream.peek() == ',' || shifts_stream.peek() == ' ') {
+            shifts_stream.ignore();
+        }
+    }
+    settings.shifts = shifts;
+
     boost::filesystem::path imgsP(vm["images_path"].as<string>());
     if(imgsP.string().empty()) {
         LOG(FATAL)<<"images_path is a REQUIRED variable";

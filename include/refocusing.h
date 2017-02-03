@@ -88,8 +88,12 @@ class saRefocus {
     Size img_size() { return img_size_; }
     int num_frames() { return imgs[0].size(); }
 
+    void set_init_z(double z) { z_ = z; }
+
     //! Read refractive calibration data
     void read_calib_data(string path);
+    //! Read calibration data that is output from kalibr
+    void read_kalibr_data(string path);
     //! Read pinhole calibration data
     void read_calib_data_pin(string path);
 
@@ -196,8 +200,12 @@ class saRefocus {
     // data types and private functions
     vector<Mat> P_mats_;
     vector<Mat> P_mats_u_;
+    vector<Mat> K_mats_;
+    vector<Mat> R_mats_;
+    vector<Mat> t_vecs_;
     vector<string> cam_names_;
     vector<Mat> cam_locations_;
+    vector<Mat> dist_coeffs_;
     Size img_size_;
     double scale_;
     int num_cams_;
@@ -212,6 +220,7 @@ class saRefocus {
     double z_, dz_, xs_, ys_, zs_, rx_, ry_, rz_, cxs_, cys_, czs_, crx_, cry_, crz_;
     double thresh_;
     vector<int> frames_;
+    vector<int> shifts_;
     int mult_;
     double mult_exp_;
     double warp_factor_;
@@ -219,6 +228,7 @@ class saRefocus {
     int start_frame_;
     int end_frame_;
     int skip_frame_;
+    double rf_;
 
     Mat refocused_host_;
 
@@ -251,6 +261,8 @@ class saRefocus {
     int MAX_NR_ITERS;
     int BENCHMARK_MODE;
     int INT_IMG_MODE;
+    int RESIZE_IMAGES;
+    int KALIBR;
     
 };
 

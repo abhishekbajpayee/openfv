@@ -116,6 +116,9 @@ multiCamCalibration::multiCamCalibration(calibration_settings settings) {
     solveForDistortion_ = settings.distortion;
     freeCamInit_ = 1;
     // averageCams_ = 0;
+    shifts_ = settings.shifts;
+    resize_input_images_ = settings.resize_images;
+    rf_ = settings.rf;
 
     dummy_mode_ = 0;
     show_corners_flag = 0;
@@ -331,15 +334,19 @@ void multiCamCalibration::read_cam_names_mp4() {
             if (temp_name.compare(dir2)) {
                 if (temp_name.compare(temp_name.size()-3,3,"MP4") == 0) {
                     cam_names_.push_back(temp_name);
-                    shifts_.push_back(0);
                 }
             }
         }
     }
     
     sort(cam_names_.begin(), cam_names_.end());
-
     for (int i=0; i<cam_names_.size(); i++) VLOG(1)<<"Camera "<<i+1<<": "<<cam_names_[i]<<endl;
+
+    if (shifts_.size()==0) {
+        for (int i=0; i<cam_names_.size(); i++) shifts_.push_back(0);
+    } else if (shifts_.size() != cam_names_.size()) {
+        LOG(FATAL)<<"Number of shift elements supplied does not match the number of cameras!";
+    }
 
     if (dummy_mode_) {
         int id;
@@ -521,40 +528,29 @@ void multiCamCalibration::read_calib_imgs_mtiff() {
 
 void multiCamCalibration::read_calib_imgs_mp4() {
 
+    time_t result = time(NULL);
+
     for (int i=0; i<cam_names_.size(); i++) {
 
         string file_path = path_+cam_names_[i];
         mp4Reader mf(file_path);
 
-        // LOG(INFO)<<"Opening "<<file_path;
-        // VideoCapture cap(file_path); // open the default camera
-        // if(!cap.isOpened())  // check if we succeeded
-        //     LOG(FATAL)<<"Could not open " + file_path;
-
-        // int total_frames = cap.get(CV_CAP_PROP_FRAME_COUNT);
-        // VLOG(1)<<"Total frames: "<<total_frames;
-
         int count = 0;
         Mat frame, frame2;
-
-        // cap.set(CV_CAP_PROP_POS_FRAMES, start_frame_-1);
-        // VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);       
         
         vector<Mat> calib_imgs_sub;
         vector<string> tstamps_sub;
-        time_t result = time(NULL);
+        
         int skip = 0;
         while(start_frame_ + skip <= end_frame_) {
 
-            Mat frame = mf.get_frame(start_frame_ + skip);
+            Mat frame = mf.get_frame(start_frame_ + skip + shifts_[i]);
 
-            // cap >> frame; 
-            // VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
-
-            // tstamps_sub.push_back(cap.get(CV_CAP_PROP_POS_MSEC));
-            
             // convert msec to s + nsec
-            double t, it, ft; t = mf.time_stamp(start_frame_ + skip)/1000; ft = modf(t, &it);
+            double t, it, ft; 
+            t = mf.time_stamp(start_frame_ + skip + shifts_[i])/1000 - shifts_[i]*(1.0/30.0);
+            // t = count*(1.0/30.0)
+            ft = modf(t, &it);
             stringstream ss; ss<<ft; string fts = ss.str().substr(2);
             int len = fts.length();
             ss.str(""); ss<<(int(result)+int(it))<<fts;
@@ -562,19 +558,17 @@ void multiCamCalibration::read_calib_imgs_mp4() {
                 ss<<"0";
             tstamps_sub.push_back(ss.str());
 
-            // tstamps_sub.push_back(mf.time_stamp(start_frame_ + skip));
+            Mat small;
+            if (resize_input_images_) {
+                resize(frame, small, Size(int(frame.cols*rf_), int(frame.rows*rf_)));
+            } else {
+                small = frame.clone();
+            }
 
-            // cvtColor(frame, frame2, CV_BGR2GRAY);
-            // frame2.convertTo(frame2, CV_8U);
-
-            calib_imgs_sub.push_back(frame.clone()); // store frame
+            calib_imgs_sub.push_back(small.clone()); // store frame
             count++;
 
             skip += skip_frames_;
-
-            // VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
-            // cap.set(CV_CAP_PROP_POS_FRAMES, cap.get(CV_CAP_PROP_POS_FRAMES)+skip_frames_);
-            // VLOG(3)<<"Location after skipping: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
 
         }
 
@@ -586,6 +580,7 @@ void multiCamCalibration::read_calib_imgs_mp4() {
 
     num_imgs_ = calib_imgs_[0].size();
     img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
+    VLOG(1)<<"Size of input images: "<<img_size_;
 
     LOG(INFO)<<"\nDONE READING IMAGES!\n\n";
     images_read_ = 1;
@@ -618,6 +613,7 @@ void multiCamCalibration::find_corners() {
                 scene = imgs_temp[j]; //*255.0;
                 //scene.convertTo(scene, CV_8U);
                 bool found = findChessboardCorners(scene, grid_size_, points, CV_CALIB_CB_ADAPTIVE_THRESH|CALIB_CB_FAST_CHECK);
+                // bool found = findChessboardCorners(scene, grid_size_, points, CALIB_CB_FAST_CHECK);
             
                 if (found) {
                     //cvtColor(scene, scene_gray, CV_RGB2GRAY);
@@ -629,7 +625,7 @@ void multiCamCalibration::find_corners() {
                         scene_drawn = scene;
                         cvtColor(scene_drawn, scene_drawn, CV_GRAY2RGB);
                         drawChessboardCorners(scene_drawn, grid_size_, points, found);
-                        namedWindow("Pattern", CV_WINDOW_NORMAL);
+                        namedWindow("Pattern", CV_WINDOW_AUTOSIZE);
                         imshow("Pattern", scene_drawn);
                         waitKey(0);
                         cvDestroyWindow("Pattern");
@@ -642,7 +638,7 @@ void multiCamCalibration::find_corners() {
                     corner_points.push_back(points);
 
                     if (show_corners_flag) {
-                        namedWindow("Pattern not found!", CV_WINDOW_NORMAL);
+                        namedWindow("Pattern not found!", CV_WINDOW_AUTOSIZE);
                         imshow("Pattern not found!", scene);
                         waitKey(0);
                         cvDestroyWindow("Pattern not found!");
@@ -858,8 +854,10 @@ void multiCamCalibration::initialize_cams() {
         
             double reproj_err;
             if (freeCamInit_) {
+                VLOG(1)<<"Calibrating without using initial guesses...";
                 reproj_err = calibrateCamera(all_pattern_points_[i], all_corner_points_[i], img_size_, A, dist_coeff, rvec, tvec, CV_CALIB_FIX_ASPECT_RATIO);
             } else {
+                VLOG(1)<<"Calibrating using initial guesses...";
                 reproj_err = calibrateCamera(all_pattern_points_[i], all_corner_points_[i], img_size_, A, dist_coeff, rvec, tvec, CV_CALIB_USE_INTRINSIC_GUESS|CV_CALIB_FIX_PRINCIPAL_POINT|CV_CALIB_FIX_ASPECT_RATIO);
             }
             VLOG(1)<<"Camera calibration reprojection error: "<<reproj_err;
@@ -877,8 +875,8 @@ void multiCamCalibration::initialize_cams() {
             if (initGridViews_)
                 adjust_pattern_points(all_pattern_points_[i], A, dist_coeff, rvec, tvec, rvec_avg, tvec_avg);
 
-            LOG(INFO)<<A;
-            LOG(INFO)<<dist_coeff;
+            VLOG(2)<<A;
+            VLOG(2)<<dist_coeff;
 
             LOG(INFO)<<"done!\n";
 
@@ -1955,7 +1953,7 @@ void multiCamCalibration::write_kalibr_imgs(string path) {
 
     for (int i=0; i<cam_names_.size(); i++) {
 
-        string newPath = path + cam_names_[i] + "/";
+        string newPath = path + cam_names_[i].substr(0,4) + "/";
         if (!dirExists(newPath)) {
             LOG(INFO)<<newPath<<" directory does not exist..."<<endl;
             mkdir(newPath.c_str(), S_IRWXU);
@@ -2067,18 +2065,26 @@ void multiCamCalibration::grid_view() {
 
 }
 
-void multiCamCalibration::grid_view_mp4() {
+void multiCamCalibration::grid_view_mp4(double f, int color) {
+
+    zf_ = f;
+    gcolor_ = color;
 
     read_cam_names_mp4();
     for (int i=0; i<cam_names_.size(); i++) {
         string file_path = path_+cam_names_[i];
-        mp4Reader mf(file_path);
+        mp4Reader mf(file_path, gcolor_);
         mfs_.push_back(mf);
     }
 
     gframe_ = 0;
+    for (int i=0; i<shifts_.size(); i++) {
+        if (-gframe_ > shifts_[i])
+            gframe_ = -shifts_[i];
+    }
     gskip_ = 1;
     active_cam_ = 0;
+    update_frame_ = 1;
 
     namedWindow("Grid View", CV_WINDOW_AUTOSIZE | CV_GUI_EXPANDED);
     update_grid_view_mp4();
@@ -2091,20 +2097,24 @@ void multiCamCalibration::grid_view_mp4() {
         int pkey = key & 255;
         if (pkey!=255) {
 
+            update_frame_ = 1;
             if (pkey==83) {
                 gframe_ += gskip_;
             } else if (pkey==81) {
                 gframe_ = max(0, gframe_-gskip_);
             } else if (pkey==82) {
                 gskip_ *= 10;
+                update_frame_ = 0;
             } else if (pkey==84) {
                 gskip_ = max(1, gskip_/10);
+                update_frame_ = 0;
             } else if (pkey>=49 && pkey<=57) {
+                update_frame_ = 0;
                 if (pkey-49<shifts_.size())
                     active_cam_ = pkey-49;
             } else if (pkey==61) {
                 shifts_[active_cam_]++;
-            } else if (pkey==84) {
+            } else if (pkey==45) {
                 shifts_[active_cam_]--;
             } else if (pkey==27) {
                 cvDestroyAllWindows();
@@ -2121,9 +2131,8 @@ void multiCamCalibration::grid_view_mp4() {
 
 void multiCamCalibration::update_grid_view_mp4() {
 
-    int f1 = 1;
-    int ow = 1920*f1;
-    int oh = 1080*f1;
+    int ow = 1920*zf_;
+    int oh = 1080*zf_;
 
     int f2 = 1;
     if (cam_names_.size()==2) {
@@ -2135,18 +2144,24 @@ void multiCamCalibration::update_grid_view_mp4() {
     if (cam_names_.size()>9)
         LOG(WARNING)<<"Grid view will malfunction because it assumes a max 3x3 grid (9 cameras)!";
 
-    Mat grid;
-    grid.create(oh, ow, CV_8U);
-
-    for (int i=0; i<cam_names_.size(); i++) {
-        Mat img = mfs_[i].get_frame(gframe_+shifts_[i]);
-        Mat small;
-        double w = ow/f2;
-        double h = w*img.rows/img.cols;
-        resize(img, small, Size(w, h));
-        int r = floor(i/3);
-        int c = i%3;
-        small.copyTo(grid.colRange(c*w, (c+1)*w).rowRange(r*h, (r+1)*h));
+    if (update_frame_) {
+        Mat grid;
+        if (gcolor_) {
+            grid.create(oh, ow, CV_8UC3);
+        } else {
+            grid.create(oh, ow, CV_8U);
+        }
+        for (int i=0; i<cam_names_.size(); i++) {
+            Mat img = mfs_[i].get_frame(gframe_+shifts_[i]);
+            Mat small;
+            double w = ow/f2;
+            double h = w*img.rows/img.cols;
+            resize(img, small, Size(w, h));
+            int r = floor(i/3);
+            int c = i%3;
+            small.copyTo(grid.colRange(c*w, (c+1)*w).rowRange(r*h, (r+1)*h));
+        }
+        grid_ = grid.clone();
     }
 
     stringstream title;
@@ -2161,7 +2176,7 @@ void multiCamCalibration::update_grid_view_mp4() {
     }
     title<<")";
 
-    imshow("Grid View", grid);
+    imshow("Grid View", grid_);
     displayOverlay("Grid View", title.str().c_str());
 
 }

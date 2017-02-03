@@ -130,21 +130,27 @@ Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P) {
 
 }
 
+Mat build_Rt(Mat R, Mat t) {
+
+    Mat_<double> Rt = Mat_<double>::zeros(3,4);
+    for (int i=0; i<3; i++) {
+        for (int j=0; j<3; j++) {
+            Rt(i,j) = R.at<double>(i,j);
+        }
+        Rt(i,3) = t.at<double>(0,i);
+    }
+
+    return Rt;
+
+}
+
 Mat build_camera_matrix(Mat K, Mat rvec, Mat tvec) {
 
     Mat R; Rodrigues(rvec, R);
+    Mat Rt = build_Rt(R, tvec);
+    Mat P = K*Rt;
 
-    Mat_<double> P = Mat_<double>::zeros(3,4);
-
-    for (int i=0; i<3; i++) {
-        for (int j=0; j<3; j++) {
-            P(i,j) = R.at<double>(i,j);
-        }
-        P(i,3) = tvec.at<double>(0,i);
-    }
-    P = K*P;
-
-    return P;
+    return P.clone();
 
 }
 
@@ -158,9 +164,34 @@ double dist(Point3f p1, Point3f p2) {
 
 void qimshow(Mat image) {
 
+    stringstream info;
+    info<<"Image Type: ";
+    int type = image.type();
+    switch(type) {
+    case CV_8U:
+        info<<"CV_8U";
+        break;
+    case CV_16U:
+        info<<"CV_16U";
+        break;
+    case CV_32F:
+        info<<"CV_32F";
+        break;
+    case CV_64F:
+        info<<"CV_64F";
+        break;
+    default:
+        info<<type;
+        break;
+    }
+
+    info<<", Size: ";
+    info<<image.cols<<" x "<<image.rows;
+
     namedWindow("Image", CV_WINDOW_AUTOSIZE);
     imshow("Image", image);
-    
+    displayOverlay("Image", info.str().c_str());
+
     int key;
     while(1) {
         key = cvWaitKey(10);

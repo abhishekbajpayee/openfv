@@ -86,7 +86,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), MP4_FLAG(settings.mp4) {
+    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), MP4_FLAG(settings.mp4), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), shifts_(settings.shifts), KALIBR(settings.kalibr) {
     
 #ifdef WITHOUT_CUDA
     if (GPU_FLAG)
@@ -101,7 +101,11 @@ saRefocus::saRefocus(refocus_settings settings):
     SINGLE_CAM_DEBUG = 0;
     
     imgs_read_ = 0;
-    read_calib_data(settings.calib_file_path);
+    if (!KALIBR) {
+        read_calib_data(settings.calib_file_path);
+    } else {
+        read_kalibr_data(settings.calib_file_path);
+    }
 
     if (mult_) {
         mult_exp_ = settings.mult_exp;
@@ -206,6 +210,83 @@ void saRefocus::read_calib_data(string path) {
     }
 
     VLOG(1)<<"DONE READING CALIBRATION DATA";
+
+}
+
+void saRefocus::read_kalibr_data(string path) {
+
+    FileStorage fs(path, FileStorage::READ);
+    FileNode fn = fs.root();
+
+    FileNodeIterator fi = fn.begin(), fi_end = fn.end();
+
+    int i=0;
+    for (; fi != fi_end; ++fi, i++) {
+        
+        FileNode f = *fi;
+        string cam_name; f["rostopic"]>>cam_name;
+        cam_names_.push_back(cam_name.substr(1,4) + "_003.MP4"); // TODO: deal with this!
+
+        // Reading distortion coefficients
+        vector<double> dc;
+        Mat_<double> dist_coeff = Mat_<double>::zeros(1,4);
+        f["distortion_coeffs"] >> dc;
+        for (int j=0; j < dc.size(); j++)
+            dist_coeff(0,j) = (double)dc[j];
+        
+        // Reading K (camera matrix)
+        vector<double> intr;
+        f["intrinsics"] >> intr;
+        Mat_<double> K_mat = Mat_<double>::zeros(3,3);
+        K_mat(0,0) = (double)intr[0]; K_mat(1,1) = (double)intr[1];
+        K_mat(0,2) = (double)intr[2]; K_mat(1,2) = (double)intr[3];
+        K_mat(2,2) = 1.0;
+
+        // TODO: why does this not print?
+        // LOG(INFO)<<cam_names_[i]; 
+
+        // Reading R and t matrices
+        Mat_<double> R = Mat_<double>::zeros(3,3);
+        Mat_<double> t = Mat_<double>::zeros(3,1);
+        FileNode tn = f["T_cn_cnm1"];
+        if (tn.empty()) {
+            R(0,0) = -1.0; R(1,1) = -1.0; R(2,2) = -1.0;
+            t(0,0) = 0.0; t(1,0) = 0.0; t(2,0) = 0.0;
+        } else {
+            FileNodeIterator fi2 = tn.begin(), fi2_end = tn.end();
+            int r = 0;
+            for (; fi2 != fi2_end; ++fi2, r++) {
+                if (r==3)
+                    continue;
+                FileNode f2 = *fi2;
+                R(r,0) = (double)f2[0]; R(r,1) = (double)f2[1]; R(r,2) = (double)f2[2]; 
+                t(r,0) = (double)f2[3]*1000.0; // converting from [m] to [mm]
+            }            
+        }
+
+        // Converting R and t matrices to be relative to world coordinates
+        if (i>0) {
+            Mat R3 = R.clone()*R_mats_[i-1].clone();
+            Mat t3 = R.clone()*t_vecs_[i-1].clone() + t.clone();
+            R = R3.clone(); t = t3.clone();
+        }
+
+        Mat Rt = build_Rt(R, t);
+        Mat P = K_mat*Rt;
+        
+        LOG(INFO)<<cam_name;
+        LOG(INFO)<<P;
+
+        R_mats_.push_back(R);
+        t_vecs_.push_back(t);
+        dist_coeffs_.push_back(dist_coeff);
+        K_mats_.push_back(K_mat);
+        P_mats_.push_back(P);
+        
+    }
+
+    num_cams_ = i;
+    REF_FLAG = 0;
 
 }
 
@@ -427,31 +508,43 @@ void saRefocus::read_imgs_mp4(string path) {
     for (int i=0; i<cam_names_.size(); i++) {
 
         string file_path = path+cam_names_[i];
-        LOG(INFO)<<"Opening "<<file_path;
-        VideoCapture cap(file_path); // open the default camera
-        if(!cap.isOpened())  // check if we succeeded
-            LOG(FATAL)<<"Could not open " + file_path;
+        mp4Reader mf(file_path);
 
-        int total_frames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+        // LOG(INFO)<<"Opening "<<file_path;
+        // VideoCapture cap(file_path); // open the default camera
+        // if(!cap.isOpened())  // check if we succeeded
+        //     LOG(FATAL)<<"Could not open " + file_path;
+
+        // int total_frames = cap.get(CV_CAP_PROP_FRAME_COUNT);
+        int total_frames = mf.num_frames();
         VLOG(1)<<"Total frames: "<<total_frames;
 
-        Mat frame, frame2;
+        Mat frame, frame2, frame3;
                 
         vector<Mat> refocusing_imgs_sub;
-        for (int f=0; f<frames_.size(); f++) {
-        // while(cap.get(CV_CAP_PROP_POS_FRAMES)<=end_frame_) {
+        for (int j=0; j<frames_.size(); j++) {
 
-            VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
-            cap.set(CV_CAP_PROP_POS_FRAMES, frames_.at(f));
-            VLOG(3)<<"Location after skipping: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
+            // VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
+            // cap.set(CV_CAP_PROP_POS_FRAMES, frames_.at(f));
+            // VLOG(3)<<"Location after skipping: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
 
-            cap >> frame;
-            VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
+            // cap >> frame;
+            // VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
+            // cvtColor(frame, frame2, CV_BGR2GRAY);
+            // frame2.convertTo(frame2, CV_8U);
 
-            cvtColor(frame, frame2, CV_BGR2GRAY);
-            frame2.convertTo(frame2, CV_8U);
-            refocusing_imgs_sub.push_back(frame2.clone()); // store frame
+            frame = mf.get_frame(frames_[j] + shifts_[i]);
+            
+            if (RESIZE_IMAGES) {
+                resize(frame, frame2, Size(int(frame.cols*rf_), int(frame.rows*rf_)));
+            } else {
+                frame2 = frame.clone();
+            }
+            
+            fisheye::undistortImage(frame2, frame3, K_mats_[i], dist_coeffs_[i], K_mats_[i]);
 
+            refocusing_imgs_sub.push_back(frame3.clone()); // store frame
+            // qimshow(frame3);
         }
 
         imgs.push_back(refocusing_imgs_sub);
@@ -463,7 +556,7 @@ void saRefocus::read_imgs_mp4(string path) {
 
     initializeRefocus();
 
-    LOG(INFO)<<"\nDONE READING IMAGES!\n\n";
+    LOG(INFO)<<"DONE READING IMAGES!";
 
 }
 
@@ -767,8 +860,6 @@ void saRefocus::uploadToGPU() {
         VLOG(1)<<"Free Memory before: "<<free_mem_GPU<<" MB";
     }
 
-   
-          
     VLOG(1)<<"Uploading all frames to GPU..."<<endl;
     for (int i=0; i<imgs[0].size(); i++) {
         for (int j=0; j<num_cams_; j++) {

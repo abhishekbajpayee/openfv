@@ -152,7 +152,7 @@ class multiCamCalibration {
     // void write_calib_results_matlab_ref();
 
     void grid_view();
-    void grid_view_mp4();
+    void grid_view_mp4(double f, int color);
     void update_grid_view_mp4();
 
     // Functions to access calibration data
@@ -238,6 +238,8 @@ class multiCamCalibration {
     int dummy_mode_;
     int mtiff_; // 0 = folders with tif images, 1 = multipage tif files
     int mp4_;
+    int resize_input_images_;
+    double rf_;
 
     // Settings
     int pinhole_max_iterations;
@@ -257,7 +259,11 @@ class multiCamCalibration {
     int gframe_;
     int gskip_;
     int active_cam_;
+    int gcolor_;
+    int update_frame_;
     vector<mp4Reader> mfs_;
+    Mat grid_;
+    double zf_;
 
 };
 

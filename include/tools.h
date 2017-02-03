@@ -48,6 +48,8 @@ int matrixMean(vector<Mat> mats_in, Mat &mat_out);
 
 Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P);
 
+Mat build_Rt(Mat R, Mat t);
+
 Mat build_camera_matrix(Mat K, Mat rvec, Mat tvec);
 
 double dist(Point3f p1, Point3f p2);
