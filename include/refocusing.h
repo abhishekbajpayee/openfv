@@ -89,6 +89,7 @@ class saRefocus {
     int num_frames() { return imgs[0].size(); }
 
     void set_init_z(double z) { z_ = z; }
+    void set_dz(double dz) { dz_ = dz; }
 
     //! Read refractive calibration data
     void read_calib_data(string path);

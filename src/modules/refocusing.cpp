@@ -139,7 +139,7 @@ saRefocus::saRefocus(refocus_settings settings):
     }
 #endif
 
-    z_ = 0; 
+    z_ = 0; dz_ = 0.1;
     xs_ = 0; ys_ = 0; zs_ = 0; 
     rx_ = 0; ry_ = 0; rz_ = 0;
     cxs_ = 0; cys_ = 0; czs_ = 0;
@@ -260,7 +260,7 @@ void saRefocus::read_kalibr_data(string path) {
                     continue;
                 FileNode f2 = *fi2;
                 R(r,0) = (double)f2[0]; R(r,1) = (double)f2[1]; R(r,2) = (double)f2[2]; 
-                t(r,0) = (double)f2[3]*1000.0; // converting from [m] to [mm]
+                t(r,0) = (double)f2[3]*-1000.0; // converting from [m] to [mm]
             }            
         }
 
@@ -285,6 +285,7 @@ void saRefocus::read_kalibr_data(string path) {
         
     }
 
+    scale_ = 30; // TODO: fix this
     num_cams_ = i;
     REF_FLAG = 0;
 
@@ -584,7 +585,6 @@ void saRefocus::CPUliveView() {
         CPUrefocus(1, active_frame_);
     }
     
-    double dz = 0.1;
     double dthresh = 5/255.0;
     double tlimit = 1.0;
     double mult_exp_limit = 1.0;
@@ -597,9 +597,9 @@ void saRefocus::CPUliveView() {
         if ( (key & 255)!=255 ) {
 
             if ( (key & 255)==83 ) {
-                z_ += dz;
+                z_ += dz_;
             } else if( (key & 255)==81 ) {
-                z_ -= dz;
+                z_ -= dz_;
             } else if( (key & 255)==82 ) {
                 if (mult_) {
                     if (mult_exp_<mult_exp_limit)
@@ -1097,7 +1097,6 @@ void saRefocus::GPUliveView() {
 
     active_frame_ = 0; 
     thresh_ = 0;
-    dz_ = 0.1;
     double dthresh, tulimit, tllimit;
     if (STDEV_THRESH) {
         dthresh = 0.1;
@@ -1287,14 +1286,12 @@ void saRefocus::updateLiveFrame() {
 
 void saRefocus::CPUrefocus(int live, int frame) {
 
-    //z *= warp_factor_;
-
     Scalar fact = Scalar(1/double(num_cams_));
 
     Mat H, trans;
-    //T_from_P(P_mats_[0], H, z, scale_, img_size_);
     calc_refocus_H(0, H);
     warpPerspective(imgs[0][frame], cputemp, H, img_size_);
+    // qimshow(cputemp);
 
     if (mult_) {
         pow(cputemp, mult_exp_, cputemp2);
@@ -1306,9 +1303,9 @@ void saRefocus::CPUrefocus(int live, int frame) {
 
     for (int i=1; i<num_cams_; i++) {
         
-        //T_from_P(P_mats_[i], H, z, scale_, img_size_);
         calc_refocus_H(i, H);
         warpPerspective(imgs[i][frame], cputemp, H, img_size_);
+        // qimshow(cputemp);
 
         if (mult_) {
             pow(cputemp, mult_exp_, cputemp2);
@@ -1537,8 +1534,10 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
 
 void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
-    int width = img_size_.width;
-    int height = img_size_.height;
+    double width = img_size_.width;
+    double height = img_size_.height;
+    double fx = K_mats_[cam].at<double>(0,0);
+    double fy = K_mats_[cam].at<double>(1,1);
 
     Mat D;
     if (INVERT_Y_FLAG) {
@@ -1555,18 +1554,34 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     X(0,3) = 0;       X(1,3) = height-1;
     X = hinv*X;
 
-    for (int i=0; i<X.cols; i++)
-        X(2,i) = 0;//z_;
-
-    Mat R = getRotMat(rx_, ry_, rz_);
-    X = R*X;
-
     Mat_<double> X2 = Mat_<double>::zeros(4, 4);
-    for (int j=0; j<X.cols; j++) {
-        X2(0,j) = X(0,j)+xs_;
-        X2(1,j) = X(1,j)+ys_;
-        X2(2,j) = X(2,j)+z_;
-        X2(3,j) = 1;
+    if (!MP4_FLAG) {
+        for (int i=0; i<X.cols; i++)
+            X(2,i) = 0; //z_;
+
+        Mat R = getRotMat(rx_, ry_, rz_);
+        X = R*X;
+
+        for (int j=0; j<X.cols; j++) {
+            X2(0,j) = X(0,j) + xs_;
+            X2(1,j) = X(1,j) + ys_;
+            X2(2,j) = X(2,j)+z_;
+            X2(3,j) = 1;
+        }
+
+    } else {
+
+        // New for self driving
+        // X2(0,0) = -z_*width*0.5/fx; X2(1,0) = -z_*height*0.5/fy; X2(2,0) = z_; X2(3,0) = 1.0;
+        // X2(0,1) = z_*width*0.5/fx;  X2(1,1) = -z_*height*0.5/fy; X2(2,1) = z_; X2(3,1) = 1.0;
+        // X2(0,2) = z_*width*0.5/fx;  X2(1,2) = z_*height*0.5/fy;  X2(2,2) = z_; X2(3,2) = 1.0;
+        // X2(0,3) = -z_*width*0.5/fx; X2(1,3) = z_*height*0.5/fy;  X2(2,3) = z_; X2(3,3) = 1.0;
+        
+        X2(0,0) = 0;            X2(1,0) = 0;             X2(2,0) = z_; X2(3,0) = 1.0;
+        X2(0,1) = z_*width/fx;  X2(1,1) = 0;             X2(2,1) = z_; X2(3,1) = 1.0;
+        X2(0,2) = z_*width/fx;  X2(1,2) = z_*height/fy;  X2(2,2) = z_; X2(3,2) = 1.0;
+        X2(0,3) = 0;            X2(1,3) = z_*height/fy;  X2(2,3) = z_; X2(3,3) = 1.0;
+
     }
 
     //cout<<"Projecting to find final map"<<endl;
