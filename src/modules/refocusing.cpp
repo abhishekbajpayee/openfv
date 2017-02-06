@@ -214,6 +214,8 @@ void saRefocus::read_calib_data(string path) {
 }
 
 void saRefocus::read_kalibr_data(string path) {
+    
+    LOG(INFO)<<"Reading calibration (kalibr) data...";
 
     FileStorage fs(path, FileStorage::READ);
     FileNode fn = fs.root();
@@ -225,7 +227,17 @@ void saRefocus::read_kalibr_data(string path) {
         
         FileNode f = *fi;
         string cam_name; f["rostopic"]>>cam_name;
-        cam_names_.push_back(cam_name.substr(1,4) + "_003.MP4"); // TODO: deal with this!
+        cam_names_.push_back(cam_name.substr(1,8) + ".MP4");
+
+        VLOG(1)<<"Camera: "<<cam_names_[i];
+
+        string cam_model; f["camera_model"]>>cam_model;
+        string dist_model; f["distortion_model"]>>dist_model;
+        
+        if (cam_model.compare("pinhole"))
+            LOG(FATAL)<<"Only pinhole camera model is supported as of now!";
+        if (dist_model.compare("equidistant"))
+            LOG(FATAL)<<"Only equidistant distortion model is supported as of now!";
 
         // Reading distortion coefficients
         vector<double> dc;
@@ -233,6 +245,15 @@ void saRefocus::read_kalibr_data(string path) {
         f["distortion_coeffs"] >> dc;
         for (int j=0; j < dc.size(); j++)
             dist_coeff(0,j) = (double)dc[j];
+
+        vector<int> ims;
+        f["resolution"] >> ims;
+        if (i>0) {
+            if (((int)ims[0] != calib_img_size_.width) || ((int)ims[1] != calib_img_size_.height))
+                LOG(FATAL)<<"Resolution of all images is not the same!";
+        } else {
+            calib_img_size_ = Size((int)ims[0], (int)ims[1]);
+        }
         
         // Reading K (camera matrix)
         vector<double> intr;
@@ -241,9 +262,6 @@ void saRefocus::read_kalibr_data(string path) {
         K_mat(0,0) = (double)intr[0]; K_mat(1,1) = (double)intr[1];
         K_mat(0,2) = (double)intr[2]; K_mat(1,2) = (double)intr[3];
         K_mat(2,2) = 1.0;
-
-        // TODO: why does this not print?
-        // LOG(INFO)<<cam_names_[i]; 
 
         // Reading R and t matrices
         Mat_<double> R = Mat_<double>::zeros(3,3);
@@ -274,8 +292,9 @@ void saRefocus::read_kalibr_data(string path) {
         Mat Rt = build_Rt(R, t);
         Mat P = K_mat*Rt;
         
-        LOG(INFO)<<cam_name;
-        LOG(INFO)<<P;
+        VLOG(2)<<K_mat;
+        VLOG(2)<<Rt;
+        VLOG(3)<<P;
 
         R_mats_.push_back(R);
         t_vecs_.push_back(t);
@@ -285,7 +304,7 @@ void saRefocus::read_kalibr_data(string path) {
         
     }
 
-    scale_ = 30; // TODO: fix this
+    scale_ = 30; // TODO: fix this!!
     num_cams_ = i;
     REF_FLAG = 0;
 
@@ -511,12 +530,6 @@ void saRefocus::read_imgs_mp4(string path) {
         string file_path = path+cam_names_[i];
         mp4Reader mf(file_path);
 
-        // LOG(INFO)<<"Opening "<<file_path;
-        // VideoCapture cap(file_path); // open the default camera
-        // if(!cap.isOpened())  // check if we succeeded
-        //     LOG(FATAL)<<"Could not open " + file_path;
-
-        // int total_frames = cap.get(CV_CAP_PROP_FRAME_COUNT);
         int total_frames = mf.num_frames();
         VLOG(1)<<"Total frames: "<<total_frames;
 
@@ -525,15 +538,6 @@ void saRefocus::read_imgs_mp4(string path) {
         vector<Mat> refocusing_imgs_sub;
         for (int j=0; j<frames_.size(); j++) {
 
-            // VLOG(3)<<"Location: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
-            // cap.set(CV_CAP_PROP_POS_FRAMES, frames_.at(f));
-            // VLOG(3)<<"Location after skipping: "<<cap.get(CV_CAP_PROP_POS_FRAMES);
-
-            // cap >> frame;
-            // VLOG(3)<<cap.get(CV_CAP_PROP_POS_FRAMES)-1<<"\'th frame read";
-            // cvtColor(frame, frame2, CV_BGR2GRAY);
-            // frame2.convertTo(frame2, CV_8U);
-
             frame = mf.get_frame(frames_[j] + shifts_[i]);
             
             if (RESIZE_IMAGES) {
@@ -541,19 +545,31 @@ void saRefocus::read_imgs_mp4(string path) {
             } else {
                 frame2 = frame.clone();
             }
-            
-            fisheye::undistortImage(frame2, frame3, K_mats_[i], dist_coeffs_[i], K_mats_[i]);
+
+            if (UNDISTORT_IMAGES) {
+                fisheye::undistortImage(frame2, frame3, K_mats_[i], dist_coeffs_[i], K_mats_[i]);
+            } else {
+                frame3 = frame2.clone();
+            }
 
             refocusing_imgs_sub.push_back(frame3.clone()); // store frame
-            // qimshow(frame3);
+
+            if (i==0 && j==0) {
+                img_size_ = Size(refocusing_imgs_sub[0].cols, refocusing_imgs_sub[0].rows);
+            } else {
+                if (refocusing_imgs_sub[j].cols != img_size_.width || refocusing_imgs_sub[j].rows != img_size_.height)
+                    LOG(FATAL)<<"Size of images to refocus is not the same!";
+            }
+
         }
 
         imgs.push_back(refocusing_imgs_sub);
 
     }
 
-    // num_imgs_ = calib_imgs_[0].size();
-    img_size_ = Size(imgs[0][0].cols, imgs[0][0].rows);
+    // img_size_ = Size(imgs[0][0].cols, imgs[0][0].rows);
+    if (img_size_.width != calib_img_size_.width || img_size_.height != calib_img_size_.height)
+        LOG(FATAL)<<"Resolution of images used for calibration and size of images to refocus is not the same!";
 
     initializeRefocus();
 

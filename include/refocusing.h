@@ -90,6 +90,7 @@ class saRefocus {
 
     void set_init_z(double z) { z_ = z; }
     void set_dz(double dz) { dz_ = dz; }
+    void set_undistort(int flag) { UNDISTORT_IMAGES = flag; }
 
     //! Read refractive calibration data
     void read_calib_data(string path);
@@ -207,6 +208,7 @@ class saRefocus {
     vector<string> cam_names_;
     vector<Mat> cam_locations_;
     vector<Mat> dist_coeffs_;
+    Size calib_img_size_;
     Size img_size_;
     double scale_;
     int num_cams_;
@@ -263,6 +265,7 @@ class saRefocus {
     int BENCHMARK_MODE;
     int INT_IMG_MODE;
     int RESIZE_IMAGES;
+    int UNDISTORT_IMAGES;
     int KALIBR;
     
 };

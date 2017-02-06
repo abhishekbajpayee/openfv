@@ -1953,7 +1953,11 @@ void multiCamCalibration::write_kalibr_imgs(string path) {
 
     for (int i=0; i<cam_names_.size(); i++) {
 
-        string newPath = path + cam_names_[i].substr(0,4) + "/";
+        string extension = cam_names_[i].substr(8);
+        if (extension.compare(".MP4"))
+            LOG(FATAL)<<"Video filenames must be of format [8 characters].MP4!";
+
+        string newPath = path + cam_names_[i].substr(0,8) + "/";
         if (!dirExists(newPath)) {
             LOG(INFO)<<newPath<<" directory does not exist..."<<endl;
             mkdir(newPath.c_str(), S_IRWXU);
