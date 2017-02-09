@@ -89,6 +89,10 @@ class saRefocus {
     int num_frames() { return imgs[0].size(); }
 
     void set_init_z(double z) { z_ = z; }
+    void set_drx(double drx) { drx_ = drx; }
+    void set_dry(double dry) { dry_ = dry; }
+    void set_dx(double dx) { dx_ = dx; }
+    void set_dy(double dy) { dy_ = dy; }
     void set_dz(double dz) { dz_ = dz; }
     void set_undistort(int flag) { UNDISTORT_IMAGES = flag; }
 
@@ -220,7 +224,7 @@ class saRefocus {
     float geom[5];
 
     // Refocusing parameters
-    double z_, dz_, xs_, ys_, zs_, rx_, ry_, rz_, cxs_, cys_, czs_, crx_, cry_, crz_;
+    double z_, dz_, zs_, xs_, ys_, dx_, dy_, rx_, ry_, rz_, drx_, dry_, drz_, cxs_, cys_, czs_, crx_, cry_, crz_;
     double thresh_;
     vector<int> frames_;
     vector<int> shifts_;

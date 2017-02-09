@@ -141,7 +141,7 @@ saRefocus::saRefocus(refocus_settings settings):
 
     z_ = 0; dz_ = 0.1;
     xs_ = 0; ys_ = 0; zs_ = 0; 
-    rx_ = 0; ry_ = 0; rz_ = 0;
+    rx_ = 0; ry_ = 0; rz_ = 0; drx_ = 1.0; dry_ = 1.0; drz_ = 1.0;
     cxs_ = 0; cys_ = 0; czs_ = 0;
     crx_ = 0; cry_ = 0; crz_ = 0;
 
@@ -1169,25 +1169,25 @@ void saRefocus::GPUliveView() {
                     active_frame_--; 
                 }
             } else if( (key & 255)==119 ) { // w
-                rx_ += 1;
+                rx_ += drx_;
             } else if( (key & 255)==113 ) { // q
-                rx_ -= 1;
+                rx_ -= drx_;
             } else if( (key & 255)==115 ) { // s
-                ry_ += 1;
+                ry_ += dry_;
             } else if( (key & 255)==97 ) {  // a
-                ry_ -= 1;
+                ry_ -= dry_;
             } else if( (key & 255)==120 ) { // x
-                rz_ += 1;
+                rz_ += drz_;
             } else if( (key & 255)==122 ) { // z
-                rz_ -= 1;
+                rz_ -= drz_;
             } else if( (key & 255)==114 ) { // r
-                xs_ += 1;
+                xs_ += dx_;
             } else if( (key & 255)==101 ) { // e
-                xs_ -= 1;
+                xs_ -= dx_;
             } else if( (key & 255)==102 ) { // f
-                ys_ += 1;
+                ys_ += dy_;
             } else if( (key & 255)==100 ) { // d
-                ys_ -= 1;
+                ys_ -= dy_;
             } else if( (key & 255)==118 ) { // v
                 zs_ += 1;
             } else if( (key & 255)==99 ) {  // c
@@ -1572,6 +1572,7 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
     Mat_<double> X2 = Mat_<double>::zeros(4, 4);
     if (!MP4_FLAG) {
+
         for (int i=0; i<X.cols; i++)
             X(2,i) = 0; //z_;
 
@@ -1587,23 +1588,36 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
     } else {
 
-        // New for self driving
-        // X2(0,0) = -z_*width*0.5/fx; X2(1,0) = -z_*height*0.5/fy; X2(2,0) = z_; X2(3,0) = 1.0;
-        // X2(0,1) = z_*width*0.5/fx;  X2(1,1) = -z_*height*0.5/fy; X2(2,1) = z_; X2(3,1) = 1.0;
-        // X2(0,2) = z_*width*0.5/fx;  X2(1,2) = z_*height*0.5/fy;  X2(2,2) = z_; X2(3,2) = 1.0;
-        // X2(0,3) = -z_*width*0.5/fx; X2(1,3) = z_*height*0.5/fy;  X2(2,3) = z_; X2(3,3) = 1.0;
+        Mat_<double> X3 = Mat_<double>::zeros(3, 4);
+
+        X3(0,0) = 0;            X3(1,0) = 0;             
+        X3(0,1) = z_*width/fx;  X3(1,1) = 0;             
+        X3(0,2) = z_*width/fx;  X3(1,2) = z_*height/fy;  
+        X3(0,3) = 0;            X3(1,3) = z_*height/fy;  
+
+        Mat R = getRotMat(rx_, ry_, rz_);
+        X3 = R*X3;
+
+        for (int j=0; j<X.cols; j++) {
+            X2(0,j) = X3(0,j) + xs_;
+            X2(1,j) = X3(1,j) + ys_;
+            X2(2,j) = X3(2,j) + z_;
+            X2(3,j) = 1.0;
+        }
         
-        X2(0,0) = 0;            X2(1,0) = 0;             X2(2,0) = z_; X2(3,0) = 1.0;
-        X2(0,1) = z_*width/fx;  X2(1,1) = 0;             X2(2,1) = z_; X2(3,1) = 1.0;
-        X2(0,2) = z_*width/fx;  X2(1,2) = z_*height/fy;  X2(2,2) = z_; X2(3,2) = 1.0;
-        X2(0,3) = 0;            X2(1,3) = z_*height/fy;  X2(2,3) = z_; X2(3,3) = 1.0;
+        // X2(0,0) = 0;            X2(1,0) = 0;             X2(2,0) = z_; X2(3,0) = 1.0;
+        // X2(0,1) = z_*width/fx;  X2(1,1) = 0;             X2(2,1) = z_; X2(3,1) = 1.0;
+        // X2(0,2) = z_*width/fx;  X2(1,2) = z_*height/fy;  X2(2,2) = z_; X2(3,2) = 1.0;
+        // X2(0,3) = 0;            X2(1,3) = z_*height/fy;  X2(2,3) = z_; X2(3,3) = 1.0;
+
+        LOG(INFO)<<X2;
 
     }
 
     //cout<<"Projecting to find final map"<<endl;
     Mat_<double> proj = P_mats_[cam]*X2;
-    //Mat_<double> proj2 = P_mats_[4]*X2;
 
+    //Mat_<double> proj2 = P_mats_[4]*X2;
     /*
     Mat K, Rot, t;
     decomposeProjectionMatrix(P_mats_[4], K, Rot, t);
