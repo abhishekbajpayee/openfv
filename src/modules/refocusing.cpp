@@ -1616,8 +1616,8 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
     //cout<<"Projecting to find final map"<<endl;
     Mat_<double> proj = P_mats_[cam]*X2;
+    Mat_<double> proj2 = P_mats_[0]*X2;
 
-    //Mat_<double> proj2 = P_mats_[4]*X2;
     /*
     Mat K, Rot, t;
     decomposeProjectionMatrix(P_mats_[4], K, Rot, t);
@@ -1634,20 +1634,26 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     Mat_<double> proj2 = P_mat_new*X2;
     */
 
-    Point2f src, dst;
-    vector<Point2f> sp, dp;
+    Point2f src, dst, dst2;
+    vector<Point2f> sp, dp, dp2;
     int i, j;
 
     for (int i=0; i<X.cols; i++) {
         src.x = X(0,i); src.y = X(1,i);
-        //src.x = proj2(0,i)/proj2(2,i); src.y = proj2(1,i)/proj2(2,i);
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
-        sp.push_back(src); dp.push_back(dst);
+        dst2.x = proj2(0,i)/proj2(2,i); dst2.y = proj2(1,i)/proj2(2,i);
+        sp.push_back(src); dp.push_back(dst); dp2.push_back(dst2);
     }
 
     //H = findHomography(dp, sp, CV_RANSAC);
     H = findHomography(dp, sp, 0);
     H = D*H;
+
+    Mat H2;
+    H2 = findHomography(dp2, sp, 0);
+    H2 = D*H2;
+
+    H = H2.inv()*H;
 
 }
 
