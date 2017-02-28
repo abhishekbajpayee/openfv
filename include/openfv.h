@@ -53,7 +53,6 @@
 #include "tracking.h"
 
 // CUDA
-#pragma message "CUDA_FLAG="
 #ifndef _WITHOUT_CUDA_
 #include "cuda_lib.h"
 #endif
