@@ -99,7 +99,8 @@ saRefocus::saRefocus(refocus_settings settings):
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
     SINGLE_CAM_DEBUG = 0;
-    
+    PERSPECTIVE_SHIFT = 0;
+
     imgs_read_ = 0;
     if (!KALIBR) {
         read_calib_data(settings.calib_file_path);
@@ -307,6 +308,11 @@ void saRefocus::read_kalibr_data(string path) {
     scale_ = 30; // TODO: fix this!!
     num_cams_ = i;
     REF_FLAG = 0;
+    
+    // Averaging P matrices for perspective shift fix
+    P_mat_avg_ = P_mats_[0].clone()/num_cams_;
+    for (int i=1; i<P_mats_.size(); i++)
+        P_mat_avg_ += P_mats_[i].clone()/num_cams_;
 
 }
 
@@ -1610,29 +1616,10 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
         // X2(0,2) = z_*width/fx;  X2(1,2) = z_*height/fy;  X2(2,2) = z_; X2(3,2) = 1.0;
         // X2(0,3) = 0;            X2(1,3) = z_*height/fy;  X2(2,3) = z_; X2(3,3) = 1.0;
 
-        LOG(INFO)<<X2;
-
     }
 
-    //cout<<"Projecting to find final map"<<endl;
     Mat_<double> proj = P_mats_[cam]*X2;
-    Mat_<double> proj2 = P_mats_[0]*X2;
-
-    /*
-    Mat K, Rot, t;
-    decomposeProjectionMatrix(P_mats_[4], K, Rot, t);
-    Rot = getRotMat(crx_, cry_, crz_)*Rot;
-
-    Mat_<double> P_mat_new = Mat_<double>::zeros(3,4);
-    for (int i=0; i<3; i++) {
-        for (int j=0; j<3; j++) {
-            P_mat_new(i,j) = Rot.at<double>(i,j);
-        }
-        P_mat_new(i,3) = -t.at<double>(i,0)/t.at<double>(3,0); // WHY NEGATIVE?
-    }
-    P_mat_new = K*P_mat_new;
-    Mat_<double> proj2 = P_mat_new*X2;
-    */
+    Mat_<double> proj2 = P_mat_avg_*X2;
 
     Point2f src, dst, dst2;
     vector<Point2f> sp, dp, dp2;
@@ -1645,15 +1632,15 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
         sp.push_back(src); dp.push_back(dst); dp2.push_back(dst2);
     }
 
-    //H = findHomography(dp, sp, CV_RANSAC);
     H = findHomography(dp, sp, 0);
     H = D*H;
 
-    Mat H2;
-    H2 = findHomography(dp2, sp, 0);
-    H2 = D*H2;
-
-    H = H2.inv()*H;
+    if (PERSPECTIVE_SHIFT) {
+        Mat H2;
+        H2 = findHomography(dp2, sp, 0);
+        H2 = D*H2;
+        H = H2.inv()*H;
+    }
 
 }
 

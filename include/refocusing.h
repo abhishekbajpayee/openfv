@@ -95,6 +95,7 @@ class saRefocus {
     void set_dy(double dy) { dy_ = dy; }
     void set_dz(double dz) { dz_ = dz; }
     void set_undistort(int flag) { UNDISTORT_IMAGES = flag; }
+    void set_perspective_shift(int flag) { PERSPECTIVE_SHIFT = flag; }
 
     //! Read refractive calibration data
     void read_calib_data(string path);
@@ -206,6 +207,7 @@ class saRefocus {
     // data types and private functions
     vector<Mat> P_mats_;
     vector<Mat> P_mats_u_;
+    Mat P_mat_avg_;
     vector<Mat> K_mats_;
     vector<Mat> R_mats_;
     vector<Mat> t_vecs_;
@@ -271,6 +273,7 @@ class saRefocus {
     int RESIZE_IMAGES;
     int UNDISTORT_IMAGES;
     int KALIBR;
+    int PERSPECTIVE_SHIFT;
     
 };
 
