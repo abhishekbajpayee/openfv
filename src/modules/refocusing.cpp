@@ -60,6 +60,8 @@ saRefocus::saRefocus() {
     MAX_NR_ITERS = 20;
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
+    MP4_FLAG = 0;
+    PERSPECTIVE_SHIFT = 0;
 
 }
 
@@ -1558,9 +1560,7 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
     double width = img_size_.width;
     double height = img_size_.height;
-    double fx = K_mats_[cam].at<double>(0,0);
-    double fy = K_mats_[cam].at<double>(1,1);
-
+    
     Mat D;
     if (INVERT_Y_FLAG) {
         D = (Mat_<double>(3,3) << scale_, 0, width*0.5, 0, -1.0*scale_, height*0.5, 0, 0, 1); 
@@ -1594,6 +1594,9 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
     } else {
 
+        double fx = K_mats_[cam].at<double>(0,0);
+        double fy = K_mats_[cam].at<double>(1,1);
+
         Mat_<double> X3 = Mat_<double>::zeros(3, 4);
 
         X3(0,0) = 0;            X3(1,0) = 0;             
@@ -1619,7 +1622,9 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     }
 
     Mat_<double> proj = P_mats_[cam]*X2;
-    Mat_<double> proj2 = P_mat_avg_*X2;
+    Mat_<double> proj2;
+    if (PERSPECTIVE_SHIFT)
+        proj2 = P_mat_avg_*X2;
 
     Point2f src, dst, dst2;
     vector<Point2f> sp, dp, dp2;
@@ -1628,8 +1633,10 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     for (int i=0; i<X.cols; i++) {
         src.x = X(0,i); src.y = X(1,i);
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
-        dst2.x = proj2(0,i)/proj2(2,i); dst2.y = proj2(1,i)/proj2(2,i);
-        sp.push_back(src); dp.push_back(dst); dp2.push_back(dst2);
+        if (PERSPECTIVE_SHIFT) {
+            dst2.x = proj2(0,i)/proj2(2,i); dst2.y = proj2(1,i)/proj2(2,i); dp2.push_back(dst2);
+        }
+        sp.push_back(src); dp.push_back(dst); 
     }
 
     H = findHomography(dp, sp, 0);

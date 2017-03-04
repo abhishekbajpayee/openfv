@@ -123,6 +123,7 @@ class Scene {
     vector<int> getVoxelGeom();
     vector<double> getSceneGeom();
     double sigma();
+    int getNumParticles() { return particles_.cols; }
 
     void temp();
 
