@@ -160,7 +160,8 @@ class saRefocus {
     // Expert mode functions
     void setBenchmarkMode(int);
     void setIntImgMode(int);
-    void setGPU(int id);
+    void setGpuDevice(int id);
+    void setGpuMode(int flag);
     void setSingleCamDebug(int);
     void setStdevThresh(int);
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);

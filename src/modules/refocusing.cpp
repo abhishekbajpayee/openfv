@@ -47,7 +47,7 @@ saRefocus::saRefocus() {
 
     GPU_FLAG=1;
     REF_FLAG=0;
-    CORNER_FLAG=0;
+    CORNER_FLAG=1;
     MTIFF_FLAG=0;
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
@@ -2124,9 +2124,15 @@ void saRefocus::setIntImgMode(int flag) {
 
 }
 
-void saRefocus::setGPU(int id) {
+void saRefocus::setGpuDevice(int id) {
 
     gpu::setDevice(id);
+
+}
+
+void saRefocus::setGpuMode(int flag) {
+
+    GPU_FLAG = flag;
 
 }
 
