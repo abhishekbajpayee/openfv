@@ -76,8 +76,8 @@ ENV PATH /usr/local/cuda/bin:${PATH}
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:${LD_LIBRARY_PATH}
 
 # Install OpenCV 3
-RUN wget https://github.com/Itseez/opencv/archive/3.0.0.zip
-RUN unzip 3.0.0.zip
+RUN wget https://github.com/Itseez/opencv/archive/2.4.10.zip
+RUN unzip 2.4.10.zip
 
 # RUN cd opencv-3.0.0 && mkdir build && cd build && \
 #	cmake -D CUDA_GENERATION=Kepler -D WITH_QT=OFF ..
@@ -91,7 +91,7 @@ RUN unzip 3.0.0.zip
 # Install OpenFV
 # RUN cd ../.. && git clone https://github.com/abhishekbajpayee/openfv.git && \
 
-RUN cd opencv-3.0.0 && mkdir build && cd build && \
+RUN cd opencv-2.4.10 && mkdir build && cd build && \
         cmake -D CUDA_GENERATION=Kepler .. && make -j7 && make install
 
 USER $NB_USER
