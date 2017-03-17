@@ -29,6 +29,11 @@ RUN git clone https://github.com/google/glog.git && \
 	autoreconf --force --install glog && \
 	cd glog && ./configure && make && make install
 
+# Installing gflags
+RUN git clone https://github.com/gflags/gflags.git && \
+	cd gflags && mkdir bin && cd bin && \
+	cmake .. && make && make install
+
 # Installing Ceres Solver
 RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
 	tar -xvzf ceres-solver-1.11.0.tar.gz && \
@@ -81,9 +86,10 @@ RUN unzip 2.4.10.zip
 RUN cd opencv-2.4.10 && mkdir build && cd build && \
         cmake -D CUDA_GENERATION=Kepler .. && make -j7 && make install
 
-USER $NB_USER
+# USER $NB_USER
 
+# Install openfv
 RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
 	cd openfv && ./configure && cd bin && \
 	cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON -D PYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so .. && \
-    make
+        make
