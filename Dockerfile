@@ -80,9 +80,22 @@ RUN wget https://github.com/Itseez/opencv/archive/3.0.0.zip
 RUN unzip 3.0.0.zip
 
 # RUN cd opencv-3.0.0 && mkdir build && cd build && \
-# 	cmake -D CUDA_GENERATION=Kepler -D WITH_QT=OFF ..
-# RUN make && sudo make install
+#	cmake -D CUDA_GENERATION=Kepler -D WITH_QT=OFF ..
+# took the sudo off "sudo make install" Azuh
+# RUN make && make install
 
 # Remove files
 
 # USER $NB_USER
+
+# Install OpenFV
+# RUN cd ../.. && git clone https://github.com/abhishekbajpayee/openfv.git && \
+
+RUN cd opencv-3.0.0 && mkdir build && cd build && \
+        cmake -D CUDA_GENERATION=Kepler .. && make -j7 && make install
+
+USER $NB_USER
+
+RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
+	cd openfv && ./configure && cd bin && \
+	cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON -DCMAKE_CXX_FLAGS=-isystem /usr/local/include/opencv2 .. 
