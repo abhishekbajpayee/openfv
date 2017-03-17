@@ -1,5 +1,5 @@
 # Copyright (c) OpenFV
-# Distributed under the GNU General Public License 
+# Distributed under the GNU General Public License
 # as published by the Free Software Foundation
 
 FROM jupyter/scipy-notebook
@@ -9,7 +9,7 @@ MAINTAINER Abhishek Bajpayee <ab9@mit.edu>
 USER root
 
 # Installing OpenFV dependencies
-RUN apt-get update -qq 
+RUN apt-get update -qq
 RUN apt-get install -yq --no-install-recommends qt5-default \
 	cmake \
 	build-essential \
@@ -28,6 +28,11 @@ RUN apt-get install -yq --no-install-recommends qt5-default \
 RUN git clone https://github.com/google/glog.git && \
 	autoreconf --force --install glog && \
 	cd glog && ./configure && make && make install
+
+# Installing gflags
+RUN git clone https://github.com/gflags/gflags.git && \
+	cd gflags && mkdir bin && cd bin && \
+	cmake .. && make && make install
 
 # Installing Ceres Solver
 RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
@@ -75,14 +80,16 @@ RUN echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \
 ENV PATH /usr/local/cuda/bin:${PATH}
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64:${LD_LIBRARY_PATH}
 
-# Install OpenCV 3
-RUN wget https://github.com/Itseez/opencv/archive/3.0.0.zip
-RUN unzip 3.0.0.zip
-
-# RUN cd opencv-3.0.0 && mkdir build && cd build && \
-# 	cmake -D CUDA_GENERATION=Kepler -D WITH_QT=OFF ..
-# RUN make && sudo make install
-
-# Remove files
+# Install OpenCV
+RUN wget https://github.com/Itseez/opencv/archive/2.4.10.zip
+RUN unzip 2.4.10.zip
+RUN cd opencv-2.4.10 && mkdir build && cd build && \
+        cmake -D CUDA_GENERATION=Kepler .. && make -j7 && make install
 
 # USER $NB_USER
+
+# Install openfv
+RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
+	cd openfv && ./configure && cd bin && \
+	cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON -D PYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so .. && \
+        make

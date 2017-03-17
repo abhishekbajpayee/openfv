@@ -107,6 +107,7 @@ include_directories( ${PROJECT_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${PYTHON_INCLUDE_DIRS} )
 include_directories( ${EIGEN_INC_DIR} )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Don't think these are needed because OpenFV
 # doesn't link to Qt
