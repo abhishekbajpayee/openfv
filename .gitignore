@@ -22,7 +22,7 @@ _site
 *.so
 
 # Documentation build
-docs/build
-docs/source/html
-docs/source/xml
-docs/source/latex
+docs/build/
+docs/source/html/
+docs/source/xml/
+docs/source/latex/
