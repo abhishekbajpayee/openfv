@@ -39,9 +39,6 @@ option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 option(FAST_MATH "FAST_MATH" OFF)
 option(WITH_CUDA "WITH_CUDA" ON)
 
-set(PYTHON_INCLUDE_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
-set(PYTHON_LIBRARIES "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
-set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
 
@@ -50,6 +47,17 @@ if(POLICY CMP0022)
 endif()
 
 # FIND REQUIRED PACKAGES
+
+# Python
+if (BUILD_PYTHON)
+  set(Python_ADDITIONAL_VERSIONS "2.7")
+  find_package(PythonLibs REQUIRED)
+  if (NOT PYTHONLIBS_FOUND)
+    message("Python not found!")
+    set(BUILD_PYTHON OFF)
+  endif()
+  set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
+endif()
 
 # CUDA
 find_package(CUDA)
@@ -81,8 +89,10 @@ find_package(Boost)
 if(Boost_FOUND)
   find_package ( Boost COMPONENTS program_options filesystem system serialization REQUIRED )
   set(Boost_GENERAL ${Boost_LIBRARIES})
-  find_package ( Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED )
-  set(Boost_PY ${Boost_LIBRARIES})
+  if(BUILD_PYTHON)
+    find_package ( Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED )
+    set(Boost_PY ${Boost_LIBRARIES})
+  endif()
 elseif(NOT Boost_FOUND)
   message("Boost not found!")
 endif()
@@ -95,7 +105,7 @@ endif()
 # Include directories
 include_directories( ${PROJECT_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
-include_directories( ${PYTHON_INCLUDE_DIR} )
+include_directories( ${PYTHON_INCLUDE_DIRS} )
 include_directories( ${EIGEN_INC_DIR} )
 
 # Don't think these are needed because OpenFV
