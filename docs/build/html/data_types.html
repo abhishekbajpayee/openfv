@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Data Types &mdash; openfv 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <link rel="next" title="File Formats" href="file_formats.html" />
+    <link rel="prev" title="Utility Classes" href="utility_classes.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="file_formats.html" title="File Formats"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="utility_classes.html" title="Utility Classes"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="data-types">
+<h1>Data Types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h1>
+<p>Here are descriptions of some custom data types defined for internal
+use within <code class="docutils literal"><span class="pre">openfv</span></code>. Most of these are defined in the header <code class="docutils literal"><span class="pre">typedefs.h</span></code>.</p>
+<div class="section" id="refocus-settings-struct">
+<h2>refocus_settings struct<a class="headerlink" href="#refocus-settings-struct" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv216refocus_settings">
+<span id="refocus_settings"></span><span class="target" id="openfvstructrefocus__settings"></span><em class="property">struct </em><code class="descclassname"></code><code class="descname">refocus_settings</code><a class="headerlink" href="#_CPPv216refocus_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Settings container passed to <a class="reference internal" href="refocusing.html#openfvclasssaRefocus"><span>saRefocus</span></a> constructor. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Members</p>
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings5mtiffE">
+<span id="refocus_settings::mtiff__i"></span><span class="target" id="openfvstructrefocus__settings_1ae277f5b02cff38e0ca4fbe94b25c88ea"></span>int <code class="descname">mtiff</code><a class="headerlink" href="#_CPPv2N16refocus_settings5mtiffE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag indicating if data is in mtiff format files. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings3mp4E">
+<span id="refocus_settings::mp4__i"></span><span class="target" id="openfvstructrefocus__settings_1af1a31fa547383a02c19c1ebaaedb0fce"></span>int <code class="descname">mp4</code><a class="headerlink" href="#_CPPv2N16refocus_settings3mp4E" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag indicating if data is in mp4 videos. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings4multE">
+<span id="refocus_settings::mult__i"></span><span class="target" id="openfvstructrefocus__settings_1a20ef1445b4228fbc138ad08623a5dfc5"></span>int <code class="descname">mult</code><a class="headerlink" href="#_CPPv2N16refocus_settings4multE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag to use multiplicative refocusing. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings8mult_expE">
+<span id="refocus_settings::mult_exp__double"></span><span class="target" id="openfvstructrefocus__settings_1adc2d542f46102c215d732d8e2a29bc22"></span>double <code class="descname">mult_exp</code><a class="headerlink" href="#_CPPv2N16refocus_settings8mult_expE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplicative exponent. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings7use_gpuE">
+<span id="refocus_settings::use_gpu__i"></span><span class="target" id="openfvstructrefocus__settings_1a0c1ccba27ea357fddb7146e677d07548"></span>int <code class="descname">use_gpu</code><a class="headerlink" href="#_CPPv2N16refocus_settings7use_gpuE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag to use a GPU or not. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings9hf_methodE">
+<span id="refocus_settings::hf_method__i"></span><span class="target" id="openfvstructrefocus__settings_1ab7d98fe5151f61cd0b7c73f86d44c22e"></span>int <code class="descname">hf_method</code><a class="headerlink" href="#_CPPv2N16refocus_settings9hf_methodE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use Homography Fit (HF) method or not. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings15calib_file_pathE">
+<span id="refocus_settings::calib_file_path__string"></span><span class="target" id="openfvstructrefocus__settings_1a73deaae0071b53a5dc61e8b847121c47"></span>string <code class="descname">calib_file_path</code><a class="headerlink" href="#_CPPv2N16refocus_settings15calib_file_pathE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to calibration data file. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings11images_pathE">
+<span id="refocus_settings::images_path__string"></span><span class="target" id="openfvstructrefocus__settings_1abc78823db492dcc4c879a633a4ee39b6"></span>string <code class="descname">images_path</code><a class="headerlink" href="#_CPPv2N16refocus_settings11images_pathE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to directory where images to be refocused are. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings10all_framesE">
+<span id="refocus_settings::all_frames__i"></span><span class="target" id="openfvstructrefocus__settings_1a29adc7d52c05a19958842f3648dad013"></span>int <code class="descname">all_frames</code><a class="headerlink" href="#_CPPv2N16refocus_settings10all_framesE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag indicating if all frames in the input data should be processed. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings11start_frameE">
+<span id="refocus_settings::start_frame__i"></span><span class="target" id="openfvstructrefocus__settings_1a83398b0c8ef8e6755661322ba4668afd"></span>int <code class="descname">start_frame</code><a class="headerlink" href="#_CPPv2N16refocus_settings11start_frameE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start frame number (used if all_frames is set to 0) </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings9end_frameE">
+<span id="refocus_settings::end_frame__i"></span><span class="target" id="openfvstructrefocus__settings_1a32f61ec775fe0e7cae2c5b3ed267a355"></span>int <code class="descname">end_frame</code><a class="headerlink" href="#_CPPv2N16refocus_settings9end_frameE" title="Permalink to this definition">¶</a></dt>
+<dd><p>End frame number (used if all_frames is set to 0) </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings4skipE">
+<span id="refocus_settings::skip__i"></span><span class="target" id="openfvstructrefocus__settings_1a6a1ef068dce98b193dd85eb654b5e85a"></span>int <code class="descname">skip</code><a class="headerlink" href="#_CPPv2N16refocus_settings4skipE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Successive frames to skip (used if all_frames is set to 0) </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings6shiftsE">
+<span id="refocus_settings::shifts__vector:i:"></span><span class="target" id="openfvstructrefocus__settings_1a382f8c970db813e2cebf3af4e95d8ea1"></span>vector&lt;int&gt; <code class="descname">shifts</code><a class="headerlink" href="#_CPPv2N16refocus_settings6shiftsE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time shift values for each camera. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings13resize_imagesE">
+<span id="refocus_settings::resize_images__i"></span><span class="target" id="openfvstructrefocus__settings_1aff3ec5522ff76037b467c1cb2ad67385"></span>int <code class="descname">resize_images</code><a class="headerlink" href="#_CPPv2N16refocus_settings13resize_imagesE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag indicating if calibration images should be resized or not. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings2rfE">
+<span id="refocus_settings::rf__double"></span><span class="target" id="openfvstructrefocus__settings_1a62f12e301e011e037802debb86536755"></span>double <code class="descname">rf</code><a class="headerlink" href="#_CPPv2N16refocus_settings2rfE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factor by which to resize calibration images. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings6kalibrE">
+<span id="refocus_settings::kalibr__i"></span><span class="target" id="openfvstructrefocus__settings_1a5567355bc517f99580fbe452be67723e"></span>int <code class="descname">kalibr</code><a class="headerlink" href="#_CPPv2N16refocus_settings6kalibrE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether calibration file is out of Kalibr. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="localizer-settings-struct">
+<h2>localizer_settings struct<a class="headerlink" href="#localizer-settings-struct" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv218localizer_settings">
+<span id="localizer_settings"></span><span class="target" id="openfvstructlocalizer__settings"></span><em class="property">struct </em><code class="descclassname"></code><code class="descname">localizer_settings</code><a class="headerlink" href="#_CPPv218localizer_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Settings container passed to <a class="reference internal" href="localization.html#openfvclasspLocalize"><span>pLocalize</span></a> constructor. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Members</p>
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings6windowE">
+<span id="localizer_settings::window__i"></span><span class="target" id="openfvstructlocalizer__settings_1ac011c6d9ac6633d6a9e387af0fdf3b07"></span>int <code class="descname">window</code><a class="headerlink" href="#_CPPv2N18localizer_settings6windowE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Window size to use around a given pixel to search for particle peak </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings4zminE">
+<span id="localizer_settings::zmin__double"></span><span class="target" id="openfvstructlocalizer__settings_1afd02f826cd03f60750aca7744ea8eef0"></span>double <code class="descname">zmin</code><a class="headerlink" href="#_CPPv2N18localizer_settings4zminE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starting z depth of particle search region. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings4zmaxE">
+<span id="localizer_settings::zmax__double"></span><span class="target" id="openfvstructlocalizer__settings_1a168f0c6e4fa914b6318be9cfef769c66"></span>double <code class="descname">zmax</code><a class="headerlink" href="#_CPPv2N18localizer_settings4zmaxE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ending z depth of particle search region. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings2dzE">
+<span id="localizer_settings::dz__double"></span><span class="target" id="openfvstructlocalizer__settings_1aea716788e4cd4fa02a49730c0c6c03ba"></span>double <code class="descname">dz</code><a class="headerlink" href="#_CPPv2N18localizer_settings2dzE" title="Permalink to this definition">¶</a></dt>
+<dd><p>dz between each successive refocused depth </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings6threshE">
+<span id="localizer_settings::thresh__double"></span><span class="target" id="openfvstructlocalizer__settings_1a76dd1126e941bbf6bcc4c3ba2d0a6918"></span>double <code class="descname">thresh</code><a class="headerlink" href="#_CPPv2N18localizer_settings6threshE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amount by which to threshold the refocused images. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings7zmethodE">
+<span id="localizer_settings::zmethod__i"></span><span class="target" id="openfvstructlocalizer__settings_1ac982cd029c940e54d17983c9f45a317c"></span>int <code class="descname">zmethod</code><a class="headerlink" href="#_CPPv2N18localizer_settings7zmethodE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method used to calculate the z coordinate of a particle cluster. 1 is for mean z location, 2 is for a quadratic fit (poly2) and 3 is for a gaussian fit. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings12cluster_sizeE">
+<span id="localizer_settings::cluster_size__i"></span><span class="target" id="openfvstructlocalizer__settings_1ac8a6983c7ff016aaabfa185073179b4e"></span>int <code class="descname">cluster_size</code><a class="headerlink" href="#_CPPv2N18localizer_settings12cluster_sizeE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Critical cluster size above which to consider a cluster a particle. As of now, regardless of cluster size, a maximum physical z extent of 2.5 mm is used to determine is a detected 2D particle is part of a 3D particle cluster or not. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="particle2d-struct">
+<h2>particle2d struct<a class="headerlink" href="#particle2d-struct" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv210particle2d">
+<span id="particle2d"></span><span class="target" id="openfvstructparticle2d"></span><em class="property">struct </em><code class="descclassname"></code><code class="descname">particle2d</code><a class="headerlink" href="#_CPPv210particle2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data type for a particle in 2D. Carries 3D location, average intensity and size in pixels. Used during particle localization. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Members</p>
+<dl class="member">
+<dt id="_CPPv2N10particle2d1xE">
+<span id="particle2d::x__double"></span><span class="target" id="openfvstructparticle2d_1a284e37207b47400f6a47010f5e141b02"></span>double <code class="descname">x</code><a class="headerlink" href="#_CPPv2N10particle2d1xE" title="Permalink to this definition">¶</a></dt>
+<dd><p>x coordinate of particle </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N10particle2d1yE">
+<span id="particle2d::y__double"></span><span class="target" id="openfvstructparticle2d_1a20ba47dec5ad0b909811d4848c9340a5"></span>double <code class="descname">y</code><a class="headerlink" href="#_CPPv2N10particle2d1yE" title="Permalink to this definition">¶</a></dt>
+<dd><p>y coordinate of particle </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N10particle2d1zE">
+<span id="particle2d::z__double"></span><span class="target" id="openfvstructparticle2d_1ad282947b9a81b636c508f132ea1c3ea0"></span>double <code class="descname">z</code><a class="headerlink" href="#_CPPv2N10particle2d1zE" title="Permalink to this definition">¶</a></dt>
+<dd><p>z coordinate of particle </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N10particle2d1IE">
+<span id="particle2d::I__double"></span><span class="target" id="openfvstructparticle2d_1a22e3c5e9e11119111abf0715cd77879f"></span>double <code class="descname">I</code><a class="headerlink" href="#_CPPv2N10particle2d1IE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average intensity of particle. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N10particle2d4sizeE">
+<span id="particle2d::size__i"></span><span class="target" id="openfvstructparticle2d_1abc90f84ed6bf498d7317e8e8ca83a8b8"></span>int <code class="descname">size</code><a class="headerlink" href="#_CPPv2N10particle2d4sizeE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of particle in pixels. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Data Types</a><ul>
+<li><a class="reference internal" href="#refocus-settings-struct">refocus_settings struct</a></li>
+<li><a class="reference internal" href="#localizer-settings-struct">localizer_settings struct</a></li>
+<li><a class="reference internal" href="#particle2d-struct">particle2d struct</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="utility_classes.html"
+                        title="previous chapter">Utility Classes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="file_formats.html"
+                        title="next chapter">File Formats</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/data_types.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="file_formats.html" title="File Formats"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="utility_classes.html" title="Utility Classes"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Refocusing &mdash; openfv 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <link rel="next" title="Particle Localization" href="localization.html" />
+    <link rel="prev" title="Calibration" href="calibration.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="localization.html" title="Particle Localization"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="calibration.html" title="Calibration"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="refocusing">
+<h1>Refocusing<a class="headerlink" href="#refocusing" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#_CPPv29saRefocus" title="saRefocus"><code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code></a> class can be used to calculate synthetic
+aperture refocused images after calibration has been performed. It can
+also be used to calculate refocused images using images rendered via
+the <code class="xref cpp cpp-class docutils literal"><span class="pre">Scene</span></code> and <code class="xref cpp cpp-class docutils literal"><span class="pre">Camera</span></code> classes.</p>
+<p>The <a class="reference internal" href="utility_functions.html#_CPPv222parse_refocus_settings6stringR16refocus_settingsb" title="parse_refocus_settings"><code class="xref cpp cpp-func docutils literal"><span class="pre">parse_refocus_settings()</span></code></a> function can be used to parse
+data from a configuration file to populate a <a class="reference internal" href="data_types.html#_CPPv216refocus_settings" title="refocus_settings"><code class="xref cpp cpp-any docutils literal"><span class="pre">refocus_settings</span></code></a>
+variable that can be used to create an <a class="reference internal" href="#_CPPv29saRefocus" title="saRefocus"><code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code></a> object.</p>
+<dl class="class">
+<dt id="_CPPv29saRefocus">
+<span id="saRefocus"></span><span class="target" id="openfvclasssaRefocus"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">saRefocus</code><a class="headerlink" href="#_CPPv29saRefocus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class with functions that allow user to calculate synthetic aperture refocused images using calibration data. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N9saRefocus9saRefocusE16refocus_settings">
+<span id="saRefocus::saRefocus__refocus_settings"></span><span class="target" id="openfvclasssaRefocus_1a958d9b2ad867a83a22df29c5a9172699"></span><code class="descname">saRefocus</code><span class="sig-paren">(</span><a class="reference internal" href="data_types.html#_CPPv216refocus_settings" title="refocus_settings">refocus_settings</a> <em>settings</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus9saRefocusE16refocus_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclasssaRefocus"><span>saRefocus</span></a> constructor <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">settings</span></code> - <p>A <a class="reference internal" href="data_types.html#openfvstructrefocus__settings"><span>refocus_settings</span></a> struct variable containing all relevant settings </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus9saRefocusEid">
+<span id="saRefocus::saRefocus__i.double"></span><span class="target" id="openfvclasssaRefocus_1a0c4af9d202a0e8725e969d7e058282f8"></span><code class="descname">saRefocus</code><span class="sig-paren">(</span>int <em>num_cams</em>, double <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus9saRefocusEid" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclasssaRefocus"><span>saRefocus</span></a> construction to be generally used when rendered data (using Scene and Camera classes is being used <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">num_cams</span></code> - <p>Number of cameras that will be in the simulated array </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">Factor</span></code> - <p>indicating number of physical units per pixel </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus15read_calib_dataE6string">
+<span id="saRefocus::read_calib_data__string"></span><span class="target" id="openfvclasssaRefocus_1a241f9dcc069d8837d6bba9c3c1b218f0"></span>void <code class="descname">read_calib_data</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus15read_calib_dataE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read refractive calibration data. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus16read_kalibr_dataE6string">
+<span id="saRefocus::read_kalibr_data__string"></span><span class="target" id="openfvclasssaRefocus_1a8e7c8e536b36c5fce1114e7ee3064fc9"></span>void <code class="descname">read_kalibr_data</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus16read_kalibr_dataE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read calibration data that is output from kalibr. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus19read_calib_data_pinE6string">
+<span id="saRefocus::read_calib_data_pin__string"></span><span class="target" id="openfvclasssaRefocus_1aefb3ab5add8bee77df1ad513f4b1c324"></span>void <code class="descname">read_calib_data_pin</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus19read_calib_data_pinE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read pinhole calibration data. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus9read_imgsE6string">
+<span id="saRefocus::read_imgs__string"></span><span class="target" id="openfvclasssaRefocus_1a3d75da5d4cf776ea324413f9f138ef70"></span>void <code class="descname">read_imgs</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus9read_imgsE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images when they are as individual files in separate folders. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus15read_imgs_mtiffE6string">
+<span id="saRefocus::read_imgs_mtiff__string"></span><span class="target" id="openfvclasssaRefocus_1aa3716b7d1b1552e72476a15e40d7f7cf"></span>void <code class="descname">read_imgs_mtiff</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus15read_imgs_mtiffE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images when they are in multipage TIFF files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus13read_imgs_mp4E6string">
+<span id="saRefocus::read_imgs_mp4__string"></span><span class="target" id="openfvclasssaRefocus_1afe9c6d4a4b98a9364238ae391da3731c"></span>void <code class="descname">read_imgs_mp4</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus13read_imgs_mp4E6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images when they are in mp4 files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus7refocusEdddddi">
+<span id="saRefocus::refocus__double.double.double.double.double.i"></span><span class="target" id="openfvclasssaRefocus_1aa86d2fdf91897ae55a21df02394380aa"></span>Mat <code class="descname">refocus</code><span class="sig-paren">(</span>double <em>z</em>, double <em>rx</em>, double <em>ry</em>, double <em>rz</em>, double <em>thresh</em>, int <em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus7refocusEdddddi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a refocused image <dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Refocused image as OpenCV Mat type </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">z</span></code> - <p>Depth in physical units at which to calculate refocused image </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">rx</span></code> - <p>Angle by which to rotate focal plane about x axis </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">ry</span></code> - <p>Angle by which you rotate focal plane about y axis </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">rz</span></code> - <p>Angle by which to rotate focal plane about z axis </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">thresh</span></code> - <p>Thresholding level (if additive refocusing is used) </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">frame</span></code> - <p>The frame (int time) to refocus. Indexing starts at 0. </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus11GPUliveViewEv">
+<span id="saRefocus::GPUliveView"></span><span class="target" id="openfvclasssaRefocus_1ab0d935f4b3a4201c33bf51e39e14a128"></span>void <code class="descname">GPUliveView</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus11GPUliveViewEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start refocusing live view (requires Qt) </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus13initializeGPUEv">
+<span id="saRefocus::initializeGPU"></span><span class="target" id="openfvclasssaRefocus_1a2a17871cc22d0b1aed028ad6052f20b4"></span>void <code class="descname">initializeGPU</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus13initializeGPUEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize everything required to calculate refocused images on GPU. This is automatically called by <a class="reference internal" href="#openfvclasssaRefocus_1ab0d935f4b3a4201c33bf51e39e14a128"><span>GPUliveView()</span></a> but needs to be explicitly called when live view is not being started. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="calibration.html"
+                        title="previous chapter">Calibration</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="localization.html"
+                        title="next chapter">Particle Localization</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/refocusing.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="localization.html" title="Particle Localization"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="calibration.html" title="Calibration"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

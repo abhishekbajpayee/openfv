@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tracking &mdash; openfv 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <link rel="next" title="Utility Functions" href="utility_functions.html" />
+    <link rel="prev" title="Particle Localization" href="localization.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="utility_functions.html" title="Utility Functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="localization.html" title="Particle Localization"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tracking">
+<h1>Tracking<a class="headerlink" href="#tracking" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#_CPPv29pTracking" title="pTracking"><code class="xref cpp cpp-class docutils literal"><span class="pre">pTracking</span></code></a> class can be used to tracking particles
+detected using <a class="reference internal" href="localization.html#_CPPv29pLocalize" title="pLocalize"><code class="xref cpp cpp-class docutils literal"><span class="pre">pLocalize</span></code></a> using a relaxation based scheme
+as highlighted in [1].</p>
+<dl class="class">
+<dt id="_CPPv29pTracking">
+<span id="pTracking"></span><span class="target" id="openfvclasspTracking"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">pTracking</code><a class="headerlink" href="#_CPPv29pTracking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class with functions to track particles using relaxation based method. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N9pTracking9pTrackingE6stringdd">
+<span id="pTracking::pTracking__string.double.double"></span><span class="target" id="openfvclasspTracking_1ad32fa979e6fa996f2ea0f5cb380d27dd"></span><code class="descname">pTracking</code><span class="sig-paren">(</span>string <em>particle_file</em>, double <em>Rn</em>, double <em>Rs</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking9pTrackingE6stringdd" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclasspTracking"><span>pTracking</span></a> constructor <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">particle_file</span></code> - <p>Path of file containing list of particles </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">Rn</span></code> - <p>Neighborhood threshold </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">Rs</span></code> - <p>Search threshold </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking8set_varsEidddd">
+<span id="pTracking::set_vars__i.double.double.double.double"></span><span class="target" id="openfvclasspTracking_1a10e1bf108e359dc75f66a39d08b4c37a"></span>void <code class="descname">set_vars</code><span class="sig-paren">(</span>int <em>method</em>, double <em>rn</em>, double <em>rs</em>, double <em>e</em>, double <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking8set_varsEidddd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to reset relevant variables <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">method</span></code> - <p></p>
+</li>
+<li><code class="first docutils literal"><span class="pre">rn</span></code> - <p>Neighborhood threshold </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">rs</span></code> - <p>Search threshold </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">e</span></code> - <p>Relaxation set parameter E from [1] </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">f</span></code> - <p>Relaxation set parameter F from [1] </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking12track_framesEii">
+<span id="pTracking::track_frames__i.i"></span><span class="target" id="openfvclasspTracking_1af28ef931c1500102079dfd1b130d91fe"></span>void <code class="descname">track_frames</code><span class="sig-paren">(</span>int <em>start</em>, int <em>end</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking12track_framesEii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Track particles between given frames <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">start</span></code> - <p>Starting frame </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">end</span></code> - <p>Ending frame </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking9track_allEv">
+<span id="pTracking::track_all"></span><span class="target" id="openfvclasspTracking_1afaf65d05d3ecd81d766196186ba83623"></span>void <code class="descname">track_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking9track_allEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Track particles over all the frames in the input file </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking15find_long_pathsEi">
+<span id="pTracking::find_long_paths__i"></span><span class="target" id="openfvclasspTracking_1a5cccfc521fdc02b4a2561411926ecea0"></span>void <code class="descname">find_long_paths</code><span class="sig-paren">(</span>int <em>l</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking15find_long_pathsEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find paths longer than a certain length l in time frames </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking16find_sized_pathsEi">
+<span id="pTracking::find_sized_paths__i"></span><span class="target" id="openfvclasspTracking_1ae6cd07a1bd29227b08abea232ef88dad"></span>void <code class="descname">find_sized_paths</code><span class="sig-paren">(</span>int <em>l</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking16find_sized_pathsEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find paths exactly of length l in time frames </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking21write_tracking_resultE6string">
+<span id="pTracking::write_tracking_result__string"></span><span class="target" id="openfvclasspTracking_1a8be05cfec80498dd6e6283dba3bdc02b"></span>void <code class="descname">write_tracking_result</code><span class="sig-paren">(</span>string <em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking21write_tracking_resultE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write tracking results to file. The output filename and location is automatically generated based on the path and name of the input particle file passed to the <a class="reference internal" href="#openfvclasspTracking"><span>pTracking</span></a> constructor. For example, if the particle_file is <code class="docutils literal"><span class="pre">/home/user/project/particles.txt</span></code> and the prefix string passed is <code class="docutils literal"><span class="pre">prefix</span></code> then then tracking results are saved in <code class="docutils literal"><span class="pre">/home/user/project/particles_prefix_result.txt</span></code>. The format of this results file is: <div class="code highlight-python"><div class="highlight"><pre><span></span>&lt;number of time frames&gt;
+&lt;number of matches in frame 1&gt;
+&lt;index of particle in frame 1&gt;TAB&lt;index of match particle in frame 2&gt;
+&lt;index of particle in frame 1&gt;TAB&lt;index of match particle in frame 2&gt;
+...
+&lt;number of matches in frame 2&gt;
+&lt;index of particle in frame 2&gt;TAB&lt;index of match particle in frame 3&gt;
+&lt;index of particle in frame 2&gt;TAB&lt;index of match particle in frame 3&gt;
+...
+...
+</pre></div>
+</div>
+ where the &#8220;\t&#8221; between particle indices is a TAB character and the indices are of particles in the particles file used. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">prefix</span></code> - <p>String of text to add to the output filename </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<p>[1] Jia, P., Y. Wang, and Y. Zhang. &#8220;Improvement in the independence of
+relaxation method-based particle tracking velocimetry.&#8221; Measurement
+Science and Technology 24.5 (2013): 055301.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="localization.html"
+                        title="previous chapter">Particle Localization</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="utility_functions.html"
+                        title="next chapter">Utility Functions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tracking.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="utility_functions.html" title="Utility Functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="localization.html" title="Particle Localization"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

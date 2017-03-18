@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Calibration &mdash; openfv 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <link rel="next" title="Refocusing" href="refocusing.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="refocusing.html" title="Refocusing"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="calibration">
+<h1>Calibration<a class="headerlink" href="#calibration" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#_CPPv219multiCamCalibration" title="multiCamCalibration"><code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code></a> class can be used to calibrate multiple
+cameras via bundle adjustment. Data from a successful calibration run
+can be used to calculate synthetic aperture refocused images or for
+other purposes.</p>
+<dl class="class">
+<dt id="_CPPv219multiCamCalibration">
+<span id="multiCamCalibration"></span><span class="target" id="openfvclassmultiCamCalibration"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">multiCamCalibration</code><a class="headerlink" href="#_CPPv219multiCamCalibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class with functions that allow user to calibrate multiple cameras via bundle adjustment. Contains functionality for both pinhole and refractive scenes. Note that refractive calibration ability is currently of limited robustness. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration19multiCamCalibrationE20calibration_settings">
+<span id="multiCamCalibration::multiCamCalibration__calibration_settings"></span><span class="target" id="openfvclassmultiCamCalibration_1a2fa107eb64e08a51bb5927d02f11da95"></span><code class="descname">multiCamCalibration</code><span class="sig-paren">(</span>calibration_settings <em>settings</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration19multiCamCalibrationE20calibration_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclassmultiCamCalibration"><span>multiCamCalibration</span></a> constructor <a class="reference internal" href="#openfvclassmultiCamCalibration"><span>multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners)</span></a>; <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">path</span></code> - <p>Path to where calibration images lie. If the images are in multipage tiff files then this parameters just points to a folder where all (from all cameras) the multipage tiff files lie. If the images are in separate folders then the expected directory structure is: <p>path/</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>cam1/</dt>
+<dd><p class="first last">img1.jpg, img2.jpg, ...</p>
+</dd>
+<dt>cam2/</dt>
+<dd><p class="first last">img1.jpg, img2.jpg, ...</p>
+</dd>
+</dl>
+<p>...</p>
+</div></blockquote>
+ where cam1, cam2 etc. and img1, img2 etc. are variable names and can be of user&#8217;s choice. Supported image types are currently limited but JPEG and TIFF are supported. </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">grid_size</span></code> - <p>The number of internal corners in the grid used (x, y) </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">grid_size_phys</span></code> - <p>Physical size of one square in the grid. Usually in [mm]. </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">refractive</span></code> - <p>Flag indicating whether data set is for a refractive set or not </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">dummy_mode</span></code> - <p></p>
+</li>
+<li><code class="first docutils literal"><span class="pre">mtiff</span></code> - <p>Flag indicating whether images are in multipage tiff files or as separate images </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">skip</span></code> - <p>Number of frames to skip between each successive frame used </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">show_corners</span></code> - <p>Flag to enable displaying of corners in each image after they are found</p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration18set_max_iterationsEi">
+<span id="multiCamCalibration::set_max_iterations__i"></span><span class="target" id="openfvclassmultiCamCalibration_1a1a9be9bd861374adc5b1a8b648eddd1a"></span>void <code class="descname">set_max_iterations</code><span class="sig-paren">(</span>int <em>num</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration18set_max_iterationsEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set maximum iterations for the bundle adjustment optimization. Default is 100. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration16set_init_f_valueEf">
+<span id="multiCamCalibration::set_init_f_value__float"></span><span class="target" id="openfvclassmultiCamCalibration_1a40bc5938ded827bbc3134f22cd08fff8"></span>void <code class="descname">set_init_f_value</code><span class="sig-paren">(</span>float <em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration16set_init_f_valueEf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set initial value for f (focal length) in pixel units for P matrix of cameras. Default is 2500. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration14set_dummy_modeEi">
+<span id="multiCamCalibration::set_dummy_mode__i"></span><span class="target" id="openfvclassmultiCamCalibration_1a668356adc8ef37d6ac4d87ac8c37ddb3"></span>void <code class="descname">set_dummy_mode</code><span class="sig-paren">(</span>int <em>flag</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration14set_dummy_modeEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn dummy mode on (1) or off. Default is off. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration12show_cornersEi">
+<span id="multiCamCalibration::show_corners__i"></span><span class="target" id="openfvclassmultiCamCalibration_1ad02cff3c6c90ff2291909ee4589388d9"></span>void <code class="descname">show_corners</code><span class="sig-paren">(</span>int <em>flag</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration12show_cornersEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn showing found corners on (1) or off. Default is off. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration11freeCamInitEi">
+<span id="multiCamCalibration::freeCamInit__i"></span><span class="target" id="openfvclassmultiCamCalibration_1a857af78207d5ed291d99bf0d01c5c115"></span>void <code class="descname">freeCamInit</code><span class="sig-paren">(</span>int <em>flag</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration11freeCamInitEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove constraints (1) of fixed principal point and initial guesses on camera initialization Default is on. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration3runEv">
+<span id="multiCamCalibration::run"></span><span class="target" id="openfvclassmultiCamCalibration_1aeee89100553583b0bd4570e94f2f505d"></span>void <code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration3runEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a calibration job. This automatically calls functions to read camera names and calibration images (<a class="reference internal" href="#openfvclassmultiCamCalibration_1af538f3e95b8b53820af0281a9e6fd11e"><span>read_cam_names_mtiff()</span></a>, <a class="reference internal" href="#openfvclassmultiCamCalibration_1a24cb2e8de6cc995b341a844676eea647"><span>read_calib_imgs_mtiff()</span></a> or <a class="reference internal" href="#openfvclassmultiCamCalibration_1a4aec5f46a3029784fd76e412308e65b5"><span>read_cam_names()</span></a>, <a class="reference internal" href="#openfvclassmultiCamCalibration_1aae9b08ca3712d652ae875df269db4cad"><span>read_calib_imgs()</span></a>), <a class="reference internal" href="#openfvclassmultiCamCalibration_1a311de3776df8af06bd7af56f9f9743f9"><span>find_corners()</span></a> function, functions to calibrate the cameras, functions to write calibration results to a file. Calling only this function after creating a <a class="reference internal" href="#openfvclassmultiCamCalibration"><span>multiCamCalibration</span></a> instance should typically suffice to do everything. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration18read_cam_names_mp4Ev">
+<span id="multiCamCalibration::read_cam_names_mp4"></span><span class="target" id="openfvclassmultiCamCalibration_1a9236b6b9a66c88e325f4e5377109fe25"></span>void <code class="descname">read_cam_names_mp4</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration18read_cam_names_mp4Ev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read camera names if calibration images are in mp4 files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration19read_calib_imgs_mp4Ev">
+<span id="multiCamCalibration::read_calib_imgs_mp4"></span><span class="target" id="openfvclassmultiCamCalibration_1af6d04e3b784dd9b57b13f3e42b069b4b"></span>void <code class="descname">read_calib_imgs_mp4</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration19read_calib_imgs_mp4Ev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images if calibration images are in mp4 files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration20read_cam_names_mtiffEv">
+<span id="multiCamCalibration::read_cam_names_mtiff"></span><span class="target" id="openfvclassmultiCamCalibration_1af538f3e95b8b53820af0281a9e6fd11e"></span>void <code class="descname">read_cam_names_mtiff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration20read_cam_names_mtiffEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read camera names if calibration images are in multipage tiff files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration21read_calib_imgs_mtiffEv">
+<span id="multiCamCalibration::read_calib_imgs_mtiff"></span><span class="target" id="openfvclassmultiCamCalibration_1a24cb2e8de6cc995b341a844676eea647"></span>void <code class="descname">read_calib_imgs_mtiff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration21read_calib_imgs_mtiffEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images if calibration images are in multipage tiff files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration14read_cam_namesEv">
+<span id="multiCamCalibration::read_cam_names"></span><span class="target" id="openfvclassmultiCamCalibration_1a4aec5f46a3029784fd76e412308e65b5"></span>void <code class="descname">read_cam_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration14read_cam_namesEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read camera names if calibration images are in folders as separate images. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration15read_calib_imgsEv">
+<span id="multiCamCalibration::read_calib_imgs"></span><span class="target" id="openfvclassmultiCamCalibration_1aae9b08ca3712d652ae875df269db4cad"></span>void <code class="descname">read_calib_imgs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration15read_calib_imgsEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images if calibration images are in folders as separate images. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration12find_cornersEv">
+<span id="multiCamCalibration::find_corners"></span><span class="target" id="openfvclassmultiCamCalibration_1a311de3776df8af06bd7af56f9f9743f9"></span>void <code class="descname">find_corners</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration12find_cornersEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find corners in images. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration8num_camsEv">
+<span id="multiCamCalibration::num_cams"></span><span class="target" id="openfvclassmultiCamCalibration_1a0672baa65e2c4f6f9457f05f33c55271"></span>int <code class="descname">num_cams</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration8num_camsEv" title="Permalink to this definition">¶</a></dt>
+<dd><p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Number of cameras in the data set </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration8num_imgsEv">
+<span id="multiCamCalibration::num_imgs"></span><span class="target" id="openfvclassmultiCamCalibration_1a69f0c4582fa045cfcc7c146dbbea4078"></span>int <code class="descname">num_imgs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration8num_imgsEv" title="Permalink to this definition">¶</a></dt>
+<dd><p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Number of images per camera in the data set </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration9grid_sizeEv">
+<span id="multiCamCalibration::grid_size"></span><span class="target" id="openfvclassmultiCamCalibration_1a210c43ef7397dcf9b2c1c10c43a243e8"></span>Size <code class="descname">grid_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration9grid_sizeEv" title="Permalink to this definition">¶</a></dt>
+<dd><p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Size in number of internal corners of grid used </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration9cam_namesEv">
+<span id="multiCamCalibration::cam_names"></span><span class="target" id="openfvclassmultiCamCalibration_1aec318f334898f58be8593ea7a9051dda"></span>vector&lt;string&gt; <code class="descname">cam_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration9cam_namesEv" title="Permalink to this definition">¶</a></dt>
+<dd><p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Names of cameras (names of folders in which images lie if images are separate or names of the multipage tiff files) </dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="refocusing.html"
+                        title="next chapter">Refocusing</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/calibration.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="refocusing.html" title="Refocusing"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

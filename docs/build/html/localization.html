@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Particle Localization &mdash; openfv 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <link rel="next" title="Tracking" href="tracking.html" />
+    <link rel="prev" title="Refocusing" href="refocusing.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tracking.html" title="Tracking"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="refocusing.html" title="Refocusing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="particle-localization">
+<h1>Particle Localization<a class="headerlink" href="#particle-localization" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#_CPPv29pLocalize" title="pLocalize"><code class="xref cpp cpp-class docutils literal"><span class="pre">pLocalize</span></code></a> class can be used to localize particles in a refocused volume.</p>
+<dl class="class">
+<dt id="_CPPv29pLocalize">
+<span id="pLocalize"></span><span class="target" id="openfvclasspLocalize"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">pLocalize</code><a class="headerlink" href="#_CPPv29pLocalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class with functions that allow a user to find particles in a refocused volume. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N9pLocalize9pLocalizeE18localizer_settings9saRefocus16refocus_settings">
+<span id="pLocalize::pLocalize__localizer_settings.saRefocus.refocus_settings"></span><span class="target" id="openfvclasspLocalize_1a384efc3434ae1ee37f4f0b2f0dd25f78"></span><code class="descname">pLocalize</code><span class="sig-paren">(</span><a class="reference internal" href="data_types.html#_CPPv218localizer_settings" title="localizer_settings">localizer_settings</a> <em>s</em>, <a class="reference internal" href="refocusing.html#_CPPv29saRefocus" title="saRefocus">saRefocus</a> <em>refocus</em>, <a class="reference internal" href="data_types.html#_CPPv216refocus_settings" title="refocus_settings">refocus_settings</a> <em>s2</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize9pLocalizeE18localizer_settings9saRefocus16refocus_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclasspLocalize"><span>pLocalize</span></a> constructor <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">s</span></code> - <p>A <a class="reference internal" href="data_types.html#openfvstructlocalizer__settings"><span>localizer_settings</span></a> struct variable containing all relevant settings for the localizer </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">refocus</span></code> - <p>An <a class="reference internal" href="refocusing.html#openfvclasssaRefocus"><span>saRefocus</span></a> object that has been initialized with data etc. </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">s2</span></code> - <p>A <a class="reference internal" href="data_types.html#openfvstructrefocus__settings"><span>refocus_settings</span></a> struct variable. This is the same variable that is passed to the <a class="reference internal" href="refocusing.html#openfvclasssaRefocus"><span>saRefocus</span></a> class constructor. </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize18detected_particlesEv">
+<span id="pLocalize::detected_particles"></span><span class="target" id="openfvclasspLocalize_1a9fd130c559d3a8898099c30e31f77771"></span>vector&lt;Point3f&gt; <code class="descname">detected_particles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize18detected_particlesEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return detected particles </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize25find_particles_all_framesEv">
+<span id="pLocalize::find_particles_all_frames"></span><span class="target" id="openfvclasspLocalize_1a80d8c3af8922b89126c6b09f2abaa9f3"></span>void <code class="descname">find_particles_all_frames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize25find_particles_all_framesEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find particles in all in all frames in the sequence. This is like calling the <a class="reference internal" href="#openfvclasspLocalize_1a4cc93f868df86be24d561fe2696d073a"><span>find_particles_3d()</span></a> function for each frame. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize17find_particles_3dEi">
+<span id="pLocalize::find_particles_3d__i"></span><span class="target" id="openfvclasspLocalize_1a4cc93f868df86be24d561fe2696d073a"></span>void <code class="descname">find_particles_3d</code><span class="sig-paren">(</span>int <em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize17find_particles_3dEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find particles in the volume. The depth extents between which particles are found are specified in the localizer settings. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">frame</span></code> - <p>The frame number in which to find the particles. </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize27write_all_particles_to_fileE6string">
+<span id="pLocalize::write_all_particles_to_file__string"></span><span class="target" id="openfvclasspLocalize_1ad08e3078d7b3b0757122007a023f9602"></span>void <code class="descname">write_all_particles_to_file</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize27write_all_particles_to_fileE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write particles to file <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">path</span></code> - <p>Path of file to write particles to </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize19write_all_particlesE6string">
+<span id="pLocalize::write_all_particles__string"></span><span class="target" id="openfvclasspLocalize_1ad5721a263782e0cd55885d44f2fb5da6"></span>void <code class="descname">write_all_particles</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize19write_all_particlesE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write particles to a folder. This is different from the <a class="reference internal" href="#openfvclasspLocalize_1ad08e3078d7b3b0757122007a023f9602"><span>write_all_particles_to_file()</span></a> function in that this accepts a path to a directory and write particles in a file inside a folder called particles in the path. Note that the path and a folder called particles must exist. The filename is determined automatically based on the relevant settings being used. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">path</span></code> - <p>Path of folder to write file in. This path must contain another folder called particles in it. </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="refocusing.html"
+                        title="previous chapter">Refocusing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tracking.html"
+                        title="next chapter">Tracking</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/localization.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tracking.html" title="Tracking"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="refocusing.html" title="Refocusing"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
