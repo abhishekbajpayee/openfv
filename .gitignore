@@ -1,13 +1,11 @@
-# data output files in python and matlab folder
-python/data_files/
-matlab/data_files/
-matlab/*.txt
-python/*.txt
-
+# master folders
+python
+matlab
+docker
+src
+include
 bin
 temp
-samples/build
-_site
 
 # emacs temp files
 *~
@@ -21,8 +19,5 @@ _site
 *.o
 *.so
 
-# Documentation build
-docs/build/
-docs/source/html/
-docs/source/xml/
-docs/source/latex/
+# Documentation source
+docs/source
