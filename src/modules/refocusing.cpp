@@ -2308,23 +2308,25 @@ vector< vector<Mat> > saRefocus::getCamStacks() {
 BOOST_PYTHON_MODULE(refocusing) {
 
     using namespace boost::python;
-
+	
+    docstring_options local_docstring_options(true, true, false);	
+    
     class_<saRefocus>("saRefocus")
-        .def("read_calib_data", &saRefocus::read_calib_data)
+        .def("read_calib_data", &saRefocus::read_calib_data, "@DocString(read_calib_data)")
         .def("addView", &saRefocus::addView)
         .def("clearViews", &saRefocus::clearViews)
         .def("setF", &saRefocus::setF)
         .def("setMult", &saRefocus::setMult)
         .def("setHF", &saRefocus::setHF)
         .def("setRefractive", &saRefocus::setRefractive)
-        .def("showSettings", &saRefocus::showSettings)
+        .def("showSettings", &saRefocus::showSettings, "@DocString(showSettings)")
 #ifndef WITHOUT_CUDA
-        .def("initializeGPU", &saRefocus::initializeGPU)
+        .def("initializeGPU", &saRefocus::initializeGPU, "@DocString(initializeGPU)")
 #endif
-        .def("refocus", &saRefocus::refocus)
+        .def("refocus", &saRefocus::refocus, "@DocString(refocus)")
         .def("project_point", &saRefocus::project_point)
-        .def("getP", &saRefocus::getP)
-        .def("getC", &saRefocus::getC)
+        .def("getP", &saRefocus::getP, "@DocString(getP)")
+        .def("getC", &saRefocus::getC, "@DocString(getC)")
     ;
 
 }

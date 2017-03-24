@@ -38,6 +38,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 option(BUILD_PYTHON "BUILD_PYTHON" ON)
 option(WITH_CUDA "WITH_CUDA" ON)
 
+<<<<<<< Updated upstream
+=======
+set(PYTHON_INCLUDE_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
+set(PYTHON_LIBRARIES "/usr/lib/python2.7/config-x86_64-linux-gnu/libpython2.7.so" CACHE PATH "Path to Python Libraries")
+set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
+>>>>>>> Stashed changes
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
 

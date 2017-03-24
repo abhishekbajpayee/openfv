@@ -97,6 +97,7 @@ class saRefocus {
     void set_undistort(int flag) { UNDISTORT_IMAGES = flag; }
     void set_perspective_shift(int flag) { PERSPECTIVE_SHIFT = flag; }
 
+    // DocString: read_calib_data
     //! Read refractive calibration data
     void read_calib_data(string path);
     //! Read calibration data that is output from kalibr
