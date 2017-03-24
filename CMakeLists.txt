@@ -35,13 +35,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Options
-option(BUILD_PYTHON "BUILD_PYTHON" OFF)
-option(FAST_MATH "FAST_MATH" OFF)
+option(BUILD_PYTHON "BUILD_PYTHON" ON)
 option(WITH_CUDA "WITH_CUDA" ON)
 
-set(PYTHON_INCLUDE_DIR "/usr/include/python2.7" CACHE PATH "Path to Python Directory")
-set(PYTHON_LIBRARIES "/usr/lib/libpython2.7.so" CACHE PATH "Path to Python Libraries")
-set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
 
@@ -50,6 +46,20 @@ if(POLICY CMP0022)
 endif()
 
 # FIND REQUIRED PACKAGES
+
+# Python
+if (BUILD_PYTHON)
+  set(Python_ADDITIONAL_VERSIONS "2.7")
+  find_package(PythonLibs REQUIRED)
+  if (PYTHONLIBS_FOUND)
+    message("Python found!")
+    message("Python Libraries: " ${PYTHON_LIBRARIES})
+  else()
+    message("Python not found! Python wrappers will not be built.")
+    set(BUILD_PYTHON OFF)
+  endif()
+  set(BOOST_PYTHON_VERSION "python" CACHE PATH "Boost Python Version [python or python3]")
+endif()
 
 # CUDA
 find_package(CUDA)
@@ -81,8 +91,10 @@ find_package(Boost)
 if(Boost_FOUND)
   find_package ( Boost COMPONENTS program_options filesystem system serialization REQUIRED )
   set(Boost_GENERAL ${Boost_LIBRARIES})
-  find_package ( Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED )
-  set(Boost_PY ${Boost_LIBRARIES})
+  if(BUILD_PYTHON)
+    find_package ( Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED )
+    set(Boost_PY ${Boost_LIBRARIES})
+  endif()
 elseif(NOT Boost_FOUND)
   message("Boost not found!")
 endif()
@@ -95,7 +107,7 @@ endif()
 # Include directories
 include_directories( ${PROJECT_INCLUDE_DIR} )
 include_directories( ${Boost_INCLUDE_DIR} )
-include_directories( ${PYTHON_INCLUDE_DIR} )
+include_directories( ${PYTHON_INCLUDE_DIRS} )
 include_directories( ${EIGEN_INC_DIR} )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
@@ -119,17 +131,15 @@ if (WITH_CUDA)
 else()
   set (OFV_LIBS openfv)
 endif()
+if (BUILD_PYTHON)
+  set (OTHER_LIBS ${OTHER_LIBS} ${PYTHON_LIBRARIES})
+endif()
 set (PROF_LIB profiler)
-set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${PYTHON_LIBRARIES} ${CERES_LIBS} ${OpenCV_LIBS})
+set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
 
 # fPIC flags, needed?
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-
-if (FAST_MATH)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
-endif()
 
 set(CMAKE_INSTALL_PREFIX "/usr/local/openfv")
 
