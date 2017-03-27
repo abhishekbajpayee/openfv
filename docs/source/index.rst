@@ -6,7 +6,8 @@
 Welcome to OpenFV's documentation!
 ==================================
 
-## Setup and Tutorials
+Setup and Tutorials
+-------------------
 
 .. toctree::
    :maxdepth: 2
@@ -14,21 +15,16 @@ Welcome to OpenFV's documentation!
    setup
    tutorial
 
-## API Reference
+API Reference
+-------------
 
 .. toctree::
    :maxdepth: 2
 
-   calibration
-   refocusing
-   localization
-   tracking
-   utility_functions
-   utility_classes
-   data_types
-   file_formats
+   cpp_api_docs
+   py_api_docs
 
-.. 
+..
    doxygenindex::
 
 Note: This documentation is only partially complete
