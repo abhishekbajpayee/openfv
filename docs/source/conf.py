@@ -17,7 +17,7 @@ import sys, os, subprocess
 subprocess.call(['doxygen', '../config'])
 
 # Pointing to path of python modules
-sys.path.append(os.path.join(os.getcwd, '../../bin/openfv'))
+sys.path.append(os.path.join(os.getcwd(), '../../bin/openfv'))
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
