@@ -2,7 +2,7 @@ Python API Documentation
 ========================
 
 Calibration
-----------
+-----------
 
 Below is documentation for the wrapper class
 :py:class:`calibration.multiCamCalibration` of the :cpp:class:`multiCamCalibration` C++ class.
