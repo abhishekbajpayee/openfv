@@ -1,0 +1,1068 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>C++ API Documentation &mdash; openfv 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <link rel="next" title="Python API Documentation" href="py_api_docs.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="py_api_docs.html" title="Python API Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="c-api-documentation">
+<h1>C++ API Documentation<a class="headerlink" href="#c-api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="calibration">
+<h2>Calibration<a class="headerlink" href="#calibration" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#_CPPv219multiCamCalibration" title="multiCamCalibration"><code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code></a> class can be used to calibrate multiple
+cameras via bundle adjustment. Data from a successful calibration run
+can be used to calculate synthetic aperture refocused images or for
+other purposes.</p>
+<dl class="class">
+<dt id="_CPPv219multiCamCalibration">
+<span id="multiCamCalibration"></span><span class="target" id="openfvclassmultiCamCalibration"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">multiCamCalibration</code><a class="headerlink" href="#_CPPv219multiCamCalibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class with functions that allow user to calibrate multiple cameras via bundle adjustment. Contains functionality for both pinhole and refractive scenes. Note that refractive calibration ability is currently of limited robustness. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration19multiCamCalibrationE20calibration_settings">
+<span id="multiCamCalibration::multiCamCalibration__calibration_settings"></span><span class="target" id="openfvclassmultiCamCalibration_1a2fa107eb64e08a51bb5927d02f11da95"></span><code class="descname">multiCamCalibration</code><span class="sig-paren">(</span>calibration_settings <em>settings</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration19multiCamCalibrationE20calibration_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclassmultiCamCalibration"><span>multiCamCalibration</span></a> constructor <a class="reference internal" href="#openfvclassmultiCamCalibration"><span>multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners)</span></a>; <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">path</span></code> - <p>Path to where calibration images lie. If the images are in multipage tiff files then this parameters just points to a folder where all (from all cameras) the multipage tiff files lie. If the images are in separate folders then the expected directory structure is: <p>path/</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>cam1/</dt>
+<dd><p class="first last">img1.jpg, img2.jpg, ...</p>
+</dd>
+<dt>cam2/</dt>
+<dd><p class="first last">img1.jpg, img2.jpg, ...</p>
+</dd>
+</dl>
+<p>...</p>
+</div></blockquote>
+ where cam1, cam2 etc. and img1, img2 etc. are variable names and can be of user&#8217;s choice. Supported image types are currently limited but JPEG and TIFF are supported. </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">grid_size</span></code> - <p>The number of internal corners in the grid used (x, y) </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">grid_size_phys</span></code> - <p>Physical size of one square in the grid. Usually in [mm]. </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">refractive</span></code> - <p>Flag indicating whether data set is for a refractive set or not </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">dummy_mode</span></code> - <p></p>
+</li>
+<li><code class="first docutils literal"><span class="pre">mtiff</span></code> - <p>Flag indicating whether images are in multipage tiff files or as separate images </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">skip</span></code> - <p>Number of frames to skip between each successive frame used </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">show_corners</span></code> - <p>Flag to enable displaying of corners in each image after they are found</p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration18set_max_iterationsEi">
+<span id="multiCamCalibration::set_max_iterations__i"></span><span class="target" id="openfvclassmultiCamCalibration_1a1a9be9bd861374adc5b1a8b648eddd1a"></span>void <code class="descname">set_max_iterations</code><span class="sig-paren">(</span>int <em>num</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration18set_max_iterationsEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set maximum iterations for the bundle adjustment optimization. Default is 100. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration16set_init_f_valueEf">
+<span id="multiCamCalibration::set_init_f_value__float"></span><span class="target" id="openfvclassmultiCamCalibration_1a40bc5938ded827bbc3134f22cd08fff8"></span>void <code class="descname">set_init_f_value</code><span class="sig-paren">(</span>float <em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration16set_init_f_valueEf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set initial value for f (focal length) in pixel units for P matrix of cameras. Default is 2500. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration14set_dummy_modeEi">
+<span id="multiCamCalibration::set_dummy_mode__i"></span><span class="target" id="openfvclassmultiCamCalibration_1a668356adc8ef37d6ac4d87ac8c37ddb3"></span>void <code class="descname">set_dummy_mode</code><span class="sig-paren">(</span>int <em>flag</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration14set_dummy_modeEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn dummy mode on (1) or off. Default is off. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration12show_cornersEi">
+<span id="multiCamCalibration::show_corners__i"></span><span class="target" id="openfvclassmultiCamCalibration_1ad02cff3c6c90ff2291909ee4589388d9"></span>void <code class="descname">show_corners</code><span class="sig-paren">(</span>int <em>flag</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration12show_cornersEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Turn showing found corners on (1) or off. Default is off. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration11freeCamInitEi">
+<span id="multiCamCalibration::freeCamInit__i"></span><span class="target" id="openfvclassmultiCamCalibration_1a857af78207d5ed291d99bf0d01c5c115"></span>void <code class="descname">freeCamInit</code><span class="sig-paren">(</span>int <em>flag</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration11freeCamInitEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove constraints (1) of fixed principal point and initial guesses on camera initialization Default is on. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration3runEv">
+<span id="multiCamCalibration::run"></span><span class="target" id="openfvclassmultiCamCalibration_1aeee89100553583b0bd4570e94f2f505d"></span>void <code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration3runEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a calibration job. This automatically calls functions to read camera names and calibration images (<a class="reference internal" href="#openfvclassmultiCamCalibration_1af538f3e95b8b53820af0281a9e6fd11e"><span>read_cam_names_mtiff()</span></a>, <a class="reference internal" href="#openfvclassmultiCamCalibration_1a24cb2e8de6cc995b341a844676eea647"><span>read_calib_imgs_mtiff()</span></a> or <a class="reference internal" href="#openfvclassmultiCamCalibration_1a4aec5f46a3029784fd76e412308e65b5"><span>read_cam_names()</span></a>, <a class="reference internal" href="#openfvclassmultiCamCalibration_1aae9b08ca3712d652ae875df269db4cad"><span>read_calib_imgs()</span></a>), <a class="reference internal" href="#openfvclassmultiCamCalibration_1a311de3776df8af06bd7af56f9f9743f9"><span>find_corners()</span></a> function, functions to calibrate the cameras, functions to write calibration results to a file. Calling only this function after creating a <a class="reference internal" href="#openfvclassmultiCamCalibration"><span>multiCamCalibration</span></a> instance should typically suffice to do everything. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration18read_cam_names_mp4Ev">
+<span id="multiCamCalibration::read_cam_names_mp4"></span><span class="target" id="openfvclassmultiCamCalibration_1a9236b6b9a66c88e325f4e5377109fe25"></span>void <code class="descname">read_cam_names_mp4</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration18read_cam_names_mp4Ev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read camera names if calibration images are in mp4 files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration19read_calib_imgs_mp4Ev">
+<span id="multiCamCalibration::read_calib_imgs_mp4"></span><span class="target" id="openfvclassmultiCamCalibration_1af6d04e3b784dd9b57b13f3e42b069b4b"></span>void <code class="descname">read_calib_imgs_mp4</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration19read_calib_imgs_mp4Ev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images if calibration images are in mp4 files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration20read_cam_names_mtiffEv">
+<span id="multiCamCalibration::read_cam_names_mtiff"></span><span class="target" id="openfvclassmultiCamCalibration_1af538f3e95b8b53820af0281a9e6fd11e"></span>void <code class="descname">read_cam_names_mtiff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration20read_cam_names_mtiffEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read camera names if calibration images are in multipage tiff files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration21read_calib_imgs_mtiffEv">
+<span id="multiCamCalibration::read_calib_imgs_mtiff"></span><span class="target" id="openfvclassmultiCamCalibration_1a24cb2e8de6cc995b341a844676eea647"></span>void <code class="descname">read_calib_imgs_mtiff</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration21read_calib_imgs_mtiffEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images if calibration images are in multipage tiff files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration14read_cam_namesEv">
+<span id="multiCamCalibration::read_cam_names"></span><span class="target" id="openfvclassmultiCamCalibration_1a4aec5f46a3029784fd76e412308e65b5"></span>void <code class="descname">read_cam_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration14read_cam_namesEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read camera names if calibration images are in folders as separate images. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration15read_calib_imgsEv">
+<span id="multiCamCalibration::read_calib_imgs"></span><span class="target" id="openfvclassmultiCamCalibration_1aae9b08ca3712d652ae875df269db4cad"></span>void <code class="descname">read_calib_imgs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration15read_calib_imgsEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images if calibration images are in folders as separate images. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration12find_cornersEv">
+<span id="multiCamCalibration::find_corners"></span><span class="target" id="openfvclassmultiCamCalibration_1a311de3776df8af06bd7af56f9f9743f9"></span>void <code class="descname">find_corners</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration12find_cornersEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find corners in images. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration8num_camsEv">
+<span id="multiCamCalibration::num_cams"></span><span class="target" id="openfvclassmultiCamCalibration_1a0672baa65e2c4f6f9457f05f33c55271"></span>int <code class="descname">num_cams</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration8num_camsEv" title="Permalink to this definition">¶</a></dt>
+<dd><p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Number of cameras in the data set </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration8num_imgsEv">
+<span id="multiCamCalibration::num_imgs"></span><span class="target" id="openfvclassmultiCamCalibration_1a69f0c4582fa045cfcc7c146dbbea4078"></span>int <code class="descname">num_imgs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration8num_imgsEv" title="Permalink to this definition">¶</a></dt>
+<dd><p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Number of images per camera in the data set </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration9grid_sizeEv">
+<span id="multiCamCalibration::grid_size"></span><span class="target" id="openfvclassmultiCamCalibration_1a210c43ef7397dcf9b2c1c10c43a243e8"></span>Size <code class="descname">grid_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration9grid_sizeEv" title="Permalink to this definition">¶</a></dt>
+<dd><p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Size in number of internal corners of grid used </dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N19multiCamCalibration9cam_namesEv">
+<span id="multiCamCalibration::cam_names"></span><span class="target" id="openfvclassmultiCamCalibration_1aec318f334898f58be8593ea7a9051dda"></span>vector&lt;string&gt; <code class="descname">cam_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N19multiCamCalibration9cam_namesEv" title="Permalink to this definition">¶</a></dt>
+<dd><p><dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Names of cameras (names of folders in which images lie if images are separate or names of the multipage tiff files) </dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="refocusing">
+<h2>Refocusing<a class="headerlink" href="#refocusing" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#_CPPv29saRefocus" title="saRefocus"><code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code></a> class can be used to calculate synthetic
+aperture refocused images after calibration has been performed. It can
+also be used to calculate refocused images using images rendered via
+the <code class="xref cpp cpp-class docutils literal"><span class="pre">Scene</span></code> and <code class="xref cpp cpp-class docutils literal"><span class="pre">Camera</span></code> classes.</p>
+<p>The <a class="reference internal" href="#_CPPv222parse_refocus_settings6stringR16refocus_settingsb" title="parse_refocus_settings"><code class="xref cpp cpp-func docutils literal"><span class="pre">parse_refocus_settings()</span></code></a> function can be used to parse
+data from a configuration file to populate a <a class="reference internal" href="#_CPPv216refocus_settings" title="refocus_settings"><code class="xref cpp cpp-any docutils literal"><span class="pre">refocus_settings</span></code></a>
+variable that can be used to create an <a class="reference internal" href="#_CPPv29saRefocus" title="saRefocus"><code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code></a> object.</p>
+<dl class="class">
+<dt id="_CPPv29saRefocus">
+<span id="saRefocus"></span><span class="target" id="openfvclasssaRefocus"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">saRefocus</code><a class="headerlink" href="#_CPPv29saRefocus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class with functions that allow user to calculate synthetic aperture refocused images using calibration data. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N9saRefocus9saRefocusE16refocus_settings">
+<span id="saRefocus::saRefocus__refocus_settings"></span><span class="target" id="openfvclasssaRefocus_1a958d9b2ad867a83a22df29c5a9172699"></span><code class="descname">saRefocus</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv216refocus_settings" title="refocus_settings">refocus_settings</a> <em>settings</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus9saRefocusE16refocus_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclasssaRefocus"><span>saRefocus</span></a> constructor <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">settings</span></code> - <p>A <a class="reference internal" href="#openfvstructrefocus__settings"><span>refocus_settings</span></a> struct variable containing all relevant settings </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus9saRefocusEid">
+<span id="saRefocus::saRefocus__i.double"></span><span class="target" id="openfvclasssaRefocus_1a0c4af9d202a0e8725e969d7e058282f8"></span><code class="descname">saRefocus</code><span class="sig-paren">(</span>int <em>num_cams</em>, double <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus9saRefocusEid" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclasssaRefocus"><span>saRefocus</span></a> construction to be generally used when rendered data (using Scene and Camera classes is being used <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">num_cams</span></code> - <p>Number of cameras that will be in the simulated array </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">Factor</span></code> - <p>indicating number of physical units per pixel </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus15read_calib_dataE6string">
+<span id="saRefocus::read_calib_data__string"></span><span class="target" id="openfvclasssaRefocus_1a241f9dcc069d8837d6bba9c3c1b218f0"></span>void <code class="descname">read_calib_data</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus15read_calib_dataE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read refractive calibration data. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus16read_kalibr_dataE6string">
+<span id="saRefocus::read_kalibr_data__string"></span><span class="target" id="openfvclasssaRefocus_1a8e7c8e536b36c5fce1114e7ee3064fc9"></span>void <code class="descname">read_kalibr_data</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus16read_kalibr_dataE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read calibration data that is output from kalibr. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus19read_calib_data_pinE6string">
+<span id="saRefocus::read_calib_data_pin__string"></span><span class="target" id="openfvclasssaRefocus_1aefb3ab5add8bee77df1ad513f4b1c324"></span>void <code class="descname">read_calib_data_pin</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus19read_calib_data_pinE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read pinhole calibration data. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus9read_imgsE6string">
+<span id="saRefocus::read_imgs__string"></span><span class="target" id="openfvclasssaRefocus_1a3d75da5d4cf776ea324413f9f138ef70"></span>void <code class="descname">read_imgs</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus9read_imgsE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images when they are as individual files in separate folders. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus15read_imgs_mtiffE6string">
+<span id="saRefocus::read_imgs_mtiff__string"></span><span class="target" id="openfvclasssaRefocus_1aa3716b7d1b1552e72476a15e40d7f7cf"></span>void <code class="descname">read_imgs_mtiff</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus15read_imgs_mtiffE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images when they are in multipage TIFF files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus13read_imgs_mp4E6string">
+<span id="saRefocus::read_imgs_mp4__string"></span><span class="target" id="openfvclasssaRefocus_1afe9c6d4a4b98a9364238ae391da3731c"></span>void <code class="descname">read_imgs_mp4</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus13read_imgs_mp4E6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read images when they are in mp4 files. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus7refocusEdddddi">
+<span id="saRefocus::refocus__double.double.double.double.double.i"></span><span class="target" id="openfvclasssaRefocus_1aa86d2fdf91897ae55a21df02394380aa"></span>Mat <code class="descname">refocus</code><span class="sig-paren">(</span>double <em>z</em>, double <em>rx</em>, double <em>ry</em>, double <em>rz</em>, double <em>thresh</em>, int <em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus7refocusEdddddi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a refocused image <dl class="docutils">
+<dt><strong>Return</strong></dt>
+<dd>Refocused image as OpenCV Mat type </dd>
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">z</span></code> - <p>Depth in physical units at which to calculate refocused image </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">rx</span></code> - <p>Angle by which to rotate focal plane about x axis </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">ry</span></code> - <p>Angle by which you rotate focal plane about y axis </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">rz</span></code> - <p>Angle by which to rotate focal plane about z axis </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">thresh</span></code> - <p>Thresholding level (if additive refocusing is used) </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">frame</span></code> - <p>The frame (int time) to refocus. Indexing starts at 0. </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus11GPUliveViewEv">
+<span id="saRefocus::GPUliveView"></span><span class="target" id="openfvclasssaRefocus_1ab0d935f4b3a4201c33bf51e39e14a128"></span>void <code class="descname">GPUliveView</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus11GPUliveViewEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start refocusing live view (requires Qt) </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9saRefocus13initializeGPUEv">
+<span id="saRefocus::initializeGPU"></span><span class="target" id="openfvclasssaRefocus_1a2a17871cc22d0b1aed028ad6052f20b4"></span>void <code class="descname">initializeGPU</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9saRefocus13initializeGPUEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize everything required to calculate refocused images on GPU. This is automatically called by <a class="reference internal" href="#openfvclasssaRefocus_1ab0d935f4b3a4201c33bf51e39e14a128"><span>GPUliveView()</span></a> but needs to be explicitly called when live view is not being started. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="particle-localization">
+<h2>Particle Localization<a class="headerlink" href="#particle-localization" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#_CPPv29pLocalize" title="pLocalize"><code class="xref cpp cpp-class docutils literal"><span class="pre">pLocalize</span></code></a> class can be used to localize particles in a refocused volume.</p>
+<dl class="class">
+<dt id="_CPPv29pLocalize">
+<span id="pLocalize"></span><span class="target" id="openfvclasspLocalize"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">pLocalize</code><a class="headerlink" href="#_CPPv29pLocalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class with functions that allow a user to find particles in a refocused volume. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N9pLocalize9pLocalizeE18localizer_settings9saRefocus16refocus_settings">
+<span id="pLocalize::pLocalize__localizer_settings.saRefocus.refocus_settings"></span><span class="target" id="openfvclasspLocalize_1a384efc3434ae1ee37f4f0b2f0dd25f78"></span><code class="descname">pLocalize</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv218localizer_settings" title="localizer_settings">localizer_settings</a> <em>s</em>, <a class="reference internal" href="#_CPPv29saRefocus" title="saRefocus">saRefocus</a> <em>refocus</em>, <a class="reference internal" href="#_CPPv216refocus_settings" title="refocus_settings">refocus_settings</a> <em>s2</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize9pLocalizeE18localizer_settings9saRefocus16refocus_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclasspLocalize"><span>pLocalize</span></a> constructor <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">s</span></code> - <p>A <a class="reference internal" href="#openfvstructlocalizer__settings"><span>localizer_settings</span></a> struct variable containing all relevant settings for the localizer </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">refocus</span></code> - <p>An <a class="reference internal" href="#openfvclasssaRefocus"><span>saRefocus</span></a> object that has been initialized with data etc. </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">s2</span></code> - <p>A <a class="reference internal" href="#openfvstructrefocus__settings"><span>refocus_settings</span></a> struct variable. This is the same variable that is passed to the <a class="reference internal" href="#openfvclasssaRefocus"><span>saRefocus</span></a> class constructor. </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize18detected_particlesEv">
+<span id="pLocalize::detected_particles"></span><span class="target" id="openfvclasspLocalize_1a9fd130c559d3a8898099c30e31f77771"></span>vector&lt;Point3f&gt; <code class="descname">detected_particles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize18detected_particlesEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return detected particles </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize25find_particles_all_framesEv">
+<span id="pLocalize::find_particles_all_frames"></span><span class="target" id="openfvclasspLocalize_1a80d8c3af8922b89126c6b09f2abaa9f3"></span>void <code class="descname">find_particles_all_frames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize25find_particles_all_framesEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find particles in all in all frames in the sequence. This is like calling the <a class="reference internal" href="#openfvclasspLocalize_1a4cc93f868df86be24d561fe2696d073a"><span>find_particles_3d()</span></a> function for each frame. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize17find_particles_3dEi">
+<span id="pLocalize::find_particles_3d__i"></span><span class="target" id="openfvclasspLocalize_1a4cc93f868df86be24d561fe2696d073a"></span>void <code class="descname">find_particles_3d</code><span class="sig-paren">(</span>int <em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize17find_particles_3dEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find particles in the volume. The depth extents between which particles are found are specified in the localizer settings. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">frame</span></code> - <p>The frame number in which to find the particles. </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize27write_all_particles_to_fileE6string">
+<span id="pLocalize::write_all_particles_to_file__string"></span><span class="target" id="openfvclasspLocalize_1ad08e3078d7b3b0757122007a023f9602"></span>void <code class="descname">write_all_particles_to_file</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize27write_all_particles_to_fileE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write particles to file <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">path</span></code> - <p>Path of file to write particles to </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pLocalize19write_all_particlesE6string">
+<span id="pLocalize::write_all_particles__string"></span><span class="target" id="openfvclasspLocalize_1ad5721a263782e0cd55885d44f2fb5da6"></span>void <code class="descname">write_all_particles</code><span class="sig-paren">(</span>string <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pLocalize19write_all_particlesE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write particles to a folder. This is different from the <a class="reference internal" href="#openfvclasspLocalize_1ad08e3078d7b3b0757122007a023f9602"><span>write_all_particles_to_file()</span></a> function in that this accepts a path to a directory and write particles in a file inside a folder called particles in the path. Note that the path and a folder called particles must exist. The filename is determined automatically based on the relevant settings being used. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">path</span></code> - <p>Path of folder to write file in. This path must contain another folder called particles in it. </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="tracking">
+<h2>Tracking<a class="headerlink" href="#tracking" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#_CPPv29pTracking" title="pTracking"><code class="xref cpp cpp-class docutils literal"><span class="pre">pTracking</span></code></a> class can be used to tracking particles
+detected using <a class="reference internal" href="#_CPPv29pLocalize" title="pLocalize"><code class="xref cpp cpp-class docutils literal"><span class="pre">pLocalize</span></code></a> using a relaxation based scheme
+as highlighted in [1].</p>
+<dl class="class">
+<dt id="_CPPv29pTracking">
+<span id="pTracking"></span><span class="target" id="openfvclasspTracking"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">pTracking</code><a class="headerlink" href="#_CPPv29pTracking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class with functions to track particles using relaxation based method. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N9pTracking9pTrackingE6stringdd">
+<span id="pTracking::pTracking__string.double.double"></span><span class="target" id="openfvclasspTracking_1ad32fa979e6fa996f2ea0f5cb380d27dd"></span><code class="descname">pTracking</code><span class="sig-paren">(</span>string <em>particle_file</em>, double <em>Rn</em>, double <em>Rs</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking9pTrackingE6stringdd" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#openfvclasspTracking"><span>pTracking</span></a> constructor <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">particle_file</span></code> - <p>Path of file containing list of particles </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">Rn</span></code> - <p>Neighborhood threshold </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">Rs</span></code> - <p>Search threshold </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking8set_varsEidddd">
+<span id="pTracking::set_vars__i.double.double.double.double"></span><span class="target" id="openfvclasspTracking_1a10e1bf108e359dc75f66a39d08b4c37a"></span>void <code class="descname">set_vars</code><span class="sig-paren">(</span>int <em>method</em>, double <em>rn</em>, double <em>rs</em>, double <em>e</em>, double <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking8set_varsEidddd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to reset relevant variables <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">method</span></code> - <p></p>
+</li>
+<li><code class="first docutils literal"><span class="pre">rn</span></code> - <p>Neighborhood threshold </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">rs</span></code> - <p>Search threshold </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">e</span></code> - <p>Relaxation set parameter E from [1] </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">f</span></code> - <p>Relaxation set parameter F from [1] </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking12track_framesEii">
+<span id="pTracking::track_frames__i.i"></span><span class="target" id="openfvclasspTracking_1af28ef931c1500102079dfd1b130d91fe"></span>void <code class="descname">track_frames</code><span class="sig-paren">(</span>int <em>start</em>, int <em>end</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking12track_framesEii" title="Permalink to this definition">¶</a></dt>
+<dd><p>Track particles between given frames <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">start</span></code> - <p>Starting frame </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">end</span></code> - <p>Ending frame </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking9track_allEv">
+<span id="pTracking::track_all"></span><span class="target" id="openfvclasspTracking_1afaf65d05d3ecd81d766196186ba83623"></span>void <code class="descname">track_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking9track_allEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Track particles over all the frames in the input file </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking15find_long_pathsEi">
+<span id="pTracking::find_long_paths__i"></span><span class="target" id="openfvclasspTracking_1a5cccfc521fdc02b4a2561411926ecea0"></span>void <code class="descname">find_long_paths</code><span class="sig-paren">(</span>int <em>l</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking15find_long_pathsEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find paths longer than a certain length l in time frames </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking16find_sized_pathsEi">
+<span id="pTracking::find_sized_paths__i"></span><span class="target" id="openfvclasspTracking_1ae6cd07a1bd29227b08abea232ef88dad"></span>void <code class="descname">find_sized_paths</code><span class="sig-paren">(</span>int <em>l</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking16find_sized_pathsEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find paths exactly of length l in time frames </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N9pTracking21write_tracking_resultE6string">
+<span id="pTracking::write_tracking_result__string"></span><span class="target" id="openfvclasspTracking_1a8be05cfec80498dd6e6283dba3bdc02b"></span>void <code class="descname">write_tracking_result</code><span class="sig-paren">(</span>string <em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N9pTracking21write_tracking_resultE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write tracking results to file. The output filename and location is automatically generated based on the path and name of the input particle file passed to the <a class="reference internal" href="#openfvclasspTracking"><span>pTracking</span></a> constructor. For example, if the particle_file is <code class="docutils literal"><span class="pre">/home/user/project/particles.txt</span></code> and the prefix string passed is <code class="docutils literal"><span class="pre">prefix</span></code> then then tracking results are saved in <code class="docutils literal"><span class="pre">/home/user/project/particles_prefix_result.txt</span></code>. The format of this results file is: <div class="code highlight-python"><div class="highlight"><pre><span></span>&lt;number of time frames&gt;
+&lt;number of matches in frame 1&gt;
+&lt;index of particle in frame 1&gt;TAB&lt;index of match particle in frame 2&gt;
+&lt;index of particle in frame 1&gt;TAB&lt;index of match particle in frame 2&gt;
+...
+&lt;number of matches in frame 2&gt;
+&lt;index of particle in frame 2&gt;TAB&lt;index of match particle in frame 3&gt;
+&lt;index of particle in frame 2&gt;TAB&lt;index of match particle in frame 3&gt;
+...
+...
+</pre></div>
+</div>
+ where the &#8220;\t&#8221; between particle indices is a TAB character and the indices are of particles in the particles file used. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">prefix</span></code> - <p>String of text to add to the output filename </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<p>[1] Jia, P., Y. Wang, and Y. Zhang. &#8220;Improvement in the independence of
+relaxation method-based particle tracking velocimetry.&#8221; Measurement
+Science and Technology 24.5 (2013): 055301.</p>
+</div>
+<div class="section" id="utility-functions">
+<h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
+<p>Here are some utility functions that are part of openFV in order to
+support miscellaneous functionality that do not really belong to any
+other class.</p>
+<div class="section" id="functions-in-tools-h">
+<h3>Functions in tools.h<a class="headerlink" href="#functions-in-tools-h" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv212init_loggingiPPc">
+<span id="init_logging__i.cPP"></span><span class="target" id="openfvtools_8h_1a8f5f478be48baaaf9efd3edd93c0fdec"></span>void <code class="descclassname"></code><code class="descname">init_logging</code><span class="sig-paren">(</span>int <em>argc</em>, char **<em>argv</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv212init_loggingiPPc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize logging via glog. Should be called at the start of the main() function to enable logging since most output in openFV is routed to the glog library. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv27qimshow3Mat">
+<span id="qimshow__Mat"></span><span class="target" id="openfvtools_8h_1a4840ca25298930a4df4bc7eaeb25b95a"></span>void <code class="descclassname"></code><code class="descname">qimshow</code><span class="sig-paren">(</span>Mat <em>image</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv27qimshow3Mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display an image and wait for Esc press <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">image</span></code> - <p>Image to display </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv28linspaceddi">
+<span id="linspace__double.double.i"></span><span class="target" id="openfvtools_8h_1a8c739dfce316dd8e41454230c9524f8b"></span>vector&lt;double&gt; <code class="descclassname"></code><code class="descname">linspace</code><span class="sig-paren">(</span>double, double, int<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv28linspaceddi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to generate a given number of linearly spaced points between specified lower and upper limits </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv29saveScene6string5Scene">
+<span id="saveScene__string.Scene"></span><span class="target" id="openfvtools_8h_1a9783c58c36417d3d94d4425cad7c86a5"></span>void <code class="descclassname"></code><code class="descname">saveScene</code><span class="sig-paren">(</span>string <em>filename</em>, Scene <em>scn</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv29saveScene6string5Scene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a Scene object to a binary file <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">filename</span></code> - <p>Name of file to save object to </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">scn</span></code> - <p>Object of scene class to save </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>doxygenfunction: Unable to resolve multiple matches for function &#8220;loadScene&#8221; with arguments () in doxygen xml output for project &#8220;openfv&#8221; from directory: xml/.
+Potential matches:
+</p>
+<pre class="last literal-block">
+- Scene loadScene(string)
+- void loadScene(string, Scene&amp;)
+</pre>
+</div>
+</div>
+<div class="section" id="functions-in-parse-settings-h">
+<h3>Functions in parse_settings.h<a class="headerlink" href="#functions-in-parse-settings-h" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv222parse_refocus_settings6stringR16refocus_settingsb">
+<span id="parse_refocus_settings__string.refocus_settingsR.b"></span><span class="target" id="openfvparse__settings_8h_1aaba9518f1f6329d5b5ed9309315ee012"></span>void <code class="descclassname"></code><code class="descname">parse_refocus_settings</code><span class="sig-paren">(</span>string <em>filename</em>, <a class="reference internal" href="#_CPPv216refocus_settings" title="refocus_settings">refocus_settings</a> &amp;<em>settings</em>, bool <em>help</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv222parse_refocus_settings6stringR16refocus_settingsb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to parse a refocus settings file and return a <a class="reference internal" href="#openfvstructrefocus__settings"><span>refocus_settings</span></a> variable which can be directly passed to an <a class="reference internal" href="#openfvclasssaRefocus"><span>saRefocus</span></a> constructor. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">filename</span></code> - <p>Full path to configuration file </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">settings</span></code> - <p>Destination <a class="reference internal" href="#openfvstructrefocus__settings"><span>refocus_settings</span></a> variable </p>
+</li>
+<li><code class="first docutils literal"><span class="pre">help</span></code> - <p>Flag to show all options as a help menu instead of parsing data </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="utility-classes">
+<h2>Utility Classes<a class="headerlink" href="#utility-classes" title="Permalink to this headline">¶</a></h2>
+<p>Here are a few classes to support miscellaneous useful functionality.</p>
+<dl class="class">
+<dt id="_CPPv26fileIO">
+<span id="fileIO"></span><span class="target" id="openfvclassfileIO"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">fileIO</code><a class="headerlink" href="#_CPPv26fileIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to enable easy writing of data to files. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Functions</p>
+<dl class="function">
+<dt id="_CPPv2N6fileIO6fileIOE6string">
+<span id="fileIO::fileIO__string"></span><span class="target" id="openfvclassfileIO_1a2347043b5bf9eeb596a1b4e35c484445"></span><code class="descname">fileIO</code><span class="sig-paren">(</span>string <em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6fileIO6fileIOE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor to create a file to write data to. This also checks whether or not the path to the file being created exists or not which determines whether the file is successfully created or not. In case the path is not valid or for some other reason the constructor is unable to create the specified file, all output is routed to a temporary file. <dl class="docutils">
+<dt><strong>Parameters</strong></dt>
+<dd><ul class="breatheparameterlist first last">
+<li><code class="first docutils literal"><span class="pre">filename</span></code> - <p>Name of file to write data to </p>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N6fileIOlsEi">
+<span id="fileIO::lshift-operator__i"></span><span class="target" id="openfvclassfileIO_1af559c579170bb91262f073223f13325d"></span><a class="reference internal" href="#_CPPv2N6fileIO6fileIOE6string" title="fileIO::fileIO">fileIO</a> &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>int<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6fileIOlsEi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write int type to file. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N6fileIOlsEf">
+<span id="fileIO::lshift-operator__float"></span><span class="target" id="openfvclassfileIO_1ac846a0c4db48eb58c1aa09f1fae5fe03"></span><a class="reference internal" href="#_CPPv2N6fileIO6fileIOE6string" title="fileIO::fileIO">fileIO</a> &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>float<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6fileIOlsEf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write float type to file. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N6fileIOlsEd">
+<span id="fileIO::lshift-operator__double"></span><span class="target" id="openfvclassfileIO_1a0f758444d99a2c5d014a8f74593315a0"></span><a class="reference internal" href="#_CPPv2N6fileIO6fileIOE6string" title="fileIO::fileIO">fileIO</a> &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>double<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6fileIOlsEd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write double type to file. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N6fileIOlsE6string">
+<span id="fileIO::lshift-operator__string"></span><span class="target" id="openfvclassfileIO_1a67d36492710cc8fb89d41af14cd8fd29"></span><a class="reference internal" href="#_CPPv2N6fileIO6fileIOE6string" title="fileIO::fileIO">fileIO</a> &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>string<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6fileIOlsE6string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a string to the file. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N6fileIOlsEPKc">
+<span id="fileIO::lshift-operator__cCP"></span><span class="target" id="openfvclassfileIO_1abdc36988f95409c07494216877f4664f"></span><a class="reference internal" href="#_CPPv2N6fileIO6fileIOE6string" title="fileIO::fileIO">fileIO</a> &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span><em class="property">const</em> char *<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6fileIOlsEPKc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a const char* to file. </p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N6fileIOlsE6vectorIiE">
+<span id="fileIO::lshift-operator__vector:i:"></span><span class="target" id="openfvclassfileIO_1a919965cc447f8f75366da2b5fc6bfcf3"></span><a class="reference internal" href="#_CPPv2N6fileIO6fileIOE6string" title="fileIO::fileIO">fileIO</a> &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>vector&lt;int&gt;<span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N6fileIOlsE6vectorIiE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a vector of int variables to file. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="_CPPv27imageIO">
+<span id="imageIO"></span><span class="target" id="openfvclassimageIO"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">imageIO</code><a class="headerlink" href="#_CPPv27imageIO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="_CPPv211mtiffReader">
+<span id="mtiffReader"></span><span class="target" id="openfvclassmtiffReader"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">mtiffReader</code><a class="headerlink" href="#_CPPv211mtiffReader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="data-types">
+<h2>Data Types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h2>
+<p>Here are descriptions of some custom data types defined for internal
+use within <code class="docutils literal"><span class="pre">openfv</span></code>. Most of these are defined in the header <code class="docutils literal"><span class="pre">typedefs.h</span></code>.</p>
+<div class="section" id="refocus-settings-struct">
+<h3>refocus_settings struct<a class="headerlink" href="#refocus-settings-struct" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv216refocus_settings">
+<span id="refocus_settings"></span><span class="target" id="openfvstructrefocus__settings"></span><em class="property">struct </em><code class="descclassname"></code><code class="descname">refocus_settings</code><a class="headerlink" href="#_CPPv216refocus_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Settings container passed to <a class="reference internal" href="#openfvclasssaRefocus"><span>saRefocus</span></a> constructor. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Members</p>
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings5mtiffE">
+<span id="refocus_settings::mtiff__i"></span><span class="target" id="openfvstructrefocus__settings_1ae277f5b02cff38e0ca4fbe94b25c88ea"></span>int <code class="descname">mtiff</code><a class="headerlink" href="#_CPPv2N16refocus_settings5mtiffE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag indicating if data is in mtiff format files. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings3mp4E">
+<span id="refocus_settings::mp4__i"></span><span class="target" id="openfvstructrefocus__settings_1af1a31fa547383a02c19c1ebaaedb0fce"></span>int <code class="descname">mp4</code><a class="headerlink" href="#_CPPv2N16refocus_settings3mp4E" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag indicating if data is in mp4 videos. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings4multE">
+<span id="refocus_settings::mult__i"></span><span class="target" id="openfvstructrefocus__settings_1a20ef1445b4228fbc138ad08623a5dfc5"></span>int <code class="descname">mult</code><a class="headerlink" href="#_CPPv2N16refocus_settings4multE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag to use multiplicative refocusing. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings8mult_expE">
+<span id="refocus_settings::mult_exp__double"></span><span class="target" id="openfvstructrefocus__settings_1adc2d542f46102c215d732d8e2a29bc22"></span>double <code class="descname">mult_exp</code><a class="headerlink" href="#_CPPv2N16refocus_settings8mult_expE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplicative exponent. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings7use_gpuE">
+<span id="refocus_settings::use_gpu__i"></span><span class="target" id="openfvstructrefocus__settings_1a0c1ccba27ea357fddb7146e677d07548"></span>int <code class="descname">use_gpu</code><a class="headerlink" href="#_CPPv2N16refocus_settings7use_gpuE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag to use a GPU or not. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings9hf_methodE">
+<span id="refocus_settings::hf_method__i"></span><span class="target" id="openfvstructrefocus__settings_1ab7d98fe5151f61cd0b7c73f86d44c22e"></span>int <code class="descname">hf_method</code><a class="headerlink" href="#_CPPv2N16refocus_settings9hf_methodE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use Homography Fit (HF) method or not. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings15calib_file_pathE">
+<span id="refocus_settings::calib_file_path__string"></span><span class="target" id="openfvstructrefocus__settings_1a73deaae0071b53a5dc61e8b847121c47"></span>string <code class="descname">calib_file_path</code><a class="headerlink" href="#_CPPv2N16refocus_settings15calib_file_pathE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to calibration data file. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings11images_pathE">
+<span id="refocus_settings::images_path__string"></span><span class="target" id="openfvstructrefocus__settings_1abc78823db492dcc4c879a633a4ee39b6"></span>string <code class="descname">images_path</code><a class="headerlink" href="#_CPPv2N16refocus_settings11images_pathE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to directory where images to be refocused are. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings10all_framesE">
+<span id="refocus_settings::all_frames__i"></span><span class="target" id="openfvstructrefocus__settings_1a29adc7d52c05a19958842f3648dad013"></span>int <code class="descname">all_frames</code><a class="headerlink" href="#_CPPv2N16refocus_settings10all_framesE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag indicating if all frames in the input data should be processed. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings11start_frameE">
+<span id="refocus_settings::start_frame__i"></span><span class="target" id="openfvstructrefocus__settings_1a83398b0c8ef8e6755661322ba4668afd"></span>int <code class="descname">start_frame</code><a class="headerlink" href="#_CPPv2N16refocus_settings11start_frameE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start frame number (used if all_frames is set to 0) </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings9end_frameE">
+<span id="refocus_settings::end_frame__i"></span><span class="target" id="openfvstructrefocus__settings_1a32f61ec775fe0e7cae2c5b3ed267a355"></span>int <code class="descname">end_frame</code><a class="headerlink" href="#_CPPv2N16refocus_settings9end_frameE" title="Permalink to this definition">¶</a></dt>
+<dd><p>End frame number (used if all_frames is set to 0) </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings4skipE">
+<span id="refocus_settings::skip__i"></span><span class="target" id="openfvstructrefocus__settings_1a6a1ef068dce98b193dd85eb654b5e85a"></span>int <code class="descname">skip</code><a class="headerlink" href="#_CPPv2N16refocus_settings4skipE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Successive frames to skip (used if all_frames is set to 0) </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings6shiftsE">
+<span id="refocus_settings::shifts__vector:i:"></span><span class="target" id="openfvstructrefocus__settings_1a382f8c970db813e2cebf3af4e95d8ea1"></span>vector&lt;int&gt; <code class="descname">shifts</code><a class="headerlink" href="#_CPPv2N16refocus_settings6shiftsE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time shift values for each camera. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings13resize_imagesE">
+<span id="refocus_settings::resize_images__i"></span><span class="target" id="openfvstructrefocus__settings_1aff3ec5522ff76037b467c1cb2ad67385"></span>int <code class="descname">resize_images</code><a class="headerlink" href="#_CPPv2N16refocus_settings13resize_imagesE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flag indicating if calibration images should be resized or not. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings2rfE">
+<span id="refocus_settings::rf__double"></span><span class="target" id="openfvstructrefocus__settings_1a62f12e301e011e037802debb86536755"></span>double <code class="descname">rf</code><a class="headerlink" href="#_CPPv2N16refocus_settings2rfE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factor by which to resize calibration images. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N16refocus_settings6kalibrE">
+<span id="refocus_settings::kalibr__i"></span><span class="target" id="openfvstructrefocus__settings_1a5567355bc517f99580fbe452be67723e"></span>int <code class="descname">kalibr</code><a class="headerlink" href="#_CPPv2N16refocus_settings6kalibrE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether calibration file is out of Kalibr. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="localizer-settings-struct">
+<h3>localizer_settings struct<a class="headerlink" href="#localizer-settings-struct" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv218localizer_settings">
+<span id="localizer_settings"></span><span class="target" id="openfvstructlocalizer__settings"></span><em class="property">struct </em><code class="descclassname"></code><code class="descname">localizer_settings</code><a class="headerlink" href="#_CPPv218localizer_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Settings container passed to <a class="reference internal" href="#openfvclasspLocalize"><span>pLocalize</span></a> constructor. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Members</p>
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings6windowE">
+<span id="localizer_settings::window__i"></span><span class="target" id="openfvstructlocalizer__settings_1ac011c6d9ac6633d6a9e387af0fdf3b07"></span>int <code class="descname">window</code><a class="headerlink" href="#_CPPv2N18localizer_settings6windowE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Window size to use around a given pixel to search for particle peak </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings4zminE">
+<span id="localizer_settings::zmin__double"></span><span class="target" id="openfvstructlocalizer__settings_1afd02f826cd03f60750aca7744ea8eef0"></span>double <code class="descname">zmin</code><a class="headerlink" href="#_CPPv2N18localizer_settings4zminE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starting z depth of particle search region. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings4zmaxE">
+<span id="localizer_settings::zmax__double"></span><span class="target" id="openfvstructlocalizer__settings_1a168f0c6e4fa914b6318be9cfef769c66"></span>double <code class="descname">zmax</code><a class="headerlink" href="#_CPPv2N18localizer_settings4zmaxE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ending z depth of particle search region. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings2dzE">
+<span id="localizer_settings::dz__double"></span><span class="target" id="openfvstructlocalizer__settings_1aea716788e4cd4fa02a49730c0c6c03ba"></span>double <code class="descname">dz</code><a class="headerlink" href="#_CPPv2N18localizer_settings2dzE" title="Permalink to this definition">¶</a></dt>
+<dd><p>dz between each successive refocused depth </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings6threshE">
+<span id="localizer_settings::thresh__double"></span><span class="target" id="openfvstructlocalizer__settings_1a76dd1126e941bbf6bcc4c3ba2d0a6918"></span>double <code class="descname">thresh</code><a class="headerlink" href="#_CPPv2N18localizer_settings6threshE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amount by which to threshold the refocused images. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings7zmethodE">
+<span id="localizer_settings::zmethod__i"></span><span class="target" id="openfvstructlocalizer__settings_1ac982cd029c940e54d17983c9f45a317c"></span>int <code class="descname">zmethod</code><a class="headerlink" href="#_CPPv2N18localizer_settings7zmethodE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method used to calculate the z coordinate of a particle cluster. 1 is for mean z location, 2 is for a quadratic fit (poly2) and 3 is for a gaussian fit. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N18localizer_settings12cluster_sizeE">
+<span id="localizer_settings::cluster_size__i"></span><span class="target" id="openfvstructlocalizer__settings_1ac8a6983c7ff016aaabfa185073179b4e"></span>int <code class="descname">cluster_size</code><a class="headerlink" href="#_CPPv2N18localizer_settings12cluster_sizeE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Critical cluster size above which to consider a cluster a particle. As of now, regardless of cluster size, a maximum physical z extent of 2.5 mm is used to determine is a detected 2D particle is part of a 3D particle cluster or not. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="particle2d-struct">
+<h3>particle2d struct<a class="headerlink" href="#particle2d-struct" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="_CPPv210particle2d">
+<span id="particle2d"></span><span class="target" id="openfvstructparticle2d"></span><em class="property">struct </em><code class="descclassname"></code><code class="descname">particle2d</code><a class="headerlink" href="#_CPPv210particle2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data type for a particle in 2D. Carries 3D location, average intensity and size in pixels. Used during particle localization. </p>
+<div class="breathe-sectiondef container">
+<p class="breathe-sectiondef-title rubric">Public Members</p>
+<dl class="member">
+<dt id="_CPPv2N10particle2d1xE">
+<span id="particle2d::x__double"></span><span class="target" id="openfvstructparticle2d_1a284e37207b47400f6a47010f5e141b02"></span>double <code class="descname">x</code><a class="headerlink" href="#_CPPv2N10particle2d1xE" title="Permalink to this definition">¶</a></dt>
+<dd><p>x coordinate of particle </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N10particle2d1yE">
+<span id="particle2d::y__double"></span><span class="target" id="openfvstructparticle2d_1a20ba47dec5ad0b909811d4848c9340a5"></span>double <code class="descname">y</code><a class="headerlink" href="#_CPPv2N10particle2d1yE" title="Permalink to this definition">¶</a></dt>
+<dd><p>y coordinate of particle </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N10particle2d1zE">
+<span id="particle2d::z__double"></span><span class="target" id="openfvstructparticle2d_1ad282947b9a81b636c508f132ea1c3ea0"></span>double <code class="descname">z</code><a class="headerlink" href="#_CPPv2N10particle2d1zE" title="Permalink to this definition">¶</a></dt>
+<dd><p>z coordinate of particle </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N10particle2d1IE">
+<span id="particle2d::I__double"></span><span class="target" id="openfvstructparticle2d_1a22e3c5e9e11119111abf0715cd77879f"></span>double <code class="descname">I</code><a class="headerlink" href="#_CPPv2N10particle2d1IE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average intensity of particle. </p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N10particle2d4sizeE">
+<span id="particle2d::size__i"></span><span class="target" id="openfvstructparticle2d_1abc90f84ed6bf498d7317e8e8ca83a8b8"></span>int <code class="descname">size</code><a class="headerlink" href="#_CPPv2N10particle2d4sizeE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of particle in pixels. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="file-formats">
+<h2>File Formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h3>
+<p><strong>Utilizes</strong> <a class="reference external" href="http://www.boost.org/doc/libs/1_58_0/doc/html/program_options/overview.html#idp337767072">Boost Program Options</a></p>
+<p>A configuration file consists of the assignment of the following
+variables. Any unassigned variable will hold its corresponding default
+value.</p>
+<ul>
+<li><p class="first"><strong>use_gpu</strong>         (default = 0)     1 to use GPU, 0 for CPU.</p>
+</li>
+<li><p class="first"><strong>mult</strong>            (default = 0)     1 to use the multiplicative
+method, 0 otherwise.</p>
+</li>
+<li><p class="first"><strong>mult_exp</strong>        (default = .25)   Multiplicative method
+exponent.</p>
+</li>
+<li><p class="first"><strong>hf_method</strong>       (default = 0)     1 to use HF Method, 0
+otherwise.</p>
+</li>
+<li><p class="first"><strong>mtiff</strong>           (default = 0)     1 if data is in multipage tiff
+files.</p>
+</li>
+<li><p class="first"><strong>frames</strong>          (default = &#8220;&#8221;)</p>
+<p>Array of values in the format start frame, end frame, skip value. No
+value means all frames are to be processed. frames being one value
+leads to the processing of that frame alone. Two values indicates
+the start and end frames with 0 skipped. Three values indicates the
+start frame, end frame, and skip value.</p>
+<p>Examples:</p>
+<p>omitted &#8211; All frames are processed</p>
+<p><code class="code docutils literal"><span class="pre">frames</span> <span class="pre">=</span> <span class="pre">5</span></code> : Processes frame 5</p>
+<p><code class="code docutils literal"><span class="pre">frames</span> <span class="pre">=</span> <span class="pre">5,10</span></code> : Processes frames 5 through 10, inclusive</p>
+<p><code class="code docutils literal"><span class="pre">frames</span> <span class="pre">=</span> <span class="pre">5,20,4</span></code> : Processes frames 5, 10, 15, and 20</p>
+</li>
+<li><p class="first"><strong>calib_file_path</strong> (default = &#8220;&#8221;)    Path to calibration file,
+relative to config filepath.</p>
+</li>
+<li><p class="first"><strong>images_path</strong>     (default = &#8220;&#8221;)    Path to data, relative to
+config filepath.</p>
+</li>
+</ul>
+<p><code class="code docutils literal"><span class="pre">#</span></code> can be used for commenting the configuration file</p>
+<p>Example configuration file contents:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>use_gpu=0
+hf_method=1
+calib_file_path= ./pinhole_calibration_data/calibration_results/results_000001438970105.txt
+images_path= ./pinhole_data/set1_text/
+
+mtiff=0
+
+mult=0
+mult_exp=0.5
+#frames was omitted to indicate all frames be processed
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">C++ API Documentation</a><ul>
+<li><a class="reference internal" href="#calibration">Calibration</a></li>
+<li><a class="reference internal" href="#refocusing">Refocusing</a></li>
+<li><a class="reference internal" href="#particle-localization">Particle Localization</a></li>
+<li><a class="reference internal" href="#tracking">Tracking</a></li>
+<li><a class="reference internal" href="#utility-functions">Utility Functions</a><ul>
+<li><a class="reference internal" href="#functions-in-tools-h">Functions in tools.h</a></li>
+<li><a class="reference internal" href="#functions-in-parse-settings-h">Functions in parse_settings.h</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#utility-classes">Utility Classes</a></li>
+<li><a class="reference internal" href="#data-types">Data Types</a><ul>
+<li><a class="reference internal" href="#refocus-settings-struct">refocus_settings struct</a></li>
+<li><a class="reference internal" href="#localizer-settings-struct">localizer_settings struct</a></li>
+<li><a class="reference internal" href="#particle2d-struct">particle2d struct</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#file-formats">File Formats</a><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="py_api_docs.html"
+                        title="next chapter">Python API Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/cpp_api_docs.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="py_api_docs.html" title="Python API Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

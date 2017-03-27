@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Python API Documentation &mdash; openfv 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <link rel="prev" title="C++ API Documentation" href="cpp_api_docs.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cpp_api_docs.html" title="C++ API Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="python-api-documentation">
+<h1>Python API Documentation<a class="headerlink" href="#python-api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="calibration">
+<h2>Calibration<a class="headerlink" href="#calibration" title="Permalink to this headline">¶</a></h2>
+<p>Below is documentation for the wrapper class
+<code class="xref py py-class docutils literal"><span class="pre">calibration.multiCamCalibration</span></code> of the <a class="reference internal" href="cpp_api_docs.html#_CPPv219multiCamCalibration" title="multiCamCalibration"><code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code></a> C++ class.</p>
+</div>
+<div class="section" id="refocusing">
+<h2>Refocusing<a class="headerlink" href="#refocusing" title="Permalink to this headline">¶</a></h2>
+<p>Below is documentation for the wrapper class
+<a class="reference internal" href="#refocusing.saRefocus" title="refocusing.saRefocus"><code class="xref py py-class docutils literal"><span class="pre">refocusing.saRefocus</span></code></a> of the <a class="reference internal" href="cpp_api_docs.html#_CPPv29saRefocus" title="saRefocus"><code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code></a> C++ class.</p>
+<dl class="class">
+<dt id="refocusing.saRefocus">
+<em class="property">class </em><code class="descclassname">refocusing.</code><code class="descname">saRefocus</code><a class="headerlink" href="#refocusing.saRefocus" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="refocusing.saRefocus.addView">
+<code class="descname">addView</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(object)arg2</em>, <em>(object)arg3</em>, <em>(object)arg4</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#refocusing.saRefocus.addView" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void addView(saRefocus {lvalue},cv::Mat,cv::Mat,cv::Mat)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.clearViews">
+<code class="descname">clearViews</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#refocusing.saRefocus.clearViews" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void clearViews(saRefocus {lvalue})</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.getC">
+<code class="descname">getC</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(int)arg2</em><span class="sig-paren">)</span> &rarr; object :<a class="headerlink" href="#refocusing.saRefocus.getC" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>cv::Mat getC(saRefocus {lvalue},int)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.getP">
+<code class="descname">getP</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(int)arg2</em><span class="sig-paren">)</span> &rarr; object :<a class="headerlink" href="#refocusing.saRefocus.getP" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>cv::Mat getP(saRefocus {lvalue},int)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.initializeGPU">
+<code class="descname">initializeGPU</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#refocusing.saRefocus.initializeGPU" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void initializeGPU(saRefocus {lvalue})</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.project_point">
+<code class="descname">project_point</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(int)arg2</em>, <em>(object)arg3</em><span class="sig-paren">)</span> &rarr; object :<a class="headerlink" href="#refocusing.saRefocus.project_point" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>cv::Mat project_point(saRefocus {lvalue},int,cv::Mat_&lt;double&gt;)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.read_calib_data">
+<code class="descname">read_calib_data</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(str)arg2</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#refocusing.saRefocus.read_calib_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void read_calib_data(saRefocus {lvalue},std::string)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.refocus">
+<code class="descname">refocus</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(float)arg2</em>, <em>(float)arg3</em>, <em>(float)arg4</em>, <em>(float)arg5</em>, <em>(float)arg6</em>, <em>(int)arg7</em><span class="sig-paren">)</span> &rarr; object :<a class="headerlink" href="#refocusing.saRefocus.refocus" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>cv::Mat refocus(saRefocus {lvalue},double,double,double,double,double,int)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.setF">
+<code class="descname">setF</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(float)arg2</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#refocusing.saRefocus.setF" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void setF(saRefocus {lvalue},double)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.setHF">
+<code class="descname">setHF</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(int)arg2</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#refocusing.saRefocus.setHF" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void setHF(saRefocus {lvalue},int)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.setMult">
+<code class="descname">setMult</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(int)arg2</em>, <em>(float)arg3</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#refocusing.saRefocus.setMult" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void setMult(saRefocus {lvalue},int,double)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.setRefractive">
+<code class="descname">setRefractive</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(int)arg2</em>, <em>(float)arg3</em>, <em>(float)arg4</em>, <em>(float)arg5</em>, <em>(float)arg6</em>, <em>(float)arg7</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#refocusing.saRefocus.setRefractive" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void setRefractive(saRefocus {lvalue},int,double,double,double,double,double)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="refocusing.saRefocus.showSettings">
+<code class="descname">showSettings</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em><span class="sig-paren">)</span> &rarr; str :<a class="headerlink" href="#refocusing.saRefocus.showSettings" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>std::string showSettings(saRefocus {lvalue})</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="tracking">
+<h2>Tracking<a class="headerlink" href="#tracking" title="Permalink to this headline">¶</a></h2>
+<p>Below is documentation for the wrapper class
+<a class="reference internal" href="#tracking.pTracking" title="tracking.pTracking"><code class="xref py py-class docutils literal"><span class="pre">tracking.pTracking</span></code></a> of the <a class="reference internal" href="cpp_api_docs.html#_CPPv29pTracking" title="pTracking"><code class="xref cpp cpp-class docutils literal"><span class="pre">pTracking</span></code></a> C++ class.</p>
+<dl class="class">
+<dt id="tracking.pTracking">
+<em class="property">class </em><code class="descclassname">tracking.</code><code class="descname">pTracking</code><a class="headerlink" href="#tracking.pTracking" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="tracking.pTracking.getP">
+<code class="descname">getP</code><span class="sig-paren">(</span><em>(pTracking)arg1</em><span class="sig-paren">)</span> &rarr; object :<a class="headerlink" href="#tracking.pTracking.getP" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>cv::Mat getP(pTracking {lvalue})</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tracking.pTracking.get_match_counts">
+<code class="descname">get_match_counts</code><span class="sig-paren">(</span><em>(pTracking)arg1</em><span class="sig-paren">)</span> &rarr; object :<a class="headerlink" href="#tracking.pTracking.get_match_counts" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>std::vector&lt;int, std::allocator&lt;int&gt; &gt; get_match_counts(pTracking {lvalue})</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tracking.pTracking.set_vars">
+<code class="descname">set_vars</code><span class="sig-paren">(</span><em>(pTracking)arg1</em>, <em>(int)arg2</em>, <em>(float)arg3</em>, <em>(float)arg4</em>, <em>(float)arg5</em>, <em>(float)arg6</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#tracking.pTracking.set_vars" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void set_vars(pTracking {lvalue},int,double,double,double,double)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tracking.pTracking.track_frame">
+<code class="descname">track_frame</code><span class="sig-paren">(</span><em>(pTracking)arg1</em>, <em>(int)arg2</em>, <em>(int)arg3</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#tracking.pTracking.track_frame" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void track_frame(pTracking {lvalue},int,int)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tracking.pTracking.write_quiver_data">
+<code class="descname">write_quiver_data</code><span class="sig-paren">(</span><em>(pTracking)arg1</em><span class="sig-paren">)</span> &rarr; None :<a class="headerlink" href="#tracking.pTracking.write_quiver_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void write_quiver_data(pTracking {lvalue})</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="tools">
+<h2>Tools<a class="headerlink" href="#tools" title="Permalink to this headline">¶</a></h2>
+<p>Below is documentation for the wrapper module
+<a href="#id1"><span class="problematic" id="id2">:py:module:`tools`</span></a> of the C++ utility functions.</p>
+<span class="target" id="module-tools"></span></div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Python API Documentation</a><ul>
+<li><a class="reference internal" href="#calibration">Calibration</a></li>
+<li><a class="reference internal" href="#refocusing">Refocusing</a></li>
+<li><a class="reference internal" href="#tracking">Tracking</a></li>
+<li><a class="reference internal" href="#tools">Tools</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cpp_api_docs.html"
+                        title="previous chapter">C++ API Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/py_api_docs.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cpp_api_docs.html" title="C++ API Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
