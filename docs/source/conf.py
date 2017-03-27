@@ -16,6 +16,9 @@ import sys, os, subprocess
 # Building XML files using doxygen
 subprocess.call(['doxygen', '../config'])
 
+# Pointing to path of python modules
+sys.path.append(os.path.join(os.getcwd, '../../bin/openfv'))
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
