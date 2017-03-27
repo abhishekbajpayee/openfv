@@ -1,11 +1,19 @@
 #!/bin/bash
 
-# Checking out and unstaging required files from master
-git checkout master ../include source config Makefile
-git rm -r --cached ../include source config Makefile
+# Checking out and unstaging source files
+git checkout master ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
+git rm -r --cached ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
+
+# Build library
+make -C ../bin
+
+# Checking out and unstaging docs source
+git checkout master source config Makefile
+git rm -r --cached source config Makefile
 
 # Building docs
 make html
 
 # Cleaning up
-rm -r ../include source config Makefile
+rm -r ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
+rm -r source config Makefile
