@@ -1,0 +1,11 @@
+#!/bin/bash
+
+git checkout master source
+git checkout master config
+git checkout master Makefile
+
+git rm -r --cached source
+git rm --cached config
+git rm --cached Makefile
+
+make html
