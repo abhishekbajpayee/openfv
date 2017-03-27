@@ -1,16 +1,11 @@
 #!/bin/bash
 
 # Checking out and unstaging required files from master
-git checkout master source
-git checkout master config
-git checkout master Makefile
-git rm -r --cached source
-git rm --cached config
-git rm --cached Makefile
+git checkout master ../include source config Makefile
+git rm -r --cached ../include source config Makefile
 
 # Building docs
 make html
 
 # Cleaning up
-rm config
-rm Makefile
+rm -r ../include source config Makefile
