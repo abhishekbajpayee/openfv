@@ -1,4 +1,4 @@
-FROM nvidia/cuda:7.5
+FROM openfv-scipy-notebook
 
 MAINTAINER Abhishek Bajpayee <ab9@mit.edu>
 
@@ -46,10 +46,8 @@ RUN unzip 2.4.10.zip
 RUN cd opencv-2.4.10 && mkdir build && cd build && \
         cmake -D CUDA_GENERATION=Kepler .. && make -j7 && make install
 
-# USER $NB_USER
-
 # Install openfv
 RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
         cd openfv && ./configure && cd bin && \
-        cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON -D PYTHON_LIBRARIES=/usr/lib/x86_64-linux-gnu/libpython2.7.so .. && \
-        make
+        cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON .. && \
+        make && make install

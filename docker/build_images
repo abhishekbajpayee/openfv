@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# build non CUDA image
+docker build -t openfv .
+
+# build CUDA image
+cd base-notebook
+docker build -t openfv-base-notebook .
+cd ../minimal-notebook
+docker build -t openfv-minimal-notebook .
+cd ../scipy-notebook
+docker build -t openfv-scipy-notebook .
+cd ../cuda
+docker build -t openfv-cuda .
