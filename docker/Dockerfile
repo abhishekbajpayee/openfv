@@ -2,7 +2,7 @@
 # Distributed under the GNU General Public License
 # as published by the Free Software Foundation
 
-FROM jupyter/scipy-notebook
+FROM openfv-scipy-notebook 
 
 MAINTAINER Abhishek Bajpayee <ab9@mit.edu>
 
