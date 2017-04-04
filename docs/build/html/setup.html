@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>OpenFV Setup &mdash; openfv 1.0 documentation</title>
+    <title>Set-up on Cloud Instances (AWS EC2) &mdash; openfv 1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -53,8 +53,41 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="openfv-setup">
-<h1>OpenFV Setup<a class="headerlink" href="#openfv-setup" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="set-up-on-cloud-instances-aws-ec2">
+<h1>Set-up on Cloud Instances (AWS EC2)<a class="headerlink" href="#set-up-on-cloud-instances-aws-ec2" title="Permalink to this headline">¶</a></h1>
+<p><em>(experimental)</em></p>
+<p>We realize that code libraries can be painful to install and not
+everyone has access to a Linux machine. This is why we have packaged
+OpenFV to be easily set up on AWS EC2 instances inside docker
+containers. Just follow the following simple steps to get started:</p>
+<ol class="arabic">
+<li><p class="first">Create an AWS account</p>
+</li>
+<li><p class="first">Create an EC2 instance using the <cite>OpenFV AMI &lt;#&gt;</cite>. This AMI has all
+the requirements pre-installed. Also, if you pick an instance type
+that has a connected GPU(s) (we recommend the <cite>p2 instances &lt;https://aws.amazon.com/ec2/instance-types/p2/&gt;</cite>), this
+AMI will be able to communicate with the GPU.</p>
+</li>
+<li><p class="first">SSH into your instance. If your instance does not have a GPU, run:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker pull openfv/openfv
+$ docker run -it --rm -p 80:8888 openfv/openfv
+</pre></div>
+</div>
+<p>If your instance has a GPU, run:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker pull openfv/openfv-cuda
+$ nvidia-docker run -it --rm -p 80:8888 openfv/openfv-cuda
+</pre></div>
+</div>
+</li>
+<li><p class="first">Now access a IPython Notebook / Jupyter server that runs inside
+your EC2 instance by visiting the public DNS of your instance. Now
+you can create Python notebooks and use the OpenFV Python API or
+write C++ executables and run them via the terminal.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="set-up-on-an-ubuntu-machine">
+<h1>Set-up on an Ubuntu Machine<a class="headerlink" href="#set-up-on-an-ubuntu-machine" title="Permalink to this headline">¶</a></h1>
 <p>Below are basic instructions on how to get started with using
 OpenFV. This documentation assumes that you have a basic working knowledge
 of Linux.</p>
@@ -78,9 +111,6 @@ just not run.)</li>
 </ul>
 </li>
 </ol>
-</div>
-<div class="section" id="set-up-on-an-ubuntu-machine">
-<h1>Set-up on an Ubuntu Machine<a class="headerlink" href="#set-up-on-an-ubuntu-machine" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2>14.04<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ sudo apt-get install qt5-default libtiff5-dev libgoogle-glog-dev
@@ -202,7 +232,7 @@ $ make
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">OpenFV Setup</a></li>
+<li><a class="reference internal" href="#">Set-up on Cloud Instances (AWS EC2)</a></li>
 <li><a class="reference internal" href="#set-up-on-an-ubuntu-machine">Set-up on an Ubuntu Machine</a><ul>
 <li><a class="reference internal" href="#id1">14.04</a></li>
 <li><a class="reference internal" href="#id2">12.04</a></li>
