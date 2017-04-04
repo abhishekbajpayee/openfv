@@ -38,16 +38,20 @@ RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
         tar -xvzf ceres-solver-1.11.0.tar.gz && \
         cd ceres-solver-1.11.0 && \
         mkdir build && cd build && \
-        cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && make && make install
+        cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && \
+        make && make install
 
 # Install OpenCV
 RUN wget https://github.com/Itseez/opencv/archive/2.4.10.zip
 RUN unzip 2.4.10.zip
 RUN cd opencv-2.4.10 && mkdir build && cd build && \
-        cmake -D CUDA_GENERATION=Kepler .. && make -j7 && make install
+        cmake -D CUDA_ARCH_BIN=5.0 -D CUDA_ARCH_PTX=5.0 .. && \
+        make -j7 && make install
 
 # Install openfv
 RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
         cd openfv && ./configure && cd bin && \
         cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON .. && \
         make && make install
+
+USER $NB_USER
