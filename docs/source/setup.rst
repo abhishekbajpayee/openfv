@@ -1,5 +1,40 @@
-OpenFV Setup
-============
+Set-up on Cloud Instances (AWS EC2)
+===================================
+
+*(experimental)*
+
+We realize that code libraries can be painful to install and not
+everyone has access to a Linux machine. This is why we have packaged 
+OpenFV to be easily set up on AWS EC2 instances inside docker
+containers. Just follow the following simple steps to get started:
+
+
+#. Create an AWS account
+#. Create an EC2 instance using the `OpenFV AMI <#>`. This AMI has all
+   the requirements pre-installed. Also, if you pick an instance type
+   that has a connected GPU(s) (we recommend the `p2 instances <https://aws.amazon.com/ec2/instance-types/p2/>`), this
+   AMI will be able to communicate with the GPU.
+#. SSH into your instance. If your instance does not have a GPU, run:
+
+   .. code-block :: bash
+       
+       $ docker pull openfv/openfv
+       $ docker run -it --rm -p 80:8888 openfv/openfv
+
+   If your instance has a GPU, run:
+
+   .. code-block :: bash
+       
+       $ docker pull openfv/openfv-cuda
+       $ nvidia-docker run -it --rm -p 80:8888 openfv/openfv-cuda
+
+#. Now access a IPython Notebook / Jupyter server that runs inside
+   your EC2 instance by visiting the public DNS of your instance. Now
+   you can create Python notebooks and use the OpenFV Python API or
+   write C++ executables and run them via the terminal.
+
+Set-up on an Ubuntu Machine
+===========================
 
 Below are basic instructions on how to get started with using
 OpenFV. This documentation assumes that you have a basic working knowledge
@@ -23,11 +58,6 @@ OpenFV depends on the following packages:
 #. OpenCV 2.4.10 or earlier (3.0+ not yet supported) built with Python, Qt, and CUDA
 
    * Some versions may not be compatable. In such a case, please let us know
-
-
-
-Set-up on an Ubuntu Machine
-===========================
 
 14.04
 ^^^^^
