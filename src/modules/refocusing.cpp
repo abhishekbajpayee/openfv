@@ -2319,14 +2319,14 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("setMult", &saRefocus::setMult)
         .def("setHF", &saRefocus::setHF)
         .def("setRefractive", &saRefocus::setRefractive)
-        .def("showSettings", &saRefocus::showSettings, "@DocString(showSettings)")
+        .def("showSettings", &saRefocus::showSettings)
 #ifndef WITHOUT_CUDA
         .def("initializeGPU", &saRefocus::initializeGPU, "@DocString(initializeGPU)")
 #endif
         .def("refocus", &saRefocus::refocus, "@DocString(refocus)")
         .def("project_point", &saRefocus::project_point)
-        .def("getP", &saRefocus::getP, "@DocString(getP)")
-        .def("getC", &saRefocus::getC, "@DocString(getC)")
+        .def("getP", &saRefocus::getP)
+        .def("getC", &saRefocus::getC)
     ;
 
 }
