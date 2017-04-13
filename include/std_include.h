@@ -50,6 +50,10 @@ namespace libtiff {
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 
+// glog and gflags
+#include <glog/logging.h>
+#include <gflags/gflags.h>
+
 // Profiler header
 // #include <gperftools/profiler.h>
 
