@@ -38,7 +38,7 @@ def parse_doc_string(istr):
             param_name = words[0]
             description = " ".join(words[1:])
             if not has_param:
-                docstring.append("Parameters")
+                docstring.append("\nParameters")
                 docstring.append("----------")
                 has_param = True
             docstring.append(param_name)
@@ -48,7 +48,7 @@ def parse_doc_string(istr):
             words = match.group(1).split(" ")
             return_type = words[0]
             description = " ".join(words[1:])
-            docstring.append("Return")
+            docstring.append("\nReturn")
             docstring.append("-------")
             docstring.append(return_type)
             docstring.append("    " + description)
