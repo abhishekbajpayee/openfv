@@ -2311,8 +2311,8 @@ BOOST_PYTHON_MODULE(refocusing) {
 
     docstring_options local_docstring_options(true, true, false);
 
-    class_<saRefocus>("saRefocus")
-        .def("read_calib_data", &saRefocus::read_calib_data, "Read refractive calibration data")
+    class_<saRefocus>("saRefocus", "")
+        .def("read_calib_data", &saRefocus::read_calib_data, boost::python::arg("path"), "Read refractive calibration data")
         .def("addView", &saRefocus::addView)
         .def("clearViews", &saRefocus::clearViews)
         .def("setF", &saRefocus::setF)
@@ -2321,9 +2321,9 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("setRefractive", &saRefocus::setRefractive)
         .def("showSettings", &saRefocus::showSettings)
 #ifndef WITHOUT_CUDA
-        .def("initializeGPU", &saRefocus::initializeGPU, "Initialize everything required to calculate refocused images on GPU.")
+        .def("initializeGPU", &saRefocus::initializeGPU, boost::python::arg(), "Initialize everything required to calculate refocused images on GPU.")
 #endif
-        .def("refocus", &saRefocus::refocus, "Calculate a refocused image\nparam: z Depth in physical units at which to calculate refocused image\nparam: rx Angle by which to rotate focal plane about x axis\nparam: ry Angle by which you rotate focal plane about y axis\nparam: rz Angle by which to rotate focal plane about z axis\nparam: thresh Thresholding level (if additive refocusing is used)\nparam: frame The frame (int time) to refocus. Indexing starts at zero.\nreturn: Refocused image as OpenCV Mat type")
+        .def("refocus", &saRefocus::refocus, boost::python::arg("z", "rx", "ry", "rz", "thresh", "frame"), "Calculate a refocused image\nParameters\n----------\nz\n    Depth in physical units at which to calculate refocused image\nrx\n    Angle by which to rotate focal plane about x axis\nry\n    Angle by which you rotate focal plane about y axis\nrz\n    Angle by which to rotate focal plane about z axis\nthresh\n    Thresholding level (if additive refocusing is used)\nframe\n    The frame (int time) to refocus. Indexing starts at 0.\nReturn\n-------\nRefocused\n    image as OpenCV Mat type")
         .def("project_point", &saRefocus::project_point)
         .def("getP", &saRefocus::getP)
         .def("getC", &saRefocus::getC)
