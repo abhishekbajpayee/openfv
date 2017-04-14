@@ -6,10 +6,15 @@ from os import remove, close
 import glob
 
 h = set(glob.glob('../include/*.h'))
+print h
 cpp = set(glob.glob('../src/modules/*.cpp'))
-hfiles = set([lambda x: x.replace("../include/", "").replace(".h", "") for filee in h])
-cppfiles = set([lambda x: x.replace("../src/modules/", "").replace(".cpp", "") for filee in cpp])
-shared = h.intersection(cpp)
+print cpp
+hfiles = set([filee.replace("../include/", "").replace(".h", "") for filee in h])
+print hfiles
+cppfiles = set([filee.replace("../src/modules/", "").replace(".cpp", "") for filee in cpp])
+print cppfiles
+shared = hfiles.intersection(cppfiles)
+print shared
 
 # returns a list of strings
 # enters under the "DocString"
