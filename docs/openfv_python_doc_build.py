@@ -6,15 +6,10 @@ from os import remove, close
 import glob
 
 h = set(glob.glob('../include/*.h'))
-print h
 cpp = set(glob.glob('../src/modules/*.cpp'))
-print cpp
 hfiles = set([filee.replace("../include/", "").replace(".h", "") for filee in h])
-print hfiles
 cppfiles = set([filee.replace("../src/modules/", "").replace(".cpp", "") for filee in cpp])
-print cppfiles
 shared = hfiles.intersection(cppfiles)
-print shared
 
 # returns a list of strings
 # enters under the "DocString"
@@ -86,6 +81,7 @@ def substitute(istr, docfile, docstrings):
                 token = match.group(1)
                 docstring = format_doc_string(docstrings[token])
                 line = line.replace(match.group(0), escape(docstring))
+		print line
             new_file.write(line + "\n")
         # print(line, file=ostr)
     close(fh)
