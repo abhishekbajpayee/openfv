@@ -55,10 +55,13 @@ namespace libtiff {
 
 // Boost libraries
 #include <boost/program_options.hpp>
-#include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#ifdef WITH_PYTHON
+#include <boost/python.hpp>
+#endif
+
 
 // Python library
 #include <Python.h>
