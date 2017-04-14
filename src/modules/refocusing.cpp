@@ -2311,7 +2311,7 @@ BOOST_PYTHON_MODULE(refocusing) {
 
     docstring_options local_docstring_options(true, true, false);
 
-    class_<saRefocus>("saRefocus", "@DocString(saRefocusClass)")
+    class_<saRefocus>("saRefocus")
         .def("read_calib_data", &saRefocus::read_calib_data, "@DocString(read_calib_data)")
         .def("addView", &saRefocus::addView)
         .def("clearViews", &saRefocus::clearViews)
