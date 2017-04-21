@@ -48,7 +48,7 @@ def parse_doc_string(istr):
             words = match.group(1).split(" ")
             return_type = words[0]
             description = " ".join(words[1:])
-            docstring.append("\nReturn")
+            docstring.append("\nReturns")
             docstring.append("-------")
             docstring.append(return_type)
             docstring.append("    " + description)
