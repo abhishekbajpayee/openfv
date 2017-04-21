@@ -230,7 +230,10 @@ void saRefocus::read_kalibr_data(string path) {
         
         FileNode f = *fi;
         string cam_name; f["rostopic"]>>cam_name;
-        cam_names_.push_back(cam_name.substr(1,8) + ".MP4");
+        if (MP4_FLAG)
+            cam_names_.push_back(cam_name.substr(1,8) + ".MP4");
+        else 
+            cam_names_.push_back(cam_name.substr(1,4));
 
         VLOG(1)<<"Camera: "<<cam_names_[i];
 
@@ -426,9 +429,7 @@ void saRefocus::read_imgs(string path) {
                     LOG(WARNING)<<"End frame is greater than number of frames!" <<endl;   
                     end = img_names.size();
                 }
-            }
-                
-           
+            }                           
 
             for (int j=begin; j<end; j+=skip+1) {
                 VLOG(1)<<j<<": "<<img_names.at(j)<<endl;
@@ -437,6 +438,10 @@ void saRefocus::read_imgs(string path) {
                 // Mat imgI;
                 // preprocess(image, imgI);
                 // refocusing_imgs_sub.push_back(imgI.clone());
+
+                if (j==begin)
+                    img_size_ = Size(image.cols, image.rows);
+
                 refocusing_imgs_sub.push_back(image.clone());
                 if (i==0) {
                     frames_.push_back(j);
