@@ -55,6 +55,9 @@ RUN mkdir /home/$NB_USER/work && \
     mkdir /home/$NB_USER/.jupyter && \
     echo "cacert=/etc/ssl/certs/ca-certificates.crt" > /home/$NB_USER/.curlrc
 
+# Allow python wrappers to find shared 
+RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/:/usr/lib/:/usr/local/openfv/lib:${LD_LIBRARY_PATH}" >> ~/.bashrc
+
 # Install conda as jovyan
 RUN cd /tmp && \
     mkdir -p $CONDA_DIR && \

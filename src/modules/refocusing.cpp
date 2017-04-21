@@ -35,6 +35,7 @@
 
 #include "refocusing.h"
 #include "tools.h"
+#include <boost/chrono.hpp>
 
 using namespace std;
 using namespace cv;
@@ -1877,7 +1878,7 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
     
     LOG(INFO)<<"Saving frame "<<f<<"...";
     
-    double t1 = omp_get_wtime();
+    boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
     vector<Mat> stack;
     for (double z=zmin; z<=zmax; z+=dz) {
@@ -1885,7 +1886,7 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
         stack.push_back(img);
     }
 
-    double t2 = omp_get_wtime()-t1;
+    boost::chrono::duration<double> t2 = boost::chrono::system_clock::now() - t1;
     VLOG(1)<<"Time taken for reconstruction: "<<t2;
 
     imageIO io(fn.str());
@@ -1943,28 +1944,29 @@ void saRefocus::calculateQ(double zmin, double zmax, double dz, double thresh, i
 
 void saRefocus::return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack) {
 
-    double t1 = omp_get_wtime();
+    boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
     for (double z=zmin; z<=zmax+(dz*0.5); z+=dz) {
         Mat img = refocus(z, 0, 0, 0, thresh, frame);
         stack.push_back(img);
     }
 
-    double t2 = omp_get_wtime()-t1;
+    boost::chrono::duration<double> t2 = boost::chrono::system_clock::now() - t1;
     VLOG(1)<<"Time taken for reconstruction: "<<t2;
 
 }
 
 void saRefocus::return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack, double &time) {
 
-    double t1 = omp_get_wtime();
+    boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
     for (double z=zmin; z<=zmax+(dz*0.5); z+=dz) {
         Mat img = refocus(z, 0, 0, 0, thresh, frame);
         stack.push_back(img);
     }
 
-    time = omp_get_wtime()-t1;
+    boost::chrono::duration<double> t2 = boost::chrono::system_clock::now() - t1;
+    time = t2.count();
     VLOG(1)<<"Time taken for reconstruction: "<<time;
 
 }

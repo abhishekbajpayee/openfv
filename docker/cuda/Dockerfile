@@ -51,3 +51,14 @@ RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
         cd openfv && ./configure && cd bin && \
         cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON .. && \
         make && make install
+
+RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
+
+# Download sample data
+RUN git clone https://github.com/abhishekbajpayee/openfv-sample-data.git
+
+# Download and test sample
+RUN git clone https://github.com/abhishekbajpayee/openfv-samples.git # && cd openfv-samples && \
+        # mkdir bin && cd bin && cmake .. && make -j4
+
+USER $NB_USER

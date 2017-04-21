@@ -79,7 +79,7 @@ endif()
 # Boost Libraries
 find_package(Boost)
 if(Boost_FOUND)
-  find_package ( Boost COMPONENTS program_options filesystem system serialization REQUIRED )
+  find_package ( Boost COMPONENTS program_options filesystem system serialization chrono REQUIRED )
   set(Boost_GENERAL ${Boost_LIBRARIES})
   find_package ( Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED )
   set(Boost_PY ${Boost_LIBRARIES})
