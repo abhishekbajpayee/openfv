@@ -39,7 +39,6 @@
 #include <algorithm>
 #include <ctime>
 #include <sys/stat.h>
-#include <omp.h>
 
 // Tiff library (included in namespace because of typedef conflict with some OpenCV versions)
 namespace libtiff {

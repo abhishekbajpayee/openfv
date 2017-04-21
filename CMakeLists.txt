@@ -115,13 +115,6 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 # doesn't link to Qt
 # include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
-# Omitting for now because nothing in OpenFV as
-# of now uses OpenMP
-# find_package (OpenMP)
-# if (OPENMP_FOUND)
-#   set (CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
-#   set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
-# endif()
 
 set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack gomp) # protobuf lgomp (removed)
 set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY})
