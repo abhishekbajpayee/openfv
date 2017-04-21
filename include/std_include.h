@@ -59,6 +59,7 @@ namespace libtiff {
 #include <boost/filesystem.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <boost/chrono.hpp>
 
 // Python library
 #include <Python.h>
