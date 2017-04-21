@@ -2323,7 +2323,7 @@ BOOST_PYTHON_MODULE(refocusing) {
 #ifndef WITHOUT_CUDA
         .def("initializeGPU", &saRefocus::initializeGPU, "@DocString(initializeGPU)")
 #endif
-        .def("refocus", &saRefocus::refocus, "@DocString(refocus)")
+	.def("refocus", &saRefocus::refocus, boost::python::arg("z", "rx", "ry", "rz", "thresh", "frame"), "@DocString(refocus)")
         .def("project_point", &saRefocus::project_point)
         .def("getP", &saRefocus::getP)
         .def("getC", &saRefocus::getC)
