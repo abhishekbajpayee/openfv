@@ -1,28 +1,54 @@
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
-
-# Debian Jessie debootstrap from 2017-02-27
-# https://github.com/docker-library/official-images/commit/aa5973d0c918c70c035ec0746b8acaec3a4d7777
-
 FROM ubuntu:14.04
 
 USER root
 
-# Install all OS dependencies for notebook server that starts but lacks all
-# features (e.g., download as all possible file formats)
 #ENV DEBIAN_FRONTEND noninteractive RUN REPO=http://cdn-fastly.deb.debian.org \
 # && echo "deb $REPO/debian jessie main\ndeb $REPO/debian-security jessie/updates main" > /etc/apt/sources.list \
 
-RUN apt-get update && apt-get -yq dist-upgrade \
-    && apt-get install -yq --no-install-recommends \
+# Install all OS dependencies for fully functioning notebook server,
+# libav-tools for matplotlib anim,
+# and OpenFV dependencies
+RUN apt-get update -qq && apt-get -yq dist-upgrade && \
+    apt-get install -yq --no-install-recommends \
     wget \
     bzip2 \
     ca-certificates \
     sudo \
     locales \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
+    git \
+    vim \
+    jed \
+    emacs \
+    build-essential \
+    python-dev \
+    unzip \
+    libsm6 \
+    pandoc \
+    texlive-latex-base \
+    texlive-latex-extra \
+    texlive-fonts-extra \
+    texlive-fonts-recommended \
+    texlive-generic-recommended \
+    texlive-xetex \
+    libxrender1 \
+    inkscape \
+    libav-tools \
+    qt5-default \
+    cmake \
+    build-essential \
+    libboost-all-dev \
+    libgoogle-perftools-dev \
+    google-perftools \
+    libeigen3-dev \
+    libatlas-base-dev \
+    libsuitesparse-dev \
+    libtiff5-dev \
+    autoconf \
+    automake \
+    libtool && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+        
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
 
@@ -42,6 +68,7 @@ ENV HOME /home/$NB_USER
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
+ENV LD_LIBRARY_PATH /usr/local/lib/:$LD_LIBRARY_PATH
 
 # Create jovyan user with UID=1000 and in the 'users' group
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
@@ -56,7 +83,7 @@ RUN mkdir /home/$NB_USER/work && \
     echo "cacert=/etc/ssl/certs/ca-certificates.crt" > /home/$NB_USER/.curlrc
 
 # Allow python wrappers to find shared 
-RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/:/usr/lib/:/usr/local/openfv/lib:${LD_LIBRARY_PATH}" >> ~/.bashrc
+# RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/:/usr/lib/:/usr/local/openfv/lib:${LD_LIBRARY_PATH}" >> ~/.bashrc
 
 # Install conda as jovyan
 RUN cd /tmp && \
@@ -85,75 +112,42 @@ WORKDIR /home/$NB_USER/work
 ENTRYPOINT ["tini", "--"]
 CMD ["cuda/start-notebook.sh"]
 
-# Add local files as late as possible to avoid cache busting
-COPY cuda/start.sh /usr/local/bin/
-COPY cuda/start-notebook.sh /usr/local/bin/
-COPY cuda/start-singleuser.sh /usr/local/bin/
-COPY cuda/jupyter_notebook_config.py /home/$NB_USER/.jupyter/
 RUN chown -R $NB_USER:users /home/$NB_USER/.jupyter
-
-# Install all OS dependencies for fully functional notebook server
-RUN apt-get update && apt-get install -yq --no-install-recommends \
-    git \
-    vim \
-    jed \
-    emacs \
-    build-essential \
-    python-dev \
-    unzip \
-    libsm6 \
-    pandoc \
-    texlive-latex-base \
-    texlive-latex-extra \
-    texlive-fonts-extra \
-    texlive-fonts-recommended \
-    texlive-generic-recommended \
-    texlive-xetex \
-    libxrender1 \
-    inkscape \
-    && apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# libav-tools for matplotlib anim
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends libav-tools && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 USER $NB_USER
 
-# Install Python 3 packages
+# Not installing Python 3 packages
 # Remove pyqt and qt pulled in for matplotlib since we're only ever going to
 # use notebook-friendly backends in these images
-RUN conda install --quiet --yes \
-    'nomkl' \
-    'ipywidgets=6.0*' \
-    'pandas=0.19*' \
-    'numexpr=2.6*' \
-    'matplotlib=2.0*' \
-    'scipy=0.19*' \
-    'seaborn=0.7*' \
-    'scikit-learn=0.18*' \
-    'scikit-image=0.12*' \
-    'sympy=1.0*' \
-    'cython=0.25*' \
-    'patsy=0.4*' \
-    'statsmodels=0.8*' \
-    'cloudpickle=0.2*' \
-    'dill=0.2*' \
-    'numba=0.31*' \
-    'bokeh=0.12*' \
-    'sqlalchemy=1.1*' \
-    'hdf5=1.8.17' \
-    'h5py=2.6*' \
-    'vincent=0.4.*' \
-    'beautifulsoup4=4.5.*' \
-    'xlrd'  && \
-    conda remove --quiet --yes --force qt pyqt && \
-    conda clean -tipsy
+# RUN conda install --quiet --yes \
+#     'nomkl' \
+#     'ipywidgets=6.0*' \
+#     'pandas=0.19*' \
+#     'numexpr=2.6*' \
+#     'matplotlib=2.0*' \
+#     'scipy=0.19*' \
+#     'seaborn=0.7*' \
+#     'scikit-learn=0.18*' \
+#     'scikit-image=0.12*' \
+#     'sympy=1.0*' \
+#     'cython=0.25*' \
+#     'patsy=0.4*' \
+#     'statsmodels=0.8*' \
+#     'cloudpickle=0.2*' \
+#     'dill=0.2*' \
+#     'numba=0.31*' \
+#     'bokeh=0.12*' \
+#     'sqlalchemy=1.1*' \
+#     'hdf5=1.8.17' \
+#     'h5py=2.6*' \
+#     'vincent=0.4.*' \
+#     'beautifulsoup4=4.5.*' \
+#     'xlrd'  && \
+#     conda remove --quiet --yes --force qt pyqt && \
+#     conda clean -tipsy
 
 # Activate ipywidgets extension in the environment that runs the notebook server
-RUN jupyter nbextension enable --py widgetsnbextension --sys-prefix
+# RUN jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
 # Install Python 2 packages
 # Remove pyqt and qt pulled in for matplotlib since we're only ever going to
@@ -194,10 +188,6 @@ RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
 ENV XDG_CACHE_HOME /home/$NB_USER/.cache/
 RUN MPLBACKEND=Agg $CONDA_DIR/envs/python2/bin/python -c "import matplotlib.pyplot"
 
-# Configure ipython kernel to use matplotlib inline backend by default
-RUN mkdir -p $HOME/.ipython/profile_default/startup
-COPY cuda/mplimporthook.py $HOME/.ipython/profile_default/startup/
-
 USER root
 
 # Install Python 2 kernel spec globally to avoid permission problems when NB_UID
@@ -208,22 +198,6 @@ RUN pip install kernda --no-cache && \
     $CONDA_DIR/envs/python2/bin/python -m ipykernel install && \
     kernda -o -y /usr/local/share/jupyter/kernels/python2/kernel.json && \
     pip uninstall kernda -y
-
-# Installing OpenFV dependencies
-RUN apt-get update -qq
-RUN apt-get install -yq --no-install-recommends qt5-default \
-	cmake \
-	build-essential \
-	libboost-all-dev \
-	libgoogle-perftools-dev \
-	google-perftools \
-	libeigen3-dev \
-	libatlas-base-dev \
-	libsuitesparse-dev \
-	libtiff5-dev \
- 	autoconf \
-	automake \
-	libtool
 
 # Installing Glog
 RUN git clone https://github.com/google/glog.git && \
@@ -260,8 +234,18 @@ RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
 RUN git clone https://github.com/abhishekbajpayee/openfv-sample-data.git
 
 # Download and test sample
-RUN git clone https://github.com/abhishekbajpayee/openfv-samples.git # && cd openfv-samples && \
+RUN git clone https://github.com/abhishekbajpayee/openfv-samples.git # && cd openfv-samples
 	# mkdir bin && cd bin && cmake .. && make refocus
+
+# Add local files as late as possible to avoid cache busting
+COPY cuda/start.sh /usr/local/bin/
+COPY cuda/start-notebook.sh /usr/local/bin/
+COPY cuda/start-singleuser.sh /usr/local/bin/
+COPY cuda/jupyter_notebook_config.py /home/$NB_USER/.jupyter/
+
+# Configure ipython kernel to use matplotlib inline backend by default
+RUN mkdir -p $HOME/.ipython/profile_default/startup
+COPY cuda/mplimporthook.py $HOME/.ipython/profile_default/startup/
 
 # Switch back to jovyan to avoid accidental container runs as root
 USER $NB_USER
