@@ -1582,7 +1582,7 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     X = hinv*X;
 
     Mat_<double> X2 = Mat_<double>::zeros(4, 4);
-    if (!MP4_FLAG) {
+    if (!KALIBR) {
 
         for (int i=0; i<X.cols; i++)
             X(2,i) = 0; //z_;
