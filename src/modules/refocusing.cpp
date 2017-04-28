@@ -646,11 +646,11 @@ void saRefocus::CPUliveView() {
                         thresh_ -= dthresh; 
                 }
             } else if( (key & 255)==46 ) { // >
-                if (active_frame_<imgs[0].size()) {
+                if (active_frame_<imgs[0].size()-1) {
                     active_frame_++; 
                 }
             } else if( (key & 255)==44 ) { // <
-                if (active_frame_<imgs[0].size()) { 
+                if (active_frame_>0) { 
                     active_frame_--; 
                 }
             } else if( (key & 255)==119 ) { // w
@@ -1174,11 +1174,11 @@ void saRefocus::GPUliveView() {
                         thresh_ -= dthresh; 
                 }
             } else if( (key & 255)==46 ) {
-                if (active_frame_<array_all.size()) { 
+                if (active_frame_<array_all.size()-1) { 
                     active_frame_++; 
                 }
             } else if( (key & 255)==44 ) {
-                if (active_frame_<array_all.size()) { 
+                if (active_frame_>0) { 
                     active_frame_--; 
                 }
             } else if( (key & 255)==119 ) { // w
