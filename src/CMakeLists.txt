@@ -85,9 +85,13 @@ if(BUILD_PYTHON)
   # add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
   # set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")
   # target_link_libraries(localization ${LIBS})
- 
+  
+  install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/lib/__init__.py \"\")")
+  install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"\")")
+
   install(TARGETS rendering refocusing tools tracking calibration
-          DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+          DESTINATION ${CMAKE_INSTALL_PREFIX}/lib) 
+  install(FILES ${PROJECT_SOURCE_DIR}/bin/lib/__init__.py DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 endif()
 
 install(TARGETS openfv DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)

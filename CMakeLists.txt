@@ -146,7 +146,12 @@ if (FAST_MATH)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
 endif()
 
+execute_process ( COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+message("Python package install directory: " ${PYTHON_SITE_PACKAGES})
+
 set(CMAKE_INSTALL_PREFIX "/usr/local/openfv")
+file(MAKE_DIRECTORY ${PYTHON_SITE_PACKAGES}/openfv)
+set(CMAKE_INSTALL_PREFIX ${PYTHON_SITE_PACKAGES}/openfv)
 
 # Subdirectories
 add_subdirectory(src)
