@@ -28,13 +28,15 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-// #define __CUDA_INTERNAL_COMPILATION__
-// #include <math_functions.h>
-// #undef __CUDA_INTERNAL_COMPILATION__
+#define __CUDA_INTERNAL_COMPILATION__
+#include <math_functions.h>
+#undef __CUDA_INTERNAL_COMPILATION__
 
 #include <cv.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/gpu/gpu.hpp>
+
+#include <iostream>
 
 using namespace cv;
 using namespace gpu;

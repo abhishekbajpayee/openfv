@@ -1,30 +1,6 @@
 // Written by Barry Scharfman
 
-#include "std_include.h"
-#include "calibration.h"
-#include "refocusing.h"
-#include "tools.h"
-#include "visualize.h"
-
-#ifndef WITHOUT_CUDA
-#include "cuda_lib.h"
-#endif
-
-#include <Eigen/Core>
-
-#include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
-
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <iostream>
-#include <stdio.h>
-
 #include "safeRefocusing.h"
-
-#include "featureDetection.h"
-
-#include <unistd.h>
 
 // #include "pcl3DExtracting.h"
 
