@@ -39,7 +39,7 @@ option(BUILD_PYTHON "BUILD_PYTHON" ON)
 option(WITH_CUDA "WITH_CUDA" ON)
 
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
-set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
+set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/openfv" CACHE PATH "Project Include Directory")
 
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 OLD)
