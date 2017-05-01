@@ -139,4 +139,4 @@ set(CMAKE_INSTALL_PREFIX "/usr/local/")
 # Subdirectories
 add_subdirectory(src)
 
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/openfv)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/openfv/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/openfv)
