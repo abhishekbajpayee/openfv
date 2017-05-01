@@ -119,7 +119,7 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack gomp) # protobuf lgomp (removed)
 set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY})
 if (WITH_CUDA)
-  set(OTHER_LIBS ${OTHER_LIBS} cufft cufftw)
+  set(OTHER_LIBS ${OTHER_LIBS}) # cufft cufftw
   set (OFV_LIBS openfv cuda_openfv)
 else()
   set (OFV_LIBS openfv)
