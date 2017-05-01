@@ -36,8 +36,8 @@ if (WITH_CUDA)
     ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/parse_safe_settings.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/featureDetection.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/safeRefocusing.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/piv.cpp)
+    ${PROJECT_SOURCE_DIR}/src/modules/safeRefocusing.cpp)
+    # ${PROJECT_SOURCE_DIR}/src/modules/piv.cpp)
   target_link_libraries(openfv cuda_openfv ${LIBS})
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_52,code=sm_52)
   cuda_add_library (cuda_openfv SHARED ${PROJECT_SOURCE_DIR}/src/modules/cuda_lib.cu)
