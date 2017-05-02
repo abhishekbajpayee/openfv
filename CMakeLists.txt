@@ -141,7 +141,6 @@ execute_process ( COMMAND ${PYTHON_EXEC} -c "from distutils.sysconfig import get
 message("Python package install directory: " ${PYTHON_SITE_PACKAGES})
 
 set(CMAKE_INSTALL_PREFIX "/usr/local")
-# file(MAKE_DIRECTORY ${PYTHON_SITE_PACKAGES}/openfv)
 set(CMAKE_PYTHON_INSTALL_PREFIX ${PYTHON_SITE_PACKAGES}/openfv)
 
 # Subdirectories
