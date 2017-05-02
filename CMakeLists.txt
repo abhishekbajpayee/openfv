@@ -36,12 +36,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" ON)
-option(FAST_MATH "FAST_MATH" OFF)
 option(WITH_CUDA "WITH_CUDA" ON)
 
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
-set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
 set(PYTHON_EXEC "python2.7" CACHE PATH "Python executable (used to find which dir to install python bindings in)")
+set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/openfv" CACHE PATH "Project Include Directory")
 
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 OLD)
@@ -93,7 +92,7 @@ endif()
 # Boost Libraries
 find_package(Boost)
 if(Boost_FOUND)
-  find_package ( Boost COMPONENTS program_options filesystem system serialization REQUIRED )
+  find_package ( Boost COMPONENTS program_options filesystem system serialization chrono REQUIRED )
   set(Boost_GENERAL ${Boost_LIBRARIES})
   if(BUILD_PYTHON)
     find_package ( Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED )
@@ -119,33 +118,24 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 # doesn't link to Qt
 # include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
-# Omitting for now because nothing in OpenFV as
-# of now uses OpenMP
-# find_package (OpenMP)
-# if (OPENMP_FOUND)
-#   set (CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS})
-#   set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
-# endif()
 
 set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack gomp) # protobuf lgomp (removed)
 set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY})
 if (WITH_CUDA)
-  set(OTHER_LIBS ${OTHER_LIBS} cufft cufftw)
+  set(OTHER_LIBS ${OTHER_LIBS}) # cufft cufftw
   set (OFV_LIBS openfv cuda_openfv)
 else()
   set (OFV_LIBS openfv)
 endif()
+if (BUILD_PYTHON)
+  set (OTHER_LIBS ${OTHER_LIBS} ${PYTHON_LIBRARIES})
+endif()
 set (PROF_LIB profiler)
-set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${PYTHON_LIBRARIES} ${CERES_LIBS} ${OpenCV_LIBS})
+set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
 
 # fPIC flags, needed?
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-
-if (FAST_MATH)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
-endif()
 
 execute_process ( COMMAND ${PYTHON_EXEC} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 message("Python package install directory: " ${PYTHON_SITE_PACKAGES})
@@ -157,4 +147,4 @@ set(CMAKE_PYTHON_INSTALL_PREFIX ${PYTHON_SITE_PACKAGES}/openfv)
 # Subdirectories
 add_subdirectory(src)
 
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/openfv/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/openfv)

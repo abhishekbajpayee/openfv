@@ -1,40 +1,74 @@
-OpenFV Setup
-============
+Set-up on Cloud Instances (AWS EC2)
+===================================
+
+*(experimental)*
+
+We realize that code libraries can be painful to install and not
+everyone has access to a Linux machine. This is why we have packaged 
+OpenFV to be easily set up on AWS EC2 instances inside docker
+containers. Just follow the following simple steps to get started:
+
+
+#. Create an AWS account
+#. Create an EC2 instance using the `OpenFV AMI <#>`. This AMI has all
+   the requirements pre-installed. Also, if you pick an instance type
+   that has a connected GPU(s) (we recommend the `p2 instances <https://aws.amazon.com/ec2/instance-types/p2/>`), this
+   AMI will be able to communicate with the GPU.
+#. SSH into your instance. If your instance does not have a GPU, run:
+
+   .. code-block :: bash
+       
+       $ docker pull openfv/openfv
+       $ docker run -it --rm -p 80:8888 openfv/openfv
+
+   If your instance has a GPU, run:
+
+   .. code-block :: bash
+       
+       $ docker pull openfv/openfv-cuda
+       $ nvidia-docker run -it --rm -p 80:8888 openfv/openfv-cuda
+
+#. Now access a IPython Notebook / Jupyter server that runs inside
+   your EC2 instance by visiting the public DNS of your instance. Now
+   you can create Python notebooks and use the OpenFV Python API or
+   write C++ executables and run them via the terminal.
+
+Set-up on an Ubuntu Machine
+===========================
 
 Below are basic instructions on how to get started with using
 OpenFV. This documentation assumes that you have a basic working knowledge
 of Linux.
 
-OpenFV depends on the following packages:
+OpenFV requires the following packages:
 
 #. CMake 2.8 or higher
 #. Git
 #. GCC 4.4.x or higher
 #. Python 2.7
-#. Qt4 +
-#. CUDA toolkit 6 + (Even if you don't have a CUDA capable GPU on your
-   machine because CUDA toolkit is currently is a required
-   dependency. In case you do not have a GPU, feel free to skip
-   installing driver and samples. The GPU function will
-   just not run.)
 #. Boost Libraries, libtiff4 +, gperftools
 #. Glog, Google Log 0.3.1 +
 #. Ceres Solver, Eigen 3.2.2 +, Atlas, SuiteSparse
-#. OpenCV 2.4.10 or earlier (3.0+ not yet supported) built with Python, Qt, and CUDA
+#. OpenCV 2.4.10 (3.0+ not yet supported) built with Python,
+   [optional: Qt and CUDA (if you have a GPU on your machine)]
 
-   * Some versions may not be compatable. In such a case, please let us know
+   * Some versions may not be compatable. In such a case, please let
+     us know.
 
+The following packages are optional for OpenFV:
 
+#. Qt4 +
+#. CUDA toolkit 7.5 preferred (6.0+ should work, 8.0 not supported)
 
-Set-up on an Ubuntu Machine
-===========================
+   * If Qt is no installed, any live view functions will not work.
 
 14.04
 ^^^^^
 
 .. code-block:: bash
 
-    $ sudo apt-get install qt5-default libtiff5-dev libgoogle-glog-dev
+    $ sudo apt-get install libtiff5-dev libgoogle-glog-dev
+    $ sudo apt-get install qt5-default
    
 
 12.04
@@ -42,7 +76,8 @@ Set-up on an Ubuntu Machine
 
 .. code-block:: bash
 
-    $ sudo apt-get install qt4-dev-tools libtiff4-dev
+    $ sudo apt-get install libtiff4-dev
+    $ sudo apt-get install qt4-dev-tools
 
 * install `glog
   <https://google-glog.googlecode.com/svn/trunk/INSTALL>`_
@@ -63,16 +98,23 @@ After installing ceres, run the following commands in your build directory
 
     $ cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC ../ceres-solver-1.10.0 && make && sudo make install
 
-* install `cuda toolkit <http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf>`_
+* install `CUDA Toolkit <http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf>`_
 
-* install `opencv 2.4.10 <http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html>`_
+* install `OpenCV 2.4.10 <http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html>`_
 
-After installing opencv 2.4.10, change into the directory and run the following commands
+After installing opencv 2.4.10, change into the directory and run the following commands:
 
 .. code-block:: bash
 
-    $ mkdir build_dir && cd build_dir && cmake -D CUDA_GENERATION=Kepler -D WITH_QT=ON ..
-    $ make && sudo make install
+    $ mkdir bin && cd bin && cmake -D CUDA_GENERATION=Kepler [-D WITH_QT=ON] ..
+    $ make
+
+or if you are building without CUDA:
+
+.. code-block:: bash
+
+    $ mkdir bin && cd bin && cmake -D WITH_CUDA=OFF [-D WITH_QT=ON] ..
+    $ make
 
 
 OpenFV Installation

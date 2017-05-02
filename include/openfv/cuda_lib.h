@@ -22,47 +22,42 @@
 // You should have received a copy of the GNU General Public License along with openFV. 
 // If not, see http://www.gnu.org/licenses/.
 
-// OpenCV headers
+#ifndef CUDA_LIBRARY
+#define CUDA_LIBRARY
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+
+// #define __CUDA_INTERNAL_COMPILATION__
+// #include <math_functions.h>
+// #undef __CUDA_INTERNAL_COMPILATION__
+
 #include <cv.h>
-#include <highgui.h>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/gpu/gpu.hpp>
 
-// Standard headers
 #include <iostream>
-#include <string>
-#include <stdio.h>
-#include <dirent.h>
-#include <fstream>
-#include <sstream>
-#include <math.h>
-#include <algorithm>
-#include <ctime>
-#include <sys/stat.h>
-#include <omp.h>
 
-// Tiff library (included in namespace because of typedef conflict with some OpenCV versions)
-namespace libtiff {
-    #include <tiffio.h>
-}
+using namespace cv;
+using namespace gpu;
 
-// Ceres Solver headers
-#include <ceres/ceres.h>
-#include <ceres/rotation.h>
+// Types
+typedef struct {
+    float x, y, z;
+} point;
 
-// Profiler header
-// #include <gperftools/profiler.h>
+// Kernels
+__global__ void calc_refocus_map_kernel(PtrStepSzf xmap, PtrStepSzf ymap, float z, int n, int rows, int cols);
 
-// Boost libraries
-#include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#ifdef WITH_PYTHON
-#include <boost/python.hpp>
+__device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_, float n1_, float n2_, float n3_, float t_);
+
+__device__ point point_refrac_fast(point Xcam, point p, float &f, float &g);
+
+// Host wrappers
+void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][12], float geom[5]);
+
+void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i, int rows, int cols);
+
+void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z);
+
 #endif
-
-
-// Python library
-#include <Python.h>
-
