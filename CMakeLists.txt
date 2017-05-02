@@ -134,7 +134,7 @@ set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-set(CMAKE_INSTALL_PREFIX "/usr/local/")
+set(CMAKE_INSTALL_PREFIX "/usr/local")
 
 # Subdirectories
 add_subdirectory(src)
