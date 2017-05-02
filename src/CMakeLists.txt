@@ -89,8 +89,8 @@ if(BUILD_PYTHON)
   install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"\")")
 
   install(TARGETS rendering refocusing tools tracking calibration
-          DESTINATION ${CMAKE_INSTALL_PREFIX}/) 
-  install(FILES ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py DESTINATION ${CMAKE_INSTALL_PREFIX}/)
+          DESTINATION ${CMAKE_PYTHON_INSTALL_PREFIX}) 
+  install(FILES ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py DESTINATION ${CMAKE_PYTHON_INSTALL_PREFIX})
 endif()
 
 install(TARGETS openfv DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
