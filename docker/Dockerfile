@@ -223,9 +223,10 @@ RUN cd opencv-2.4.10 && mkdir build && cd build && \
         cmake .. && make -j7 && make install
 
 # Install openfv
+RUN echo "hello"
 RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
 	cd openfv && ./configure && cd bin && \
-	cmake -D BUILD_PYTHON=ON .. && \
+	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python .. && \
     make && make install
 
 RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
@@ -235,7 +236,7 @@ RUN git clone https://github.com/abhishekbajpayee/openfv-sample-data.git
 
 # Download and test sample
 RUN git clone https://github.com/abhishekbajpayee/openfv-samples.git # && cd openfv-samples
-	# mkdir bin && cd bin && cmake .. && make refocus
+	# mkdir bin && cd bin && cmake .. && make
 
 # Add local files as late as possible to avoid cache busting
 COPY cuda/start.sh /usr/local/bin/

@@ -224,7 +224,7 @@ RUN cd opencv-2.4.10 && mkdir build && cd build && \
 # Install openfv
 RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
         cd openfv && ./configure && cd bin && \
-        cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON .. && \
+        cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python .. && \
         make && make install
 
 RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
