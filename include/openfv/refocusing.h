@@ -97,17 +97,23 @@ class saRefocus {
     void set_undistort(int flag) { UNDISTORT_IMAGES = flag; }
     void set_perspective_shift(int flag) { PERSPECTIVE_SHIFT = flag; }
 
+    // DocString: read_calib_data
     //! Read refractive calibration data
     void read_calib_data(string path);
+    // DocString: read_kalibr_data
     //! Read calibration data that is output from kalibr
     void read_kalibr_data(string path);
+    // DocString: read_calib_data_pin
     //! Read pinhole calibration data
     void read_calib_data_pin(string path);
-
+    
+    // DocString: read_imgs
     //! Read images when they are as individual files in separate folders
     void read_imgs(string path);
+    // DocString: read_imgs_mtiff
     //! Read images when they are in multipage TIFF files
     void read_imgs_mtiff(string path);
+    //! Read images when they are in mp4 files
     //! Read images when they are in mp4 files
     void read_imgs_mp4(string path);
 
@@ -116,6 +122,7 @@ class saRefocus {
     void initializeRefocus();
     void initializeCPU();
 
+    // DocString: refocus
     /*! Calculate a refocused image
       \param z Depth in physical units at which to calculate refocused image
       \param rx Angle by which to rotate focal plane about x axis
@@ -128,8 +135,10 @@ class saRefocus {
     Mat refocus(double z, double rx, double ry, double rz, double thresh, int frame);
 
 #ifndef WITHOUT_CUDA
+    // DocString: GPUliveView
     //! Start refocusing live view (requires Qt)
     void GPUliveView();
+    // DocString: initializeGPU
     /*! Initialize everything required to calculate refocused images on GPU.
       This is automatically called by GPUliveView() but needs to be explicitly
       called when live view is not being started.
