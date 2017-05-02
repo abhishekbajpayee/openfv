@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Set-up on Cloud Instances (AWS EC2) &mdash; openfv 1.0 documentation</title>
+    <title>Set-up on Cloud Instances (AWS EC2) &#8212; openfv 1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,14 +17,16 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Tutorial" href="tutorial.html" />
     <link rel="prev" title="Welcome to OpenFV’s documentation!" href="index.html" /> 
   </head>
@@ -44,7 +46,7 @@
         <li class="right" >
           <a href="index.html" title="Welcome to OpenFV’s documentation!"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -70,12 +72,12 @@ AMI will be able to communicate with the GPU.</p>
 </li>
 <li><p class="first">SSH into your instance. If your instance does not have a GPU, run:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker pull openfv/openfv
-$ docker run -it --rm -p 80:8888 openfv/openfv
+$ docker run -it --rm -p <span class="m">80</span>:8888 openfv/openfv
 </pre></div>
 </div>
 <p>If your instance has a GPU, run:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>$ docker pull openfv/openfv-cuda
-$ nvidia-docker run -it --rm -p 80:8888 openfv/openfv-cuda
+$ nvidia-docker run -it --rm -p <span class="m">80</span>:8888 openfv/openfv-cuda
 </pre></div>
 </div>
 </li>
@@ -91,35 +93,41 @@ write C++ executables and run them via the terminal.</p>
 <p>Below are basic instructions on how to get started with using
 OpenFV. This documentation assumes that you have a basic working knowledge
 of Linux.</p>
-<p>OpenFV depends on the following packages:</p>
+<p>OpenFV requires the following packages:</p>
 <ol class="arabic simple">
 <li>CMake 2.8 or higher</li>
 <li>Git</li>
 <li>GCC 4.4.x or higher</li>
 <li>Python 2.7</li>
-<li>Qt4 +</li>
-<li>CUDA toolkit 6 + (Even if you don&#8217;t have a CUDA capable GPU on your
-machine because CUDA toolkit is currently is a required
-dependency. In case you do not have a GPU, feel free to skip
-installing driver and samples. The GPU function will
-just not run.)</li>
 <li>Boost Libraries, libtiff4 +, gperftools</li>
 <li>Glog, Google Log 0.3.1 +</li>
 <li>Ceres Solver, Eigen 3.2.2 +, Atlas, SuiteSparse</li>
-<li>OpenCV 2.4.10 or earlier (3.0+ not yet supported) built with Python, Qt, and CUDA<ul>
-<li>Some versions may not be compatable. In such a case, please let us know</li>
+<li>OpenCV 2.4.10 (3.0+ not yet supported) built with Python,
+[optional: Qt and CUDA (if you have a GPU on your machine)]<ul>
+<li>Some versions may not be compatable. In such a case, please let
+us know.</li>
+</ul>
+</li>
+</ol>
+<p>The following packages are optional for OpenFV:</p>
+<ol class="arabic simple">
+<li>Qt4 +</li>
+<li>CUDA toolkit 7.5 preferred (6.0+ should work, 8.0 not supported)<ul>
+<li>If Qt is no installed, any live view functions will not work.</li>
 </ul>
 </li>
 </ol>
 <div class="section" id="id1">
 <h2>14.04<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>$ sudo apt-get install qt5-default libtiff5-dev libgoogle-glog-dev
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ sudo apt-get install libtiff5-dev libgoogle-glog-dev
+$ sudo apt-get install qt5-default
 </pre></div>
 </div>
 </div>
 <div class="section" id="id2">
 <h2>12.04<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>$ sudo apt-get install qt4-dev-tools libtiff4-dev
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ sudo apt-get install libtiff4-dev
+$ sudo apt-get install qt4-dev-tools
 </pre></div>
 </div>
 <ul class="simple">
@@ -139,12 +147,17 @@ just not run.)</li>
 </pre></div>
 </div>
 <ul class="simple">
-<li>install <a class="reference external" href="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf">cuda toolkit</a></li>
-<li>install <a class="reference external" href="http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html">opencv 2.4.10</a></li>
+<li>install <a class="reference external" href="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf">CUDA Toolkit</a></li>
+<li>install <a class="reference external" href="http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html">OpenCV 2.4.10</a></li>
 </ul>
-<p>After installing opencv 2.4.10, change into the directory and run the following commands</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>$ mkdir build_dir <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build_dir <span class="o">&amp;&amp;</span> cmake -D <span class="nv">CUDA_GENERATION</span><span class="o">=</span>Kepler -D <span class="nv">WITH_QT</span><span class="o">=</span>ON ..
-$ make <span class="o">&amp;&amp;</span> sudo make install
+<p>After installing opencv 2.4.10, change into the directory and run the following commands:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ mkdir bin <span class="o">&amp;&amp;</span> <span class="nb">cd</span> bin <span class="o">&amp;&amp;</span> cmake -D <span class="nv">CUDA_GENERATION</span><span class="o">=</span>Kepler <span class="o">[</span>-D <span class="nv">WITH_QT</span><span class="o">=</span>ON<span class="o">]</span> ..
+$ make
+</pre></div>
+</div>
+<p>or if you are building without CUDA:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ mkdir bin <span class="o">&amp;&amp;</span> <span class="nb">cd</span> bin <span class="o">&amp;&amp;</span> cmake -D <span class="nv">WITH_CUDA</span><span class="o">=</span>OFF <span class="o">[</span>-D <span class="nv">WITH_QT</span><span class="o">=</span>ON<span class="o">]</span> ..
+$ make
 </pre></div>
 </div>
 </div>
@@ -252,21 +265,18 @@ $ make
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/setup.txt"
+      <li><a href="_sources/setup.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -288,12 +298,12 @@ $ make
         <li class="right" >
           <a href="index.html" title="Welcome to OpenFV’s documentation!"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+        &#169; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
     </div>
   </body>
 </html>

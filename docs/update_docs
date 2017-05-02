@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Checking out and unstaging source files
-git checkout docs-branch ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
+git checkout master ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
 git rm -r --cached ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
 
-git checkout docs-branch openfv_python_doc_build.py 
+git checkout master openfv_python_doc_build.py 
 git rm -r --cached openfv_python_doc_build.py
 
 # Python docstrings
@@ -14,7 +14,7 @@ python openfv_python_doc_build.py ../include/refocusing.h ../src/modules/refocus
 make -C ../bin
 
 # Checking out and unstaging docs source
-git checkout docs-branch source config Makefile
+git checkout master source config Makefile
 git rm -r --cached source config Makefile
 
 # Building docs

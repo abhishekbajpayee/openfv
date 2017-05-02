@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorial &mdash; openfv 1.0 documentation</title>
+    <title>Tutorial &#8212; openfv 1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,14 +17,16 @@
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="openfv 1.0 documentation" href="index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="C++ API Documentation" href="cpp_api_docs.html" />
     <link rel="prev" title="Set-up on Cloud Instances (AWS EC2)" href="setup.html" /> 
   </head>
@@ -44,7 +46,7 @@
         <li class="right" >
           <a href="setup.html" title="Set-up on Cloud Instances (AWS EC2)"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -63,7 +65,7 @@ repository.</p>
 <div class="section" id="calibration-tutorial">
 <h2>Calibration Tutorial<a class="headerlink" href="#calibration-tutorial" title="Permalink to this headline">¶</a></h2>
 <p>This tutorial details a sample that utilizes the
-<a class="reference internal" href="cpp_api_docs.html#_CPPv219multiCamCalibration" title="multiCamCalibration"><code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code></a> class to calibrate a set of
+<code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code> class to calibrate a set of
 cameras. The source code discussed in this tutorial is in the
 <code class="docutils literal"><span class="pre">calibrate.cpp</span></code> file in the <code class="docutils literal"><span class="pre">samples</span></code> folder in the <code class="docutils literal"><span class="pre">openfv</span></code> root.</p>
 <p>Firstly, we include the <code class="docutils literal"><span class="pre">std_include.h</span></code> file. This include all the
@@ -122,7 +124,7 @@ code.</p>
 </pre></div>
 </div>
 <p>We then add a few more lines of code to our <code class="docutils literal"><span class="pre">main</span></code> function. We call
-the <a class="reference internal" href="cpp_api_docs.html#_CPPv219multiCamCalibration" title="multiCamCalibration"><code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code></a> constructor using the data that
+the <code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code> constructor using the data that
 will be passed to the code through the command line flags defined
 earlier and then run the calibration process. The fourth argument to
 the constructor being <code class="docutils literal"><span class="pre">1</span></code> indicates that the easy or dummy mode will
@@ -181,7 +183,7 @@ directories when building the <code class="docutils literal"><span class="pre">m
 <li><code class="docutils literal"><span class="pre">OFV_LIB_DIR</span></code>: Path to OpenFV libraries (example <code class="docutils literal"><span class="pre">openfv/bin/lib</span></code>)</li>
 </ul>
 <p>You can now run the calibration code by executing:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>$ ./calibrate --path /path/to/openfv-sample-data/pinhole_calibration_data/ --hgrid <span class="m">6</span> --vgrid 5
+<div class="highlight-bash"><div class="highlight"><pre><span></span>$ ./calibrate --path /path/to/openfv-sample-data/pinhole_calibration_data/ --hgrid <span class="m">6</span> --vgrid <span class="m">5</span>
 </pre></div>
 </div>
 <p>The default values for the rest of the command line flags will be used
@@ -195,7 +197,7 @@ should ideally be of the order of 1 or less (the lesser the better).</p>
 </div>
 <div class="section" id="refocusing-tutorial">
 <h2>Refocusing Tutorial<a class="headerlink" href="#refocusing-tutorial" title="Permalink to this headline">¶</a></h2>
-<p>This tutorial details a sample that utilizes <a class="reference internal" href="cpp_api_docs.html#_CPPv29saRefocus" title="saRefocus"><code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code></a> to
+<p>This tutorial details a sample that utilizes <code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code> to
 refocus images from a camera array. The source code discussed in this
 tutorial is in the <code class="docutils literal"><span class="pre">refocus.cpp</span></code> file in the <code class="docutils literal"><span class="pre">samples</span></code> folder in
 the <code class="docutils literal"><span class="pre">openfv</span></code> root.</p>
@@ -234,7 +236,7 @@ initialize <code class="docutils literal"><span class="pre">glog</span></code> l
 </pre></div>
 </div>
 <p>Next, we define a <code class="docutils literal"><span class="pre">refocus_settings</span></code> variable to store the settings
-from our refocus config file, and call the <a class="reference internal" href="cpp_api_docs.html#_CPPv29saRefocus" title="saRefocus"><code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code></a>
+from our refocus config file, and call the <code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code>
 constructor.</p>
 <div class="highlight-cpp"><div class="highlight"><pre><span></span><span class="n">refocus_settings</span> <span class="n">settings</span><span class="p">;</span>
 <span class="n">parse_refocus_settings</span><span class="p">(</span><span class="n">FLAGS_config_file</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">FLAGS_fhelp</span><span class="p">);</span>
@@ -328,21 +330,18 @@ command line variables.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/tutorial.txt"
+      <li><a href="_sources/tutorial.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -364,12 +363,12 @@ command line variables.</p>
         <li class="right" >
           <a href="setup.html" title="Set-up on Cloud Instances (AWS EC2)"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">openfv 1.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Abhishek Bajpayee and Logan Ford.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+        &#169; Copyright 2016, Abhishek Bajpayee and Logan Ford.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
     </div>
   </body>
 </html>
