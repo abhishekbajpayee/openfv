@@ -41,6 +41,7 @@ option(WITH_CUDA "WITH_CUDA" ON)
 
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include" CACHE PATH "Project Include Directory")
+set(PYTHON_EXEC "python2.7" CACHE PATH "Python executable (used to find which dir to install python bindings in)")
 
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 OLD)
@@ -146,12 +147,12 @@ if (FAST_MATH)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
 endif()
 
-execute_process ( COMMAND python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process ( COMMAND ${PYTHON_EXEC} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 message("Python package install directory: " ${PYTHON_SITE_PACKAGES})
 
-set(CMAKE_INSTALL_PREFIX "/usr/local/openfv")
-file(MAKE_DIRECTORY ${PYTHON_SITE_PACKAGES}/openfv)
-set(CMAKE_INSTALL_PREFIX ${PYTHON_SITE_PACKAGES}/openfv)
+set(CMAKE_INSTALL_PREFIX "/usr/local")
+# file(MAKE_DIRECTORY ${PYTHON_SITE_PACKAGES}/openfv)
+set(CMAKE_PYTHON_INSTALL_PREFIX ${PYTHON_SITE_PACKAGES}/openfv)
 
 # Subdirectories
 add_subdirectory(src)
