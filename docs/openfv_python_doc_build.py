@@ -5,9 +5,9 @@ from shutil import move
 from os import remove, close
 import glob
 
-h = set(glob.glob('../include/*.h'))
+h = set(glob.glob('../include/openfv/*.h'))
 cpp = set(glob.glob('../src/modules/*.cpp'))
-hfiles = set([filee.replace("../include/", "").replace(".h", "") for filee in h])
+hfiles = set([filee.replace("../include/openfv/", "").replace(".h", "") for filee in h])
 cppfiles = set([filee.replace("../src/modules/", "").replace(".cpp", "") for filee in cpp])
 shared = hfiles.intersection(cppfiles)
 
@@ -90,7 +90,7 @@ def substitute(istr, docfile, docstrings):
 
 if __name__ == '__main__':
     for filename in shared:
-        sourcefile = '../include/' + filename + '.h'
+        sourcefile = '../include/openfv/' + filename + '.h'
         docfile = '../src/modules/' + filename + '.cpp'
         docstrings = dict()
         with open(sourcefile) as istr:
