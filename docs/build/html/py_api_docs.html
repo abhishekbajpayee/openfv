@@ -56,12 +56,12 @@
 <div class="section" id="calibration">
 <h2>Calibration<a class="headerlink" href="#calibration" title="Permalink to this headline">¶</a></h2>
 <p>Below is documentation for the wrapper class
-<code class="xref py py-class docutils literal"><span class="pre">calibration.multiCamCalibration</span></code> of the <code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code> C++ class.</p>
+<code class="xref py py-class docutils literal"><span class="pre">calibration.multiCamCalibration</span></code> of the <a class="reference internal" href="cpp_api_docs.html#_CPPv219multiCamCalibration" title="multiCamCalibration"><code class="xref cpp cpp-class docutils literal"><span class="pre">multiCamCalibration</span></code></a> C++ class.</p>
 </div>
 <div class="section" id="refocusing">
 <h2>Refocusing<a class="headerlink" href="#refocusing" title="Permalink to this headline">¶</a></h2>
 <p>Below is documentation for the wrapper class
-<a class="reference internal" href="#refocusing.saRefocus" title="refocusing.saRefocus"><code class="xref py py-class docutils literal"><span class="pre">refocusing.saRefocus</span></code></a> of the <code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code> C++ class.</p>
+<a class="reference internal" href="#refocusing.saRefocus" title="refocusing.saRefocus"><code class="xref py py-class docutils literal"><span class="pre">refocusing.saRefocus</span></code></a> of the <a class="reference internal" href="cpp_api_docs.html#_CPPv29saRefocus" title="saRefocus"><code class="xref cpp cpp-class docutils literal"><span class="pre">saRefocus</span></code></a> C++ class.</p>
 <dl class="class">
 <dt id="refocusing.saRefocus">
 <em class="property">class </em><code class="descclassname">refocusing.</code><code class="descname">saRefocus</code><a class="headerlink" href="#refocusing.saRefocus" title="Permalink to this definition">¶</a></dt>
@@ -88,8 +88,8 @@
 
 <dl class="method">
 <dt id="refocusing.saRefocus.initializeGPU">
-<code class="descname">initializeGPU</code><span class="sig-paren">(</span><em>(saRefocus)arg1) -&gt; None : &#64;DocString(initializeGPU</em><span class="sig-paren">)</span><a class="headerlink" href="#refocusing.saRefocus.initializeGPU" title="Permalink to this definition">¶</a></dt>
-<dd><p>&#64;DocString(initializeGPU)</p>
+<code class="descname">initializeGPU</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em><span class="sig-paren">)</span> &#x2192; None :<a class="headerlink" href="#refocusing.saRefocus.initializeGPU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize everything required to calculate refocused images on GPU.</p>
 </dd></dl>
 
 <dl class="method">
@@ -99,14 +99,52 @@
 
 <dl class="method">
 <dt id="refocusing.saRefocus.read_calib_data">
-<code class="descname">read_calib_data</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(str)arg2) -&gt; None : &#64;DocString(read_calib_data</em><span class="sig-paren">)</span><a class="headerlink" href="#refocusing.saRefocus.read_calib_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>&#64;DocString(read_calib_data)</p>
+<code class="descname">read_calib_data</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(str)arg2</em><span class="sig-paren">)</span> &#x2192; None :<a class="headerlink" href="#refocusing.saRefocus.read_calib_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read refractive calibration data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="refocusing.saRefocus.refocus">
-<code class="descname">refocus</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(float)arg2</em>, <em>(float)arg3</em>, <em>(float)arg4</em>, <em>(float)arg5</em>, <em>(float)arg6</em>, <em>(int)arg7) -&gt; object : &#64;DocString(refocus</em><span class="sig-paren">)</span><a class="headerlink" href="#refocusing.saRefocus.refocus" title="Permalink to this definition">¶</a></dt>
-<dd><p>&#64;DocString(refocus)</p>
+<code class="descname">refocus</code><span class="sig-paren">(</span><em>(saRefocus)arg1</em>, <em>(float)arg2</em>, <em>(float)arg3</em>, <em>(float)arg4</em>, <em>(float)arg5</em>, <em>(float)arg6</em>, <em>(int)arg7</em><span class="sig-paren">)</span> &#x2192; object :<a class="headerlink" href="#refocusing.saRefocus.refocus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a refocused image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>z</strong></p>
+<blockquote>
+<div><p>Depth in physical units at which to calculate refocused image</p>
+</div></blockquote>
+<p><strong>rx</strong></p>
+<blockquote>
+<div><p>Angle by which to rotate focal plane about x axis</p>
+</div></blockquote>
+<p><strong>ry</strong></p>
+<blockquote>
+<div><p>Angle by which you rotate focal plane about y axis</p>
+</div></blockquote>
+<p><strong>rz</strong></p>
+<blockquote>
+<div><p>Angle by which to rotate focal plane about z axis</p>
+</div></blockquote>
+<p><strong>thresh</strong></p>
+<blockquote>
+<div><p>Thresholding level (if additive refocusing is used)</p>
+</div></blockquote>
+<p><strong>frame</strong></p>
+<blockquote>
+<div><p>The frame (int time) to refocus. Indexing starts at 0.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Refocused</p>
+<blockquote class="last">
+<div><p>image as OpenCV Mat type</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -140,7 +178,7 @@
 <div class="section" id="tracking">
 <h2>Tracking<a class="headerlink" href="#tracking" title="Permalink to this headline">¶</a></h2>
 <p>Below is documentation for the wrapper class
-<a class="reference internal" href="#tracking.pTracking" title="tracking.pTracking"><code class="xref py py-class docutils literal"><span class="pre">tracking.pTracking</span></code></a> of the <code class="xref cpp cpp-class docutils literal"><span class="pre">pTracking</span></code> C++ class.</p>
+<a class="reference internal" href="#tracking.pTracking" title="tracking.pTracking"><code class="xref py py-class docutils literal"><span class="pre">tracking.pTracking</span></code></a> of the <a class="reference internal" href="cpp_api_docs.html#_CPPv29pTracking" title="pTracking"><code class="xref cpp cpp-class docutils literal"><span class="pre">pTracking</span></code></a> C++ class.</p>
 <dl class="class">
 <dt id="tracking.pTracking">
 <em class="property">class </em><code class="descclassname">tracking.</code><code class="descname">pTracking</code><a class="headerlink" href="#tracking.pTracking" title="Permalink to this definition">¶</a></dt>
