@@ -49,8 +49,7 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales
 
 # Install Tini
 RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.10.0/tini && \
