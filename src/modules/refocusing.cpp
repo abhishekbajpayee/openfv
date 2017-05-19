@@ -2319,6 +2319,7 @@ BOOST_PYTHON_MODULE(refocusing) {
 
     class_<saRefocus>("saRefocus")
         .def("read_calib_data", &saRefocus::read_calib_data, "@DocString(read_calib_data)")
+        .def("read_imgs", &saRefocus::read_imgs, "@DocString(read_imgs)")
         .def("addView", &saRefocus::addView)
         .def("clearViews", &saRefocus::clearViews)
         .def("setF", &saRefocus::setF)
