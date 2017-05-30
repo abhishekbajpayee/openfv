@@ -18,8 +18,10 @@ _site
 *.class
 *.dll
 *.exe
+*.a
 *.o
 *.so
+*.mexa64
 
 # Documentation build
 docs/build/
