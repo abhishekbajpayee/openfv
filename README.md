@@ -10,14 +10,13 @@ Roadmap
 
 ### Phase 1
 - Complete Python bindings for all C++ functionality
-- Add particle field rendering engine
-- Add tomo reconstruction and window deformation enabled PIV code (MATLAB)
+- Add tomo reconstruction code (MATLAB)
 
 ### Phase 2
 - Add tests that ensure functionality is not breaking due to updates
 - Remove MATLAB code and call underlying algorithms (in Fortran) from Python
 - Eliminate use of Intel MKL (in Fortran code) and replace with FFTW
-- Start establishing a framework for effective benchmarking and comparison of different algorithms using the exact same data / inputs
+- Establish a framework for effective benchmarking and comparison of different algorithms using the exact same data / inputs
 
 ### Phase 3
 - Streamline execution pipeline so that reconstruction via multiple techniques can seamlessly be bound to multiple PIV algorithms for comparison purposes
