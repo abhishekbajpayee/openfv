@@ -1,0 +1,403 @@
+!*****************************************************************************
+!                              INTEL CONFIDENTIAL
+! Copyright(C) 2003-2009 Intel Corporation. All Rights Reserved.
+! The source code contained  or  described herein and all documents related to
+! the source code ("Material") are owned by Intel Corporation or its suppliers
+! or licensors.  Title to the  Material remains with  Intel Corporation or its
+! suppliers and licensors. The Material contains trade secrets and proprietary
+! and  confidential  information of  Intel or its suppliers and licensors. The
+! Material  is  protected  by  worldwide  copyright  and trade secret laws and
+! treaty  provisions. No part of the Material may be used, copied, reproduced,
+! modified, published, uploaded, posted, transmitted, distributed or disclosed
+! in any way without Intel's prior express written permission.
+! No license  under any  patent, copyright, trade secret or other intellectual
+! property right is granted to or conferred upon you by disclosure or delivery
+! of the Materials,  either expressly, by implication, inducement, estoppel or
+! otherwise.  Any  license  under  such  intellectual property  rights must be
+! express and approved by Intel in writing.
+!
+!*****************************************************************************
+! Content:
+!       MKL DFTI example interface file
+!
+!*****************************************************************************
+
+      REAL(KIND=8)    MATH_PI
+      PARAMETER       (MATH_PI = 3.14159265358979323846)
+
+      INTEGER M_MAX
+      PARAMETER      (M_MAX = 15)
+
+      INTEGER N_MAX
+      PARAMETER      (N_MAX = 13)
+
+      INTEGER K_MAX
+      PARAMETER      (K_MAX = 12)
+
+      REAL      SINGLE_EPS
+      PARAMETER (SINGLE_EPS = 1.0E-5)
+
+      REAL      DOUBLE_EPS
+      PARAMETER (DOUBLE_EPS = 1.0E-11)
+
+      LOGICAL    LEGEND_PRINT
+      PARAMETER (LEGEND_PRINT = .TRUE.)
+
+      LOGICAL    ADVANCED_DATA_PRINT
+      PARAMETER (ADVANCED_DATA_PRINT = .TRUE.)
+
+      LOGICAL    ACCURACY_PRINT
+      PARAMETER (ACCURACY_PRINT = .TRUE.)
+
+!*****************************************************************************
+!       MKL DFTI example support functions' interfaces
+!
+!*****************************************************************************
+
+      INTERFACE
+        SUBROUTINE ZERO_INIT_COMPLEX_C(X, n)
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE ZERO_INIT_REAL_S(X, n)
+          REAL(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE ZERO_INIT_COMPLEX_Z(X, n)
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE ZERO_INIT_REAL_D(X, n)
+          REAL(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_FORW_TONE_AND_EXP_RES_Z(X_IN, X_EXP, n)
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X_IN
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X_EXP
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_BACKW_TONE_AND_EXP_RES_Z(X_IN, X_EXP, n)
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X_IN
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X_EXP
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_COMPLEX_VECTOR_Z(X, n)
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_REAL_VECTOR_D(X, n)
+          REAL(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_MULTIPLE_VECTOR_Z(X, n, multiple, dist, strides)
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: multiple
+          INTEGER,INTENT(IN) :: dist
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_MULTIPLE_REAL_VECTOR_D(X, n, multiple, dist, strides)
+          REAL(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: multiple
+          INTEGER,INTENT(IN) :: dist
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_MULTIPLE_2D_COLUMNS_Z(X, m, n, strides)
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: m
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_3D_COLUMNS_Z(X, m, n, k, strides)
+          COMPLEX(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: m
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: k
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_FORW_TONE_AND_EXP_RES_C(X_IN, X_EXP, n)
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X_IN
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X_EXP
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_BACKW_TONE_AND_EXP_RES_C(X_IN, X_EXP, n)
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X_IN
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X_EXP
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_COMPLEX_VECTOR_C(X, n)
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_REAL_VECTOR_S(X, n)
+          REAL(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_MULTIPLE_VECTOR_C(X, n, multiple, dist, strides)
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: multiple
+          INTEGER,INTENT(IN) :: dist
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_MULTIPLE_REAL_VECTOR_S(X, n, multiple, dist, strides)
+          REAL(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: multiple
+          INTEGER,INTENT(IN) :: dist
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_MULTIPLE_2D_COLUMNS_S(X, m, n, strides)
+          REAL(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: m
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_MULTIPLE_2D_COLUMNS_D(X, m, n, strides)
+          REAL(8), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: m
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_MULTIPLE_2D_COLUMNS_C(X, m, n, strides)
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: m
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE INIT_3D_COLUMNS_C(X, m, n, k, strides)
+          COMPLEX(4), INTENT(INOUT), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: m
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: k
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_VECTOR_C(X, n)
+          COMPLEX(4), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_VECTOR_S(X, n)
+          REAL(4), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_VECTORS_C(X, n, dist, strides)
+          COMPLEX(4), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: dist
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_2D_COLUMNS_C(X, m, strides)
+          COMPLEX(4), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: m
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_VECTORS_S(X, n, dist, strides)
+          REAL(4), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: dist
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_FIRST_AND_THREE_LAST_VECTORS_2D_S(X, lengths, strides)
+          REAL(4), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN), DIMENSION(*) :: lengths
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_FIRST_AND_THREE_LAST_VECTORS_2D_D(X, lengths, strides)
+          REAL(8), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN), DIMENSION(*) :: lengths
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_FIRST_VECTORS_2D_S(X, lengths, strides)
+          REAL(4), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN), DIMENSION(*) :: lengths
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_FIRST_VECTORS_2D_D(X, lengths, strides)
+          REAL(8), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN), DIMENSION(*) :: lengths
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_VECTOR_Z(X, n)
+          COMPLEX(8), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_VECTOR_D(X, n)
+          REAL(8), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_VECTORS_Z(X, n, dist, strides)
+          COMPLEX(8), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: dist
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_VECTORS_D(X, n, dist, strides)
+          REAL(8), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: n
+          INTEGER,INTENT(IN) :: dist
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        SUBROUTINE PRINT_THREE_2D_COLUMNS_Z(X, m, strides)
+          COMPLEX(8), INTENT(IN), DIMENSION(*) :: X
+          INTEGER,INTENT(IN) :: m
+          INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END SUBROUTINE
+      END INTERFACE
+
+      INTERFACE
+        REAL FUNCTION CHECK_RESULT_C(X_IN, X_EXP, n)
+            COMPLEX(4), INTENT(IN), DIMENSION(*):: X_IN(*)
+            COMPLEX(4), INTENT(IN), DIMENSION(*):: X_EXP
+            INTEGER,INTENT(IN) :: n
+        END FUNCTION
+      END INTERFACE
+
+      INTERFACE
+        REAL FUNCTION CHECK_RESULT_S(X_IN, X_EXP, n)
+            REAL(4), INTENT(IN), DIMENSION(*):: X_IN(*)
+            REAL(4), INTENT(IN), DIMENSION(*):: X_EXP
+            INTEGER,INTENT(IN) :: n
+        END FUNCTION
+      END INTERFACE
+
+      INTERFACE
+        REAL(4) FUNCTION CHECK_RESULT_2D_S(X_IN, X_EXP, lengths, strides )
+!           Input parameters
+            REAL(4), INTENT(IN), DIMENSION(*):: X_IN
+            REAL(4), INTENT(IN), DIMENSION(*):: X_EXP
+            INTEGER,INTENT(IN), DIMENSION(*) :: lengths
+            INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END FUNCTION
+      END INTERFACE
+
+      INTERFACE
+        REAL(8) FUNCTION CHECK_RESULT_Z(X_IN, X_EXP, n)
+            COMPLEX(8), INTENT(IN), DIMENSION(*):: X_IN
+            COMPLEX(8), INTENT(IN), DIMENSION(*):: X_EXP
+            INTEGER,INTENT(IN) :: n
+        END FUNCTION
+      END INTERFACE
+
+      INTERFACE
+        REAL(8) FUNCTION CHECK_RESULT_D(X_IN, X_EXP, n)
+            REAL(8), INTENT(IN), DIMENSION(*):: X_IN
+            REAL(8), INTENT(IN), DIMENSION(*):: X_EXP
+            INTEGER,INTENT(IN) :: n
+        END FUNCTION
+      END INTERFACE
+
+      INTERFACE
+        REAL(8) FUNCTION CHECK_RESULT_2D_D(X_IN, X_EXP, lengths, strides )
+!           Input parameters
+            REAL(8), INTENT(IN), DIMENSION(*):: X_IN
+            REAL(8), INTENT(IN), DIMENSION(*):: X_EXP
+            INTEGER,INTENT(IN), DIMENSION(*) :: lengths
+            INTEGER,INTENT(IN), DIMENSION(*) :: strides
+        END FUNCTION
+      END INTERFACE

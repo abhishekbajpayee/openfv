@@ -1,0 +1,4 @@
+PIV3D {
+  global: cte3d_; vodim3d_; # explicitly list symbols to be exported
+  local: *;         # hide everything else
+};

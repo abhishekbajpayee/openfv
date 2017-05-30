@@ -1,0 +1,81 @@
+#!/bin/sh
+
+# ROOT DIRECTORIES
+MKLROOT="/opt/intel/mkl"
+INTELROOT="/opt/intel/lib/intel64"
+TMWROOT="/usr/local/MATLAB/R2015a"
+PIV3DROOT=`pwd`
+
+# SUBROUTINE NAMES
+NAME_VODIM="vodim3d" # [not used]
+NAME_CTE="cte3d"
+
+# Compile flags for fully optimised parallel running
+COMPILEFLAGS="-c -O3 -heap-arrays -ipo -xHost -fexceptions -fPIC -qopenmp -qopt-report"
+
+# Compile
+echo "COMPILING $NAME_CTE.F90 TO OBJECT ..."
+ifort $COMPILEFLAGS -I$MKLROOT/include -I$MKLROOT/examples/dftf/source $NAME_CTE.F90
+
+# --- BUILDING libpiv3d.so ---
+
+LIB_NAME="libpiv3d"
+
+#Link Flags (parallel optimised)
+LINKFLAGS="-O3 -shared -fPIC -static-intel -heap-arrays -qopenmp -qopt-report -fast -ipo -xHost"
+
+# MKL Link options. Use the Intel MKL link line tool. 
+# Here, we have Linux, Intel64 Architecture, Static Links, LP64 Interface Layer,  Sequential implementation (single core). Note that the sequential implementation is thread-safe hence can be embedded in an openMP construct
+MKLLINKLINE="-Wl,--start-group $MKLROOT/lib/intel64/libmkl_intel_lp64.a $MKLROOT/lib/intel64/libmkl_sequential.a $MKLROOT/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread"
+
+# We always link OMP dynamically for reasons known only to the doc writers
+OMPLINKLINE="-liomp5"
+
+# Compile libpiv3d.so
+# TODO: check what is up with all the repeated flags here
+echo "COMPILING OBJECT FILES INTO $LIB_NAME.so ..."
+ifort $LINKFLAGS -Wl,-Bdynamic,-liomp5,-lpthread,-Bstatic -o $LIB_NAME.so cte3d.o $INTELROOT/libifcoremt_pic.a $OMPLINKLINE $MKLLINKLINE -Wl,--version-script=libpiv3d.version
+
+#-Wl,-Bdynamic,-liomp5,-Bstatic
+
+# --- BUILDING MEX FILES ---
+
+# Fully optimised (redefined for mex)
+COMPILEFLAGS="-c -O3 -heap-arrays -fast -fexceptions -ipo -qopenmp -qopt-report -fPIC -DMATLAB_MEX_FILE -DMX_COMPAT_32 -xHost"
+
+# MEX File name
+MEXNAME_VODIM="mex_vodim3d"
+MEXNAME_CTE="mex_cte3d"
+
+echo "BUILDING MEX FILES ..."
+
+# Compile the mex file to make an object
+ifort $COMPILEFLAGS -I$TMWROOT/extern/include $MEXNAME_VODIM.F90
+ifort $COMPILEFLAGS -I$TMWROOT/extern/include $MEXNAME_CTE.F90
+
+# Link the mex file as a shared library accessible by MATLAB
+ifort $LINKFLAGS -Wl,--version-script,$TMWROOT/extern/lib/glnxa64/fexport.map -Wl,--no-undefined -o $MEXNAME_VODIM.mexa64 $MEXNAME_VODIM.o $INTELROOT/libifcoremt_pic.a -L$PIV3DROOT -lpiv3d -Wl,-rpath-link,$TMWROOT/bin/glnxa64 -L$TMWROOT/bin/glnxa64 -lm -lmx -lmex -lmat -liomp5
+
+# Link the mex file as a shared library accessible by MATLAB
+ifort $LINKFLAGS -Wl,--version-script,$TMWROOT/extern/lib/glnxa64/fexport.map -Wl,--no-undefined -o $MEXNAME_CTE.mexa64 $MEXNAME_CTE.o $INTELROOT/libifcoremt_pic.a -L$PIV3DROOT -lpiv3d -Wl,-rpath-link,$TMWROOT/bin/glnxa64 -L$TMWROOT/bin/glnxa64 -lm -lmx -lmex -lmat -liomp5
+
+# CLEANING UP
+echo "CLEANING UP ..."
+rm cte3d.o
+rm mkl_service.mod
+rm mkl_dfti.mod
+rm mkl_dft_type.mod
+rm mod_piv3d.mod
+rm matlabapimex.mod
+rm matlabapimx.mod
+rm matlabapicharmex.mod
+rm $MEXNAME_VODIM.o
+rm $MEXNAME_CTE.o
+
+# Clean optrpt files (comment this if not needed later)
+rm mex_vodim3d.optrpt
+rm cte3d.optrpt
+rm mex_cte3d.optrpt
+rm ipo_out.optrpt
+
+echo "ALL DONE!"
