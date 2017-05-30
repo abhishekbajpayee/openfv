@@ -1,0 +1,4 @@
+- remove unnecessary folders from pivAlgorithms folder
+- test other piv algorithms
+- preferably make number of cores in vodim3d a variable
+- 
