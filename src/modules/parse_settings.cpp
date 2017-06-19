@@ -1,3 +1,26 @@
+//  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+//
+//  By downloading, copying, installing or using the software you agree to this license.
+//  If you do not agree to this license, do not download, install,
+//  copy or use the software.
+//
+//                           License Agreement
+//                For Open Source Flow Visualization Library
+//
+// Copyright 2013-2017 Abhishek Bajpayee
+//
+// This file is part of OpenFV.
+//
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
+//
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
+//
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
+
 #include "std_include.h"
 
 #include "refocusing.h"
@@ -61,7 +84,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     int i;
     while (frames_stream >> i) {
         frames.push_back(i);
-        
+
         if(frames_stream.peek() == ',' || frames_stream.peek() == ' ') {
             frames_stream.ignore();
         }
@@ -88,7 +111,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     if (settings.start_frame<0) {
         LOG(FATAL)<<"Can't have starting frame less than 0. Terminating..."<<endl;
     }
-    
+
     // Reading time shift values
     vector<int> shifts;
     stringstream shifts_stream(vm["shifts"].as<string>());
@@ -107,7 +130,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     //     settings.end_frame = vm["end_frame"].as<int>();
     // }
     // settings.upload_frame = vm["upload_frame"].as<int>();
-    
+
     boost::filesystem::path calibP(vm["calib_file_path"].as<string>());
     if(calibP.string().empty()) {
         LOG(FATAL)<<"calib_file_path is a REQUIRED variable";
@@ -137,7 +160,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
 
     // calibP.remove_leaf() /= vm["calib_file_path"].as<string>();
     // imgsP.remove_leaf() /= vm["images_path"].as<string>();
-    
+
     // settings.calib_file_path = calibP.string();
     // if (settings.calib_file_path.empty()) {
     //     LOG(FATAL)<<"calib_file is a REQUIRED Variable";
@@ -145,16 +168,16 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     // else if (!dirExists(settings.calib_file_path)) {
     //    LOG(FATAL)<<"Calibration File Path does not exist!";
     // }
-     
+
     // settings.images_path = imgsP.string();
     // if(settings.images_path.empty()) {
     //     LOG(FATAL)<<"data_path is a REQUIRED Variable";
     // }
     // else if (!dirExists(settings.images_path)) {
     //    LOG(FATAL)<<"Images Files Path does not exist!";
-    // } 
+    // }
 
-  
+
 }
 
 void parse_calibration_settings(string filename, calibration_settings &settings, bool h) {
@@ -203,7 +226,7 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     int i;
     while (frames_stream >> i) {
         frames.push_back(i);
-            
+
         if(frames_stream.peek() == ',' || frames_stream.peek() == ' ') {
             frames_stream.ignore();
         }
@@ -219,7 +242,7 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     if (settings.start_frame<0) {
         LOG(FATAL)<<"Can't have starting frame less than 0. Terminating..."<<endl;
     }
-    
+
     // Reading time shift values
     vector<int> shifts;
     stringstream shifts_stream(vm["shifts"].as<string>());
@@ -242,7 +265,7 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
         config_file_path.remove_leaf() /= imgsP.string();
         settings.images_path = config_file_path.string();
     }
-  
+
     settings.corners_file_path = vm["corners_file"].as<string>();
 
 }

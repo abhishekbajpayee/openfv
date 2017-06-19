@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 #ifndef DATA_TYPES
 #define DATA_TYPES
@@ -34,7 +33,7 @@ const double pi = 3.14159;
 
 /*! Settings container passed to saRefocus constructor. */
 struct refocus_settings {
-    
+
     //! Flag indicating if data is in mtiff format files
     int mtiff; // 1 for using multipage tiffs
     //! Flag indicating if data is in mp4 videos
@@ -53,7 +52,7 @@ struct refocus_settings {
     string calib_file_path;
     //! Path to directory where images to be refocused are
     string images_path;
-  
+
     // string frames;
     //! Flag indicating if all frames in the input data should be processed
     int all_frames;
@@ -63,7 +62,7 @@ struct refocus_settings {
     int end_frame;
     //! Successive frames to skip (used if all_frames is set to 0)
     int skip;
-    
+
     //! Time shift values for each camera
     vector<int> shifts;
 
@@ -119,7 +118,7 @@ struct calibration_settings {
 struct safe_refocus_settings {
 
   double dp;
-  double minDist; 
+  double minDist;
   double param1;
   double param2;
   int minRadius;
@@ -135,7 +134,7 @@ struct safe_refocus_settings {
 
 /*! Settings container passed to pLocalize constructor. */
 struct localizer_settings {
-    
+
     /*! Window size to use around a given pixel
       to search for particle peak */
     int window;
@@ -153,12 +152,12 @@ struct localizer_settings {
     int show_refocused;
     //! Critical cluster size above which to consider a cluster a particle. As of now, regardless of cluster size, a maximum physical z extent of 2.5 mm is used to determine is a detected 2D particle is part of a 3D particle cluster or not.
     int cluster_size;
-    
+
 };
 
 // TODO: consider making size a fractional where max intensity
 //       defines how much of a pixel to count
-/*! Data type for a particle in 2D. Carries 3D location, 
+/*! Data type for a particle in 2D. Carries 3D location,
     average intensity and size in pixels. Used during
     particle localization. */
 struct particle2d {
@@ -189,10 +188,10 @@ struct volume {
 };
 
 struct particle_path {
-    
+
     int start_frame;
     vector<int> path;
-    
+
 };
 
 /*

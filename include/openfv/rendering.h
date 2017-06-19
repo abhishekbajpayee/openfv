@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -97,13 +96,13 @@ class Scene {
 
     void seedR();
     void seedAxes();
-    void seedFromFile(string path);    
+    void seedFromFile(string path);
     void seedParticles(vector< vector<double> > locations);
     /*! Randomly seed particles in a scene
       \param num Number of particles to seed
       \param factor Portion of volume to be seeded with particles in each direction
     */
-    void seedParticles(int num, double factor);    
+    void seedParticles(int num, double factor);
 
     /*! Propagate particles in a scene using a user defined velocity function over time
       \param func Function of form func(x, y, z, t) which returns new particle location for a particle at
@@ -203,7 +202,7 @@ class Camera {
     void setLocation(double x, double y, double z);
     //! Point camera at point
     void pointAt(double x, double y, double z);
-    
+
     void setCustomParticleSigma(double sigma);
 
     //! Render image of attached scene

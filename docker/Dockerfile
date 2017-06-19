@@ -1,3 +1,26 @@
+#  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+#
+#  By downloading, copying, installing or using the software you agree to this license.
+#  If you do not agree to this license, do not download, install,
+#  copy or use the software.
+#
+#                           License Agreement
+#                For Open Source Flow Visualization Library
+#
+# Copyright 2013-2017 Abhishek Bajpayee
+#
+# This file is part of OpenFV.
+#
+# OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+# GNU General Public License version 2 as published by the Free Software Foundation.
+#
+# OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License version 2 for more details.
+#
+# You should have received a copy of the GNU General Public License version 2 along with
+# OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
+
 FROM ubuntu:14.04
 
 USER root
@@ -48,7 +71,7 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     libtool && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-        
+
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
 
@@ -82,7 +105,7 @@ RUN mkdir /home/$NB_USER/work && \
     mkdir /home/$NB_USER/.jupyter && \
     echo "cacert=/etc/ssl/certs/ca-certificates.crt" > /home/$NB_USER/.curlrc
 
-# Allow python wrappers to find shared 
+# Allow python wrappers to find shared
 # RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/:/usr/lib/:/usr/local/openfv/lib:${LD_LIBRARY_PATH}" >> ~/.bashrc
 
 # Install conda as jovyan

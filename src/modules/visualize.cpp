@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -43,7 +42,7 @@ using namespace std;
 // ACTUAL PLOTTING FUNCTIONS
 
 void PyVisualize::plot(vector<double> x, vector<double> y, string args) {
-    
+
     string sx, sy;
     string_from_vdouble(x, sx);
     string_from_vdouble(y, sy);
@@ -56,7 +55,7 @@ void PyVisualize::plot(vector<double> x, vector<double> y, string args) {
 }
 
 void PyVisualize::plot3d(vector<Point3f> points, string args) {
-    
+
     vector<string> strs;
     string_from_vPoint3f(points, strs);
 
@@ -69,12 +68,12 @@ void PyVisualize::plot3d(vector<Point3f> points, string args) {
 }
 
 void PyVisualize::line3d(Point3f p1, Point3f p2) {
-    
+
     vector<Point3f> points;
     points.push_back(p1);
     points.push_back(p2);
     vector<string> strs;
-    
+
     string_from_vPoint3f(points, strs);
 
     string call("ax.plot(");
@@ -129,7 +128,7 @@ void PyVisualize::string_from_vdouble(vector<double> p, string &str) {
     str = sp.str();
 
 }
-    
+
 
 void PyVisualize::string_from_vPoint3f(vector<Point3f> points, vector<int> indices, vector<string> &strs) {
 

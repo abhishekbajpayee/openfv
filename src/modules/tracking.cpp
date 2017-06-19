@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -96,7 +95,7 @@ void pTracking::read_points() {
     file.open(path_.c_str());
 
     VLOG(1)<<"Reading points to track...";
-    
+
     int num_frames;
     file>>num_frames;
 
@@ -114,7 +113,7 @@ void pTracking::read_points() {
         vol.z2 = 0;
 
         for (int j=0; j<num_points; j++) {
-            
+
             file>>point.x;
             file>>point.y;
             file>>point.z;
@@ -144,7 +143,7 @@ void pTracking::read_points() {
 }
 
 void pTracking::track_frames(int start, int end) {
-    
+
     offset = start;
 
     vector<Point2i> matches;
@@ -340,7 +339,7 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
     int count_mult = 0;
     int tiecount = 0;
     for (int i=0; i<Pij.size(); i++) {
-        
+
         vector<int> c;
         vector<int> cf;
 
@@ -367,7 +366,7 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
                     c.push_back(zematch[i][j]);
                     cf.push_back(1);
                 }
-                
+
             }
 
             // Finding maximum occurence frequency
@@ -383,10 +382,10 @@ int pTracking::find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int>
             // Checking if multiple maxima exist
             int tie = 0;
             for (int k=0; k<cf.size(); k++) {
-                
+
                 if (k==modloc)
                     continue;
-                
+
                 if (cf[k]==cf[modloc]) {
                     tie=1;
                     tiecount++;
@@ -428,7 +427,7 @@ double pTracking::update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector
             diffsum = sum(diffpij);
             difftotal += diffsum.val[0];
         }
-        
+
         Pij[i] = Pij2[i].clone();
 
         if (Pi[i].rows>0 && Pi[i].cols>0) {
@@ -467,7 +466,7 @@ void pTracking::normalize_probabilites(vector<Mat> &Pij, vector<Mat> &Pi) {
 void pTracking::build_probability_sets(vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2) {
 
     for (int i=0; i<S_r.size(); i++) {
-        
+
         Mat_<double> Pij_single = Mat_<double>::zeros(S_r[i].size(), S_c[i].size());
         Mat_<double> Pi_single = Mat_<double>::zeros(S_r[i].size(), 1);
 
@@ -515,7 +514,7 @@ int pTracking::find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches) {
         cout<<endl;
     }
 
-    
+
 
     vector< vector<int> > zematch;
     vector<int> container;
@@ -529,9 +528,9 @@ int pTracking::find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches) {
                 zematch[S_r[i][j]].push_back(S_c[i][j]);
         }
     }
-    
+
     for (int i=0; i<Pij.size(); i++) {
-        
+
         vector<int> c;
         vector<int> cf;
 
@@ -541,7 +540,7 @@ int pTracking::find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches) {
             matches.push_back(Point2i(i,zematch[i][0]));
             count++;
         }
-    
+
     }
 
     else {
@@ -559,7 +558,7 @@ int pTracking::find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches) {
                     c.push_back(zematch[i][j]);
                     cf.push_back(1);
                 }
-                
+
             }
 
             // Finding maximum occurence frequency
@@ -575,10 +574,10 @@ int pTracking::find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches) {
             // Checking if multiple maxima exist
             int tie = 0;
             for (int k=0; k<cf.size(); k++) {
-                
+
                 if (k==modloc)
                     continue;
-                
+
                 if (cf[k]==cf[modloc]) {
                     tie=1;
                     tiecount++;
@@ -603,7 +602,7 @@ int pTracking::find_matches_n(Mat Pij, Mat Pi, vector<Point2i> &matches) {
     */
 
     // LOG(INFO)<<"Ties: "<<tiecount<<", Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.size())<<endl;
-    
+
     LOG(INFO)<<"Matches: "<<count<<", Ratio: "<<double(count)/double(Pij.rows)<<endl;
     // LOG(INFO)<<"Singles: "<<count_single<<", Multiples: "<<count_mult;
 
@@ -717,7 +716,7 @@ void pTracking::build_relaxation_sets(int frame1, int frame2, vector< vector<int
                         if ( dist(dij, dkl) < thresh ) {
                             theta_single.push_back(Point2i(k,l));
                         }
-                        
+
                     }
                 }
                 theta_j.push_back(theta_single);
@@ -780,7 +779,7 @@ void pTracking::build_relaxation_sets_n(int frame1, int frame2, vector< vector<i
                     if ( dist(dij, dkl) < thresh ) {
                         theta_single.push_back(Point2i(S_r[i][k],S_c[i][l]));
                     }
-                        
+
                 }
             }
             theta_j.push_back(theta_single);
@@ -846,7 +845,7 @@ void pTracking::find_long_paths(int l) {
 
     vector<int> path;
     for (int i=0; i<all_matches[0].size(); i++) {
-        
+
         path.push_back(all_matches[0][i].x);
 
         int j=0;
@@ -886,16 +885,16 @@ void pTracking::find_sized_paths(int l) {
     particle_path pp;
 
     for (int k=0; k<all_matches.size()-l; k++) {
-        for (int i=0; i<all_matches[k].size(); i++) {    
-            
+        for (int i=0; i<all_matches[k].size(); i++) {
+
             if (is_used(used, k, i)) {
                 continue;
             } else {
-                
+
                 pp.path.push_back(all_matches[k][i].x);
                 pp.start_frame = k;
                 used[k].push_back(all_matches[k][i].x);
-                
+
                 int j=k;
                 int p1=i;
                 while(j < all_matches.size()) {
@@ -913,7 +912,7 @@ void pTracking::find_sized_paths(int l) {
                 }
                 pp.path.clear();
             }
-            
+
         }
     }
 
@@ -962,7 +961,7 @@ void pTracking::plot_sized_paths() {
     int count=0;
     int every = 1;
     for (int i=0; i<sized_paths_.size(); i++) {
-        
+
         if (i%every==0) {
             vector<Point3f> points;
             for (int j=0; j<sized_paths_[i].path.size(); j++) {
@@ -1013,7 +1012,7 @@ void pTracking::plot_all_paths() {
 }
 
 void pTracking::write_quiver_data() {
-    
+
     string qpath("");
     for (int i=0; i<path_.size()-4; i++) {
         qpath += path_[i];
@@ -1032,16 +1031,16 @@ void pTracking::write_quiver_data() {
         file<<match_counts[frame]<<endl;
 
         for (int i=0; i<all_matches[frame].size(); i++) {
-            
+
             if (all_matches[frame][i].y > -1) {
                 file<<all_points_[offset+frame][all_matches[frame][i].x].x<<"\t";
                 file<<all_points_[offset+frame][all_matches[frame][i].x].y<<"\t";
                 file<<all_points_[offset+frame][all_matches[frame][i].x].z<<"\t";
-            
+
                 double u = all_points_[offset+frame+1][all_matches[frame][i].y].x - all_points_[offset+frame][all_matches[frame][i].x].x;
                 double v = all_points_[offset+frame+1][all_matches[frame][i].y].y - all_points_[offset+frame][all_matches[frame][i].x].y;
                 double w = all_points_[offset+frame+1][all_matches[frame][i].y].z - all_points_[offset+frame][all_matches[frame][i].x].z;
-            
+
                 file<<u<<"\t"<<v<<"\t"<<w<<endl;
             }
         }
@@ -1086,7 +1085,7 @@ void pTracking::write_all_paths(string path) {
     file.open(path.c_str());
 
     file<<all_matches.size()<<endl;
-    
+
     for (int i=0; i<all_matches.size(); i++) {
         file<<match_counts[i]<<endl;
         for (int j=0; j<all_matches[i].size(); j++) {
@@ -1109,7 +1108,7 @@ void pTracking::write_long_quiver(string path, int l) {
 
     ofstream file;
     file.open(path.c_str());
-    
+
     file<<l-1<<endl;
 
     for (int j=0; j<l-1; j++) {
@@ -1119,11 +1118,11 @@ void pTracking::write_long_quiver(string path, int l) {
             file<<all_points_[offset+j][long_paths_[i][j]].x<<"\t";
             file<<all_points_[offset+j][long_paths_[i][j]].y<<"\t";
             file<<all_points_[offset+j][long_paths_[i][j]].z<<"\t";
-            
+
             double u = all_points_[offset+j+1][long_paths_[i][j+1]].x - all_points_[offset+j][long_paths_[i][j]].x;
             double v = all_points_[offset+j+1][long_paths_[i][j+1]].y - all_points_[offset+j][long_paths_[i][j]].y;
             double w = all_points_[offset+j+1][long_paths_[i][j+1]].z - all_points_[offset+j][long_paths_[i][j]].z;
-            
+
             file<<u<<"\t"<<v<<"\t"<<w<<endl;
         }
     }
@@ -1163,7 +1162,7 @@ double pTracking::sim_performance() {
 }
 
 vector<int> pTracking::get_match_counts() {
-    
+
     return(match_counts);
 
 }

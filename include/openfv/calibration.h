@@ -7,21 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
-
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 // -------------------------------------------------------
 // -------------------------------------------------------
 // Synthetic Aperture - Particle Tracking Velocimetry Code
@@ -47,7 +45,7 @@
     that refractive calibration ability is currently of limited robustness.
 */
 class multiCamCalibration {
- 
+
  public:
     ~multiCamCalibration() {
         //
@@ -59,7 +57,7 @@ class multiCamCalibration {
       If the images are in separate folders then the expected directory structure is:
       \verbatim embed:rst
       path/
-      
+
         cam1/
           img1.jpg, img2.jpg, ...
         cam2/
@@ -72,14 +70,14 @@ class multiCamCalibration {
       \param grid_size The number of internal corners in the grid used (x, y)
       \param grid_size_phys Physical size of one square in the grid. Usually in [mm].
       \param refractive Flag indicating whether data set is for a refractive set or not
-      \param dummy_mode 
+      \param dummy_mode
       \param mtiff Flag indicating whether images are in multipage tiff files or as separate images
       \param skip Number of frames to skip between each successive frame used
       \param show_corners Flag to enable displaying of corners in each image after they are found
-    
+
     multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners);
     */
-    
+
     // TODO: document this constructor!
     multiCamCalibration(calibration_settings settings);
 
@@ -96,14 +94,14 @@ class multiCamCalibration {
       Default is on.
     */
     void freeCamInit(int flag) { freeCamInit_ = flag; }
-    
+
     void setCenterCam(int cam) { center_cam_id_ = cam; }
     void initGridViews(int flag) { initGridViews_ = flag; }
 
     // Function to run calibration
     /*! Run a calibration job. This automatically calls functions to
         read camera names and calibration images (read_cam_names_mtiff(), read_calib_imgs_mtiff() or
-        read_cam_names(), read_calib_imgs()), find_corners() function, functions to calibrate the 
+        read_cam_names(), read_calib_imgs()), find_corners() function, functions to calibrate the
         cameras, functions to write calibration results to a file. Calling only this function after
         creating a multiCamCalibration instance should typically suffice to do everything.
     */
@@ -114,7 +112,7 @@ class multiCamCalibration {
     void read_cam_names_mp4();
     //! Read images if calibration images are in mp4 files
     void read_calib_imgs_mp4();
-    
+
     // Functions to work with multipage tiff files
     //! Read camera names if calibration images are in multipage tiff files
     void read_cam_names_mtiff();
@@ -132,7 +130,7 @@ class multiCamCalibration {
 
     void initialize_cams();
     void initialize_cams_ref();
-    
+
     // void average_camera_params(vector<Mat>, vector<Mat>, Mat&, Mat&);
     void adjust_pattern_points(vector< vector<Point3f> >&, Mat, Mat, vector<Mat>, vector<Mat>, Mat, Mat);
 
@@ -160,11 +158,11 @@ class multiCamCalibration {
     int num_cams() { return num_cams_; }
     //! \return Number of images per camera in the data set
     int num_imgs() { return num_imgs_; }
-    //! \return Size in number of internal corners of grid used    
+    //! \return Size in number of internal corners of grid used
     Size grid_size() { return grid_size_; }
     //! \return Names of cameras (names of folders in which images lie if images are separate or names of the multipage tiff files)
     vector<string> cam_names() { return cam_names_; }
-    
+
     // refocusing_data refocusing_params() { return refocusing_params_; }
 
  private:
@@ -177,19 +175,19 @@ class multiCamCalibration {
     string ba_file_;
     string result_dir_;
     string result_file_;
-    
+
     int num_cams_;
     int num_imgs_;
     int center_cam_id_;
     int origin_image_id_;
-    
+
     Size grid_size_;
     Size img_size_;
-    
+
     double grid_size_phys_;
     double grid_size_pix_;
     double pix_per_phys_;
-        
+
     vector<string> cam_names_;
     vector<int> shifts_;
     vector< vector<Mat> > calib_imgs_;
@@ -203,13 +201,13 @@ class multiCamCalibration {
     vector< vector<Mat> > tvecs_;
     // vector<Mat> rvecs_avg_;
     // vector<Mat> tvecs_avg_;
-    
+
     vector<Mat> cVecs_;
     vector<Mat> rVecs_;
     vector<Mat> tVecs_;
     vector<Mat> K_mats_;
     vector<Mat> dist_mats_;
-    
+
     vector<int> const_points_;
 
     // refocusing_data refocusing_params_;
@@ -223,7 +221,7 @@ class multiCamCalibration {
 
     int refractive_;
     float geom[5];
-    
+
     // Option flags
     int solveForDistortion_;
     int freeCamInit_;
@@ -254,7 +252,7 @@ class multiCamCalibration {
     int images_read_;
     int corners_found_;
     int cams_initialized_;
-    
+
     // Grid view variables
     int gframe_;
     int gskip_;
@@ -270,7 +268,7 @@ class multiCamCalibration {
 class camCalibration {
 
  public:
-    
+
     ~camCalibration() {
         //
     }
@@ -286,7 +284,7 @@ class camCalibration {
 
     // Inheritable stuff
 
- private: 
+ private:
 
     // Private functions and variables
 

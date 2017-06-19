@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -43,7 +42,7 @@
 using namespace std;
 using namespace cv;
 
-/*! 
+/*!
     Class with functions to track particles using relaxation based method.
 */
 class pTracking {
@@ -59,7 +58,7 @@ class pTracking {
         \param Rs Search threshold
     */
     pTracking(string particle_file, double Rn, double Rs);
-    
+
     /*! Function to reset relevant variables
         \param method
         \param rn Neighborhood threshold
@@ -92,9 +91,9 @@ class pTracking {
 
     void write_quiver_data();
 
-    /*! Write tracking results to file. The output filename and location is automatically 
-      generated based on the path and name of the input particle file passed to the 
-      pTracking constructor. For example, if the particle_file is 
+    /*! Write tracking results to file. The output filename and location is automatically
+      generated based on the path and name of the input particle file passed to the
+      pTracking constructor. For example, if the particle_file is
       ``/home/user/project/particles.txt`` and the prefix string passed is ``prefix`` then
       then tracking results are saved in ``/home/user/project/particles_prefix_result.txt``.
       The format of this results file is:
@@ -112,7 +111,7 @@ class pTracking {
           ...
           ...
       \endverbatim
-      where the "\t" between particle indices is a TAB character and the indices are of 
+      where the "\t" between particle indices is a TAB character and the indices are of
       particles in the particles file used.
       \param prefix String of text to add to the output filename
     */
@@ -129,7 +128,7 @@ class pTracking {
 
     // Functions
     int find_matches(vector<Mat> Pij, vector<Mat> Pi, vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Point2i> &matches);
-    
+
     double update_probabilities(vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
     void normalize_probabilites(vector<Mat> &Pij, vector<Mat> &Pi);
     void build_probability_sets(vector< vector<int> > S_r, vector< vector<int> > S_c, vector<Mat> &Pij, vector<Mat> &Pi, vector<Mat> &Pij2, vector<Mat> &Pi2);
@@ -154,7 +153,7 @@ class pTracking {
     vector<Point3f> points_;
     vector< vector<Point3f> > all_points_;
     vector<volume> vols_;
-    
+
     vector< vector<Point2i> > all_matches;
     vector<int> match_counts;
 

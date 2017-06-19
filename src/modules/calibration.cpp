@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -53,7 +52,7 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
         LOG(INFO)<<"Current working dir: "<<string(cwd);
     else
         LOG(FATAL)<<"getcwd() error!";
-    
+
     run_calib_flag = 0;
     load_results_flag = 0;
 
@@ -95,14 +94,14 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
     // Initializing order control variables
     cam_names_read_ = 0;
     images_read_ = 0;
-    corners_found_ = 0; 
+    corners_found_ = 0;
     cams_initialized_ = 0;
 
 }
 */
 
 multiCamCalibration::multiCamCalibration(calibration_settings settings) {
-    
+
     path_ = settings.images_path;
     corners_file_path_ = settings.corners_file_path;
     grid_size_ = settings.grid_size;
@@ -133,7 +132,7 @@ multiCamCalibration::multiCamCalibration(calibration_settings settings) {
         LOG(INFO)<<"Current working dir: "<<string(cwd);
     else
         LOG(FATAL)<<"getcwd() error!";
-    
+
     run_calib_flag = 0;
     load_results_flag = 0;
 
@@ -171,7 +170,7 @@ multiCamCalibration::multiCamCalibration(calibration_settings settings) {
     // Initializing order control variables
     cam_names_read_ = 0;
     images_read_ = 0;
-    corners_found_ = 0; 
+    corners_found_ = 0;
     cams_initialized_ = 0;
 
 }
@@ -196,7 +195,7 @@ void multiCamCalibration::run() {
         }
 
         find_corners();
-        
+
         if (refractive_) {
             initialize_cams();
             //initialize_cams_ref();
@@ -207,27 +206,27 @@ void multiCamCalibration::run() {
             write_BA_data();
             run_BA();
         }
-        
+
         //calc_space_warp_factor();
-        
+
         if (refractive_) {
             write_calib_results_ref();
         } else {
             write_calib_results();
         }
-        
+
         // if (refractive_) {
         //     write_calib_results_matlab_ref();
         // } else {
         //     write_calib_results_matlab();
         // }
-        
+
     }
-    
+
     // if (load_results_flag) {
     //     load_calib_results();
     // }
-    
+
     LOG(INFO)<<"\nCALIBRATION COMPLETE!\n";
 
 }
@@ -258,7 +257,7 @@ void multiCamCalibration::read_cam_names() {
         }
     }
     sort(cam_names_.begin(), cam_names_.end());
-    
+
     for (int i=0; i<cam_names_.size(); i++) VLOG(1)<<"Camera "<<i+1<<": "<<cam_names_[i]<<endl;
 
     if (dummy_mode_) {
@@ -297,7 +296,7 @@ void multiCamCalibration::read_cam_names_mtiff() {
             }
         }
     }
-    
+
     sort(cam_names_.begin(), cam_names_.end());
 
     for (int i=0; i<cam_names_.size(); i++) VLOG(1)<<"Camera "<<i+1<<": "<<cam_names_[i]<<endl;
@@ -338,7 +337,7 @@ void multiCamCalibration::read_cam_names_mp4() {
             }
         }
     }
-    
+
     sort(cam_names_.begin(), cam_names_.end());
     for (int i=0; i<cam_names_.size(); i++) VLOG(1)<<"Camera "<<i+1<<": "<<cam_names_[i]<<endl;
 
@@ -371,7 +370,7 @@ void multiCamCalibration::read_calib_imgs() {
 
         DIR *dir;
         struct dirent *ent;
- 
+
         string dir1(".");
         string dir2("..");
         string temp_name;
@@ -401,7 +400,7 @@ void multiCamCalibration::read_calib_imgs() {
                     }
                 }
             }
-        
+
             sort(img_names.begin(), img_names.end());
             for (int j=0; j<img_names.size(); j++) {
                 if (i==0) {
@@ -429,9 +428,9 @@ void multiCamCalibration::read_calib_imgs() {
             path_tmp = "";
 
             LOG(INFO)<<"done!\n";
-   
+
         }
- 
+
         num_imgs_ = calib_imgs_[0].size();
         img_size_ = Size(calib_imgs_[0][0].cols, calib_imgs_[0][0].rows);
         // refocusing_params_.img_size = img_size_;
@@ -469,7 +468,7 @@ void multiCamCalibration::read_calib_imgs_mtiff() {
 
         LOG(INFO)<<"Reading images..."<<endl;
         for (int i=0; i<cam_names_.size(); i++) {
-        
+
             LOG(INFO)<<"Camera "<<i+1<<"...";
 
             vector<Mat> calib_imgs_sub;
@@ -483,7 +482,7 @@ void multiCamCalibration::read_calib_imgs_mtiff() {
                 uint32 c, r;
                 size_t npixels;
                 uint32* raster;
-            
+
                 TIFFSetDirectory(tiffs[i], frame);
 
                 TIFFGetField(tiffs[i], TIFFTAG_IMAGEWIDTH, &c);
@@ -506,7 +505,7 @@ void multiCamCalibration::read_calib_imgs_mtiff() {
                 Mat img1; img.convertTo(img1, CV_8U);
                 calib_imgs_sub.push_back(img1);
                 count++;
-            
+
                 frame += skip;
 
             }
@@ -537,17 +536,17 @@ void multiCamCalibration::read_calib_imgs_mp4() {
 
         int count = 0;
         Mat frame, frame2;
-        
+
         vector<Mat> calib_imgs_sub;
         vector<string> tstamps_sub;
-        
+
         int skip = 0;
         while(start_frame_ + skip <= end_frame_) {
 
             Mat frame = mf.get_frame(start_frame_ + skip + shifts_[i]);
 
             // convert msec to s + nsec
-            double t, it, ft; 
+            double t, it, ft;
             t = mf.time_stamp(start_frame_ + skip + shifts_[i])/1000 - shifts_[i]*(1.0/30.0);
             // t = count*(1.0/30.0)
             ft = modf(t, &it);
@@ -599,10 +598,10 @@ void multiCamCalibration::find_corners() {
         Mat scene, scene_gray, scene_drawn;
 
         Mat_<double> found_mat = Mat_<double>::zeros(num_cams_, calib_imgs_[0].size());
-    
+
         LOG(INFO)<<"\nFINDING CORNERS...\n\n";
         for (int i=0; i<num_cams_; i++) {
-        
+
             LOG(INFO)<<"Camera "<<i+1<<" of "<<num_cams_<<"...";
 
             int not_found=0;
@@ -614,7 +613,7 @@ void multiCamCalibration::find_corners() {
                 //scene.convertTo(scene, CV_8U);
                 bool found = findChessboardCorners(scene, grid_size_, points, CV_CALIB_CB_ADAPTIVE_THRESH|CALIB_CB_FAST_CHECK);
                 // bool found = findChessboardCorners(scene, grid_size_, points, CALIB_CB_FAST_CHECK);
-            
+
                 if (found) {
                     //cvtColor(scene, scene_gray, CV_RGB2GRAY);
                     cornerSubPix(scene, points, Size(10, 10), Size(-1, -1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
@@ -630,10 +629,10 @@ void multiCamCalibration::find_corners() {
                         waitKey(0);
                         cvDestroyWindow("Pattern");
                     }
-                
+
                 } else {
                     not_found++;
-                
+
                     points.clear(); points.push_back(Point2f(0,0));
                     corner_points.push_back(points);
 
@@ -746,16 +745,16 @@ void multiCamCalibration::initialize_cams_ref() {
                 new ceres::NumericDiffCostFunction<refractiveReprojectionError, ceres::CENTRAL, 2, 9, 3>
                 (new refractiveReprojectionError(all_corner_points_[cam][i][j].x,
                                                  all_corner_points_[cam][i][j].y,
-                                                 img_size_.width*0.5, img_size_.height*0.5, 
+                                                 img_size_.width*0.5, img_size_.height*0.5,
                                                  1, 5.0, 1.0, 1.0, 1.3, 0 ));
-            
+
             problem.AddResidualBlock(cost_function1,
                                      NULL,
                                      camera, points + 3*(i*points_per_img + j));
 
             if (i==origin)
                 problem.SetParameterBlockConstant(points + 3*(i*points_per_img + j));
-       
+
             ceres::CostFunction* cost_function2 =
                 new ceres::AutoDiffCostFunction<planeError, 1, 3, 4>
                 (new planeError(1));
@@ -772,14 +771,14 @@ void multiCamCalibration::initialize_cams_ref() {
 
         }
     }
-    
+
     // Adding constraint for grid physical size
     for (int i=0; i<num_imgs; i++) {
-        
-        ceres::CostFunction* cost_function3 = 
+
+        ceres::CostFunction* cost_function3 =
             new ceres::NumericDiffCostFunction<gridPhysSizeError, ceres::CENTRAL, 1, 3, 3, 3>
             (new gridPhysSizeError(grid_size_phys_, grid_size_.width, grid_size_.height));
-        
+
         problem.AddResidualBlock(cost_function3,
                                  NULL,
                                  points + 3*(i*points_per_img) + 0,
@@ -787,25 +786,25 @@ void multiCamCalibration::initialize_cams_ref() {
                                  points + 3*(i*points_per_img) + 3*(grid_size_.width*(grid_size_.height-1)));
 
     }
-    
+
 
     LOG(INFO)<<"Initializing Cam"<<endl;
     ceres::Solver::Options options;
     options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;//DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = refractive_max_iterations;
-    
+
     // int threads = omp_get_num_procs();
     // options.num_threads = threads;
     // LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;
     options.function_tolerance = 1E-8;
-    
+
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
     LOG(INFO)<<summary.FullReport()<<"\n";
-    
+
     for (int i=0; i<9; i++) {
         LOG(INFO)<<camera[i]<<endl;
     }
@@ -824,7 +823,7 @@ void multiCamCalibration::initialize_cams() {
         float yshift = -(grid_size_.height-1)/2.0;
         for (int i=0; i<grid_size_.height; i++) {
             for (int j=0; j<grid_size_.width; j++) {
-                pattern_points_single.push_back(Point3f(grid_size_phys_*(float(j)+xshift), 
+                pattern_points_single.push_back(Point3f(grid_size_phys_*(float(j)+xshift),
                                                         grid_size_phys_*(float(i)+yshift), 0.0f));
             }
         }
@@ -841,7 +840,7 @@ void multiCamCalibration::initialize_cams() {
         for (int i=0; i<num_cams_; i++) {
 
             LOG(INFO)<<"Calibrating camera "<<i+1<<"...";
-            Mat_<double> A = Mat_<double>::zeros(3,3); 
+            Mat_<double> A = Mat_<double>::zeros(3,3);
             Mat_<double> dist_coeff;
 
             vector<Mat> rvec, tvec;
@@ -851,7 +850,7 @@ void multiCamCalibration::initialize_cams() {
             A(0,2) = img_size_.width*0.5;
             A(1,2) = img_size_.height*0.5;
             A(2,2) = 1;
-        
+
             double reproj_err;
             if (freeCamInit_) {
                 VLOG(1)<<"Calibrating without using initial guesses...";
@@ -915,7 +914,7 @@ void multiCamCalibration::average_camera_params(vector<Mat> rvec, vector<Mat> tv
 }
 */
 
-void multiCamCalibration::adjust_pattern_points(vector< vector<Point3f> > &pattern_points, Mat A, 
+void multiCamCalibration::adjust_pattern_points(vector< vector<Point3f> > &pattern_points, Mat A,
                                                 Mat dist_coeff, vector<Mat> rvec, vector<Mat> tvec,
                                                 Mat rvec_avg, Mat tvec_avg) {
 
@@ -932,7 +931,7 @@ void multiCamCalibration::adjust_pattern_points(vector< vector<Point3f> > &patte
         Mat_<double> P2 = build_camera_matrix(A, rvec[i], tvec[i]);
 
         for (int j=0; j<pattern_points[i].size(); j++) {
-            
+
             Mat_<double> point = Mat_<double>::zeros(4,1);
             point(0,0) = pattern_points[i][j].x;
             point(1,0) = pattern_points[i][j].y;
@@ -947,7 +946,7 @@ void multiCamCalibration::adjust_pattern_points(vector< vector<Point3f> > &patte
             pattern_points[i][j].z = bproj(2,0)/bproj(3,0);
 
         }
-        
+
     }
 
 }
@@ -956,7 +955,7 @@ void multiCamCalibration::adjust_pattern_points(vector< vector<Point3f> > &patte
 void multiCamCalibration::write_BA_data() {
 
     LOG(INFO)<<"\nWRITING POINT DATA TO FILE...";
-    
+
     ofstream file;
     file.open(ba_file_.c_str());
     if (!file)
@@ -992,13 +991,13 @@ void multiCamCalibration::write_BA_data() {
     }
 
     double param = 0;
-    
+
     // R, T, K and distortion coeffs for each camera
     for (int i=0; i<num_cams_; i++) {
         for (int j=0; j<3; j++) {
             file<<rvecs_[i][0].at<double>(0,j)<<"\t";
             file1<<rvecs_[i][0].at<double>(0,j)<<"\n";
-        }   
+        }
         for (int j=0; j<3; j++) {
             file<<tvecs_[i][0].at<double>(0,j)<<"\t";
             file1<<tvecs_[i][0].at<double>(0,j)<<"\n";
@@ -1012,7 +1011,7 @@ void multiCamCalibration::write_BA_data() {
         }
         // file<<0<<"\t"<<0<<endl;
     }
-    
+
     double width = 1000;
     double height = 200;
     // add back projected point guesses here
@@ -1031,14 +1030,14 @@ void multiCamCalibration::write_BA_data() {
             file1<<all_pattern_points_[0][j][k].z<<"\n";
         }
     }
-    
+
     // Initial values for grid points in 3D
     for (int i=0; i<num_points; i++) {
 
         // file1<<(double(rand()%int(width))-(width*0.5))<<"\t";
         // file1<<(double(rand()%int(height))-(height*0.5))<<"\t";
         // file1<<(rand()%50)+z<<"\t"<<endl;
-        
+
         if (i==op1) {
             file<<double(-grid_size_.width*grid_size_phys_*0.5)<<"\t";
             file<<double(-grid_size_.height*grid_size_phys_*0.5)<<"\t";
@@ -1058,7 +1057,7 @@ void multiCamCalibration::write_BA_data() {
             file<<0<<"\t"<<0<<"\t"<<0<<"\t"<<endl;
         }
     }
-    
+
 
     /*/ Initializing values for grid points in 3D as all zero
     for (int i=0; i<num_points; i++) {
@@ -1119,20 +1118,20 @@ void multiCamCalibration::write_BA_data_ref() {
         for (int j=0; j<3; j++) {
             file<<rvecs_[i][0].at<double>(0,j)<<"\t";
         }
-        
+
         for (int j=0; j<3; j++) {
             file<<tvecs_[i][0].at<double>(0,j)<<"\t";
         }
-        
+
         //file<<cameraMats_[i].at<double>(0,0)<<"\t";
         file<<9000.0<<"\t";
         //for (int j=0; j<2; j++) file<<dist_coeffs[i].at<double>(0,j)<<"\n";
         file<<0<<"\t"<<0<<endl;
     }
-    
+
     param = 1;
     for (int i=0; i<imgs_per_cam; i++) {
-            
+
         for (int j=0; j<3; j++) {
             file<<0<<"\t";
         }
@@ -1175,13 +1174,13 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
 
     LOG(INFO)<<"\nRUNNING PINHOLE BUNDLE ADJUSTMENT TO CALIBRATE CAMERAS...\n";
     //google::InitGoogleLogging(argv);
-    
+
     if (!ba_problem.LoadFile(ba_file.c_str()))
         LOG(FATAL)<<"Unable to open file "<<ba_file<<" to read data!";
 
     ba_problem.cx = img_size.width*0.5;
     ba_problem.cy = img_size.height*0.5;
-    
+
     // Create residuals for each observation in the bundle adjustment problem. The
     // parameters for cameras and points are added automatically.
     ceres::Problem problem;
@@ -1198,7 +1197,7 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
                 (new pinholeReprojectionError_dist(ba_problem.observations()[2 * i + 0],
                                                    ba_problem.observations()[2 * i + 1],
                                                    ba_problem.cx, ba_problem.cy, ba_problem.num_cameras()));
-        
+
             problem.AddResidualBlock(cost_function1,
                                      NULL,
                                      ba_problem.mutable_camera_for_observation(i),
@@ -1211,7 +1210,7 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
                 (new pinholeReprojectionError(ba_problem.observations()[2 * i + 0],
                                               ba_problem.observations()[2 * i + 1],
                                               ba_problem.cx, ba_problem.cy, ba_problem.num_cameras()));
-        
+
             problem.AddResidualBlock(cost_function1,
                                      NULL,
                                      ba_problem.mutable_camera_for_observation(i),
@@ -1229,14 +1228,14 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
                                  ba_problem.mutable_plane_for_observation(i));
 
     }
-    
+
     int gridx = grid_size_.width;
     int gridy = grid_size_.height;
 
     // Adding constraint for grid physical size
     for (int i=0; i<ba_problem.num_planes(); i++) {
 
-        ceres::CostFunction* cost_function3 = 
+        ceres::CostFunction* cost_function3 =
             new ceres::NumericDiffCostFunction<gridPhysSizeError, ceres::CENTRAL, 1, 3, 3, 3>
             (new gridPhysSizeError(grid_size_phys_, gridx, gridy));
 
@@ -1247,12 +1246,12 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
                                  ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)));
 
     }
-    
+
     // Fixing a plane to xy plane
-    
+
     int i=origin_image_id_;
 
-    // ceres::CostFunction* cost_function4 = 
+    // ceres::CostFunction* cost_function4 =
     //     new ceres::NumericDiffCostFunction<zError, ceres::CENTRAL, 1, 3, 3, 3, 3>
     //     (new zError());
     // problem.AddResidualBlock(cost_function4,
@@ -1260,14 +1259,14 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
     //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 0,
     //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx-1),
     //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*(gridy-1)),
-    //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*gridy-1)); 
+    //                          ba_problem.mutable_points() + 3*gridx*gridy*i + 3*(gridx*gridy-1));
 
-    ceres::CostFunction* cost_function4 = 
+    ceres::CostFunction* cost_function4 =
         new ceres::NumericDiffCostFunction<zError2, ceres::CENTRAL, 1, 4>
         (new zError2());
     problem.AddResidualBlock(cost_function4,
                              NULL,
-                             ba_problem.mutable_planes() + 4*i); 
+                             ba_problem.mutable_planes() + 4*i);
 
     // Make Ceres automatically detect the bundle structure. Note that the
     // standard solver, SPARSE_NORMAL_CHOLESKY, also works fine but it is slower
@@ -1276,14 +1275,14 @@ double multiCamCalibration::run_BA_pinhole(baProblem &ba_problem, string ba_file
     options.linear_solver_type = ceres::DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = pinhole_max_iterations;
-    
+
     // int threads = omp_get_num_procs();
     // options.num_threads = threads;
     // LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;
     options.function_tolerance = 1E-8;
-    
+
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
     LOG(INFO)<<summary.FullReport()<<"\n";
@@ -1301,7 +1300,7 @@ double multiCamCalibration::run_BA_refractive(baProblem_plane &ba_problem, strin
 
     LOG(INFO)<<"\nRUNNING REFRACTIVE BUNDLE ADJUSTMENT TO CALIBRATE CAMERAS...\n";
     //google::InitGoogleLogging(argv);
-    
+
     if (!ba_problem.LoadFile(ba_file.c_str())) {
         std::cerr << "ERROR: unable to open file " << ba_file << "\n";
         return 1;
@@ -1309,7 +1308,7 @@ double multiCamCalibration::run_BA_refractive(baProblem_plane &ba_problem, strin
 
     ba_problem.cx = img_size.width*0.5;
     ba_problem.cy = img_size.height*0.5;
-    
+
     // Create residuals for each observation in the bundle adjustment problem. The
     // parameters for cameras and points are added automatically.
     ceres::Problem problem;
@@ -1322,17 +1321,17 @@ double multiCamCalibration::run_BA_refractive(baProblem_plane &ba_problem, strin
             new ceres::NumericDiffCostFunction<refractiveReprojError, ceres::CENTRAL, 2, 9, 6>
             (new refractiveReprojError(ba_problem.observations()[2 * i + 0],
                                        ba_problem.observations()[2 * i + 1],
-                                       ba_problem.cx, ba_problem.cy, 
+                                       ba_problem.cx, ba_problem.cy,
                                        ba_problem.num_cameras(),
                                        ba_problem.t(), ba_problem.n1(), ba_problem.n2(), ba_problem.n3(), ba_problem.z0(),
-                                       grid_size_.width, grid_size_.height, grid_size_phys_, 
+                                       grid_size_.width, grid_size_.height, grid_size_phys_,
                                        ba_problem.point_index()[i], ba_problem.plane_index()[i] ));
-        
+
         problem.AddResidualBlock(cost_function1,
                                  NULL,
                                  ba_problem.mutable_camera_for_observation(i),
                                  ba_problem.mutable_plane_for_observation(i));
-        
+
         /*
 
           problem.SetParameterBlockConstant(ba_problem.mutable_point_for_observation(i));
@@ -1348,14 +1347,14 @@ double multiCamCalibration::run_BA_refractive(baProblem_plane &ba_problem, strin
     options.linear_solver_type = ceres::DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
     options.max_num_iterations = 100; //refractive_max_iterations;
-    
+
     // int threads = omp_get_num_procs();
     // options.num_threads = threads-2;
     // LOG(INFO)<<"\nSolver using "<<threads<<" threads.\n\n";
 
     options.gradient_tolerance = 1E-12;
     options.function_tolerance = 1E-8;
-    
+
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
     LOG(INFO)<<summary.FullReport()<<"\n";
@@ -1390,17 +1389,17 @@ void multiCamCalibration::calc_space_warp_factor() {
             for (int k=0; k<grid_size_.width-1; k++) {
 
                 ind1 = (i*grid_size_.width*grid_size_.height)+(j*grid_size_.width)+k;
-                
+
                 ind2 = ind1+1;
                 dist_prev = total_dist;
                 total_dist += sqrt( pow(world_points[3*ind2]-world_points[3*ind1],2)+pow(world_points[3*ind2+1]-world_points[3*ind1+1],2)+pow(world_points[3*ind2+2]-world_points[3*ind1+2],2) );
                 //LOG(INFO)<<total_dist-dist_prev<<endl;
-                
+
                 ind2 = ind1+grid_size_.width;
                 dist_prev = total_dist;
                 total_dist += sqrt( pow(world_points[3*ind2]-world_points[3*ind1],2)+pow(world_points[3*ind2+1]-world_points[3*ind1+1],2)+pow(world_points[3*ind2+2]-world_points[3*ind1+2],2) );
                 //LOG(INFO)<<total_dist-dist_prev<<endl;
-                
+
                 count += 2;
 
             }
@@ -1420,7 +1419,7 @@ void multiCamCalibration::write_calib_results() {
     cin>>choice;
 
     if (choice==89 || choice==121) {
-        
+
         string newPath = path_ + result_dir_ + "/";
         if (!dirExists(newPath)) {
             LOG(INFO)<<"\'calibration_results\' directory does not exist..."<<endl;
@@ -1435,7 +1434,7 @@ void multiCamCalibration::write_calib_results() {
         string time_stamp_str(time_stamp);
         result_file_ = newPath + "results_"+time_stamp_str+".txt";
         results_just_saved_flag = 1;
-        
+
         struct tm * timeinfo;
         time(&timer);
         timeinfo = localtime(&timer);
@@ -1449,7 +1448,7 @@ void multiCamCalibration::write_calib_results() {
         file.open(result_file_.c_str());
 
         // WRITING DATA TO RESULTS FILE
-        
+
         file<<time_stamp_hr_str;
         file<<avg_error_<<endl;
         file<<img_size_.width<<"\t"<<img_size_.height<<"\t"<<pix_per_phys_<<endl;
@@ -1469,9 +1468,9 @@ void multiCamCalibration::write_calib_results() {
             }
 
             Rodrigues(rvec, R);
-            
+
             // refocusing_params_.cam_names.push_back(cam_names_[i]);
-            
+
             K(0,0) = camera_params[(i*num_cams_)+6];
             K(1,1) = camera_params[(i*num_cams_)+6];
             K(0,2) = img_size_.width*0.5;
@@ -1487,7 +1486,7 @@ void multiCamCalibration::write_calib_results() {
             cVecs_.push_back(C.clone());
 
         }
-        
+
         // Mat_<double> P_u = Mat_<double>::zeros(3,4);
         Mat_<double> P = Mat_<double>::zeros(3,4);
         Mat_<double> rmean = Mat_<double>::zeros(3,3);
@@ -1508,7 +1507,7 @@ void multiCamCalibration::write_calib_results() {
                 // P_u.at<double>(j,3) = tVecs_[i].at<double>(0,j);
                 P.at<double>(j,3) = tVecs_[i].at<double>(0,j);
             }
-            
+
             // P_u = K*P_u;
             P = K*P;
             // // refocusing_params_.P_mats_u.push_back(P_u.clone());
@@ -1533,7 +1532,7 @@ void multiCamCalibration::write_calib_results() {
             }
             file<<endl;
         }
-        
+
         file<<refractive_<<endl;
         if(refractive_) {
             //file<<geom[0]<<"\t"<<geom[1]<<"\t"<<geom[2]<<"\t"<<geom[3]<<"\t"<<geom[4]<<endl;
@@ -1555,7 +1554,7 @@ void multiCamCalibration::write_calib_results_ref() {
     cin>>choice;
 
     if (choice==89 || choice==121) {
-        
+
         string newPath = path_ + result_dir_ + "/";
         if (!dirExists(newPath)) {
             LOG(INFO)<<"\'calibration_results\' directory does not exist..."<<endl;
@@ -1570,7 +1569,7 @@ void multiCamCalibration::write_calib_results_ref() {
         string time_stamp_str(time_stamp);
         result_file_ = newPath + "results_"+time_stamp_str+".txt";
         results_just_saved_flag = 1;
-        
+
         struct tm * timeinfo;
         time(&timer);
         timeinfo = localtime(&timer);
@@ -1584,7 +1583,7 @@ void multiCamCalibration::write_calib_results_ref() {
         file.open(result_file_.c_str());
 
         // WRITING DATA TO RESULTS FILE
-        
+
         file<<time_stamp_hr_str<<endl;
         file<<avg_reproj_error_<<endl;
         file<<num_cams_<<endl;
@@ -1604,9 +1603,9 @@ void multiCamCalibration::write_calib_results_ref() {
             }
 
             Rodrigues(rvec, R);
-            
+
             // refocusing_params_.cam_names.push_back(cam_names_[i]);
-            
+
             K(0,0) = camera_params[(i*num_cams_)+6];
             K(1,1) = camera_params[(i*num_cams_)+6];
             K(0,2) = img_size_.width*0.5;
@@ -1618,7 +1617,7 @@ void multiCamCalibration::write_calib_results_ref() {
             K_mats_.push_back(K.clone());
 
         }
-        
+
         //Mat_<double> P_u = Mat_<double>::zeros(3,4);
         Mat_<double> P = Mat_<double>::zeros(3,4);
         Mat_<double> rmean = Mat_<double>::zeros(3,3);
@@ -1628,7 +1627,7 @@ void multiCamCalibration::write_calib_results_ref() {
         for (int i=0; i<num_cams_; i++) {
 
             R = rVecs_[i]*rmean_t;
-    
+
             for (int j=0; j<3; j++) {
                 for (int k=0; k<3; k++) {
                     //P_u.at<double>(j,k) = rVecs_[i].at<double>(j,k);
@@ -1637,7 +1636,7 @@ void multiCamCalibration::write_calib_results_ref() {
                 //P_u.at<double>(j,3) = tVecs_[i].at<double>(0,j);
                 P.at<double>(j,3) = tVecs_[i].at<double>(0,j);
             }
-            
+
             //P_u = K*P_u;
             P = K*P;
             // // refocusing_params_.P_mats_u.push_back(P_u.clone());
@@ -1659,7 +1658,7 @@ void multiCamCalibration::write_calib_results_ref() {
             }
 
         }
-        
+
         file<<refractive_<<endl;
         if(refractive_) {
             //file<<geom[0]<<"\t"<<geom[1]<<"\t"<<geom[2]<<"\t"<<geom[3]<<"\t"<<geom[4]<<endl;
@@ -1676,7 +1675,7 @@ void multiCamCalibration::write_calib_results_ref() {
 void multiCamCalibration::load_calib_results() {
 
     ifstream file;
-    
+
     // add stuff to read from folder for single and multiple result file cases
 
     DIR *dir;
@@ -1741,13 +1740,13 @@ void multiCamCalibration::load_calib_results() {
     Mat_<double> P = Mat_<double>::zeros(3,4);
     string cam_name;
     double tmp;
-    
+
     for (int i=0; i<num_cams_; i++) {
-        
+
         for (int j=0; j<2; j++) getline(file, cam_name);
-        
+
         refocusing_params_.cam_names.push_back(cam_name);
-        
+
         for (int j=0; j<3; j++) {
             for (int k=0; k<3; k++) {
                 //file>>P_u(j,k);
@@ -1834,14 +1833,14 @@ void multiCamCalibration::write_calib_results_matlab() {
     Mat_<double> rvec = Mat_<double>::zeros(1,3);
     Mat_<double> tvec = Mat_<double>::zeros(3,1);
     for (int i=0; i<num_cameras; i++) {
-        
+
         file5<<camera_params[(i*9)+6]<<endl;
 
         for (int j=0; j<3; j++) {
             rvec.at<double>(0,j) = camera_params[(i*9)+j];
             tvec.at<double>(j,0) = camera_params[(i*9)+j+3];
         }
-        
+
         Mat R;
         Rodrigues(rvec, R);
 
@@ -1851,7 +1850,7 @@ void multiCamCalibration::write_calib_results_matlab() {
             file1<<translation(j,0)<<"\t";
         }
         file1<<endl;
-        
+
         for (int j=0; j<3; j++) {
             for (int k=0; k<3; k++) {
                 file4<<R.at<double>(j,k)<<"\t";
@@ -1893,7 +1892,7 @@ void multiCamCalibration::write_calib_results_matlab_ref() {
 
     int num_planes = ba_problem_ref_.num_planes();
     double* plane_params = ba_problem_ref_.mutable_planes();
-    
+
     for (int i=0; i<num_planes; i++) {
         for (int j=0; j<6; j++) {
             file2<<plane_params[(i*6)+j]<<"\t";
@@ -1913,14 +1912,14 @@ void multiCamCalibration::write_calib_results_matlab_ref() {
     Mat_<double> rvec = Mat_<double>::zeros(1,3);
     Mat_<double> tvec = Mat_<double>::zeros(3,1);
     for (int i=0; i<num_cameras; i++) {
-        
+
         file5<<camera_params[(i*9)+6]<<endl;
 
         for (int j=0; j<3; j++) {
             rvec.at<double>(0,j) = camera_params[(i*9)+j];
             tvec.at<double>(j,0) = camera_params[(i*9)+j+3];
         }
-        
+
         Mat R;
         Rodrigues(rvec, R);
 
@@ -1930,7 +1929,7 @@ void multiCamCalibration::write_calib_results_matlab_ref() {
             file1<<translation(j,0)<<"\t";
         }
         file1<<endl;
-        
+
         for (int j=0; j<3; j++) {
             for (int k=0; k<3; k++) {
                 file4<<R.at<double>(j,k)<<"\t";
@@ -1965,7 +1964,7 @@ void multiCamCalibration::write_kalibr_imgs(string path) {
         }
 
         for (int j=0; j<calib_imgs_[i].size(); j++) {
-            
+
             vector<int> compression_params;
             compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
             compression_params.push_back(0);
@@ -2023,7 +2022,7 @@ void multiCamCalibration::grid_view() {
     int frame=0;
     int skip=50;
     while (frame<dircount) {
-        
+
         for (int i=0; i<3; i++) {
             for (int j=0; j<3; j++) {
 
@@ -2031,7 +2030,7 @@ void multiCamCalibration::grid_view() {
                 uint32 c, r;
                 size_t npixels;
                 uint32* raster;
-            
+
                 int ind = i*3+j;
 
                 TIFFSetDirectory(tiffs[ind], frame);
@@ -2050,12 +2049,12 @@ void multiCamCalibration::grid_view() {
                     }
                     _TIFFfree(raster);
                 }
-                
+
                 grid.create(img.rows, img.cols, CV_32F);
                 Mat small;
                 resize(img, small, Size(img.cols/3,img.rows/3));
                 small.copyTo(grid.colRange(i*grid.cols/3,i*grid.cols/3+grid.cols/3).rowRange(j*grid.rows/3,j*grid.rows/3+grid.rows/3));
-                
+
             }
         }
 
@@ -2240,7 +2239,7 @@ void multiCamCalibration::view_calibration_data() {
         LOG(FATAL)<<"This function only works for data in mp4 files for now!";
 
     read_cam_names_mp4();
-    
+
 
 }
 */

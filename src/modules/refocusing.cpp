@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the
-// GNU General Public License as published by the Free Software Foundation, either version
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 // without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV.
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -232,7 +231,7 @@ void saRefocus::read_kalibr_data(string path) {
         string cam_name; f["rostopic"]>>cam_name;
         if (MP4_FLAG)
             cam_names_.push_back(cam_name.substr(1,8) + ".MP4");
-        else 
+        else
             cam_names_.push_back(cam_name.substr(1,4));
 
         VLOG(1)<<"Camera: "<<cam_names_[i];
@@ -429,7 +428,7 @@ void saRefocus::read_imgs(string path) {
                     LOG(WARNING)<<"End frame is greater than number of frames!" <<endl;
                     end = img_names.size();
                 }
-            }                           
+            }
 
             for (int j=begin; j<end; j+=skip+1) {
                 VLOG(1)<<j<<": "<<img_names.at(j)<<endl;
@@ -647,11 +646,11 @@ void saRefocus::CPUliveView() {
                 }
             } else if( (key & 255)==46 ) { // >
                 if (active_frame_<imgs[0].size()-1) {
-                    active_frame_++; 
+                    active_frame_++;
                 }
             } else if( (key & 255)==44 ) { // <
-                if (active_frame_>0) { 
-                    active_frame_--; 
+                if (active_frame_>0) {
+                    active_frame_--;
                 }
             } else if( (key & 255)==119 ) { // w
                 rx_ += 1;
@@ -1174,12 +1173,12 @@ void saRefocus::GPUliveView() {
                         thresh_ -= dthresh;
                 }
             } else if( (key & 255)==46 ) {
-                if (active_frame_<array_all.size()-1) { 
-                    active_frame_++; 
+                if (active_frame_<array_all.size()-1) {
+                    active_frame_++;
                 }
             } else if( (key & 255)==44 ) {
-                if (active_frame_>0) { 
-                    active_frame_--; 
+                if (active_frame_>0) {
+                    active_frame_--;
                 }
             } else if( (key & 255)==119 ) { // w
                 rx_ += drx_;
@@ -1881,7 +1880,7 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
     mkdir(fn.str().c_str(), S_IRWXU);
 
     LOG(INFO)<<"Saving frame "<<f<<"...";
-    
+
     boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
     vector<Mat> stack;
@@ -2336,4 +2335,4 @@ BOOST_PYTHON_MODULE(refocusing) {
         .def("getC", &saRefocus::getC)
     ;
 
-}                                
+}

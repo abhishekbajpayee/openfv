@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -64,7 +63,7 @@ class saRefocus {
     }
 
     saRefocus();
-    
+
     /* Probably not needed anymore
  saRefocus(refocusing_data refocusing_params, int frame, int mult, double mult_exp):
     P_mats_(refocusing_params.P_mats), P_mats_u_(refocusing_params.P_mats_u), cam_names_(refocusing_params.cam_names), img_size_(refocusing_params.img_size), scale_(refocusing_params.scale), num_cams_(refocusing_params.num_cams), warp_factor_(refocusing_params.warp_factor), z_(0), thresh_(0), mult_(mult), mult_exp_(mult_exp) { }
@@ -106,7 +105,7 @@ class saRefocus {
     // DocString: read_calib_data_pin
     //! Read pinhole calibration data
     void read_calib_data_pin(string path);
-    
+
     // DocString: read_imgs
     //! Read images when they are as individual files in separate folders
     void read_imgs(string path);
@@ -182,7 +181,7 @@ class saRefocus {
     void setHF(int hf);
     void setRefractive(int ref, double zW, double n1, double n2, double n3, double t);
     string showSettings();
-    
+
     Mat project_point(int cam, Mat_<double> X);
     Mat getP(int);
     Mat getC(int);
@@ -231,7 +230,7 @@ class saRefocus {
     int imgs_read_;
     vector<Mat> stack_;
     vector< vector<Mat> > cam_stacks_;
-    
+
     // Scene geometry params
     float geom[5];
 
@@ -284,7 +283,7 @@ class saRefocus {
     int UNDISTORT_IMAGES;
     int KALIBR;
     int PERSPECTIVE_SHIFT;
-    
+
 };
 
 #endif
