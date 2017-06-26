@@ -54,6 +54,7 @@ saRefocus::saRefocus() {
     STDEV_THRESH=0;
     SINGLE_CAM_DEBUG=0;
     mult_=0;
+    minlos_=0;
     frames_.push_back(0);
     num_cams_ = 0;
     IMG_REFRAC_TOL = 1E-9;
@@ -77,6 +78,7 @@ saRefocus::saRefocus(int num_cams, double f) {
     INVERT_Y_FLAG=0;
     EXPERT_FLAG=1;
     mult_=0;
+    minlos_=0;
     frames_.push_back(0);
     num_cams_ = num_cams;
     scale_ = f;
@@ -88,7 +90,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), MP4_FLAG(settings.mp4), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), shifts_(settings.shifts), KALIBR(settings.kalibr) {
+  GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minlos_(settings.minlos), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), MP4_FLAG(settings.mp4), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), shifts_(settings.shifts), KALIBR(settings.kalibr) {
 
 #ifdef WITHOUT_CUDA
     if (GPU_FLAG)
@@ -977,7 +979,9 @@ void saRefocus::GPUrefocus(int live, int frame) {
 
     if (mult_) {
         gpu::pow(temp, mult_exp_, temp2);
-    } else {
+    } else if (minlos_) {
+        temp2 = temp.clone();
+    }else {
         gpu::multiply(temp, fact, temp2);
     }
 
@@ -1001,6 +1005,8 @@ void saRefocus::GPUrefocus(int live, int frame) {
         if (mult_) {
             gpu::pow(temp, mult_exp_, temp2);
             gpu::multiply(refocused, temp2, refocused);
+	} else if (minlos_) {
+	    gpu::min(refocused, temp, refocused);
         } else {
             gpu::multiply(temp, fact, temp2);
             gpu::add(refocused, temp2, refocused);
@@ -1077,6 +1083,8 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     if (mult_) {
         gpu::pow(temp, mult_exp_, temp2);
+    } else if (minlos_) {
+        temp2 = temp.clone();
     } else {
         gpu::multiply(temp, fact, temp2);
     }
@@ -1091,6 +1099,8 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
         if (mult_) {
             gpu::pow(temp, mult_exp_, temp2);
             gpu::multiply(refocused, temp2, refocused);
+	} else if (minlos_) {
+	    gpu::min(refocused, temp, refocused);
         } else {
             gpu::multiply(temp, fact, temp2);
             gpu::add(refocused, temp2, refocused);
@@ -1324,6 +1334,8 @@ void saRefocus::CPUrefocus(int live, int frame) {
 
     if (mult_) {
         pow(cputemp, mult_exp_, cputemp2);
+    } else if (minlos_) {
+        multiply(cputemp, Scalar(1), cputemp2);
     } else {
         multiply(cputemp, fact, cputemp2);
     }
@@ -1339,6 +1351,8 @@ void saRefocus::CPUrefocus(int live, int frame) {
         if (mult_) {
             pow(cputemp, mult_exp_, cputemp2);
             multiply(cpurefocused, cputemp2, cpurefocused);
+	} else if (minlos_) {
+	    min(cputemp,cpurefocused,cpurefocused);
         } else {
             multiply(cputemp, fact, cputemp2);
             add(cpurefocused, cputemp2, cpurefocused);
