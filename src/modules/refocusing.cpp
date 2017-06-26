@@ -981,7 +981,7 @@ void saRefocus::GPUrefocus(int live, int frame) {
         gpu::pow(temp, mult_exp_, temp2);
     } else if (minlos_) {
         temp2 = temp.clone();
-    }else {
+    } else {
         gpu::multiply(temp, fact, temp2);
     }
 
@@ -1335,7 +1335,7 @@ void saRefocus::CPUrefocus(int live, int frame) {
     if (mult_) {
         pow(cputemp, mult_exp_, cputemp2);
     } else if (minlos_) {
-        multiply(cputemp, Scalar(1), cputemp2);
+        cputemp2 = cputemp.clone();
     } else {
         multiply(cputemp, fact, cputemp2);
     }
@@ -1411,14 +1411,30 @@ void saRefocus::CPUrefocus_ref_corner(int live, int frame) {
 
     Mat res;
     warpPerspective(imgs[0][frame], res, H, img_size_);
-    refocused_host_ = res.clone()/double(num_cams_);
 
+    if (mult_) {
+        pow(res, mult_exp_, cputemp2);
+    } else if (minlos_) {
+        cputemp2 = res.clone();
+    } else {
+        cputemp2 = res.clone()/double(num_cams_);
+    }
+
+    refocused_host_ = cputemp2.clone();
+    
     for (int i=1; i<num_cams_; i++) {
 
         calc_ref_refocus_H(cam_locations_[i], z_, i, H);
         warpPerspective(imgs[i][frame], res, H, img_size_);
-        refocused_host_ += res.clone()/double(num_cams_);
-
+        
+	if (mult_) {
+	    pow(res, mult_exp_, cputemp2);
+	    multiply(refocused_host_, cputemp2, refocused_host_);
+	} else if (minlos_) {
+	    min(refocused_host_,res,refocused_host_);
+	} else {
+            refocused_host_ += res.clone()/double(num_cams_);
+	}
     }
 
     // TODO: thresholding missing?
