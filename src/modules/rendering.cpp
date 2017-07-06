@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -52,7 +51,7 @@ void Scene::create(double sx, double sy, double sz, int gpu) {
     zlims_.push_back(-0.5*sz); zlims_.push_back(0.5*sz);
 
     sx_ = sx; sy_ = sy; sz_ = sz;
-    
+
     REF_FLAG = 0;
     geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0);
 
@@ -87,7 +86,7 @@ void Scene::setParticleSigma(double sx, double sy, double sz) {
     sigmax_ = sx;
     sigmay_ = sy;
     sigmaz_ = sz;
-    
+
 }
 
 void Scene::setRefractiveGeom(float zW, float n1, float n2, float n3, float t) {
@@ -112,7 +111,7 @@ void Scene::seedR() {
 }
 
 void Scene::seedAxes() {
-    
+
     LOG(INFO)<<"Seeding coordinate system axes...";
 
     particles_ = Mat_<double>::zeros(4, 175);
@@ -141,7 +140,7 @@ void Scene::seedFromFile(string path) {
     int num;
     file>>num;
     particles_ = Mat_<double>::zeros(4, num);
-    
+
     double x, y, z;
     for (int i=0; i<num; i++) {
         file>>x; file>>y; file>>z;
@@ -158,7 +157,7 @@ void Scene::seedParticles(vector< vector<double> > points) {
 
     int num = points.size();
     particles_ = Mat_<double>::zeros(4, num);
-    
+
     for (int i=0; i<num; i++) {
         particles_(0,i) = points[i][0]; particles_(1,i) = points[i][1]; particles_(2,i) = points[i][2]; particles_(3,i) = 1;
     }
@@ -178,7 +177,7 @@ void Scene::seedParticles(int num, double factor) {
     double x, y, z, r, theta;
 
     if (CIRC_VOL_FLAG) {
-        
+
         // double R = sqrt(pow(0.5*sx_,2)+pow(0.5*sy_,2)+pow(0.5*sz_,2))*factor;
         double R = 0.5*sx_*factor;
         LOG(INFO)<<"R: "<<R;
@@ -263,13 +262,13 @@ void Scene::renderVolumeCPU(int xv, int yv, int zv) {
         for (int i=0; i<voxelsX_.size(); i++) {
             for (int j=0; j<voxelsY_.size(); j++) {
                 // double intensity = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]);
-                // if (intensity > thresh) 
+                // if (intensity > thresh)
                 {
                     img.at<float>(j, i) = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]); //intensity;
                 }
             }
         }
-        
+
         volumeCPU_.push_back(img.clone());
 
     }
@@ -292,7 +291,7 @@ double Scene::f(double x, double y, double z) {
             intensity += b;
         }
     }
-    
+
     return(intensity);
 
 }
@@ -323,15 +322,15 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
             y.at<float>(i,j) = voxelsY_[i];
         }
     }
-    
+
     gx.upload(x); gy.upload(y);
 
     for (int z=0; z<vz_; z++) {
-        
+
         slice = 0;
 
         for (int k=0; k<particles_.cols; k++) {
-        
+
             tmp1 = 0; tmp2 = 0;
 
             // outputs -(x-ux)^2/2sig^2
@@ -349,12 +348,12 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
             gpu::add(tmp1, tmp2, tmp2);
 
             gpu::add(tmp2, Scalar( -1.0*pow(voxelsZ_[z]-particles_(2,k), 2.0) / (2*pow(sigmaz_, 2)) ), tmp2);
-        
+
             gpu::exp(tmp2, tmp2);
             gpu::add(slice, tmp2, slice);
-        
+
         }
-    
+
         Mat result(slice);
         volumeGPU_.push_back(result.clone());
 
@@ -388,11 +387,11 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
             y.at<float>(i,j) = voxelsY_[i];
         }
     }
-    
+
     gx.upload(x); gy.upload(y);
 
     for (int z=0; z<vz_; z++) {
-        
+
         slice = 0;
 
         // sorting particles into bins...
@@ -403,7 +402,7 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
         }
 
         for (int k=0; k<partbin.size(); k++) {
-        
+
             Mat_<double> particle = partbin[k];
 
             tmp1 = 0; tmp2 = 0;
@@ -423,12 +422,12 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
             gpu::add(tmp1, tmp2, tmp2);
 
             gpu::add(tmp2, Scalar( -1.0*pow(voxelsZ_[z]-particle(2,0), 2.0) / (2*pow(sigmaz_, 2)) ), tmp2);
-        
+
             gpu::exp(tmp2, tmp2);
             gpu::add(slice, tmp2, slice);
-        
+
         }
-    
+
         Mat result(slice);
         volumeGPU_.push_back(result.clone());
 
@@ -443,7 +442,7 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
 // Get slice from rendered scene or get equivalent of refocused image
 // at given depth
 Mat Scene::getSlice(int z_ind) {
-    
+
     Mat img;
 
     if (GPU_FLAG) {
@@ -593,9 +592,9 @@ void Camera::pointAt(double x, double y, double z) {
     Mat_<double> L = p - C_; L = normalize(L);
     Mat_<double> s = cross(L, up);
     Mat_<double> u = cross(s, L);
-    
+
     for (int i=0; i<3; i++) {
-        R_(0,i) = -s(i,0); 
+        R_(0,i) = -s(i,0);
         R_(1,i) = u(i,0);
         R_(2,i) = -L(i,0);
     }
@@ -627,7 +626,7 @@ Mat Camera::render() {
 #ifndef WITHOUT_CUDA
     if (GPU_FLAG) {
         renderGPU();
-    } 
+    }
 #endif
 
     if (!GPU_FLAG) {
@@ -661,7 +660,7 @@ double Camera::f(double x, double y) {
     double intensity=0;
 
     for (int i=0; i<p_.cols; i++) {
-        double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2); 
+        double d = pow(x-p_(0,i), 2) + pow(y-p_(1,i), 2);
         if (d<25)
         {
             double b = exp( -d/(2*pow(s_(0,i), 2)) );
@@ -669,7 +668,7 @@ double Camera::f(double x, double y) {
         }
 
     }
-    
+
     return(intensity);
 
 }
@@ -696,9 +695,9 @@ void Camera::renderGPU() {
     }
 
     gx.upload(x); gy.upload(y);
-    
+
     for (int k=0; k<p_.cols; k++) {
-        
+
         tmp1 = 0; tmp2 = 0;
 
         // outputs -(x-ux)^2/2sig^2
@@ -714,12 +713,12 @@ void Camera::renderGPU() {
         gpu::pow(tmp1, 2.0, tmp1);
         gpu::multiply(tmp1, Scalar(-1.0/(2*s_(0,k)*s_(0,k))), tmp1);
         gpu::add(tmp2, tmp1, tmp2);
-        
+
         gpu::exp(tmp2, tmp2);
         gpu::add(img, tmp2, img);
-        
+
     }
-    
+
     Mat result(img);
     render_ = result.clone();
 
@@ -757,12 +756,12 @@ void Camera::project() {
 
     // TODO: optimize, consider wrapping in Eigen Matrix containers
     for (int i=0; i<proj.cols; i++) {
-        
+
         proj(0,i) /= proj(2,i);
         proj(1,i) /= proj(2,i);
         p_(0,i) = proj(0,i);
         p_(1,i) = proj(1,i);
-        
+
         // TODO: correct this for refractive and decide if needed at all because of diffraction limited imaging
         if (CUSTOM_PARTICLE_SIGMA) {
             s_(0,i) = custom_sigma_;
@@ -798,7 +797,7 @@ void Camera::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out) 
         b[0] = c[0] + (point[0]-c[0])*(t_+zW_-c[2])/(point[2]-c[2]);
         b[1] = c[1] + (point[1]-c[1])*(t_+zW_-c[2])/(point[2]-c[2]);
         b[2] = t_+zW_;
-        
+
         double rp = sqrt( pow(point[0]-c[0],2) + pow(point[1]-c[1],2) );
         double dp = point[2]-b[2];
         double phi = atan2(point[1]-c[1],point[0]-c[0]);
@@ -807,9 +806,9 @@ void Camera::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out) 
         double rb = sqrt( pow(b[0]-c[0],2) + pow(b[1]-c[1],2) );
         double da = a[2]-c[2];
         double db = b[2]-a[2];
-        
+
         double f, g, dfdra, dfdrb, dgdra, dgdrb;
-        
+
         // Newton Raphson loop to solve for Snell's law
         double tol=1E-8;
 
@@ -817,7 +816,7 @@ void Camera::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out) 
 
             f = ( ra/sqrt(pow(ra,2)+pow(da,2)) ) - ( (n2_/n1_)*(rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) );
             g = ( (rb-ra)/sqrt(pow(rb-ra,2)+pow(db,2)) ) - ( (n3_/n2_)*(rp-rb)/sqrt(pow(rp-rb,2)+pow(dp,2)) );
-            
+
             dfdra = ( (1.0)/sqrt(pow(ra,2)+pow(da,2)) )
                 - ( pow(ra,2)/pow(pow(ra,2)+pow(da,2),1.5) )
                 + ( (n2_/n1_)/sqrt(pow(ra-rb,2)+pow(db,2)) )
@@ -890,7 +889,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
     for (int i=0; i<voxels[2]; i++) {
 
         Mat ref = scene_.getSlice(i);
-        
+
         Mat img;
         if (mult) {
             img = refocus_.refocus(z[i], 0, 0, 0, 0, 0); // <-- TODO: in future add ability to handle multiple time frames?
@@ -899,7 +898,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
         }
 
         //qimshow(ref); qimshow(img);
-        
+
         //double minval, maxval; minMaxLoc(img, minval, maxval);
         //VLOG(3)<<maxval;
 

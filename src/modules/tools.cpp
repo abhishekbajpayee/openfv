@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 #include "tools.h"
 
@@ -59,9 +58,9 @@ void T_from_P(Mat P, Mat &H, double z, double scale, Size img_size) {
     D(2,2) = 1;
     D(0,2) = img_size.width*0.5;
     D(1,2) = img_size.height*0.5;
-    
+
     Mat T = D*A_inv;
-    
+
     H = T.clone();
 
 }
@@ -77,7 +76,7 @@ bool dirExists(string dirPath) {
 
     if (pDir != NULL)
     {
-        bExists = true;    
+        bExists = true;
         (void) closedir (pDir);
     }
 
@@ -103,7 +102,7 @@ int matrixMean(vector<Mat> mats_in, Mat &mat_out) {
     }
 
     mat_out = mat_out/double(mats_in.size());
-    
+
     return 1;
 
 }
@@ -115,7 +114,7 @@ Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P) {
     transpose(rmean, rmean_t);
 
     Mat R = rvec*rmean_t;
-    
+
     for (int i=0; i<3; i++) {
         for (int j=0; j<3; j++) {
             P_u.at<double>(i,j) = rvec.at<double>(i,j);
@@ -124,7 +123,7 @@ Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P) {
         P_u.at<double>(i,3) = tvec.at<double>(0,i);
         P.at<double>(i,3) = tvec.at<double>(0,i);
     }
-    
+
     P_u = K*P_u;
     P = K*P;
 
@@ -157,7 +156,7 @@ Mat build_camera_matrix(Mat K, Mat rvec, Mat tvec) {
 double dist(Point3f p1, Point3f p2) {
 
     double distance = sqrt(pow(p2.x-p1.x,2) + pow(p2.y-p1.y,2) + pow(p2.z-p1.z,2));
-    
+
     return(distance);
 
 }
@@ -211,7 +210,7 @@ void qimshow2(vector<Mat> imgs) {
         namedWindow(wname.str(), CV_WINDOW_AUTOSIZE);
         imshow(wname.str(), imgs[i]);
     }
-    
+
     int key;
     while(1) {
         key = cvWaitKey(10);
@@ -230,12 +229,12 @@ void qimshow2(vector<Mat> imgs) {
 void pimshow(Mat image, double z, int n) {
 
     namedWindow("Image", CV_WINDOW_AUTOSIZE);
-    
+
     char title[50];
     sprintf(title, "z = %f, n = %d", z, n);
     putText(image, title, Point(10,20), FONT_HERSHEY_PLAIN, 1.0, Scalar(255,0,0));
     imshow("Image", image);
-    
+
     waitKey(0);
     destroyWindow("Image");
 
@@ -361,12 +360,12 @@ Mat getTransform(vector<Point2f> src, vector<Point2f> dst) {
 }
 
 void listDir(string path, vector<string> &files) {
-    
+
     DIR *dir;
     struct dirent *ent;
 
     string temp_name;
-    
+
     dir = opendir(path.c_str());
     while(ent = readdir(dir)) {
         temp_name = ent->d_name;
@@ -390,7 +389,7 @@ void readImgStack(vector<string> img_names, vector<Mat> &imgs) {
 }
 
 vector<double> linspace(double a, double b, int n) {
-    
+
     vector<double> array;
     double step = (b-a) / (n-1);
 
@@ -528,40 +527,40 @@ Scene loadScene(string filename) {
 // ----------------------------------------------------
 
 vector<double> hill_vortex(double x, double y, double z, double t) {
-    
+
     double R = sqrt(x*x + y*y + z*z);
     double r = sqrt(x*x + z*z);
     double theta = atan2(z, x);
-    
+
     double a = 32; double us = 0.8;
     double A = 7.5*us/(a*a); // needs tweaking maybe
-    
+
     double V = (-A/10)*(4*r*r + 2*y*y - 2*a*a);
     double U = A*r*y/5;
-    
+
     double mag = sqrt(V*V + U*U);
-    
+
     double Vo = us*(pow((a*a/(r*r + y*y)), 2.5)*(2*y*y - r*r)/(2*a*a)-1);
     double Uo = (1.5*us/(a*a))*r*y*pow((a*a/(r*r + y*y)), 2.5);
-    
+
     if (R<=a) {
         Vo = 0; Uo = 0;
     }
-    
+
     double Mo = sqrt(Vo*Vo + Uo*Uo);
-    
-    
+
+
     if (R>a) {
         V = Vo; U=Uo;
     }
-    
+
     double u = U*cos(theta); double v = V; double w = U*sin(theta);
-    
+
     vector<double> np;
     np.push_back(x+u*t); np.push_back(y+v*t); np.push_back(z+w*t);
-    
+
     return(np);
-    
+
 }
 
 vector<double> vortex(double x, double y, double z, double t) {
@@ -592,9 +591,9 @@ vector<double> burgers_vortex(double x, double y, double z, double t) {
 
     Mat_<double> p = Mat_<double>::zeros(3,1);
     p(0,0) = x; p(1,0) = y, p(2,0) = z;
-    
+
     Mat_<double> rp = R*p;
-    
+
     x  = rp(0,0); y = rp(1,0); z = rp(2,0);
     //
 
@@ -604,7 +603,7 @@ vector<double> burgers_vortex(double x, double y, double z, double t) {
 
     double r = sqrt(x*x + z*z);
     double theta = atan2(z, x);
-    
+
     double omega = (tau/(2*pi*r*r))*(1 - exp(-sigma*r*r/4/nu));
     double dTheta = omega*t;
     double theta2 = theta+dTheta;
@@ -614,7 +613,7 @@ vector<double> burgers_vortex(double x, double y, double z, double t) {
     //
     Mat_<double> p2 = Mat_<double>::zeros(3,1);
     p2(0,0) = x2; p2(1,0) = y2, p2(2,0) = z2;
-    
+
     Mat_<double> p3 = R.inv()*p2;
     x2 = p3(0,0); y2 = p3(1,0); z2 = p3(2,0);
     //
@@ -670,11 +669,11 @@ void Movie::play() {
 
     namedWindow("Movie", CV_WINDOW_AUTOSIZE);
     updateFrame();
-    
+
     while (1) {
-    
+
         int key = waitKey(10);
-        
+
         if ( (key & 255) == 83) {
             if (active_frame_ < frames_.size()-1) {
                 active_frame_++;
@@ -695,7 +694,7 @@ void Movie::play() {
 }
 
 void Movie::updateFrame() {
-    
+
     char title[50];
     int size = frames_.size();
     sprintf(title, "Frame %d/%d", active_frame_+1, size);
@@ -889,7 +888,7 @@ imageIO::imageIO(string path) {
         }
 
         VLOG(1)<<"Successfully initialized image writer in "<<dir_path_;
-        
+
         int files=0;
         while(ent = readdir(dir)) {
             files++;
@@ -915,10 +914,10 @@ void imageIO::operator<< (Mat img) {
 
     stringstream filename;
     filename<<dir_path_<<prefix_;
-    
+
     char num[10];
     sprintf(num, "%03d", counter_);
-    
+
     filename<<string(num);
     filename<<ext_;
 
@@ -932,15 +931,15 @@ void imageIO::operator<< (vector<Mat> imgs) {
 
     if (!DIR_CREATED)
         mkdir(dir_path_.c_str(), S_IRWXU);
-    
+
     for (int i = 0; i < imgs.size(); i++) {
-        
+
         stringstream filename;
         filename<<dir_path_<<prefix_;
 
         char num[10];
         sprintf(num, "%03d", counter_);
-    
+
         filename<<string(num);
         filename<<ext_;
 
@@ -964,7 +963,7 @@ mtiffReader::mtiffReader(string path) {
 
     VLOG(1)<<"Opening "<<path<<endl;
     tiff_ = TIFFOpen(path_.c_str(), "r");
-    
+
     num_frames_ = 0;
     if (tiff_) {
         VLOG(1)<<"Counting number of frames...";
@@ -989,7 +988,7 @@ Mat mtiffReader::get_frame(int n) {
         LOG(WARNING)<<"Multipage tiff file only contains "<<num_frames_<<" frames and frame "<<n<<" requested! Blank image will be returned.";
         return(img);
     }
-            
+
     TIFFSetDirectory(tiff_, n);
 
     TIFFGetField(tiff_, TIFFTAG_IMAGEWIDTH, &c);
@@ -1007,7 +1006,7 @@ Mat mtiffReader::get_frame(int n) {
         }
         _TIFFfree(raster);
     }
-            
+
     img /= 255;
 
     return(img);
@@ -1055,14 +1054,14 @@ Mat mp4Reader::get_frame(int n) {
 
     cap_.set(CV_CAP_PROP_POS_FRAMES, n);
     cap_ >> frame;
-    
+
     if (color_) {
         img = frame.clone();
     } else {
         cvtColor(frame, img, CV_BGR2GRAY);
         img.convertTo(img, CV_8U);
     }
-    
+
     VLOG(3)<<n<<"\'th frame read.";
     return img;
 

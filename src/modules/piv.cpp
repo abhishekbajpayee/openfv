@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -107,7 +106,7 @@ void piv3D::run_pass(vector< vector<int> > winx, vector< vector<int> > winy, vec
     i3 = new double[wz_*wz_*wz_];
 
     // double s = omp_get_wtime();
-    
+
     fileIO file(resultFile_);
 
     int count=0;
@@ -115,15 +114,15 @@ void piv3D::run_pass(vector< vector<int> > winx, vector< vector<int> > winy, vec
     for (int i = 0; i < winx.size(); i++) {
         for (int j = 0; j < winy.size(); j++) {
             for (int k = 0; k < winz.size(); k++) {
-                
-           
+
+
                 frames[0].getWindow(winx[i][0], winx[i][1], winy[j][0], winy[j][1], winz[k][0], winz[k][1], i1, zero_padding_);
                 frames[1].getWindow(winx[i][0], winx[i][1], winy[j][0], winy[j][1], winz[k][0], winz[k][1], i2, zero_padding_);
                 crossex3D(i1, i2, i3, wx_, wy_, wz_);
 
                 vector<int> mloc; double val;
                 mloc = get_velocity_vector(i3, wx_, wy_, wz_, val);
-                
+
                 VLOG(1)<<"["<<winx[i][0]<<", "<<winx[i][1]<<"], ["<<winy[j][0]<<", "<<winy[j][1]<<"], ["<<winz[k][0]<<", "<<winz[k][1]<<"]: "<<mloc[0]<<", "<<mloc[1]<<", "<<mloc[2];
                 count++;
 
@@ -317,14 +316,14 @@ void piv3D::print3D(double *a, int x, int y, int z) {
 void piv3D::print3D(fftw_complex *a, int x, int y, int z) {
 
     for (int k = 0; k < z; k++) {
-        
+
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 cout<<a[k+y*(j+x*i)][0]<<" + "<<a[k+y*(j+x*i)][1]<<"i,\t";
             }
             cout<<endl;
         }
-        
+
     }
 
 }
@@ -336,12 +335,12 @@ void piv3D::mean_shift(double*& a, int n) {
 
     for (int i = 0; i < n; i++)
         sum += a[i];
-    
+
     sum /= n;
 
     for (int i = 0; i < n; i++)
         a[i] -= sum;
-    
+
 
 }
 
@@ -358,20 +357,20 @@ void piv3D::batch_test() {
     int num = 2;
 
     double *in = new double[n];
-    fftw_complex *o1 = new fftw_complex[n/2+1];   
+    fftw_complex *o1 = new fftw_complex[n/2+1];
 
     fftw_plan plan1;
     plan1 = fftw_plan_dft_r2c_1d(n, in, o1, FFTW_ESTIMATE);
 
     cout<<"Input and output arrays from single window runs:"<<endl;
 
-    for (int s = 0; s < 10; s++) {      
+    for (int s = 0; s < 10; s++) {
         for (int i = 0; i < n; i++) {
             in[i] = i1[i+s];
-        } 
-    
+        }
+
         fftw_execute_dft_r2c(plan1, in, o1);
-    
+
         // for (int i = 0; i < n; i++) {
         //     cout<<in[i]<<"\t";
         // }

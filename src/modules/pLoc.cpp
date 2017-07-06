@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -44,7 +43,7 @@ using namespace cv;
 
 pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s2):
     window_(s.window), zmin_(s.zmin), zmax_(s.zmax), dz_(s.dz), thresh_(s.thresh), zmethod_(s.zmethod), refocus_(refocus), s2_(s2), show_particles_(s.show_particles), show_refocused_(s.show_refocused), cluster_size_(s.cluster_size) {
-    
+
     zext_ = 2.5;
 
     //cout<<"Crit cluster size: "<<cluster_size_<<endl;
@@ -52,16 +51,16 @@ pLocalize::pLocalize(localizer_settings s, saRefocus refocus, refocus_settings s
 }
 
 void pLocalize::run() {
-    
+
     int frame = 0;
     find_particles_3d(frame);
 
-}   
+}
 
 void pLocalize::find_particles_all_frames() {
 
     for (int i=0; i<refocus_.num_frames(); i++) {
-        
+
         find_particles_3d(i);
         particles_all_.push_back(particles_);
         particles3D_.clear();
@@ -83,7 +82,7 @@ void pLocalize::find_particles_3d(int frame) {
     VLOG(2)<<"Searching for particles through volume at frame "<<frame<<"..."<<endl;
 
     for (float i=zmin_; i<=zmax_; i += dz_) {
-        
+
         VLOG(3)<<1+int((i-zmin_)*100.0/(zmax_-zmin_))<<"%"<<flush;
 
         Mat image = refocus_.refocus(i, rx, ry, rz, thresh_, frame);
@@ -122,15 +121,15 @@ void pLocalize::find_particles_3d(int frame) {
 }
 
 void pLocalize::z_resolution() {
-    
+
     double zref = 5.0;
     double dz = 1.0;
     double bounds = 1.0;
 
-    
+
     ofstream file;
     file.open("../../cx_v_dz_t100.txt");
-    
+
     double t = 40.0;
 
     double factor = 0.5;
@@ -147,11 +146,11 @@ void pLocalize::z_resolution() {
         Mat denB = ref.mul(ref);
         Scalar sumdenA = sum(denA);
         Scalar sumdenB = sum(denB);
-        
+
         double num = sumnum.val[0];
         double den1 = sumdenA.val[0];
         double den2 = sumdenB.val[0];
-        
+
         double cx = num/sqrt(den1*den2);
 
         file<<dz<<"\t"<<cx<<endl;
@@ -161,8 +160,8 @@ void pLocalize::z_resolution() {
     }
 
     file.close();
-    
-}   
+
+}
 
 void pLocalize::find_clusters() {
 
@@ -190,13 +189,13 @@ void pLocalize::find_clusters() {
                 used.push_back(i);
             }
         }
-        
+
         // The tricky delete loop
         for (int i=used.size()-1; i>=0; i--) {
             particles3D_.erase(particles3D_.begin()+used[i]);
         }
         particles3D_.erase(particles3D_.begin());
-        
+
         clusters_.push_back(single_particle);
         single_particle.clear();
         used.clear();
@@ -237,7 +236,7 @@ void pLocalize::collapse_clusters() {
         den = clusters_[i].size();
 
         for (int j=0; j<clusters_[i].size(); j++) {
-            
+
             xsum += clusters_[i][j].x;
             ysum += clusters_[i][j].y;
 
@@ -247,7 +246,7 @@ void pLocalize::collapse_clusters() {
         point.y = ysum/den;
 
         point.z = get_zloc(clusters_[i]);
-        
+
         particles_.push_back(point);
 
     }
@@ -264,7 +263,7 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
     int i_min = 0;
     int count_thresh = 6;
     Point2f tmp_loc;
-    
+
     for (int i=0; i<h; i++) {
         for (int j=0; j<w; j++) {
 
@@ -278,7 +277,7 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
 
             // Look for non zero value
             if (I>i_min && min_dist(tmp_loc, points_out)>2*window_) {
-                
+
                 Point2f l_max;
                 l_max.x = j;
                 l_max.y = i;
@@ -287,7 +286,7 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
                 // Move to local peak
                 for (int x=i-window_; x<=i+window_; x++) {
                     for (int y=j-window_; y<=j+window_; y++) {
-                        
+
                         if (x<0 || x>=h || y<0 || y>=w) continue;
 
                         // Scalar intensity2 = image.at<uchar>(x,y);
@@ -300,15 +299,15 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
                             l_max.x = y;
                             l_max.y = x;
                         }
-                        
+
                     }
                 }
-                
+
                 // Find particle size in window
                 int count=0;
                 for (int x=l_max.y-1; x<=l_max.y+1; x++) {
                     for (int y=l_max.x-1; y<=l_max.x+1; y++) {
-                        
+
                         if (x<0 || x>=h || y<0 || y>=w) continue;
 
                         // Scalar intensity2 = image.at<uchar>(x,y);
@@ -317,13 +316,13 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
                         float I2 = image.at<float>(x,y);
 
                         if (I2>i_min) count++;
-                        
+
                     }
                 }
-                
+
                 if (!point_in_list(l_max, points_out) && min_dist(l_max, points_out)>window_ && count>=count_thresh) {
                     points_out.push_back(l_max);
-                }           
+                }
 
             }
 
@@ -333,7 +332,7 @@ void pLocalize::find_particles(Mat image, vector<Point2f> &points_out) {
 }
 
 void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<particle2d> &points_out) {
-    
+
     int h = image.rows;
     int w = image.cols;
 
@@ -341,7 +340,7 @@ void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<par
     int count;
 
     for (int i=0; i<points_in.size(); i++) {
-        
+
         x_num=0;
         y_num=0;
         i_sum=0;
@@ -351,7 +350,7 @@ void pLocalize::refine_subpixel(Mat image, vector<Point2f> points_in, vector<par
             for (int y=points_in[i].y-window_; y<=points_in[i].y+window_; y++) {
 
                 if (x<0 || x>=w || y<0 || y>=h) continue;
-                
+
                 // Scalar intensity = image.at<uchar>(y,x);
                 // int i_xy = intensity.val[0];
 
@@ -521,14 +520,14 @@ double pLocalize::get_zloc(vector<particle2d> cluster) {
     double z;
 
     switch (zmethod_) {
-        
+
     case 1: { // mean method
-        
+
         double den = cluster.size();
         double zsum = 0;
         for (int i=0; i<cluster.size(); i++)
             zsum += cluster[i].z;
-        
+
         z = zsum/den;
         break;
 
@@ -543,15 +542,15 @@ double pLocalize::get_zloc(vector<particle2d> cluster) {
             ceres::CostFunction* cost_function =
                 new ceres::AutoDiffCostFunction<poly2FitError, 1, 3>
                 (new poly2FitError(cluster[i].z, cluster[i].I));
-            
+
             problem.AddResidualBlock(cost_function,
                                      NULL,
                                      params);
 
         }
-        
+
         ceres::Solver::Options options;
-        options.linear_solver_type = ceres::DENSE_QR;       
+        options.linear_solver_type = ceres::DENSE_QR;
         ceres::Solver::Summary summary;
         ceres::Solve(options, &problem, &summary);
 
@@ -563,9 +562,9 @@ double pLocalize::get_zloc(vector<particle2d> cluster) {
     case 3: { // gauss fit
 
         double* params = new double[3];
-        
+
         // initial values for parameters
-        params[1] = cluster[0].z; params[0] = 1; params[2] = 0.25; 
+        params[1] = cluster[0].z; params[0] = 1; params[2] = 0.25;
 
         ceres::Problem problem;
         for (int i=0; i<cluster.size(); i++) {
@@ -573,13 +572,13 @@ double pLocalize::get_zloc(vector<particle2d> cluster) {
             ceres::CostFunction* cost_function =
                 new ceres::AutoDiffCostFunction<gaussFitError, 1, 3>
                 (new gaussFitError(cluster[i].z, cluster[i].I));
-            
+
             problem.AddResidualBlock(cost_function,
                                      NULL,
                                      params);
 
         }
-        
+
         ceres::Solver::Options options;
         options.linear_solver_type = ceres::DENSE_QR;
         ceres::Solver::Summary summary;

@@ -1,26 +1,25 @@
-# IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
-# 
-# By downloading, copying, installing or using the software you agree to this license.
-# If you do not agree to this license, do not download, install,
-# copy or use the software.
-# 
-#                            License Agreement
-#                 For Open Source Flow Visualization Library
-# 
-# Copyright 2013-2015 Abhishek Bajpayee
-# 
-# This file is part of openFV.
-# 
-# openFV is free software: you can redistribute it and/or modify it under the terms of the 
-# GNU General Public License as published by the Free Software Foundation, either version 
-# 3 of the License, or (at your option) any later version.
-# 
-# openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-# See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along with openFV. 
-# If not, see http://www.gnu.org/licenses/.
+#  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+#
+#  By downloading, copying, installing or using the software you agree to this license.
+#  If you do not agree to this license, do not download, install,
+#  copy or use the software.
+#
+#                           License Agreement
+#                For Open Source Flow Visualization Library
+#
+# Copyright 2013-2017 Abhishek Bajpayee
+#
+# This file is part of OpenFV.
+#
+# OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+# GNU General Public License version 2 as published by the Free Software Foundation.
+#
+# OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License version 2 for more details.
+#
+# You should have received a copy of the GNU General Public License version 2 along with
+# OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 cmake_minimum_required (VERSION 2.8)
 
@@ -57,7 +56,7 @@ if (BUILD_PYTHON)
   message("Python Include Dirs: " ${PYTHON_INCLUDE_DIRS})
   if (NOT PYTHONLIBS_FOUND)
     message("Python not found! Python components will not be built.")
-    set(BUILD_PYTHON OFF)    
+    set(BUILD_PYTHON OFF)
   elseif(PYTHONLIBS_FOUND)
     add_definitions(-DWITH_PYTHON)
   endif()

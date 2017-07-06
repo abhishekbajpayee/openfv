@@ -7,20 +7,19 @@
 //                           License Agreement
 //                For Open Source Flow Visualization Library
 //
-// Copyright 2013-2015 Abhishek Bajpayee
+// Copyright 2013-2017 Abhishek Bajpayee
 //
-// This file is part of openFV.
+// This file is part of OpenFV.
 //
-// openFV is free software: you can redistribute it and/or modify it under the terms of the 
-// GNU General Public License as published by the Free Software Foundation, either version 
-// 3 of the License, or (at your option) any later version.
+// OpenFV is free software: you can redistribute it and/or modify it under the terms of the
+// GNU General Public License version 2 as published by the Free Software Foundation.
 //
-// openFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// See the GNU General Public License for more details.
+// OpenFV is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License version 2 for more details.
 //
-// You should have received a copy of the GNU General Public License along with openFV. 
-// If not, see http://www.gnu.org/licenses/.
+// You should have received a copy of the GNU General Public License version 2 along with
+// OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -48,15 +47,15 @@ using namespace std;
 using namespace cv;
 
 class Mat3 {
-    
+
 public:
     ~Mat3() {}
     Mat3(vector<Mat>);
-    
+
     void getWindow(int, int, int, int, int, int, double*&, int);
 
 protected:
-    
+
 private:
 
     vector<Mat> volume_;
@@ -66,21 +65,21 @@ private:
 };
 
 class piv3D {
-    
+
 public:
     ~piv3D() {}
     piv3D(string);
-    
+
     void run(int, double);
     void add_frame(vector<Mat>);
     void batch_test();
 
 protected:
-    
+
 private:
 
     void run_pass(vector< vector<int> >, vector< vector<int> >, vector< vector<int> >);
-    
+
     vector<int> get_velocity_vector(double*, int, int, int, double&);
     void crossex3D(double*, double*, double*&, int, int, int);
     void crossex3D(double*, double*, double*&, int, int, int, fftw_plan, fftw_plan);
@@ -103,7 +102,7 @@ private:
     int frames_;
     int xs_, ys_, zs_;
     int wx_, wy_, wz_;
-    
+
     string resultFile_;
 
     // Flags
