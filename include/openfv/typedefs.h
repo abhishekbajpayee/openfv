@@ -75,6 +75,9 @@ struct refocus_settings {
     //! Whether calibration file is out of Kalibr
     int kalibr;
 
+    //! Whether to undistort images or not
+    int undistort;
+    
 };
 
 struct calibration_settings {

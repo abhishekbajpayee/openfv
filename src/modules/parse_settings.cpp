@@ -25,6 +25,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("resize_images", po::value<int>()->default_value(0), "ON to resize all input images")
         ("rf", po::value<double>()->default_value(1.0), "Factor to resize input images by")
         ("kalibr", po::value<int>()->default_value(0), "ON to use Kalibr calibration output")
+        ("undistort", po::value<int>()->default_value(0), "ON to undistort images")
         // ("all_frames", po::value<int>()->default_value(1), "ON to process all frames in a multipage tiff file")
         // ("start_frame", po::value<int>()->default_value(0), "first frame in range of frames to process")
         // ("end_frame", po::value<int>(), "last frame in range of frames to process")
@@ -55,6 +56,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.resize_images = vm["resize_images"].as<int>();
     settings.rf = vm["rf"].as<double>();
     settings.kalibr = vm["kalibr"].as<int>();
+    settings.undistort = vm["undistort"].as<int>();
 
     vector<int> frames;
     stringstream frames_stream(vm["frames"].as<string>());

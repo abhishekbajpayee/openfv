@@ -88,7 +88,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), MP4_FLAG(settings.mp4), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), shifts_(settings.shifts), KALIBR(settings.kalibr) {
+    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), MP4_FLAG(settings.mp4), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), shifts_(settings.shifts), KALIBR(settings.kalibr), UNDISTORT_IMAGES(settings.undistort) {
 
 #ifdef WITHOUT_CUDA
     if (GPU_FLAG)
@@ -391,6 +391,8 @@ void saRefocus::read_imgs(string path) {
 
         LOG(INFO)<<"READING IMAGES TO REFOCUS...";
 
+        VLOG(1)<<"UNDISTORT_IMAGES flag is "<<UNDISTORT_IMAGES;
+        
         for (int i=0; i<num_cams_; i++) {
 
             VLOG(1)<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
@@ -442,7 +444,14 @@ void saRefocus::read_imgs(string path) {
                 if (j==begin)
                     img_size_ = Size(image.cols, image.rows);
 
-                refocusing_imgs_sub.push_back(image.clone());
+                Mat image2;
+                if (UNDISTORT_IMAGES) {
+                    fisheye::undistortImage(image, image2, K_mats_[i], dist_coeffs_[i], K_mats_[i]);
+                } else {
+                    image2 = image.clone();
+                }
+
+                refocusing_imgs_sub.push_back(image2);
                 if (i==0) {
                     frames_.push_back(j);
                 }
