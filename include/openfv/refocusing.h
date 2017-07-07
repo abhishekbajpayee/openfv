@@ -153,8 +153,14 @@ class saRefocus {
     void CPUrefocus_ref_corner(int live, int frame);
 
     static void cb_mult(int, void*);
-    static void cb_zplus(int, void*);
-    static void cb_zminus(int, void*);
+    static void cb_undistort(int, void*);
+    static void cb_frames(int, void*);
+    static void cb_dz_p1(int, void*);
+    static void cb_dz_1(int, void*);
+    static void cb_dz_10(int, void*);
+    static void cb_dz_100(int, void*);
+    static void cb_drx(int);
+    static void cb_dry(int, void*);
     void updateLiveFrame();
     void liveViewWindow(Mat img);
 

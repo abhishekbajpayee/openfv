@@ -1118,6 +1118,54 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
 }
 
+void saRefocus::cb_mult(int state, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->mult_ = state;
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_frames(int frame, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->active_frame_ = frame;
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_dz_p1(int val, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->dz_ = 0.1;
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_dz_1(int val, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->dz_ = 1.0;
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_dz_10(int val, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->dz_ = 10.0;
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_dz_100(int val, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->dz_ = 100.0;
+    ref->updateLiveFrame();
+
+}
+
 void saRefocus::GPUliveView() {
 
     // initializeGPU();
@@ -1147,11 +1195,20 @@ void saRefocus::GPUliveView() {
     double mult_exp_limit = 1.0;
     double mult_thresh = 0.01;
 
-    namedWindow("Live View", CV_WINDOW_AUTOSIZE | CV_GUI_EXPANDED);
+    namedWindow("Live View", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED);
 
-    createButton("Multiplicative", cb_mult, this, CV_CHECKBOX, mult_);
-    createButton("Z+", cb_zplus, this, CV_PUSH_BUTTON);
-    createButton("Z-", cb_zminus, this, CV_PUSH_BUTTON);
+    if (array_all.size()-1)
+        createTrackbar("Frame", "Live View", &active_frame_, array_all.size()-1, cb_frames, this);
+
+    createButton("Multiplicative", cb_mult, this, CV_CHECKBOX);
+
+    createButton("dz = 0.1", cb_dz_p1, this, CV_RADIOBOX, 1);
+    createButton("dz = 1", cb_dz_1, this, CV_RADIOBOX, 0);
+    createButton("dz = 10", cb_dz_10, this, CV_RADIOBOX, 0);
+    createButton("dz = 100", cb_dz_100, this, CV_RADIOBOX, 0);
+    
+    // cvCreateTrackbar("drx", NULL, &initrv, 10, cb_drx);
+    // createTrackbar("dry", NULL, &initrv, 10, cb_dry, this);
 
     updateLiveFrame();
 
@@ -1182,13 +1239,15 @@ void saRefocus::GPUliveView() {
                         thresh_ -= dthresh;
                 }
             } else if( (key & 255)==46 ) {
-                if (active_frame_<array_all.size()-1) {
-                    active_frame_++;
-                }
+                z_ += dz_;
+                // if (active_frame_<array_all.size()-1) {
+                //     active_frame_++;
+                // }
             } else if( (key & 255)==44 ) {
-                if (active_frame_>0) {
-                    active_frame_--;
-                }
+                z_ -= dz_;
+                // if (active_frame_>0) {
+                //     active_frame_--;
+                // }
             } else if( (key & 255)==119 ) { // w
                 rx_ += drx_;
             } else if( (key & 255)==113 ) { // q
@@ -1234,44 +1293,9 @@ void saRefocus::GPUliveView() {
 
             updateLiveFrame();
 
-            // Call refocus function
-            // if(REF_FLAG) {
-            //     if (CORNER_FLAG) {
-            //         GPUrefocus_ref_corner(1, active_frame_);
-            //     } else {
-            //         GPUrefocus_ref(1, active_frame_);
-            //     }
-            // } else {
-            //     GPUrefocus(1, active_frame_);
-            // }
-
         }
 
     }
-
-}
-
-void saRefocus::cb_mult(int state, void* userdata) {
-
-    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
-    ref->mult_ = state;
-    ref->updateLiveFrame();
-
-}
-
-void saRefocus::cb_zplus(int state, void* userdata) {
-
-    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
-    ref->z_ += ref->dz_;
-    ref->updateLiveFrame();
-
-}
-
-void saRefocus::cb_zminus(int state, void* userdata) {
-
-    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
-    ref->z_ -= ref->dz_;
-    ref->updateLiveFrame();
 
 }
 
@@ -1918,9 +1942,9 @@ void saRefocus::liveViewWindow(Mat img) {
 
     char title[200];
     if (STDEV_THRESH) {
-        sprintf(title, "mult = %d, exp = %f, T = %f (x StDev), frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_, mult_exp_, thresh_, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+        sprintf(title, "exp = %f, T = %f (x StDev), frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_exp_, thresh_, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
     } else {
-        sprintf(title, "mult = %d, exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_, mult_exp_, thresh_*255.0, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+        sprintf(title, "exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_exp_, thresh_*255.0, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
     }
 
     imshow("Live View", img);
