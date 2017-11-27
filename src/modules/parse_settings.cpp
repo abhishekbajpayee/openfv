@@ -38,6 +38,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("use_gpu", po::value<int>()->default_value(0), "ON to use GPU")
         ("mult", po::value<int>()->default_value(0), "ON to use multiplicative method")
         ("mult_exp", po::value<double>()->default_value(.25), "Multiplicative method exponent")
+        ("minlos", po::value<int>()->default_value(0), "ON to use minimum line of sight method")
         ("hf_method", po::value<int>()->default_value(0), "ON to use HF method")
         ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
         ("mp4", po::value<int>()->default_value(0), "ON if data is in mp4 files")
@@ -76,6 +77,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.mp4 = vm["mp4"].as<int>();
     settings.mult = vm["mult"].as<int>();
     settings.mult_exp = vm["mult_exp"].as<double>();
+    settings.minlos = vm["minlos"].as<int>();
     settings.resize_images = vm["resize_images"].as<int>();
     settings.rf = vm["rf"].as<double>();
     settings.kalibr = vm["kalibr"].as<int>();
