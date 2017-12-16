@@ -117,7 +117,6 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 # doesn't link to Qt
 # include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
-
 set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack gomp) # protobuf lgomp (removed)
 set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY})
 if (WITH_CUDA)

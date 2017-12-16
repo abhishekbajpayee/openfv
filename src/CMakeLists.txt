@@ -24,37 +24,22 @@
 if (WITH_CUDA)
   add_library (openfv SHARED
     ${PROJECT_SOURCE_DIR}/src/modules/optimization.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/visualize.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp
-    # ${PROJECT_SOURCE_DIR}/src/modules/batchProc.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/parse_settings.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/parse_safe_settings.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/featureDetection.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/safeRefocusing.cpp)
-    # ${PROJECT_SOURCE_DIR}/src/modules/piv.cpp)
+    ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
   target_link_libraries(openfv cuda_openfv ${LIBS})
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS}; -g -G -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_52,code=sm_52)
   cuda_add_library (cuda_openfv SHARED ${PROJECT_SOURCE_DIR}/src/modules/cuda_lib.cu)
 else()
   add_library (openfv SHARED
     ${PROJECT_SOURCE_DIR}/src/modules/optimization.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/visualize.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp
-    # ${PROJECT_SOURCE_DIR}/src/modules/batchProc.cpp
     ${PROJECT_SOURCE_DIR}/src/modules/parse_settings.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/parse_safe_settings.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/featureDetection.cpp
-    ${PROJECT_SOURCE_DIR}/src/modules/safeRefocusing.cpp)
+    ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
   target_link_libraries(openfv ${LIBS})
 endif()
 
@@ -77,17 +62,13 @@ if(BUILD_PYTHON)
   set_target_properties(tracking PROPERTIES ${PYTHON_PROPS} PREFIX "")
   target_link_libraries(tracking ${OFV_LIBS} ${LIBS})
 
-  add_library(calibration SHARED ${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp)
-  set_target_properties(calibration PROPERTIES ${PYTHON_PROPS} PREFIX "")
-  target_link_libraries(calibration ${OFV_LIBS} ${LIBS})
-
   # add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
   # set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")
   # target_link_libraries(localization ${LIBS})
 
   install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"\")")
 
-  install(TARGETS rendering refocusing tools tracking calibration
+  install(TARGETS rendering refocusing tools tracking
           DESTINATION ${CMAKE_PYTHON_INSTALL_PREFIX})
   install(FILES ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py DESTINATION ${CMAKE_PYTHON_INSTALL_PREFIX})
 endif()
