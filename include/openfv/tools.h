@@ -26,8 +26,8 @@
 
 #include "std_include.h"
 #include "typedefs.h"
-#include "rendering.h"
 #include "refocusing.h"
+#include "rendering.h"
 
 using namespace std;
 using namespace cv;

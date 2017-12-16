@@ -50,16 +50,6 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("rf", po::value<double>()->default_value(1.0), "Factor to resize input images by")
         ("kalibr", po::value<int>()->default_value(0), "ON to use Kalibr calibration output")
         ("undistort", po::value<int>()->default_value(0), "ON to undistort images")
-        // ("all_frames", po::value<int>()->default_value(1), "ON to process all frames in a multipage tiff file")
-        // ("start_frame", po::value<int>()->default_value(0), "first frame in range of frames to process")
-        // ("end_frame", po::value<int>(), "last frame in range of frames to process")
-        // ("upload_frame", po::value<int>()->default_value(-1), "frame to upload to GPU (-1 uploads all frames)")
-        // ("dump_stack", po::value<int>()->default_value(0), "ON to save stack to path")
-        // ("zmin", po::value<double>()->default_value(0), "zmin")
-        // ("zmax", po::value<double>()->default_value(0), "zmax")
-        // ("dz", po::value<double>()->default_value(0), "dz")
-        // ("thresh", po::value<double>()->default_value(0), "threshold level")
-        // ("save_path", po::value<string>()->default_value(""), "path where results are saved")
         ;
 
     if (h) {
@@ -146,6 +136,10 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         config_file_path.remove_leaf() /= calibP.string();
         settings.calib_file_path = config_file_path.string();
     }
+    if (!boost::filesystem::exists(settings.calib_file_path))
+        LOG(FATAL) << settings.calib_file_path << " does not seem to exist!";
+    if (!boost::filesystem::is_regular_file(settings.calib_file_path))
+        LOG(FATAL) << settings.calib_file_path << " does not seem to be a file! Is it a directory?";
 
     boost::filesystem::path imgsP(vm["images_path"].as<string>());
     if(imgsP.string().empty()) {

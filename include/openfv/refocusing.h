@@ -37,8 +37,6 @@
 
 #include "std_include.h"
 #include "typedefs.h"
-// #include "tools.h"
-// #include "visualize.h"
 
 #ifndef WITHOUT_CUDA
 #include "cuda_lib.h"
