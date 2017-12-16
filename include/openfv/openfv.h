@@ -39,7 +39,6 @@
 // Core
 #include "std_include.h"
 #include "typedefs.h"
-#include "calibration.h"
 #include "optimization.h"
 #include "refocusing.h"
 #include "rendering.h"
@@ -48,7 +47,6 @@
 #include "tools.h"
 
 // Particle Localization and Tracking
-#include "pLoc.h"
 #include "tracking.h"
 
 // CUDA
@@ -56,12 +54,17 @@
 #include "cuda_lib.h"
 #endif
 
+// LEGACY INCLUDES
+
+// Core
+// #include "calibration.h"
+
 // Other
-#include "piv.h"
-#include "visualize.h"
-#include "batchProc.h"
+// #include "piv.h"
+// #include "visualize.h"
+// #include "batchProc.h"
 
 // SAFE
-#include "featureDetection.h"
-#include "parse_safe_settings.h"
-#include "safeRefocusing.h"
+// #include "featureDetection.h"
+// #include "parse_safe_settings.h"
+// #include "safeRefocusing.h"
