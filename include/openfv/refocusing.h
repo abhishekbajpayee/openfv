@@ -92,14 +92,10 @@ class saRefocus {
     void set_dy(double dy) { dy_ = dy; }
     void set_dz(double dz) { dz_ = dz; }
     void set_undistort(int flag) { UNDISTORT_IMAGES = flag; }
-    void set_perspective_shift(int flag) { PERSPECTIVE_SHIFT = flag; }
 
     // DocString: read_calib_data
     //! Read refractive calibration data
     void read_calib_data(string path);
-    // DocString: read_kalibr_data
-    //! Read calibration data that is output from kalibr
-    void read_kalibr_data(string path);
     // DocString: read_calib_data_pin
     //! Read pinhole calibration data
     void read_calib_data_pin(string path);
@@ -110,9 +106,6 @@ class saRefocus {
     // DocString: read_imgs_mtiff
     //! Read images when they are in multipage TIFF files
     void read_imgs_mtiff(string path);
-    //! Read images when they are in mp4 files
-    //! Read images when they are in mp4 files
-    void read_imgs_mp4(string path);
 
     void CPUliveView();
 
@@ -272,7 +265,6 @@ class saRefocus {
     int REF_FLAG;
     int CORNER_FLAG; // Flag to use corner based homography fit method
     int MTIFF_FLAG;
-    int MP4_FLAG;
     int ALL_FRAME_FLAG;
     int INVERT_Y_FLAG;
     int EXPERT_FLAG;
@@ -286,8 +278,6 @@ class saRefocus {
     int INT_IMG_MODE;
     int RESIZE_IMAGES;
     int UNDISTORT_IMAGES;
-    int KALIBR;
-    int PERSPECTIVE_SHIFT;
 
 };
 

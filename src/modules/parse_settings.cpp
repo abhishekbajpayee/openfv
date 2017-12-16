@@ -41,14 +41,12 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("minlos", po::value<int>()->default_value(0), "ON to use minimum line of sight method")
         ("hf_method", po::value<int>()->default_value(0), "ON to use HF method")
         ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
-        ("mp4", po::value<int>()->default_value(0), "ON if data is in mp4 files")
         ("frames", po::value<string>()->default_value(""), "Array of values in format start, end, skip")
         ("calib_file_path", po::value<string>()->default_value(""), "calibration file to use")
         ("images_path", po::value<string>()->default_value(""), "path where data is located")
         ("shifts", po::value<string>()->default_value(""), "path where data is located")
         ("resize_images", po::value<int>()->default_value(0), "ON to resize all input images")
         ("rf", po::value<double>()->default_value(1.0), "Factor to resize input images by")
-        ("kalibr", po::value<int>()->default_value(0), "ON to use Kalibr calibration output")
         ("undistort", po::value<int>()->default_value(0), "ON to undistort images")
         ;
 
@@ -64,13 +62,11 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.use_gpu = vm["use_gpu"].as<int>();
     settings.hf_method = vm["hf_method"].as<int>();
     settings.mtiff = vm["mtiff"].as<int>();
-    settings.mp4 = vm["mp4"].as<int>();
     settings.mult = vm["mult"].as<int>();
     settings.mult_exp = vm["mult_exp"].as<double>();
     settings.minlos = vm["minlos"].as<int>();
     settings.resize_images = vm["resize_images"].as<int>();
     settings.rf = vm["rf"].as<double>();
-    settings.kalibr = vm["kalibr"].as<int>();
     settings.undistort = vm["undistort"].as<int>();
 
     vector<int> frames;
@@ -156,7 +152,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         LOG(FATAL) << settings.images_path << " does not seem to exist!";
     if (!boost::filesystem::is_directory(settings.images_path))
         LOG(FATAL) << settings.images_path << " does not seem to be a directory! Is it a file?";
-    if (settings.images_path != '/')
+    if (*settings.images_path.rbegin() != '/')
         settings.images_path += '/';
 
 }

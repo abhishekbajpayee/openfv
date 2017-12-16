@@ -60,8 +60,6 @@ saRefocus::saRefocus() {
     MAX_NR_ITERS = 20;
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
-    MP4_FLAG = 0;
-    PERSPECTIVE_SHIFT = 0;
 
 }
 
@@ -89,7 +87,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minlos_(settings.minlos), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), MP4_FLAG(settings.mp4), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), shifts_(settings.shifts), KALIBR(settings.kalibr), UNDISTORT_IMAGES(settings.undistort) {
+    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minlos_(settings.minlos), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), UNDISTORT_IMAGES(settings.undistort) {
 
 #ifdef WITHOUT_CUDA
     if (GPU_FLAG)
@@ -102,29 +100,16 @@ saRefocus::saRefocus(refocus_settings settings):
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
     SINGLE_CAM_DEBUG = 0;
-    PERSPECTIVE_SHIFT = 0;
+    // PERSPECTIVE_SHIFT = 0;
 
     imgs_read_ = 0;
-    if (!KALIBR) {
-        read_calib_data(settings.calib_file_path);
-    } else {
-        read_kalibr_data(settings.calib_file_path);
-    }
+    read_calib_data(settings.calib_file_path);
 
     if (mult_) {
         mult_exp_ = settings.mult_exp;
     }
 
-    if (MP4_FLAG) {
-
-        if(!ALL_FRAME_FLAG) {
-
-        for (int i=start_frame_; i<=end_frame_; i+=skip_frame_+1)
-            frames_.push_back(i);
-        }
-        read_imgs_mp4(settings.images_path);
-
-    } else if (MTIFF_FLAG) {
+    if (MTIFF_FLAG) {
 
         if(!ALL_FRAME_FLAG) {
 
@@ -214,111 +199,6 @@ void saRefocus::read_calib_data(string path) {
     }
 
     VLOG(1)<<"DONE READING CALIBRATION DATA";
-
-}
-
-void saRefocus::read_kalibr_data(string path) {
-
-    LOG(INFO)<<"Reading calibration (kalibr) data...";
-
-    FileStorage fs(path, FileStorage::READ);
-    FileNode fn = fs.root();
-
-    FileNodeIterator fi = fn.begin(), fi_end = fn.end();
-
-    int i=0;
-    for (; fi != fi_end; ++fi, i++) {
-
-        FileNode f = *fi;
-        string cam_name; f["rostopic"]>>cam_name;
-        if (MP4_FLAG)
-            cam_names_.push_back(cam_name.substr(1,8) + ".MP4");
-        else
-            cam_names_.push_back(cam_name.substr(1,4));
-
-        VLOG(1)<<"Camera: "<<cam_names_[i];
-
-        string cam_model; f["camera_model"]>>cam_model;
-        string dist_model; f["distortion_model"]>>dist_model;
-
-        if (cam_model.compare("pinhole"))
-            LOG(FATAL)<<"Only pinhole camera model is supported as of now!";
-        if (dist_model.compare("equidistant"))
-            LOG(FATAL)<<"Only equidistant distortion model is supported as of now!";
-
-        // Reading distortion coefficients
-        vector<double> dc;
-        Mat_<double> dist_coeff = Mat_<double>::zeros(1,4);
-        f["distortion_coeffs"] >> dc;
-        for (int j=0; j < dc.size(); j++)
-            dist_coeff(0,j) = (double)dc[j];
-
-        vector<int> ims;
-        f["resolution"] >> ims;
-        if (i>0) {
-            if (((int)ims[0] != calib_img_size_.width) || ((int)ims[1] != calib_img_size_.height))
-                LOG(FATAL)<<"Resolution of all images is not the same!";
-        } else {
-            calib_img_size_ = Size((int)ims[0], (int)ims[1]);
-        }
-
-        // Reading K (camera matrix)
-        vector<double> intr;
-        f["intrinsics"] >> intr;
-        Mat_<double> K_mat = Mat_<double>::zeros(3,3);
-        K_mat(0,0) = (double)intr[0]; K_mat(1,1) = (double)intr[1];
-        K_mat(0,2) = (double)intr[2]; K_mat(1,2) = (double)intr[3];
-        K_mat(2,2) = 1.0;
-
-        // Reading R and t matrices
-        Mat_<double> R = Mat_<double>::zeros(3,3);
-        Mat_<double> t = Mat_<double>::zeros(3,1);
-        FileNode tn = f["T_cn_cnm1"];
-        if (tn.empty()) {
-            R(0,0) = -1.0; R(1,1) = -1.0; R(2,2) = -1.0;
-            t(0,0) = 0.0; t(1,0) = 0.0; t(2,0) = 0.0;
-        } else {
-            FileNodeIterator fi2 = tn.begin(), fi2_end = tn.end();
-            int r = 0;
-            for (; fi2 != fi2_end; ++fi2, r++) {
-                if (r==3)
-                    continue;
-                FileNode f2 = *fi2;
-                R(r,0) = (double)f2[0]; R(r,1) = (double)f2[1]; R(r,2) = (double)f2[2];
-                t(r,0) = (double)f2[3]*-1000.0; // converting from [m] to [mm]
-            }
-        }
-
-        // Converting R and t matrices to be relative to world coordinates
-        if (i>0) {
-            Mat R3 = R.clone()*R_mats_[i-1].clone();
-            Mat t3 = R.clone()*t_vecs_[i-1].clone() + t.clone();
-            R = R3.clone(); t = t3.clone();
-        }
-
-        Mat Rt = build_Rt(R, t);
-        Mat P = K_mat*Rt;
-
-        VLOG(2)<<K_mat;
-        VLOG(2)<<Rt;
-        VLOG(3)<<P;
-
-        R_mats_.push_back(R);
-        t_vecs_.push_back(t);
-        dist_coeffs_.push_back(dist_coeff);
-        K_mats_.push_back(K_mat);
-        P_mats_.push_back(P);
-
-    }
-
-    scale_ = 30; // TODO: fix this!!
-    num_cams_ = i;
-    REF_FLAG = 0;
-
-    // Averaging P matrices for perspective shift fix
-    P_mat_avg_ = P_mats_[0].clone()/num_cams_;
-    for (int i=1; i<P_mats_.size(); i++)
-        P_mat_avg_ += P_mats_[i].clone()/num_cams_;
 
 }
 
@@ -543,60 +423,6 @@ void saRefocus::read_imgs_mtiff(string path) {
     initializeRefocus();
 
     VLOG(1)<<"DONE READING IMAGES"<<endl;
-
-}
-
-void saRefocus::read_imgs_mp4(string path) {
-
-    for (int i=0; i<cam_names_.size(); i++) {
-
-        string file_path = path+cam_names_[i];
-        mp4Reader mf(file_path);
-
-        int total_frames = mf.num_frames();
-        VLOG(1)<<"Total frames: "<<total_frames;
-
-        Mat frame, frame2, frame3;
-
-        vector<Mat> refocusing_imgs_sub;
-        for (int j=0; j<frames_.size(); j++) {
-
-            frame = mf.get_frame(frames_[j] + shifts_[i]);
-
-            if (RESIZE_IMAGES) {
-                resize(frame, frame2, Size(int(frame.cols*rf_), int(frame.rows*rf_)));
-            } else {
-                frame2 = frame.clone();
-            }
-
-            if (UNDISTORT_IMAGES) {
-                fisheye::undistortImage(frame2, frame3, K_mats_[i], dist_coeffs_[i], K_mats_[i]);
-            } else {
-                frame3 = frame2.clone();
-            }
-
-            refocusing_imgs_sub.push_back(frame3.clone()); // store frame
-
-            if (i==0 && j==0) {
-                img_size_ = Size(refocusing_imgs_sub[0].cols, refocusing_imgs_sub[0].rows);
-            } else {
-                if (refocusing_imgs_sub[j].cols != img_size_.width || refocusing_imgs_sub[j].rows != img_size_.height)
-                    LOG(FATAL)<<"Size of images to refocus is not the same!";
-            }
-
-        }
-
-        imgs.push_back(refocusing_imgs_sub);
-
-    }
-
-    // img_size_ = Size(imgs[0][0].cols, imgs[0][0].rows);
-    if (img_size_.width != calib_img_size_.width || img_size_.height != calib_img_size_.height)
-        LOG(FATAL)<<"Resolution of images used for calibration and size of images to refocus is not the same!";
-
-    initializeRefocus();
-
-    LOG(INFO)<<"DONE READING IMAGES!";
 
 }
 
@@ -1644,77 +1470,34 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     X = hinv*X;
 
     Mat_<double> X2 = Mat_<double>::zeros(4, 4);
-    if (!KALIBR) {
 
-        for (int i=0; i<X.cols; i++)
-            X(2,i) = 0; //z_;
+    for (int i=0; i<X.cols; i++)
+        X(2,i) = 0; //z_;
 
-        Mat R = getRotMat(rx_, ry_, rz_);
-        X = R*X;
+    Mat R = getRotMat(rx_, ry_, rz_);
+    X = R*X;
 
-        for (int j=0; j<X.cols; j++) {
-            X2(0,j) = X(0,j) + xs_;
-            X2(1,j) = X(1,j) + ys_;
-            X2(2,j) = X(2,j)+z_;
-            X2(3,j) = 1;
-        }
-
-    } else {
-
-        double fx = K_mats_[cam].at<double>(0,0);
-        double fy = K_mats_[cam].at<double>(1,1);
-
-        Mat_<double> X3 = Mat_<double>::zeros(3, 4);
-
-        X3(0,0) = 0;            X3(1,0) = 0;
-        X3(0,1) = z_*width/fx;  X3(1,1) = 0;
-        X3(0,2) = z_*width/fx;  X3(1,2) = z_*height/fy;
-        X3(0,3) = 0;            X3(1,3) = z_*height/fy;
-
-        Mat R = getRotMat(rx_, ry_, rz_);
-        X3 = R*X3;
-
-        for (int j=0; j<X.cols; j++) {
-            X2(0,j) = X3(0,j) + xs_;
-            X2(1,j) = X3(1,j) + ys_;
-            X2(2,j) = X3(2,j) + z_;
-            X2(3,j) = 1.0;
-        }
-
-        // X2(0,0) = 0;            X2(1,0) = 0;             X2(2,0) = z_; X2(3,0) = 1.0;
-        // X2(0,1) = z_*width/fx;  X2(1,1) = 0;             X2(2,1) = z_; X2(3,1) = 1.0;
-        // X2(0,2) = z_*width/fx;  X2(1,2) = z_*height/fy;  X2(2,2) = z_; X2(3,2) = 1.0;
-        // X2(0,3) = 0;            X2(1,3) = z_*height/fy;  X2(2,3) = z_; X2(3,3) = 1.0;
-
+    for (int j=0; j<X.cols; j++) {
+        X2(0,j) = X(0,j) + xs_;
+        X2(1,j) = X(1,j) + ys_;
+        X2(2,j) = X(2,j)+z_;
+        X2(3,j) = 1;
     }
 
     Mat_<double> proj = P_mats_[cam]*X2;
-    Mat_<double> proj2;
-    if (PERSPECTIVE_SHIFT)
-        proj2 = P_mat_avg_*X2;
 
-    Point2f src, dst, dst2;
-    vector<Point2f> sp, dp, dp2;
+    Point2f src, dst;
+    vector<Point2f> sp, dp;
     int i, j;
 
     for (int i=0; i<X.cols; i++) {
         src.x = X(0,i); src.y = X(1,i);
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
-        if (PERSPECTIVE_SHIFT) {
-            dst2.x = proj2(0,i)/proj2(2,i); dst2.y = proj2(1,i)/proj2(2,i); dp2.push_back(dst2);
-        }
         sp.push_back(src); dp.push_back(dst);
     }
 
     H = findHomography(dp, sp, 0);
     H = D*H;
-
-    if (PERSPECTIVE_SHIFT) {
-        Mat H2;
-        H2 = findHomography(dp2, sp, 0);
-        H2 = D*H2;
-        H = H2.inv()*H;
-    }
 
 }
 
@@ -2399,3 +2182,163 @@ BOOST_PYTHON_MODULE(refocusing) {
     ;
 
 }
+
+/* LEGACY CODE
+void saRefocus::read_kalibr_data(string path) {
+
+    LOG(INFO)<<"Reading calibration (kalibr) data...";
+
+    FileStorage fs(path, FileStorage::READ);
+    FileNode fn = fs.root();
+
+    FileNodeIterator fi = fn.begin(), fi_end = fn.end();
+
+    int i=0;
+    for (; fi != fi_end; ++fi, i++) {
+
+        FileNode f = *fi;
+        string cam_name; f["rostopic"]>>cam_name;
+        if (MP4_FLAG)
+            cam_names_.push_back(cam_name.substr(1,8) + ".MP4");
+        else
+            cam_names_.push_back(cam_name.substr(1,4));
+
+        VLOG(1)<<"Camera: "<<cam_names_[i];
+
+        string cam_model; f["camera_model"]>>cam_model;
+        string dist_model; f["distortion_model"]>>dist_model;
+
+        if (cam_model.compare("pinhole"))
+            LOG(FATAL)<<"Only pinhole camera model is supported as of now!";
+        if (dist_model.compare("equidistant"))
+            LOG(FATAL)<<"Only equidistant distortion model is supported as of now!";
+
+        // Reading distortion coefficients
+        vector<double> dc;
+        Mat_<double> dist_coeff = Mat_<double>::zeros(1,4);
+        f["distortion_coeffs"] >> dc;
+        for (int j=0; j < dc.size(); j++)
+            dist_coeff(0,j) = (double)dc[j];
+
+        vector<int> ims;
+        f["resolution"] >> ims;
+        if (i>0) {
+            if (((int)ims[0] != calib_img_size_.width) || ((int)ims[1] != calib_img_size_.height))
+                LOG(FATAL)<<"Resolution of all images is not the same!";
+        } else {
+            calib_img_size_ = Size((int)ims[0], (int)ims[1]);
+        }
+
+        // Reading K (camera matrix)
+        vector<double> intr;
+        f["intrinsics"] >> intr;
+        Mat_<double> K_mat = Mat_<double>::zeros(3,3);
+        K_mat(0,0) = (double)intr[0]; K_mat(1,1) = (double)intr[1];
+        K_mat(0,2) = (double)intr[2]; K_mat(1,2) = (double)intr[3];
+        K_mat(2,2) = 1.0;
+
+        // Reading R and t matrices
+        Mat_<double> R = Mat_<double>::zeros(3,3);
+        Mat_<double> t = Mat_<double>::zeros(3,1);
+        FileNode tn = f["T_cn_cnm1"];
+        if (tn.empty()) {
+            R(0,0) = -1.0; R(1,1) = -1.0; R(2,2) = -1.0;
+            t(0,0) = 0.0; t(1,0) = 0.0; t(2,0) = 0.0;
+        } else {
+            FileNodeIterator fi2 = tn.begin(), fi2_end = tn.end();
+            int r = 0;
+            for (; fi2 != fi2_end; ++fi2, r++) {
+                if (r==3)
+                    continue;
+                FileNode f2 = *fi2;
+                R(r,0) = (double)f2[0]; R(r,1) = (double)f2[1]; R(r,2) = (double)f2[2];
+                t(r,0) = (double)f2[3]*-1000.0; // converting from [m] to [mm]
+            }
+        }
+
+        // Converting R and t matrices to be relative to world coordinates
+        if (i>0) {
+            Mat R3 = R.clone()*R_mats_[i-1].clone();
+            Mat t3 = R.clone()*t_vecs_[i-1].clone() + t.clone();
+            R = R3.clone(); t = t3.clone();
+        }
+
+        Mat Rt = build_Rt(R, t);
+        Mat P = K_mat*Rt;
+
+        VLOG(2)<<K_mat;
+        VLOG(2)<<Rt;
+        VLOG(3)<<P;
+
+        R_mats_.push_back(R);
+        t_vecs_.push_back(t);
+        dist_coeffs_.push_back(dist_coeff);
+        K_mats_.push_back(K_mat);
+        P_mats_.push_back(P);
+
+    }
+
+    scale_ = 30; // TODO: fix this!!
+    num_cams_ = i;
+    REF_FLAG = 0;
+
+    // Averaging P matrices for perspective shift fix
+    P_mat_avg_ = P_mats_[0].clone()/num_cams_;
+    for (int i=1; i<P_mats_.size(); i++)
+        P_mat_avg_ += P_mats_[i].clone()/num_cams_;
+
+}
+void saRefocus::read_imgs_mp4(string path) {
+
+    for (int i=0; i<cam_names_.size(); i++) {
+
+        string file_path = path+cam_names_[i];
+        mp4Reader mf(file_path);
+
+        int total_frames = mf.num_frames();
+        VLOG(1)<<"Total frames: "<<total_frames;
+
+        Mat frame, frame2, frame3;
+
+        vector<Mat> refocusing_imgs_sub;
+        for (int j=0; j<frames_.size(); j++) {
+
+            frame = mf.get_frame(frames_[j] + shifts_[i]);
+
+            if (RESIZE_IMAGES) {
+                resize(frame, frame2, Size(int(frame.cols*rf_), int(frame.rows*rf_)));
+            } else {
+                frame2 = frame.clone();
+            }
+
+            if (UNDISTORT_IMAGES) {
+                fisheye::undistortImage(frame2, frame3, K_mats_[i], dist_coeffs_[i], K_mats_[i]);
+            } else {
+                frame3 = frame2.clone();
+            }
+
+            refocusing_imgs_sub.push_back(frame3.clone()); // store frame
+
+            if (i==0 && j==0) {
+                img_size_ = Size(refocusing_imgs_sub[0].cols, refocusing_imgs_sub[0].rows);
+            } else {
+                if (refocusing_imgs_sub[j].cols != img_size_.width || refocusing_imgs_sub[j].rows != img_size_.height)
+                    LOG(FATAL)<<"Size of images to refocus is not the same!";
+            }
+
+        }
+
+        imgs.push_back(refocusing_imgs_sub);
+
+    }
+
+    // img_size_ = Size(imgs[0][0].cols, imgs[0][0].rows);
+    if (img_size_.width != calib_img_size_.width || img_size_.height != calib_img_size_.height)
+        LOG(FATAL)<<"Resolution of images used for calibration and size of images to refocus is not the same!";
+
+    initializeRefocus();
+
+    LOG(INFO)<<"DONE READING IMAGES!";
+
+}
+*/

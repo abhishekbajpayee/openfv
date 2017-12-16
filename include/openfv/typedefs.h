@@ -37,8 +37,6 @@ struct refocus_settings {
     //! Flag indicating if data is in mtiff format files
     int mtiff; // 1 for using multipage tiffs
     //! Flag indicating if data is in mp4 videos
-    int mp4; // 1 for using mp4 data
-    //! Flag to use multiplicative refocusing
     int mult; // 1 for Multiplicative
     //! Multiplicative exponent
     double mult_exp;
@@ -71,9 +69,6 @@ struct refocus_settings {
     int resize_images;
     //! Factor by which to resize calibration images
     double rf;
-
-    //! Whether calibration file is out of Kalibr
-    int kalibr;
 
     //! Whether to undistort images or not
     int undistort;
