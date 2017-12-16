@@ -152,32 +152,16 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         config_file_path.remove_leaf() /= imgsP.string();
         settings.images_path = config_file_path.string();
     }
-
-    // boost::filesystem::path calibP(filename);
-    // boost::filesystem::path imgsP(filename);
-
-    // calibP.remove_leaf() /= vm["calib_file_path"].as<string>();
-    // imgsP.remove_leaf() /= vm["images_path"].as<string>();
-
-    // settings.calib_file_path = calibP.string();
-    // if (settings.calib_file_path.empty()) {
-    //     LOG(FATAL)<<"calib_file is a REQUIRED Variable";
-    // }
-    // else if (!dirExists(settings.calib_file_path)) {
-    //    LOG(FATAL)<<"Calibration File Path does not exist!";
-    // }
-
-    // settings.images_path = imgsP.string();
-    // if(settings.images_path.empty()) {
-    //     LOG(FATAL)<<"data_path is a REQUIRED Variable";
-    // }
-    // else if (!dirExists(settings.images_path)) {
-    //    LOG(FATAL)<<"Images Files Path does not exist!";
-    // }
-
+    if (!boost::filesystem::exists(settings.images_path))
+        LOG(FATAL) << settings.images_path << " does not seem to exist!";
+    if (!boost::filesystem::is_directory(settings.images_path))
+        LOG(FATAL) << settings.images_path << " does not seem to be a directory! Is it a file?";
+    if (settings.images_path != '/')
+        settings.images_path += '/';
 
 }
 
+/*
 void parse_calibration_settings(string filename, calibration_settings &settings, bool h) {
 
     namespace po = boost::program_options;
@@ -267,3 +251,4 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     settings.corners_file_path = vm["corners_file"].as<string>();
 
 }
+*/
