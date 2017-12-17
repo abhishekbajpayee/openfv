@@ -198,59 +198,19 @@ void saRefocus::read_calib_data(string path) {
         VLOG(1)<<"Calibration is pinhole";
     }
 
-    VLOG(1)<<"DONE READING CALIBRATION DATA";
-
-}
-
-void saRefocus::read_calib_data_pin(string path) {
-
-    ifstream file;
-    file.open(path.c_str());
-    if(file.fail())
-        LOG(FATAL)<<"Could not open calibration file! Termintation...";
-
-    LOG(INFO)<<"LOADING PINHOLE CALIBRATION DATA...";
-
-    string time_stamp;
-    getline(file, time_stamp);
-
-    double reproj_error1, reproj_error2;
-    file>>reproj_error1>>reproj_error2;
-    file>>num_cams_;
-
-    Mat_<double> P_u = Mat_<double>::zeros(3,4);
-    Mat_<double> P = Mat_<double>::zeros(3,4);
-    string cam_name;
-    double tmp;
-
+    // checking for camera name clashes
     for (int i=0; i<num_cams_; i++) {
-
-        for (int j=0; j<2; j++) getline(file, cam_name);
-        cam_names_.push_back(cam_name);
-
-        for (int j=0; j<3; j++) {
-            for (int k=0; k<3; k++) {
-                file>>P_u(j,k);
-            }
-            file>>P_u(j,3);
+        for (int j=0; j<num_cams_; j++) {
+            if (i==j)
+                continue;
+            else
+                if (cam_names_[i].compare(cam_names_[j]) == 0)
+                    LOG(FATAL) << "Camera name clash detected! cam_name[" << i << "] is same as cam_name[" << j << "]";
         }
-        for (int j=0; j<3; j++) {
-            for (int k=0; k<3; k++) {
-                file>>P(j,k);
-            }
-            file>>P(j,3);
-        }
-        //refocusing_params_.P_mats_u.push_back(P_u.clone());
-        P_mats_.push_back(P.clone());
-
     }
+                    
 
-    file>>img_size_.width;
-    file>>img_size_.height;
-    file>>scale_;
-    //file>>warp_factor_;
-
-    file.close();
+    VLOG(1)<<"DONE READING CALIBRATION DATA";
 
 }
 
@@ -274,6 +234,7 @@ void saRefocus::read_imgs(string path) {
 
         VLOG(1)<<"UNDISTORT_IMAGES flag is "<<UNDISTORT_IMAGES;
         
+        int size = 0;
         for (int i=0; i<num_cams_; i++) {
 
             VLOG(1)<<"Camera "<<i+1<<" of "<<num_cams_<<"..."<<endl;
@@ -281,7 +242,11 @@ void saRefocus::read_imgs(string path) {
             string path_tmp;
             vector<Mat> refocusing_imgs_sub;
 
-            path_tmp = path+cam_names_[i]+"/"+img_prefix;
+            // path_tmp = path+cam_names_[i]+"/"+img_prefix;
+            path_tmp = path+cam_names_[i]+"/";
+
+            if (!boost::filesystem::is_directory(path_tmp))
+                LOG(FATAL) << "Directory for camera " << cam_names_[i] << " does not exist!";
 
             dir = opendir(path_tmp.c_str());
             while(ent = readdir(dir)) {
@@ -294,7 +259,19 @@ void saRefocus::read_imgs(string path) {
                 }
             }
 
+            // validate number of images in folder not 0
+            if (img_names.size() == 0)
+                LOG(FATAL) << "No images in " << cam_names_[i] << "!";
+
             sort(img_names.begin(), img_names.end());
+
+            // check if number of frames in camera folders
+            // equal or not
+            if (i==0)
+                size = img_names.size();
+            else
+                if (img_names.size() != size)
+                    LOG(WARNING) << "Number of images in camera folder for " << cam_names_[i] << " not equal to images in folder for " << cam_names_[0] << "! Corresponding frames will be read in order from beginning. Syncing might be off.";
 
             int begin;
             int end;
@@ -309,7 +286,7 @@ void saRefocus::read_imgs(string path) {
                 end = end_frame_+1;
                 skip = skip_frame_;
                 if (end>img_names.size()) {
-                    LOG(WARNING)<<"End frame is greater than number of frames!" <<endl;
+                    LOG(FATAL)<<"End frame is greater than number of frames in " << cam_names_[i] << "!";
                     end = img_names.size();
                 }
             }
@@ -384,28 +361,46 @@ void saRefocus::read_imgs_mtiff(string path) {
     }
 
     sort(img_names.begin(), img_names.end());
-    vector<mtiffReader> tiffs;
 
-    VLOG(1)<<"Images in path:"<<endl;
+    if (img_names.size() != num_cams_)
+        LOG(FATAL) << "Number of mtiff files in " << path << " not equal to the number of cameras in the calibration file!";
+
+    LOG(WARNING) << "Camera names from calibration file are not automatically matched to names of mtiff files! Please ensure the following mappings are correct:";
+    for (int i=0; i<num_cams_; i++)
+        LOG(INFO) << cam_names_[i] << " -> " << img_names[i];
+
+    VLOG(1)<<"mtiff files in path:";
+    vector<mtiffReader> tiffs;
+    int size = 0;
     for (int i=0; i<img_names.size(); i++) {
         VLOG(1)<<img_names[i]<<endl;
         mtiffReader tiff(img_names[i]);
         VLOG(2)<<tiff.num_frames()<<" frames in file.";
+
+        // check if number of frames in mtiff files
+        // equal or not
+        if (i==0)
+            size = tiff.num_frames();
+        else
+            if (tiff.num_frames() != size)
+                LOG(WARNING) << "Number of frames in " << img_names[i] << " not equal to frames in " << img_names[0] << "! Corresponding frames will be read in order from beginning. Syncing might be off.";
+
         tiffs.push_back(tiff);
     }
 
-    // TODO: add check for whether all tiffs are equal in size or not
-
     if (ALL_FRAME_FLAG) {
-        VLOG(1)<<"READING ALL FRAMES..."<<endl;
+        VLOG(1)<<"READING ALL FRAMES...";
         for (int i=0; i<tiffs[0].num_frames(); i++)
             frames_.push_back(i);
     }
 
-    VLOG(1)<<"Reading images..."<<endl;
+    VLOG(1)<<"Reading images...";
     for (int n=0; n<img_names.size(); n++) {
 
         VLOG(1)<<"Camera "<<n+1<<"...";
+
+        if (frames_.back() > tiffs[n].num_frames())
+            LOG(FATAL) << "End frame greater than the number of frames in " << img_names[n] << "!";
 
         vector<Mat> refocusing_imgs_sub;
         int count=0;
@@ -416,7 +411,7 @@ void saRefocus::read_imgs_mtiff(string path) {
         }
 
         imgs.push_back(refocusing_imgs_sub);
-        VLOG(1)<<"done! "<<count<<" frames read."<<endl;
+        VLOG(1)<<"done! "<<count<<" frames read.";
 
     }
 
@@ -2184,6 +2179,58 @@ BOOST_PYTHON_MODULE(refocusing) {
 }
 
 /* LEGACY CODE
+void saRefocus::read_calib_data_pin(string path) {
+
+    ifstream file;
+    file.open(path.c_str());
+    if(file.fail())
+        LOG(FATAL)<<"Could not open calibration file! Termintation...";
+
+    LOG(INFO)<<"LOADING PINHOLE CALIBRATION DATA...";
+
+    string time_stamp;
+    getline(file, time_stamp);
+
+    double reproj_error1, reproj_error2;
+    file>>reproj_error1>>reproj_error2;
+    file>>num_cams_;
+
+    Mat_<double> P_u = Mat_<double>::zeros(3,4);
+    Mat_<double> P = Mat_<double>::zeros(3,4);
+    string cam_name;
+    double tmp;
+
+    for (int i=0; i<num_cams_; i++) {
+
+        for (int j=0; j<2; j++) getline(file, cam_name);
+        cam_names_.push_back(cam_name);
+
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<3; k++) {
+                file>>P_u(j,k);
+            }
+            file>>P_u(j,3);
+        }
+        for (int j=0; j<3; j++) {
+            for (int k=0; k<3; k++) {
+                file>>P(j,k);
+            }
+            file>>P(j,3);
+        }
+        //refocusing_params_.P_mats_u.push_back(P_u.clone());
+        P_mats_.push_back(P.clone());
+
+    }
+
+    file>>img_size_.width;
+    file>>img_size_.height;
+    file>>scale_;
+    //file>>warp_factor_;
+
+    file.close();
+
+}
+
 void saRefocus::read_kalibr_data(string path) {
 
     LOG(INFO)<<"Reading calibration (kalibr) data...";
@@ -2288,6 +2335,7 @@ void saRefocus::read_kalibr_data(string path) {
         P_mat_avg_ += P_mats_[i].clone()/num_cams_;
 
 }
+
 void saRefocus::read_imgs_mp4(string path) {
 
     for (int i=0; i<cam_names_.size(); i++) {
