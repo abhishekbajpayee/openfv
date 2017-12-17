@@ -1671,7 +1671,24 @@ void saRefocus::img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_ou
 
 void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type) {
 
-    LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
+    LOG(INFO)<<"SAVING STACK TO "<<path;
+
+    if (*path.rbegin() != '/')
+        path += '/';
+
+    if (boost::filesystem::is_directory(path)) {
+        LOG(WARNING) << "Directory " << path << " already exists!";
+        if (boost::filesystem::is_empty(path))
+            LOG(INFO) << "However, it is empty. Will write data in same directory.";
+        else {
+            path = generate_unique_path(path);
+            LOG(INFO) << "Routing output to " << path << " instead.";
+            mkdir(path.c_str(), S_IRWXU);
+        }
+    } else {
+        LOG(INFO) << "Creating directory " << path;
+        mkdir(path.c_str(), S_IRWXU);
+    }
 
     for (int f=0; f<frames_.size(); f++) {
 

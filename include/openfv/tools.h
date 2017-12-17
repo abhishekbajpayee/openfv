@@ -113,6 +113,8 @@ vector<double> test_field(double, double, double, double);
 
 vector<double> dir_field(double, double, double, double);
 
+string generate_unique_path(string);
+
 // Movie class
 
 class Movie {

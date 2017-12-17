@@ -653,6 +653,24 @@ vector<double> dir_field(double x, double y, double z, double t) {
 
 }
 
+string generate_unique_path(string path) {
+
+    if (*path.rbegin() == '/')
+        path = path.substr(0,path.length()-1);
+
+    string new_path;
+    for (int i=0; i<999; i++) {
+        char postfix[3];
+        sprintf(postfix, "%03d", i);
+        new_path = path + "_" + postfix;
+        if (!boost::filesystem::exists(new_path))
+            break;
+    }
+
+    return new_path + "/";
+
+}
+
 // ----------------------------------------------------
 // Movie class functions
 // ----------------------------------------------------
