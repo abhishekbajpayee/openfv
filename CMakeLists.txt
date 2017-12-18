@@ -119,7 +119,7 @@ include_directories( ${CUDA_INCLUDE_DIRS} )
 # include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
 set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack gomp) # protobuf lgomp (removed)
-set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY})
+set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY} yaml-cpp)
 if (WITH_CUDA)
   set(OTHER_LIBS ${OTHER_LIBS}) # cufft cufftw
   set (OFV_LIBS openfv cuda_openfv)

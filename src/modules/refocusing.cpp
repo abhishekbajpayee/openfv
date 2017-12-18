@@ -1736,6 +1736,65 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
 
 }
 
+void saRefocus::write_piv_settings(string path, double zmin, double zmax, double dz, double thresh) {
+
+    LOG(INFO)<<"SAVING PIV SETTINGS FILE IN "<<path;
+
+    string out_file = path + "piv_config.yaml";
+    ofstream file(out_file.c_str());
+
+    YAML::Emitter rec_out;
+
+    rec_out << YAML::BeginMap;
+    rec_out << YAML::Comment("settings from SA reconstruction");
+
+    rec_out << YAML::Key << "data_path";
+    rec_out << YAML::Value << path;
+
+    rec_out << YAML::Key << "piv_save_path";
+    rec_out << YAML::Value << path + "piv_results/";
+
+    rec_out << YAML::Key << "pix_per_mm";
+    rec_out << YAML::Value << scale_;
+
+    rec_out << YAML::EndMap;
+
+    file << rec_out.c_str() << "\n\n";
+
+    YAML::Emitter piv_out;
+
+    piv_out << YAML::BeginMap;
+    piv_out << YAML::Comment("default PIV settings (change as needed)");
+
+    piv_out << YAML::Key << "dt";
+    piv_out << YAML::Value << 1.0;
+
+    piv_out << YAML::Key << "passes";
+    piv_out << YAML::Value << 3;
+
+    piv_out << YAML::Key << "windows";
+    piv_out << YAML::Value << YAML::BeginSeq;
+    piv_out << YAML::Flow << YAML::BeginSeq << 64 << 64 << 64 << YAML::EndSeq;
+    piv_out << YAML::Flow << YAML::BeginSeq << 48 << 48 << 48 << YAML::EndSeq;
+    piv_out << YAML::Flow << YAML::BeginSeq << 32 << 32 << 32 << YAML::EndSeq;
+    piv_out << YAML::EndSeq;
+
+    piv_out << YAML::Key << "overlap";
+    piv_out << YAML::Value << YAML::BeginSeq;
+    piv_out << YAML::Flow << YAML::BeginSeq << 50 << 50 << 50 << YAML::EndSeq;
+    piv_out << YAML::Flow << YAML::BeginSeq << 50 << 50 << 50 << YAML::EndSeq;
+    piv_out << YAML::Flow << YAML::BeginSeq << 50 << 50 << 50 << YAML::EndSeq;
+    piv_out << YAML::EndSeq;
+
+    piv_out << YAML::EndMap;
+
+    file << piv_out.c_str() << "\n";
+    file.close();
+
+    LOG(INFO)<<"SAVING COMPLETE!"<<endl;
+
+}
+
 void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, vector<Mat> &returnStack) {
 
     LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
