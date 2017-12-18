@@ -49,6 +49,7 @@ OpenFV requires the following packages:
 #. Boost Libraries, libtiff4 +, gperftools
 #. Glog, Google Log 0.3.1 +
 #. Ceres Solver, Eigen 3.2.2 +, Atlas, SuiteSparse
+#. yaml-cpp
 #. OpenCV 2.4.10 (3.0+ not yet supported) built with Python,
    [optional: Qt and CUDA (if you have a GPU on your machine)]
 
@@ -88,7 +89,7 @@ General Setup
 ^^^^^^^^^^^^^
 .. code-block:: bash
 
-    $ sudo apt-get install cmake build-essential libboost-all-dev libgoogle-perftools-dev google-perftools libeigen3-dev libatlas-base-dev libsuitesparse-dev  
+    $ sudo apt-get install cmake build-essential libboost-all-dev libgoogle-perftools-dev google-perftools libeigen3-dev libatlas-base-dev libsuitesparse-dev libyaml-cpp-dev
 
 * install `ceres <http://ceres-solver.org/building.html>`_
 
