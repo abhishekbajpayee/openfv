@@ -1,7 +1,7 @@
 % Function to run PIV on multiple reconstructed frames in a directory
 % based on config file output by OpenFV SA reconstruction
 
-function velocityData = processPIV(config_file)
+function velocityData = SAPIV(config_file)
 
 % extract data from yaml config file
 yaml_data = yaml.ReadYaml(config_file);
@@ -54,8 +54,8 @@ for i = 1:nFrames-1
     results_path = [save_path frames{1}];
     if exist(results_path, 'dir')
         if exist([results_path '/3DPIV_results.mat'], 'file')
-            disp(['Warning: PIV results already exist for frame ' frames{1} '. Will ' ...
-                  'be overwritten!']);
+            warning(['Warning: PIV results already exist for frame ' frames{1} '. Will ' ...
+                     'be overwritten!']);
         end
     end
     

@@ -1,7 +1,5 @@
 % Function to read data in specified format from path variable and
 % then run PIV based on other specified settings
-%
-% TODO: Only works for 1 time step so far so make that variable
 
 function velocityField = runPIV(data_path, frames, pivOpts, f, dt)
 
