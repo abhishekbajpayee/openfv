@@ -709,10 +709,32 @@ Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh,
 
 // ---GPU Refocusing Functions Begin--- //
 
+void saRefocus::initializeGPU() {
+
+    if (!EXPERT_FLAG) {
+
+        LOG(INFO)<<"INITIALIZING GPU..."<<endl;
+
+        VLOG(1)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
+
+        gpu::DeviceInfo gpuDevice(gpu::getDevice());
+
+        VLOG(1)<<"---"<<gpuDevice.name()<<"---"<<endl;
+        VLOG(1)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB";
+    }
+
+    if (REF_FLAG)
+        if (!CORNER_FLAG)
+            uploadToGPU_ref();
+
+    // uploadToGPU();
+
+}
+
 // TODO: Right now this function just starts uploading images
 //       without checking if there is enough free memory on GPU
 //       or not.
-void saRefocus::uploadToGPU() {
+void saRefocus::uploadAllToGPU() {
 
     if (!EXPERT_FLAG) {
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
@@ -720,7 +742,7 @@ void saRefocus::uploadToGPU() {
         VLOG(1)<<"Free Memory before: "<<free_mem_GPU<<" MB";
     }
 
-    VLOG(1)<<"Uploading all frames to GPU..."<<endl;
+    VLOG(1)<<"Uploading all frames to GPU...";
     for (int i=0; i<imgs[0].size(); i++) {
         for (int j=0; j<num_cams_; j++) {
             temp.upload(imgs[j][i]);
@@ -734,6 +756,21 @@ void saRefocus::uploadToGPU() {
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
         VLOG(1)<<"Free Memory after: "<<(gpuDevice.freeMemory()/pow(1024.0,2))<<" MB";
     }
+
+}
+
+void saRefocus::uploadSingleToGPU(int frame) {
+
+    VLOG(1)<<"Uploading frame " << frame << " to GPU...";
+
+    array_all.clear();
+    array.clear();
+    for (int j=0; j<num_cams_; j++) {
+        temp.upload(imgs[j][frame]);
+        array.push_back(temp.clone());
+    }
+    array_all.push_back(array);
+    array.clear();
 
 }
 
@@ -767,7 +804,7 @@ void saRefocus::uploadToGPU_ref() {
     Mat blank(img_size_.height, img_size_.width, CV_32F, float(0));
     xmap.upload(blank); ymap.upload(blank);
     temp.upload(blank); temp2.upload(blank);
-    //refocused.upload(blank);
+    // refocused.upload(blank);
 
     for (int i=0; i<9; i++) {
         xmaps.push_back(xmap.clone());
@@ -999,7 +1036,9 @@ void saRefocus::cb_dz_100(int val, void* userdata) {
 
 void saRefocus::GPUliveView() {
 
-    // initializeGPU();
+    // uploading all frames so that navigation in time
+    // is possible in real time
+    uploadAllToGPU();
 
     if (REF_FLAG) {
         if (CORNER_FLAG) {
@@ -1127,31 +1166,6 @@ void saRefocus::GPUliveView() {
         }
 
     }
-
-}
-
-// TODO: This function prints free memory on GPU and then
-//       calls uploadToGPU() which uploads either a given
-//       frame or all frames to GPU depending on frame_
-void saRefocus::initializeGPU() {
-
-    if (!EXPERT_FLAG) {
-
-        LOG(INFO)<<"INITIALIZING GPU..."<<endl;
-
-        VLOG(1)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
-
-        gpu::DeviceInfo gpuDevice(gpu::getDevice());
-
-        VLOG(1)<<"---"<<gpuDevice.name()<<"---"<<endl;
-        VLOG(1)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB";
-    }
-
-    uploadToGPU();
-
-    if (REF_FLAG)
-        if (!CORNER_FLAG)
-            uploadToGPU_ref();
 
 }
 
@@ -1693,18 +1707,20 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
     for (int f=0; f<frames_.size(); f++) {
 
         stringstream fn;
-        fn<<path<<frames_.at(f);
+        char fnum[4];
+        sprintf(fnum, "%04d", frames_.at(f));
+        // fn<<path<<frames_.at(f);
+        fn<<path<<fnum;
         mkdir(fn.str().c_str(), S_IRWXU);
 
         LOG(INFO)<<"Saving frame "<<frames_.at(f)<<"...";
 
+        uploadSingleToGPU(f);
         vector<Mat> stack;
         for (double z=zmin; z<=zmax; z+=dz) {
-
             // Mat img = refocus(z, 0, 0, 0, thresh, frames_.at(f));
-            Mat img = refocus(z, 0, 0, 0, thresh, f);
+            Mat img = refocus(z, 0, 0, 0, thresh, 0);
             stack.push_back(img);
-
         }
 
         imageIO io(fn.str());
