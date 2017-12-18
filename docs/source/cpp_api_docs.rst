@@ -1,17 +1,18 @@
 C++ API Documentation
 =====================
 
-Calibration
------------
+..
+   Calibration
+   -----------
 
-The :cpp:class:`multiCamCalibration` class can be used to calibrate multiple
-cameras via bundle adjustment. Data from a successful calibration run
-can be used to calculate synthetic aperture refocused images or for
-other purposes.
+   The :cpp:class:`multiCamCalibration` class can be used to calibrate multiple
+   cameras via bundle adjustment. Data from a successful calibration run
+   can be used to calculate synthetic aperture refocused images or for
+   other purposes.
 
-.. doxygenclass:: multiCamCalibration
-   :project: openfv
-   :members:
+   .. doxygenclass:: multiCamCalibration
+      :project: openfv
+      :members:
 
 Refocusing
 ----------
