@@ -100,10 +100,13 @@ saRefocus::saRefocus(refocus_settings settings):
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
     SINGLE_CAM_DEBUG = 0;
-    // PERSPECTIVE_SHIFT = 0;
 
     imgs_read_ = 0;
     read_calib_data(settings.calib_file_path);
+
+    if (mult_)
+        if (minlos_)
+            LOG(FATAL) << "mult and minlos both cannot be ON!";
 
     if (mult_) {
         mult_exp_ = settings.mult_exp;
@@ -1709,7 +1712,6 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
         stringstream fn;
         char fnum[4];
         sprintf(fnum, "%04d", frames_.at(f));
-        // fn<<path<<frames_.at(f);
         fn<<path<<fnum;
         mkdir(fn.str().c_str(), S_IRWXU);
 
