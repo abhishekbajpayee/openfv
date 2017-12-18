@@ -29,6 +29,15 @@
 using namespace cv;
 using namespace std;
 
+boost::program_options::options_description get_options();
+
+/*! Function to parse a config file and return a reconstruction_settings variable.
+  \param filename Full path to configuration file
+  \param settings Destination reconstruction_settings variable
+  \param help Flag to show all options as a help menu instead of parsing data
+*/
+void parse_reconstruction_settings(string filename, reconstruction_settings &settings, bool help);
+
 /*! Function to parse a refocus settings file and return a refocus_settings variable
   which can be directly passed to an saRefocus constructor.
   \param filename Full path to configuration file
@@ -42,5 +51,5 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool he
   \param filename Full path to configuration file
   \param settings Destination calibration_settings variable
   \param help Flag to show all options as a help menu instead of parsing data
-*/
 void parse_calibration_settings(string filename, calibration_settings &settings, bool help);
+*/

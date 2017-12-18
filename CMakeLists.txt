@@ -112,6 +112,7 @@ include_directories( ${Boost_INCLUDE_DIR} )
 include_directories( ${PYTHON_INCLUDE_DIRS} )
 include_directories( ${EIGEN_INC_DIR} )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories( ${CUDA_INCLUDE_DIRS} )
 
 # Don't think these are needed because OpenFV
 # doesn't link to Qt
@@ -143,5 +144,8 @@ set(CMAKE_PYTHON_INSTALL_PREFIX ${PYTHON_SITE_PACKAGES}/openfv)
 
 # Subdirectories
 add_subdirectory(src)
+
+add_executable (sa_reconstruct ${PROJECT_SOURCE_DIR}/src/tools/sa_reconstruct.cpp)
+target_link_libraries (sa_reconstruct ${LIBS} ${OFV_LIBS})
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/openfv/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/openfv)

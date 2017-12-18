@@ -75,59 +75,24 @@ struct refocus_settings {
     
 };
 
-struct calibration_settings {
+/*! Settings container used to parse reconstruction settings. */
+struct reconstruction_settings {
 
-    //! Path to directory where input images / videos lie
-    string images_path;
-    //! Path to file where detected corners should be written
-    string corners_file_path;
-    //! Number of corners in grid (horizontal x vertical)
-    Size grid_size;
-    //! Physical size of grid in [mm]
-    double grid_size_phys;
+    //! Path to where output images should be saved
+    string save_path;
 
-    //! Flag indicating if calibration refractive or not
-    int refractive;
-    //! Flag indicating if calibration data is in mtiff files or not
-    int mtiff;
-    //! Flag indicating if calibration data is in mp4 files or not
-    int mp4;
-    //! Flag indicating if radial distortion should be accounted for or not
-    int distortion;
-    //! Flag indicating if corners should be written to file or not
-    int write_corners;
+    //! lower bound z
+    double zmin;
+    //! upper bound z
+    double zmax;
+    //! manually specified dz
+    double dz;
 
-    //! Frames to skip between successive reads
-    int skip;
-    //! Number of the frame to start reading at
-    int start_frame;
-    //! Number of the frame to end reading at
-    int end_frame;
+    //! threshold level (std devs above mean)
+    double thresh;
 
-    //! Time shift values for each camera
-    vector<int> shifts;
-
-    //! Flag indicating if calibration images should be resized or not
-    int resize_images;
-    //! Factor by which to resize calibration images
-    double rf;
-
-};
-
-struct safe_refocus_settings {
-
-  double dp;
-  double minDist;
-  double param1;
-  double param2;
-  int minRadius;
-  int maxRadius;
-  int gKerWid;
-  int gKerHt;
-  int gKerSigX;
-  int gKerSigY;
-  int circle_rim_thickness;
-  int debug;
+    //! Whether to manually specify dz or not
+    int manual_dz;
 
 };
 
@@ -194,34 +159,60 @@ struct particle_path {
 };
 
 /*
-struct refocusing_data {
-    vector<Mat> P_mats_u; // Unaligned P matrices
-    vector<Mat> P_mats;
-    vector<string> cam_names;
-    double scale;
-    Size img_size;
-    int num_cams;
-    double warp_factor;
+struct calibration_settings {
+
+    //! Path to directory where input images / videos lie
+    string images_path;
+    //! Path to file where detected corners should be written
+    string corners_file_path;
+    //! Number of corners in grid (horizontal x vertical)
+    Size grid_size;
+    //! Physical size of grid in [mm]
+    double grid_size_phys;
+
+    //! Flag indicating if calibration refractive or not
+    int refractive;
+    //! Flag indicating if calibration data is in mtiff files or not
+    int mtiff;
+    //! Flag indicating if calibration data is in mp4 files or not
+    int mp4;
+    //! Flag indicating if radial distortion should be accounted for or not
+    int distortion;
+    //! Flag indicating if corners should be written to file or not
+    int write_corners;
+
+    //! Frames to skip between successive reads
+    int skip;
+    //! Number of the frame to start reading at
+    int start_frame;
+    //! Number of the frame to end reading at
+    int end_frame;
+
+    //! Time shift values for each camera
+    vector<int> shifts;
+
+    //! Flag indicating if calibration images should be resized or not
+    int resize_images;
+    //! Factor by which to resize calibration images
+    double rf;
+
 };
 
-struct refocusing_data_ref {
-    vector<Mat> P_mats_u; // Unaligned P matrices
-    vector<Mat> P_mats;
-    vector<string> cam_names;
-    double scale;
-    Size img_size;
-    int num_cams;
-    int n1;
-    int n2;
-    int n3;
-    double zW;
-};
+struct safe_refocus_settings {
 
-struct voxel {
-    int x;
-    int y;
-    int z;
-    double I;
+  double dp;
+  double minDist;
+  double param1;
+  double param2;
+  int minRadius;
+  int maxRadius;
+  int gKerWid;
+  int gKerHt;
+  int gKerSigX;
+  int gKerSigY;
+  int circle_rim_thickness;
+  int debug;
+
 };
 */
 

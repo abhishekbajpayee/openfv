@@ -94,7 +94,7 @@ saRefocus::saRefocus(refocus_settings settings):
         LOG(FATAL)<<"OpenFV was compiled without GPU support! Switch GPU option to OFF.";
 #endif
 
-    STDEV_THRESH = 0;
+    STDEV_THRESH = 1;
     IMG_REFRAC_TOL = 1E-9;
     MAX_NR_ITERS = 20;
     BENCHMARK_MODE = 0;

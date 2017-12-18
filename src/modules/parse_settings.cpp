@@ -29,11 +29,11 @@
 using namespace cv;
 using namespace std;
 
-void parse_refocus_settings(string filename, refocus_settings &settings, bool h) {
-
+boost::program_options::options_description get_options() {
+    
     namespace po = boost::program_options;
-
     po::options_description desc("Allowed config file options");
+
     desc.add_options()
         ("use_gpu", po::value<int>()->default_value(0), "ON to use GPU")
         ("mult", po::value<int>()->default_value(0), "ON to use multiplicative method")
@@ -48,8 +48,64 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
         ("resize_images", po::value<int>()->default_value(0), "ON to resize all input images")
         ("rf", po::value<double>()->default_value(1.0), "Factor to resize input images by")
         ("undistort", po::value<int>()->default_value(0), "ON to undistort images")
+
+        ("save_path", po::value<string>()->default_value(""), "path where data is saved")
+        ("zmin", po::value<double>()->default_value(0), "zmin")
+        ("zmax", po::value<double>()->default_value(10), "zmax")
+        ("manual_dz", po::value<int>()->default_value(0), "flag to enable manual specification of dz")
+        ("dz", po::value<double>()->default_value(0.1), "dz (manual)")
+        ("thresh", po::value<double>()->default_value(2.5), "threshold (std devs above mean)")
+
         ;
 
+    return desc;
+
+}
+
+void parse_reconstruction_settings(string filename, reconstruction_settings &settings, bool h) {
+
+    namespace po = boost::program_options;
+
+    po::options_description desc = get_options();
+ 
+    if (h) {
+        cout<<desc;
+        exit(1);
+    }
+
+    po::variables_map vm;
+    po::store(po::parse_config_file<char>(filename.c_str(), desc), vm);
+    po::notify(vm);
+ 
+    settings.zmin = vm["zmin"].as<double>();
+    settings.zmax = vm["zmax"].as<double>();
+    settings.manual_dz = vm["manual_dz"].as<int>();
+    if (settings.manual_dz)
+        settings.dz = vm["dz"].as<double>();
+    settings.thresh = vm["thresh"].as<double>();
+
+    boost::filesystem::path saveP(vm["save_path"].as<string>());
+    if(saveP.string().empty()) {
+        LOG(FATAL)<<"save_path is a REQUIRED variable";
+    }
+    if (saveP.is_absolute()) {
+        settings.save_path = saveP.string();
+    } else {
+        boost::filesystem::path file_path(filename);
+        file_path.remove_leaf() /= saveP.string();
+        settings.save_path = file_path.string();
+    }
+    if (*settings.save_path.rbegin() != '/')
+        settings.save_path += '/';
+
+}
+
+void parse_refocus_settings(string filename, refocus_settings &settings, bool h) {
+
+    namespace po = boost::program_options;
+
+    po::options_description desc = get_options();
+ 
     if (h) {
         cout<<desc;
         exit(1);
