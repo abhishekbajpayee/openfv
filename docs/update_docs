@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Checking out and unstaging source files
-git checkout master ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
-git rm -r --cached ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
+git checkout master ../include ../src/modules ../src/tools ../CMakeLists.txt ../src/CMakeLists.txt
+git rm -r --cached ../include ../src/modules ../src/tools ../CMakeLists.txt ../src/CMakeLists.txt
 
 git checkout master openfv_python_doc_build.py 
 git rm -r --cached openfv_python_doc_build.py
@@ -21,6 +21,6 @@ git rm -r --cached source config Makefile
 make html
 
 # Cleaning up
-rm -r ../include ../src/modules ../CMakeLists.txt ../src/CMakeLists.txt
+rm -r ../include ../src/modules ../src/tools ../CMakeLists.txt ../src/CMakeLists.txt
 rm -r openfv_python_doc_build.py
 rm -r source config Makefile
