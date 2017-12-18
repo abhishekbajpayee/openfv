@@ -1701,13 +1701,9 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
         vector<Mat> stack;
         for (double z=zmin; z<=zmax; z+=dz) {
 
-            Mat img = refocus(z, 0, 0, 0, thresh, frames_.at(f));
-            //Mat result = refocused_host_.clone();
+            // Mat img = refocus(z, 0, 0, 0, thresh, frames_.at(f));
+            Mat img = refocus(z, 0, 0, 0, thresh, f);
             stack.push_back(img);
-
-            // stringstream ss;
-            // ss<<fn.str()<<"/"<<((z-zmin)/dz)<<"."<<type;
-            // imwrite(ss.str(), img);
 
         }
 
