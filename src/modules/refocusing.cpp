@@ -1095,7 +1095,7 @@ void saRefocus::GPUliveView() {
                 z_ += dz_;
             } else if( (key & 255)==81 ) {
                 z_ -= dz_;
-            } else if( (key & 255)==82 ) {
+            } else if( (key & 255)==61 ) {
                 if (mult_) {
                     if (mult_exp_<mult_exp_limit)
                         mult_exp_ += mult_thresh;
@@ -1103,7 +1103,7 @@ void saRefocus::GPUliveView() {
                     if (thresh_<tulimit)
                         thresh_ += dthresh;
                 }
-            } else if( (key & 255)==84 ) {
+            } else if( (key & 255)==45 ) {
                 if (mult_) {
                     if (mult_exp_>0)
                         mult_exp_ -= mult_thresh;
