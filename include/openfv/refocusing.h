@@ -139,6 +139,7 @@ class saRefocus {
     void GPUrefocus(int live, int frame);
     void GPUrefocus_ref(int live, int frame);
     void GPUrefocus_ref_corner(int live, int frame);
+    void uploadAllToGPU();
 #endif
 
     void CPUrefocus(int live, int frame);
@@ -205,7 +206,6 @@ class saRefocus {
     void slidingMinToZero(Mat in, Mat &out, int xf, int yf);
 
 #ifndef WITHOUT_CUDA
-    void uploadAllToGPU();
     void uploadSingleToGPU(int);
     void uploadToGPU_ref();
     void threshold_image(GpuMat &refocused);
