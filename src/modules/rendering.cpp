@@ -55,10 +55,11 @@ void Scene::create(double sx, double sy, double sz, int gpu) {
     REF_FLAG = 0;
     geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0); geom_.push_back(0);
 
-    // TODO: this needs to be tweaked
-    sigmax_ = 0.1;
-    sigmay_ = 0.1;
-    sigmaz_ = 0.1;
+    // setting default particle sigma = 0.1 mm
+    double sigma = 0.1;
+    sigmax_ = sigma;
+    sigmay_ = sigma;
+    sigmaz_ = sigma;
 
     GPU_FLAG = gpu;
 
@@ -82,6 +83,8 @@ void Scene::setCircVolFlag(int flag) {
 }
 
 void Scene::setParticleSigma(double sx, double sy, double sz) {
+
+    LOG(INFO) << "Setting particle sigma to (" << sx << ", " << sy << ", " << sz << ") [mm]"; 
 
     sigmax_ = sx;
     sigmay_ = sy;
@@ -354,7 +357,7 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
 
         }
 
-        Mat result(slice);
+        Mat result(slice); 
         volumeGPU_.push_back(result.clone());
 
     }
@@ -534,7 +537,15 @@ void Scene::temp() {
 void Scene::dumpStack(string path) {
 
     imageIO io(path);
-    io<<volumeGPU_;
+
+#ifndef WITHOUT_CUDA
+    if (GPU_FLAG) {
+        io<<volumeGPU_;
+    }
+#endif
+    if (!GPU_FLAG) {
+        io<<volumeCPU_;
+    }
 
 }
 
@@ -767,6 +778,7 @@ void Camera::project() {
             s_(0,i) = custom_sigma_;
         } else {
             d = sqrt( pow(C_(0,0)-particles(0,i), 2) + pow(C_(1,0)-particles(1,i), 2) + pow(C_(2,0)-particles(2,i), 2) );
+            // converting scene particle sigma from mm to pixels
             s_(0,i) = scene_.sigma()*f_/d;
         }
         VLOG(3)<<"Particle sigma: "<<s_(0,i);
