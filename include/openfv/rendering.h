@@ -205,6 +205,8 @@ class Camera {
 
     void setCustomParticleSigma(double sigma);
 
+    void setRefShift(double shift) { LOG(INFO) << "Setting ref_shift to " << shift; ref_shift_ = shift; }
+
     //! Render image of attached scene
     Mat render();
     void renderCPU();
@@ -227,6 +229,7 @@ class Camera {
 
     int imsx_, imsy_, cx_, cy_;
     double f_;
+    double ref_shift_;
 
     Mat_<double> C_;
     Mat_<double> t_;

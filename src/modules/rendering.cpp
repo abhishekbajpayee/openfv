@@ -589,7 +589,10 @@ void Camera::init(double f, int imsx, int imsy, int gpu) {
 void Camera::setLocation(double x, double y, double z) {
 
     C_(0,0) = x; C_(1,0) = y; C_(2,0) = z;
-    pointAt(0, 0, 0);
+    if (REF_FLAG)
+        pointAt(-1*ref_shift_*x, -1*ref_shift_*y, 0);
+    else
+        pointAt(0, 0, 0);
 
 }
 
