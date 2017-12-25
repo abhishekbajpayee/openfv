@@ -237,6 +237,62 @@ __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g) {
 
 }
 
+__global__ void calc_nlca_image(PtrStepSzf nlca_image, PtrStepSzf img1, PtrStepSzf img2, PtrStepSzf img3, PtrStepSzf img4, int rows, int cols, int window, float sigma) {
+
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int tj = threadIdx.x;
+    int ti = threadIdx.y;
+
+    __shared__ float win[32][32];
+    __shared__ float wmin;
+    __shared__ float wmax;
+    // store min and max in shared and run only on 1 thread?
+
+    if (j < cols && i < rows && j) {
+
+        // TODO: copy to shared mem, calculate max and normalize
+        // window
+
+        float mean = 0.25*img1.ptr(i)[j];
+        __syncthreads();
+        mean += 0.25*img2.ptr(i)[j];
+        __syncthreads();
+        mean += 0.25*img3.ptr(i)[j];
+        __syncthreads();
+        mean += 0.25*img4.ptr(i)[j];
+        __syncthreads();
+
+        win[tj][ti] = mean;
+        __syncthreads();
+
+        // calculate max only once in block
+        if (tj==0 && ti == 0) {
+            wmax = 0.0;
+            wmin = 1.0;
+            for (int r=0; r<window; r++) {
+                for (int c=0; c<window; c++) {
+                    if (win[r][c] > wmax)
+                        wmax = win[r][c];
+                    if (win[r][c] < wmin)
+                        wmin = win[r][c];
+                }
+            }
+        }
+        __syncthreads();
+
+        // normalize
+        mean = (mean-wmin)/(wmax-wmin);
+
+        float out_val = exp( -0.5*( ((mean-1.0)/sigma) * ((mean-1.0)/sigma) ) );
+
+        nlca_image.ptr(i)[j] = out_val;
+
+    }
+
+}
+
 void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][12], float geom[5]) {
 
     cudaMemcpyToSymbol(Hinv, hinv, sizeof(float)*6);
@@ -262,6 +318,21 @@ void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i, int rows, 
 
     if (!cudaGetLastError()) {
         calc_refocus_map_kernel<<<grid, block>>>(xmap, ymap, z, i, rows, cols);
+    } else {
+        std::cout<<cudaGetErrorString(cudaGetLastError())<<std::endl;
+    }
+    cudaDeviceSynchronize();
+
+}
+
+// TODO: only works for 4 cameras!!!
+void gpu_calc_nlca_image(vector<GpuMat> &warped, GpuMat &nlca_image, int rows, int cols, int window, float sigma) {
+    
+    dim3 block(window, window);
+    dim3 grid(ceil(float(cols)/float(window)), ceil(float(rows)/float(window)));
+
+    if (!cudaGetLastError()) {
+        calc_nlca_image<<<grid, block>>>(nlca_image, warped[0], warped[1], warped[2], warped[3], rows, cols, window, sigma);
     } else {
         std::cout<<cudaGetErrorString(cudaGetLastError())<<std::endl;
     }

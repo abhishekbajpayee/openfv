@@ -147,6 +147,8 @@ class saRefocus {
     void CPUrefocus_ref_corner(int live, int frame);
 
     static void cb_mult(int, void*);
+    static void cb_mlos(int, void*);
+    static void cb_nlca(int, void*);
     static void cb_undistort(int, void*);
     static void cb_frames(int, void*);
     static void cb_dz_p1(int, void*);
@@ -179,6 +181,8 @@ class saRefocus {
     void clearViews();
     void setF(double f);
     void setMult(int flag, double exp);
+    void setNlca(int flag, double delta);
+    void setNlcaWindow(int size);
     void setHF(int hf);
     void setRefractive(int ref, double zW, double n1, double n2, double n3, double t);
     string showSettings();
@@ -243,24 +247,25 @@ class saRefocus {
     int mult_;
     double mult_exp_;
     int minlos_;
+    int nlca_;
+    int nlca_win_;
+    double delta_;
     double warp_factor_;
     int active_frame_;
     int start_frame_;
     int end_frame_;
     int skip_frame_;
     double rf_;
+    Scalar fact_;
 
     Mat refocused_host_;
 
     Mat cputemp; Mat cputemp2; Mat cpurefocused;
 
 #ifndef WITHOUT_CUDA
-    vector<gpu::GpuMat> array;
-    vector<gpu::GpuMat> P_mats_gpu;
-    vector<gpu::GpuMat> cam_locations_gpu;
-    vector<gpu::GpuMat> xmaps, ymaps;
+    vector<gpu::GpuMat> array, xmaps, ymaps, warped_, warped2_, P_mats_gpu, cam_locations_gpu;
     vector< vector<gpu::GpuMat> > array_all;
-    gpu::GpuMat temp, temp2, refocused, xmap, ymap;
+    gpu::GpuMat temp, temp2, refocused, xmap, ymap, blank_, blank_int_;
 #endif
 
     int frame_to_upload_;
@@ -282,6 +287,7 @@ class saRefocus {
     int INT_IMG_MODE;
     int RESIZE_IMAGES;
     int UNDISTORT_IMAGES;
+    bool GPU_MATS_UPLOADED;
 
 };
 

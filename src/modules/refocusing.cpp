@@ -45,6 +45,7 @@ saRefocus::saRefocus() {
     LOG(INFO)<<"Note: requires manual tweaking of parameters!";
 
     GPU_FLAG=1;
+    GPU_MATS_UPLOADED=false;
     REF_FLAG=0;
     CORNER_FLAG=1;
     MTIFF_FLAG=0;
@@ -54,6 +55,9 @@ saRefocus::saRefocus() {
     SINGLE_CAM_DEBUG=0;
     mult_=0;
     minlos_=0;
+    nlca_=0;
+    nlca_win_ = 32;
+    delta_ = 0.1;
     frames_.push_back(0);
     num_cams_ = 0;
     IMG_REFRAC_TOL = 1E-9;
@@ -69,6 +73,7 @@ saRefocus::saRefocus(int num_cams, double f) {
     LOG(INFO)<<"Note: requires manual tweaking of parameters!";
 
     GPU_FLAG=1;
+    GPU_MATS_UPLOADED=false;
     REF_FLAG=0;
     CORNER_FLAG=0;
     MTIFF_FLAG=0;
@@ -94,6 +99,7 @@ saRefocus::saRefocus(refocus_settings settings):
         LOG(FATAL)<<"OpenFV was compiled without GPU support! Switch GPU option to OFF.";
 #endif
 
+    GPU_MATS_UPLOADED=false;
     STDEV_THRESH = 1;
     IMG_REFRAC_TOL = 1E-9;
     MAX_NR_ITERS = 20;
@@ -161,6 +167,7 @@ void saRefocus::read_calib_data(string path) {
     file>>scale_;
 
     file>>num_cams_;
+    fact_ = Scalar(1/double(num_cams_));
 
     string cam_name;
 
@@ -745,6 +752,22 @@ void saRefocus::uploadAllToGPU() {
         VLOG(1)<<"Free Memory before: "<<free_mem_GPU<<" MB";
     }
 
+    if (!GPU_MATS_UPLOADED) {
+
+        Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
+        blank_.upload(blank);
+        Mat blank_int(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+        blank_int_.upload(blank_int);
+
+        for (int i=0; i<num_cams_; i++) {
+            warped_.push_back(blank_.clone());
+            warped2_.push_back(blank_.clone());
+        }
+
+        GPU_MATS_UPLOADED = true;
+    
+    }
+
     VLOG(1)<<"Uploading all frames to GPU...";
     for (int i=0; i<imgs[0].size(); i++) {
         for (int j=0; j<num_cams_; j++) {
@@ -765,6 +788,22 @@ void saRefocus::uploadAllToGPU() {
 void saRefocus::uploadSingleToGPU(int frame) {
 
     VLOG(1)<<"Uploading frame " << frame << " to GPU...";
+
+    if (!GPU_MATS_UPLOADED) {
+
+        Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
+        blank_.upload(blank);
+        Mat blank_int(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
+        blank_int_.upload(blank_int);
+
+        for (int i=0; i<num_cams_; i++) {
+            warped_.push_back(blank_.clone());
+            warped2_.push_back(blank_.clone());
+        }
+
+        GPU_MATS_UPLOADED = true;
+    
+    }
 
     array_all.clear();
     array.clear();
@@ -821,71 +860,55 @@ void saRefocus::uploadToGPU_ref() {
 void saRefocus::GPUrefocus(int live, int frame) {
 
     int curve = 0;
-
     Mat_<double> x = Mat_<double>::zeros(img_size_.height, img_size_.width);
     Mat_<double> y = Mat_<double>::zeros(img_size_.height, img_size_.width);
-
     Mat xm, ym;
 
-    // add warp factor stuff
-
-    Scalar fact = Scalar(1/double(num_cams_));
+    if (INT_IMG_MODE)
+        refocused = blank_int_.clone();
+    else
+        refocused = blank_.clone();
 
     Mat H, trans;
 
-    if (curve) {
-        calc_refocus_map(x, y, 0); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
-        gpu::remap(array_all[frame][0], temp, xmap, ymap, INTER_LINEAR);
-    } else {
-        //T_from_P(P_mats_[0], H, z_, scale_, img_size_);
-        calc_refocus_H(0, H);
-        gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
-        if (SINGLE_CAM_DEBUG) {
-            Mat single_cam_img(temp);
-            cam_stacks_[0].push_back(single_cam_img.clone());
-        }
-    }
-
-    if (mult_) {
-        gpu::pow(temp, mult_exp_, temp2);
-    } else if (minlos_) {
-        temp2 = temp.clone();
-    } else {
-        gpu::multiply(temp, fact, temp2);
-    }
-
-    refocused = temp2.clone();
-
-    for (int i=1; i<num_cams_; i++) {
+    for (int i=0; i<num_cams_; i++) {
 
         if (curve) {
             calc_refocus_map(x, y, i); x.convertTo(xm, CV_32FC1); y.convertTo(ym, CV_32FC1); xmap.upload(xm); ymap.upload(ym);
-            gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
+            gpu::remap(array_all[frame][i], warped_[i], xmap, ymap, INTER_LINEAR);
         } else {
-            //T_from_P(P_mats_[i], H, z, scale_, img_size_);
             calc_refocus_H(i, H);
-            gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
+            gpu::warpPerspective(array_all[frame][i], warped_[i], H, img_size_);
             if (SINGLE_CAM_DEBUG) {
-                Mat single_cam_img(temp);
+                Mat single_cam_img(warped_[i]);
                 cam_stacks_[i].push_back(single_cam_img.clone());
             }
         }
 
         if (mult_) {
-            gpu::pow(temp, mult_exp_, temp2);
-            gpu::multiply(refocused, temp2, refocused);
+            gpu::pow(warped_[i], mult_exp_, warped2_[i]);
+            if (i>0)
+                gpu::multiply(refocused, warped2_[i], refocused);
+            else
+                refocused = warped2_[i].clone();
 	} else if (minlos_) {
-	    gpu::min(refocused, temp, refocused);
+            if (i>0)
+                gpu::min(refocused, warped_[i], refocused);
+            else
+                refocused = warped_[i].clone();
         } else {
-            gpu::multiply(temp, fact, temp2);
-            gpu::add(refocused, temp2, refocused);
+            gpu::multiply(warped_[i], fact_, warped2_[i]);
+            gpu::add(refocused, warped2_[i], refocused);
         }
 
     }
 
     threshold_image(refocused);
 
-    Mat refocused_host_(refocused);
+    if (nlca_)
+        gpu_calc_nlca_image(warped_, refocused, img_size_.height, img_size_.width, nlca_win_, delta_);
+
+    refocused.download(refocused_host_);
 
     if (live)
         liveViewWindow(refocused_host_);
@@ -897,19 +920,15 @@ void saRefocus::GPUrefocus(int live, int frame) {
 
 void saRefocus::GPUrefocus_ref(int live, int frame) {
 
-    Scalar fact = Scalar(1/double(num_cams_));
-    if (INT_IMG_MODE) {
-        Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
-        refocused.upload(blank);
-    } else {
-        Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
-        refocused.upload(blank);
-    }
+    if (INT_IMG_MODE)
+        refocused = blank_int_.clone();
+    else
+        refocused = blank_.clone();
 
     for (int i=0; i<num_cams_; i++) {
 
         gpu_calc_refocus_map(xmap, ymap, z_, i, img_size_.height, img_size_.width);
-        gpu::remap(array_all[frame][i], temp, xmap, ymap, INTER_LINEAR);
+        gpu::remap(array_all[frame][i], warped_[i], xmap, ymap, INTER_LINEAR);
 
         if (i==0) {
             Mat M;
@@ -917,8 +936,8 @@ void saRefocus::GPUrefocus_ref(int live, int frame) {
             ymap.download(M); // writeMat(M, "../temp/ymap.txt");
         }
 
-        gpu::multiply(temp, fact, temp2);
-        gpu::add(refocused, temp2, refocused);
+        gpu::multiply(warped_[i], fact_, warped2_[i]);
+        gpu::add(refocused, warped2_[i], refocused);
 
     }
 
@@ -936,49 +955,41 @@ void saRefocus::GPUrefocus_ref(int live, int frame) {
 
 void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
-    Scalar fact = Scalar(1/double(num_cams_));
-    if (INT_IMG_MODE) {
-        Mat blank(img_size_.height, img_size_.width, CV_8UC1, Scalar(0));
-        refocused.upload(blank);
-    } else {
-        Mat blank(img_size_.height, img_size_.width, CV_32F, Scalar(0));
-        refocused.upload(blank);
-    }
+    if (INT_IMG_MODE)
+        refocused = blank_int_.clone();
+    else
+        refocused = blank_.clone();
 
     Mat H;
-    calc_ref_refocus_H(cam_locations_[0], z_, 0, H);
-    gpu::warpPerspective(array_all[frame][0], temp, H, img_size_);
 
-
-    if (mult_) {
-        gpu::pow(temp, mult_exp_, temp2);
-    } else if (minlos_) {
-        temp2 = temp.clone();
-    } else {
-        gpu::multiply(temp, fact, temp2);
-    }
-
-    refocused = temp2.clone();
-
-    for (int i=1; i<num_cams_; i++) {
+    for (int i=0; i<num_cams_; i++) {
 
         calc_ref_refocus_H(cam_locations_[i], z_, i, H);
-        gpu::warpPerspective(array_all[frame][i], temp, H, img_size_);
+        gpu::warpPerspective(array_all[frame][i], warped_[i], H, img_size_);
 
         if (mult_) {
-            gpu::pow(temp, mult_exp_, temp2);
-            gpu::multiply(refocused, temp2, refocused);
-	} else if (minlos_) {
-	    gpu::min(refocused, temp, refocused);
+            gpu::pow(warped_[i], mult_exp_, warped2_[i]);
+            if (i>0)
+                gpu::multiply(refocused, warped2_[i], refocused);
+            else
+                refocused = warped2_[i].clone();
+        } else if (minlos_) {
+            if (i>0)
+                gpu::min(refocused, warped_[i], refocused);
+            else
+                refocused = warped_[i].clone();
         } else {
-            gpu::multiply(temp, fact, temp2);
-            gpu::add(refocused, temp2, refocused);
+            gpu::multiply(warped_[i], fact_, warped2_[i]);
+            gpu::add(refocused, warped2_[i], refocused);
         }
 
     }
 
     if (!BENCHMARK_MODE)
         threshold_image(refocused);
+
+    if (nlca_)
+        gpu_calc_nlca_image(warped_, refocused, img_size_.height, img_size_.width, nlca_win_, delta_);
 
     refocused.download(refocused_host_);
 
@@ -993,6 +1004,34 @@ void saRefocus::cb_mult(int state, void* userdata) {
 
     saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
     ref->mult_ = state;
+    if (state) {
+        ref->minlos_ = 0;
+        ref->nlca_ = 0;
+    }
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_mlos(int state, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->minlos_ = state;
+    if (state) {
+        ref->mult_ = 0;
+        ref->nlca_ = 0;
+    }
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_nlca(int state, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->nlca_ = state;
+    if (state) {
+        ref->minlos_ = 0;
+        ref->mult_ = 0;
+    }
     ref->updateLiveFrame();
 
 }
@@ -1067,6 +1106,7 @@ void saRefocus::GPUliveView() {
     }
     double mult_exp_limit = 1.0;
     double mult_thresh = 0.01;
+    double ddelta = 0.01;
 
     namedWindow("Live View", CV_WINDOW_NORMAL | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED);
 
@@ -1074,6 +1114,8 @@ void saRefocus::GPUliveView() {
         createTrackbar("Frame", "Live View", &active_frame_, array_all.size()-1, cb_frames, this);
 
     createButton("Multiplicative", cb_mult, this, CV_CHECKBOX);
+    createButton("MLOS", cb_mlos, this, CV_CHECKBOX);
+    createButton("NLCA", cb_nlca, this, CV_CHECKBOX);
 
     createButton("dz = 0.1", cb_dz_p1, this, CV_RADIOBOX, 1);
     createButton("dz = 1", cb_dz_1, this, CV_RADIOBOX, 0);
@@ -1096,7 +1138,9 @@ void saRefocus::GPUliveView() {
             } else if( (key & 255)==81 ) {
                 z_ -= dz_;
             } else if( (key & 255)==61 ) {
-                if (mult_) {
+                if (nlca_) {
+                    delta_ += ddelta;
+                } else if (mult_) {
                     if (mult_exp_<mult_exp_limit)
                         mult_exp_ += mult_thresh;
                 } else {
@@ -1104,7 +1148,10 @@ void saRefocus::GPUliveView() {
                         thresh_ += dthresh;
                 }
             } else if( (key & 255)==45 ) {
-                if (mult_) {
+                if (nlca_) {
+                    if (delta_>0.01)
+                        delta_ -= ddelta;
+                } else if (mult_) {
                     if (mult_exp_>0)
                         mult_exp_ -= mult_thresh;
                 } else {
@@ -1113,14 +1160,8 @@ void saRefocus::GPUliveView() {
                 }
             } else if( (key & 255)==46 ) {
                 z_ += dz_;
-                // if (active_frame_<array_all.size()-1) {
-                //     active_frame_++;
-                // }
             } else if( (key & 255)==44 ) {
                 z_ -= dz_;
-                // if (active_frame_>0) {
-                //     active_frame_--;
-                // }
             } else if( (key & 255)==119 ) { // w
                 rx_ += drx_;
             } else if( (key & 255)==113 ) { // q
@@ -1838,11 +1879,11 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
 
 void saRefocus::liveViewWindow(Mat img) {
 
-    char title[200];
+    char title[250];
     if (STDEV_THRESH) {
-        sprintf(title, "exp = %f, T = %f (x StDev), frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_exp_, thresh_, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+        sprintf(title, "delta = %f, exp = %f, T = %f (x StDev), frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", delta_, mult_exp_, thresh_, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
     } else {
-        sprintf(title, "exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", mult_exp_, thresh_*255.0, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
+        sprintf(title, "delta = %f, exp = %f, T = %f, frame = %d, xs = %f, ys = %f, zs = %f \nrx = %f, ry = %f, rz = %f, crx = %f, cry = %f, crz = %f", delta_, mult_exp_, thresh_*255.0, active_frame_, xs_, ys_, z_, rx_, ry_, rz_, crx_, cry_, crz_);
     }
 
     imshow("Live View", img);
@@ -2132,6 +2173,7 @@ void saRefocus::addView(Mat img, Mat P, Mat location) {
     cam_locations_.push_back(location);
 
     num_cams_++;
+    fact_ = Scalar(1/double(num_cams_));
 
 }
 
@@ -2157,6 +2199,7 @@ void saRefocus::addViews(vector< vector<Mat> > frames, vector<Mat> Ps, vector<Ma
         frames_.push_back(i);
 
     num_cams_ = frames[0].size();
+    fact_ = Scalar(1/double(num_cams_));
 
 }
 
@@ -2179,6 +2222,31 @@ void saRefocus::setMult(int flag, double exp) {
 
     mult_ = flag;
     mult_exp_ = exp;
+
+    nlca_ = 0;
+    minlos_ = 0;
+
+}
+
+void saRefocus::setNlca(int flag, double delta) {
+
+    if (num_cams_ != 4)
+        LOG(FATAL) << "NLCA only supported for 4 cameras!";
+
+    nlca_ = flag;
+    delta_ = delta;
+
+    mult_ = 0;
+    minlos_ = 0;
+
+}
+
+void saRefocus::setNlcaWindow(int size) {
+
+    if ((img_size_.width % size != 0) && (img_size_.height % size != 0))
+        LOG(FATAL) << "Image size in both directions must be divible by NLCA window size!";
+
+    nlca_win_ = size;
 
 }
 
