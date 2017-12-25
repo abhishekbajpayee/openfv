@@ -879,6 +879,7 @@ void saRefocus::GPUrefocus(int live, int frame) {
         } else {
             calc_refocus_H(i, H);
             gpu::warpPerspective(array_all[frame][i], warped_[i], H, img_size_);
+            gpu::normalize(warped_[i], warped_[i]);
             if (SINGLE_CAM_DEBUG) {
                 Mat single_cam_img(warped_[i]);
                 cam_stacks_[i].push_back(single_cam_img.clone());
@@ -966,6 +967,11 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
         calc_ref_refocus_H(cam_locations_[i], z_, i, H);
         gpu::warpPerspective(array_all[frame][i], warped_[i], H, img_size_);
+
+        if (SINGLE_CAM_DEBUG) {
+            Mat single_cam_img(warped_[i]);
+            cam_stacks_[i].push_back(single_cam_img.clone());
+        }
 
         if (mult_) {
             gpu::pow(warped_[i], mult_exp_, warped2_[i]);

@@ -248,21 +248,37 @@ __global__ void calc_nlca_image(PtrStepSzf nlca_image, PtrStepSzf img1, PtrStepS
     __shared__ float win[32][32];
     __shared__ float wmin;
     __shared__ float wmax;
-    // store min and max in shared and run only on 1 thread?
 
     if (j < cols && i < rows) {
 
-        // TODO: copy to shared mem, calculate max and normalize
-        // window
+        // pre clip values over 1?
 
-        float mean = 0.25*img1.ptr(i)[j];
+        float v1 = img1.ptr(i)[j];
         __syncthreads();
-        mean += 0.25*img2.ptr(i)[j];
+        float v2 = img2.ptr(i)[j];
         __syncthreads();
-        mean += 0.25*img3.ptr(i)[j];
+        float v3 = img3.ptr(i)[j];
         __syncthreads();
-        mean += 0.25*img4.ptr(i)[j];
+        float v4 = img4.ptr(i)[j];
         __syncthreads();
+
+        v1 = (v1 > 1.0) ? 1.0 : v1;
+        v2 = (v2 > 1.0) ? 1.0 : v2;
+        v3 = (v3 > 1.0) ? 1.0 : v3;
+        v4 = (v4 > 1.0) ? 1.0 : v4;
+
+        float mean = 0.25*(v1+v2+v3+v4);
+
+        // float mean = 0.25*img1.ptr(i)[j];
+        // __syncthreads();
+        // mean += 0.25*img2.ptr(i)[j];
+        // __syncthreads();
+        // mean += 0.25*img3.ptr(i)[j];
+        // __syncthreads();
+        // mean += 0.25*img4.ptr(i)[j];
+        // __syncthreads();
+
+        // mean = (mean > 1.0) ? 1.0 : 0.0;
 
         win[tj][ti] = mean;
         __syncthreads();
@@ -283,9 +299,9 @@ __global__ void calc_nlca_image(PtrStepSzf nlca_image, PtrStepSzf img1, PtrStepS
         __syncthreads();
 
         // normalize
-        mean = (mean-wmin)/(wmax-wmin);
-
-        float out_val = exp( -0.5*( ((mean-1.0)/sigma) * ((mean-1.0)/sigma) ) );
+        // mean = (mean-wmin)/(wmax-wmin);
+        // float out_val = exp( -0.5*( ((mean-1.0)/sigma) * ((mean-1.0)/sigma) ) );
+        float out_val = exp( -0.5*( ((mean-wmax)/sigma) * ((mean-wmax)/sigma) ) );
 
         nlca_image.ptr(i)[j] = out_val;
 
