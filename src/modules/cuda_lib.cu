@@ -250,7 +250,7 @@ __global__ void calc_nlca_image(PtrStepSzf nlca_image, PtrStepSzf img1, PtrStepS
     __shared__ float wmax;
     // store min and max in shared and run only on 1 thread?
 
-    if (j < cols && i < rows && j) {
+    if (j < cols && i < rows) {
 
         // TODO: copy to shared mem, calculate max and normalize
         // window
