@@ -52,7 +52,9 @@ __device__ point point_refrac(point Xcam, point p, float &f, float &g, float zW_
 
 __device__ point point_refrac_fast(point Xcam, point p, float &f, float &g);
 
-__global__ void calc_nlca_image(PtrStepSzf nlca_image, PtrStepSzf img1, PtrStepSzf img2, PtrStepSzf img3, PtrStepSzf img4, int rows, int cols, float sigma);
+__global__ void calc_nlca_image_fast(PtrStepSzf nlca_image, PtrStepSzf img1, PtrStepSzf img2, PtrStepSzf img3, PtrStepSzf img4, int rows, int cols, float sigma);
+
+__global__ void calc_nlca_image(PtrStepSzf nlca_image, PtrStepSzf img1, PtrStepSzf img2, PtrStepSzf img3, PtrStepSzf img4, int rows, int cols, int window, float sigma);
 
 // Host wrappers
 void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][12], float geom[5]);
@@ -60,6 +62,8 @@ void uploadRefractiveData(float hinv[6], float locations[9][3], float pmats[9][1
 void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i, int rows, int cols);
 
 void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z);
+
+void gpu_calc_nlca_image_fast(vector<GpuMat> &warped, GpuMat &nlca_image, int rows, int cols, float sigma);
 
 void gpu_calc_nlca_image(vector<GpuMat> &warped, GpuMat &nlca_image, int rows, int cols, int window, float sigma);
 

@@ -56,6 +56,7 @@ saRefocus::saRefocus() {
     mult_=0;
     minlos_=0;
     nlca_=0;
+    nlca_fast_=0;
     nlca_win_ = 32;
     delta_ = 0.1;
     frames_.push_back(0);
@@ -910,17 +911,20 @@ void saRefocus::GPUrefocus(int live, int frame) {
                 gpu::min(refocused, warped_[i], refocused);
             else
                 refocused = warped_[i].clone();
-        } else {
+        } else if (!nlca_ && !nlca_fast_) {
             gpu::multiply(warped_[i], fact_, warped2_[i]);
             gpu::add(refocused, warped2_[i], refocused);
         }
 
     }
 
-    threshold_image(refocused);
-
     if (nlca_)
         gpu_calc_nlca_image(warped_, refocused, img_size_.height, img_size_.width, nlca_win_, delta_);
+    else if (nlca_fast_)
+        gpu_calc_nlca_image_fast(warped_, refocused, img_size_.height, img_size_.width, delta_);
+    else
+        if (!BENCHMARK_MODE)
+            threshold_image(refocused);
 
     refocused.download(refocused_host_);
 
@@ -997,18 +1001,20 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
                 gpu::min(refocused, warped_[i], refocused);
             else
                 refocused = warped_[i].clone();
-        } else {
+        } else if (!nlca_ && !nlca_fast_) {
             gpu::multiply(warped_[i], fact_, warped2_[i]);
             gpu::add(refocused, warped2_[i], refocused);
         }
 
     }
 
-    if (!BENCHMARK_MODE)
-        threshold_image(refocused);
-
     if (nlca_)
         gpu_calc_nlca_image(warped_, refocused, img_size_.height, img_size_.width, nlca_win_, delta_);
+    else if (nlca_fast_)
+        gpu_calc_nlca_image_fast(warped_, refocused, img_size_.height, img_size_.width, delta_);
+    else
+        if (!BENCHMARK_MODE)
+            threshold_image(refocused);
 
     refocused.download(refocused_host_);
 
@@ -1026,6 +1032,7 @@ void saRefocus::cb_mult(int state, void* userdata) {
     if (state) {
         ref->minlos_ = 0;
         ref->nlca_ = 0;
+        ref->nlca_fast_ = 0;
     }
     ref->updateLiveFrame();
 
@@ -1038,6 +1045,7 @@ void saRefocus::cb_mlos(int state, void* userdata) {
     if (state) {
         ref->mult_ = 0;
         ref->nlca_ = 0;
+        ref->nlca_fast_ = 0;
     }
     ref->updateLiveFrame();
 
@@ -1048,8 +1056,22 @@ void saRefocus::cb_nlca(int state, void* userdata) {
     saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
     ref->nlca_ = state;
     if (state) {
+        ref->nlca_fast_ = 0;
         ref->minlos_ = 0;
         ref->mult_ = 0;
+    }
+    ref->updateLiveFrame();
+
+}
+
+void saRefocus::cb_nlca_fast(int state, void* userdata) {
+
+    saRefocus* ref = reinterpret_cast<saRefocus*>(userdata);
+    ref->nlca_fast_ = state;
+    if (state) {
+        ref->minlos_ = 0;
+        ref->mult_ = 0;
+        ref->nlca_ = 0;
     }
     ref->updateLiveFrame();
 
@@ -1135,6 +1157,7 @@ void saRefocus::GPUliveView() {
     createButton("Multiplicative", cb_mult, this, CV_CHECKBOX);
     createButton("MLOS", cb_mlos, this, CV_CHECKBOX);
     createButton("NLCA", cb_nlca, this, CV_CHECKBOX);
+    createButton("Fast NLCA", cb_nlca_fast, this, CV_CHECKBOX);
 
     createButton("dz = 0.1", cb_dz_p1, this, CV_RADIOBOX, 1);
     createButton("dz = 1", cb_dz_1, this, CV_RADIOBOX, 0);
@@ -2243,6 +2266,7 @@ void saRefocus::setMult(int flag, double exp) {
     mult_exp_ = exp;
 
     nlca_ = 0;
+    nlca_fast_ = 0;
     minlos_ = 0;
 
 }
@@ -2255,6 +2279,21 @@ void saRefocus::setNlca(int flag, double delta) {
     nlca_ = flag;
     delta_ = delta;
 
+    nlca_fast_ = 0;
+    mult_ = 0;
+    minlos_ = 0;
+
+}
+
+void saRefocus::setNlcaFast(int flag, double delta) {
+
+    if (num_cams_ != 4)
+        LOG(FATAL) << "NLCA (fast) only supported for 4 cameras!";
+
+    nlca_fast_ = flag;
+    delta_ = delta;
+
+    nlca_ = 0;
     mult_ = 0;
     minlos_ = 0;
 
@@ -2264,6 +2303,9 @@ void saRefocus::setNlcaWindow(int size) {
 
     if ((img_size_.width % size != 0) && (img_size_.height % size != 0))
         LOG(FATAL) << "Image size in both directions must be divible by NLCA window size!";
+
+    if (size > 32)
+        LOG(FATAL) << "Window size greater than 32 not supported yet!";
 
     nlca_win_ = size;
 

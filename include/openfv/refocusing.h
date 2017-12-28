@@ -150,6 +150,7 @@ class saRefocus {
     static void cb_mult(int, void*);
     static void cb_mlos(int, void*);
     static void cb_nlca(int, void*);
+    static void cb_nlca_fast(int, void*);
     static void cb_undistort(int, void*);
     static void cb_frames(int, void*);
     static void cb_dz_p1(int, void*);
@@ -183,6 +184,7 @@ class saRefocus {
     void setF(double f);
     void setMult(int flag, double exp);
     void setNlca(int flag, double delta);
+    void setNlcaFast(int flag, double delta);
     void setNlcaWindow(int size);
     void setHF(int hf);
     void setRefractive(int ref, double zW, double n1, double n2, double n3, double t);
@@ -249,6 +251,7 @@ class saRefocus {
     double mult_exp_;
     int minlos_;
     int nlca_;
+    int nlca_fast_;
     int nlca_win_;
     double delta_;
     double warp_factor_;
