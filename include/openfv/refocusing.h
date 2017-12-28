@@ -136,6 +136,7 @@ class saRefocus {
       called when live view is not being started.
     */
     void initializeGPU();
+    void initializeSpecificGPU(int);
     void GPUrefocus(int live, int frame);
     void GPUrefocus_ref(int live, int frame);
     void GPUrefocus_ref_corner(int live, int frame);

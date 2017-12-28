@@ -719,25 +719,38 @@ Mat saRefocus::refocus(double z, double rx, double ry, double rz, double thresh,
 
 // ---GPU Refocusing Functions Begin--- //
 
+// initialize default GPU
 void saRefocus::initializeGPU() {
 
     if (!EXPERT_FLAG) {
 
         LOG(INFO)<<"INITIALIZING GPU..."<<endl;
 
-        VLOG(1)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount<<endl;
+        VLOG(1)<<"CUDA Enabled GPU Devices: "<<gpu::getCudaEnabledDeviceCount;
 
         gpu::DeviceInfo gpuDevice(gpu::getDevice());
 
         VLOG(1)<<"---"<<gpuDevice.name()<<"---"<<endl;
         VLOG(1)<<"Total Memory: "<<(gpuDevice.totalMemory()/pow(1024.0,2))<<" MB";
+
     }
 
     if (REF_FLAG)
         if (!CORNER_FLAG)
             uploadToGPU_ref();
 
-    // uploadToGPU();
+}
+
+// initialize specified GPU
+void saRefocus::initializeSpecificGPU(int gpu) {
+    
+    LOG(WARNING) << "Explicitly setting GPU to device number " << gpu << ". This is an expert function!";
+
+    gpu::setDevice(gpu);
+    
+    if (REF_FLAG)
+        if (!CORNER_FLAG)
+            uploadToGPU_ref();
 
 }
 
