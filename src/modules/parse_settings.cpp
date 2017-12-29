@@ -95,7 +95,7 @@ void parse_reconstruction_settings(string filename, reconstruction_settings &set
     if (saveP.is_absolute()) {
         settings.save_path = saveP.string();
     } else {
-        boost::filesystem::path file_path(filename);
+        boost::filesystem::path file_path = boost::filesystem::canonical(filename, boost::filesystem::current_path());
         file_path.remove_leaf() /= saveP.string();
         settings.save_path = file_path.string();
     }
@@ -192,7 +192,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     if (calibP.is_absolute()) {
         settings.calib_file_path = calibP.string();
     } else {
-        boost::filesystem::path config_file_path(filename);
+        boost::filesystem::path config_file_path = boost::filesystem::canonical(filename, boost::filesystem::current_path());
         config_file_path.remove_leaf() /= calibP.string();
         settings.calib_file_path = config_file_path.string();
     }
@@ -208,7 +208,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     if (imgsP.is_absolute()) {
         settings.images_path = imgsP.string();
     } else {
-        boost::filesystem::path config_file_path(filename);
+        boost::filesystem::path config_file_path = boost::filesystem::canonical(filename, boost::filesystem::current_path());;
         config_file_path.remove_leaf() /= imgsP.string();
         settings.images_path = config_file_path.string();
     }
