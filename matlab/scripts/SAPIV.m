@@ -11,6 +11,17 @@ save_path = yaml_data.piv_save_path;
 f = yaml_data.pix_per_mm;
 nPasses = yaml_data.passes;
 
+if data_path(end) ~= '/'
+    data_path = [data_path '/'];
+end
+if save_path(end) ~= '/'
+    save_path = [save_path '/'];
+end
+if data_path(1) ~= '/'
+    warning(['Path to data (data_path) does not seem to be absolue! ' ...
+             'Code might fail to find datasets.']);
+end
+
 wSize = [yaml_data.windows{1,1}, yaml_data.windows{1,2}, ...
          yaml_data.windows{1,3};
          yaml_data.windows{2,1}, yaml_data.windows{2,2}, ...
