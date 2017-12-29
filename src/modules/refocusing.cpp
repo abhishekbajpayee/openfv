@@ -117,9 +117,10 @@ saRefocus::saRefocus(refocus_settings settings):
     nlca_win_ = settings.nlca_win;
     delta_ = settings.delta;
     mult_exp_ = settings.mult_exp;
-    // if (nlca_fast_) {
-    //     LOG(FATAL) << "Fast NLCA not supported yet!";
-    // }
+
+    if (nlca_fast_) {
+        LOG(WARNING) << "Make sure the input images are well normalized and particle peak values are close to 1 for fast NLCA to work well!";
+    }
 
     if (MTIFF_FLAG) {
 
@@ -135,6 +136,10 @@ saRefocus::saRefocus(refocus_settings settings):
         read_imgs(settings.images_path);
 
     }
+
+    if (nlca_ || nlca_fast_)
+        if (num_cams_ != 4)
+            LOG(FATAL) << "NLCA and fast NLCA modes are currently only supported for 4 cameras!";
 
 #ifndef WITHOUT_CUDA
     if (GPU_FLAG) {
