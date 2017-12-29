@@ -42,6 +42,17 @@ struct refocus_settings {
     double mult_exp;
     //! Flag to use minLOS (minimum line of sight) reconstruction
     int minlos; // 1 for minimum line of sight
+    
+    //! Flag to use NLCA (nonlinear contrast adjustment) reconstruction
+    int nlca; // 1 for minimum line of sight
+    //! Flag to use fast NLCA (nonlinear contrast adjustment) reconstruction
+    int nlca_fast; // 1 for minimum line of sight
+    //! NLCA delta
+    double delta;
+    //! NLCA window size
+    int nlca_win;
+
+
     //! Flag to use a GPU or not
     int use_gpu; // 1 for GPU
     //! Use Homography Fit (HF) method or not

@@ -37,8 +37,12 @@ boost::program_options::options_description get_options() {
     desc.add_options()
         ("use_gpu", po::value<int>()->default_value(0), "ON to use GPU")
         ("mult", po::value<int>()->default_value(0), "ON to use multiplicative method")
-        ("mult_exp", po::value<double>()->default_value(.25), "Multiplicative method exponent")
+        ("mult_exp", po::value<double>()->default_value(1.0), "Multiplicative method exponent")
         ("minlos", po::value<int>()->default_value(0), "ON to use minimum line of sight method")
+        ("nlca", po::value<int>()->default_value(0), "ON to use nonlinear contrast adjustment")
+        ("nlca_fast", po::value<int>()->default_value(0), "ON to use fast nonlinear contrast adjustment")
+        ("nlca_win", po::value<int>()->default_value(32), "NLCA window size")
+        ("delta", po::value<double>()->default_value(0.1), "NLCA delta")
         ("hf_method", po::value<int>()->default_value(0), "ON to use HF method")
         ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
         ("frames", po::value<string>()->default_value(""), "Array of values in format start, end, skip")
@@ -121,6 +125,10 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.mult = vm["mult"].as<int>();
     settings.mult_exp = vm["mult_exp"].as<double>();
     settings.minlos = vm["minlos"].as<int>();
+    settings.nlca = vm["nlca"].as<int>();
+    settings.nlca_fast = vm["nlca_fast"].as<int>();
+    settings.nlca_win = vm["nlca_win"].as<int>();
+    settings.delta = vm["delta"].as<double>();
     settings.resize_images = vm["resize_images"].as<int>();
     settings.rf = vm["rf"].as<double>();
     settings.undistort = vm["undistort"].as<int>();

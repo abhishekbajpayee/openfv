@@ -93,7 +93,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minlos_(settings.minlos), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), UNDISTORT_IMAGES(settings.undistort) {
+    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minlos_(settings.minlos), nlca_(settings.nlca), nlca_fast_(settings.nlca_fast), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), UNDISTORT_IMAGES(settings.undistort) {
 
 #ifdef WITHOUT_CUDA
     if (GPU_FLAG)
@@ -111,13 +111,15 @@ saRefocus::saRefocus(refocus_settings settings):
     imgs_read_ = 0;
     read_calib_data(settings.calib_file_path);
 
-    if (mult_)
-        if (minlos_)
-            LOG(FATAL) << "mult and minlos both cannot be ON!";
-
-    if (mult_) {
-        mult_exp_ = settings.mult_exp;
-    }
+    if (mult_ + minlos_ + nlca_ + nlca_fast_ > 1)
+        LOG(FATAL) << "Multiple reconstructions options (mult, minlos, nlca, nlca_fast) cannot be ON!";
+    
+    nlca_win_ = settings.nlca_win;
+    delta_ = settings.delta;
+    mult_exp_ = settings.mult_exp;
+    // if (nlca_fast_) {
+    //     LOG(FATAL) << "Fast NLCA not supported yet!";
+    // }
 
     if (MTIFF_FLAG) {
 
@@ -129,7 +131,9 @@ saRefocus::saRefocus(refocus_settings settings):
         read_imgs_mtiff(settings.images_path);
 
     } else {
+
         read_imgs(settings.images_path);
+
     }
 
 #ifndef WITHOUT_CUDA
@@ -1180,7 +1184,7 @@ void saRefocus::GPUliveView() {
             } else if( (key & 255)==81 ) {
                 z_ -= dz_;
             } else if( (key & 255)==61 ) {
-                if (nlca_) {
+                if (nlca_ || nlca_fast_) {
                     delta_ += ddelta;
                 } else if (mult_) {
                     if (mult_exp_<mult_exp_limit)
@@ -1190,7 +1194,7 @@ void saRefocus::GPUliveView() {
                         thresh_ += dthresh;
                 }
             } else if( (key & 255)==45 ) {
-                if (nlca_) {
+                if (nlca_ || nlca_fast_) {
                     if (delta_>0.01)
                         delta_ -= ddelta;
                 } else if (mult_) {
