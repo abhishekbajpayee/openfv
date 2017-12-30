@@ -18,7 +18,7 @@ if save_path(end) ~= '/'
     save_path = [save_path '/'];
 end
 if data_path(1) ~= '/'
-    warning(['Path to data (data_path) does not seem to be absolue! ' ...
+    warning(['Path to data (data_path) does not seem to be absolute! ' ...
              'Code might fail to find datasets.']);
 end
 

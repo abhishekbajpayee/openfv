@@ -15,7 +15,7 @@ for j=1:2
     end
     
     for i=1:size(imn1, 1)
-        stacks(:,:,i,j+1) = imread([tmp_path imn1(i).name]);
+        stacks(:,:,i,j) = imread([tmp_path imn1(i).name]);
     end
 
 end
