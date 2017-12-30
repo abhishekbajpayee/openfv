@@ -4,7 +4,7 @@ using namespace cv;
 using namespace std;
 
 DEFINE_bool(fhelp, false, "show config file options");
-DEFINE_string(config_file, "", "config file path");
+DEFINE_string(config_file, "config.cfg", "config file path");
 
 int main(int argc, char** argv) {
 
