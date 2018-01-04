@@ -77,6 +77,7 @@ class Scene {
     //! Render all voxels of the volume
     void renderVolume(int xv, int yv, int zv);
     void renderVolumeCPU(int xv, int yv, int zv);
+    void renderVolumeCPU2(int xv, int yv, int zv);
 
 #ifndef WITHOUT_CUDA
     void renderVolumeGPU(int xv, int yv, int zv);
@@ -93,6 +94,8 @@ class Scene {
       \param t Thickness of glass wall
     */
     void setRefractiveGeom(float zW, float n1, float n2, float n3, float t);
+    void setActiveFrame(int frame);
+    int getActiveFrame() { return frame_; }
 
     void seedR();
     void seedAxes();
@@ -139,19 +142,23 @@ class Scene {
         ar & sx_ & sy_ & sz_;
         ar & vx_ & vy_ & vz_;
         ar & voxelsX_, voxelsY_, voxelsZ_;
-        ar & particles_;
+        // ar & particles_;
         ar & trajectory_;
-        ar & volumeGPU_;
-        ar & volumeCPU_;
+        // ar & volumeGPU_;
+        ar & volumesGPU_;
+        // ar & volumeCPU_;
+        ar & volumesCPU_;
         ar & GPU_FLAG;
         ar & REF_FLAG;
         ar & CIRC_VOL_FLAG;
         ar & geom_;
+        ar & frame_;
     }
 
     double f(double x, double y, double z);
 
     double sigmax_, sigmay_, sigmaz_;
+    double dthresh_;
     vector<double> xlims_, ylims_, zlims_;
     // size of volume in units ([mm] mostly)
     double sx_, sy_, sz_;
@@ -161,8 +168,10 @@ class Scene {
 
     Mat_<double> particles_;
     vector< Mat_<double> > trajectory_;
-    vector<Mat> volumeGPU_;
-    vector<Mat> volumeCPU_;
+    vector<Mat> volumeGPU_, volumeCPU_;
+    vector< vector<Mat> > volumesGPU_, volumesCPU_;
+
+    int frame_; // active frame
 
 #ifndef WITHOUT_CUDA
     gpu::GpuMat gx, gy;

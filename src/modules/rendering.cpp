@@ -61,6 +61,8 @@ void Scene::create(double sx, double sy, double sz, int gpu) {
     sigmay_ = sigma;
     sigmaz_ = sigma;
 
+    frame_ = 0;
+
     GPU_FLAG = gpu;
 
 #ifdef WITHOUT_CUDA
@@ -89,6 +91,15 @@ void Scene::setParticleSigma(double sx, double sy, double sz) {
     sigmax_ = sx;
     sigmay_ = sy;
     sigmaz_ = sz;
+
+}
+
+void Scene::setActiveFrame(int frame) {
+
+    if (frame > trajectory_.size()-1)
+        LOG(FATAL) << "Active frame number must be <= " << trajectory_.size() << " (size of rendered frames)!";
+
+    frame_ = frame;
 
 }
 
@@ -252,9 +263,15 @@ void Scene::renderVolumeCPU(int xv, int yv, int zv) {
     voxelsY_ = linspace(-0.5*sy_, 0.5*sy_, vy_);
     voxelsZ_ = linspace(-0.5*sz_, 0.5*sz_, vz_);
 
-    LOG(INFO)<<"CPU rendering voxels...";
+    double smax = sigmax_;
+    if (sigmay_ > smax)
+        smax = sigmay_;
+    if (sigmaz_ > smax)
+        smax = sigmaz_;
 
-    double thresh = 0.1;
+    dthresh_ = -2.0*smax*smax*log(0.001);
+
+    LOG(INFO)<<"CPU rendering voxels...";
 
     for (int k=0; k<voxelsZ_.size(); k++) {
 
@@ -262,21 +279,83 @@ void Scene::renderVolumeCPU(int xv, int yv, int zv) {
 
         Mat img = Mat::zeros(vy_, vx_, CV_32F);
 
-        for (int i=0; i<voxelsX_.size(); i++) {
-            for (int j=0; j<voxelsY_.size(); j++) {
-                // double intensity = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]);
-                // if (intensity > thresh)
-                {
+        for (int i=0; i<voxelsX_.size(); i++)
+            for (int j=0; j<voxelsY_.size(); j++)
                     img.at<float>(j, i) = f(voxelsX_[i], voxelsY_[j], voxelsZ_[k]); //intensity;
-                }
-            }
-        }
 
         volumeCPU_.push_back(img.clone());
 
     }
 
+    volumesCPU_.push_back(volumeCPU_);
+
     VLOG(1)<<"done";
+
+}
+
+void Scene::renderVolumeCPU2(int xv, int yv, int zv) {
+
+    volumeCPU_.clear();
+    vx_ = xv; vy_ = yv; vz_ = zv;
+    voxelsX_ = linspace(-0.5*sx_, 0.5*sx_, vx_);
+    voxelsY_ = linspace(-0.5*sy_, 0.5*sy_, vy_);
+    voxelsZ_ = linspace(-0.5*sz_, 0.5*sz_, vz_);
+
+    double smax = sigmax_;
+    if (sigmay_ > smax)
+        smax = sigmay_;
+    if (sigmaz_ > smax)
+        smax = sigmaz_;
+
+    dthresh_ = -2.0*smax*smax*log(0.001);
+
+    double ax = (vx_-1)/sx_; double bx = (vx_-1)/2.0;
+    double ay = (vy_-1)/sy_; double by = (vy_-1)/2.0;
+    double az = (vz_-1)/sz_; double bz = (vz_-1)/2.0;
+
+    if (vx_/sx_ != vy_/sy_ || vx_/sx_ != vz_/sz_)
+        LOG(FATAL) << "Different aspect ratios in each direction! This render function probably does not work well for a situation like this.";
+
+    // overestimate voxel threshold
+    int vthresh = round(sqrt(dthresh_)*vx_/sx_);
+
+    // init blank volume
+    for (int k=0; k<voxelsZ_.size(); k++) {
+        Mat img = Mat::zeros(vy_, vx_, CV_32F);
+        volumeCPU_.push_back(img.clone());
+    }
+
+    int xi, lx, ux, yi, ly, uy, zi, lz, uz;
+    double dx, dy, dz, I;
+    for (int i=0; i<particles_.cols; i++) {
+
+        LOG(INFO) << i;
+
+        xi = round(particles_(0,i)*ax + bx);
+        yi = round(particles_(1,i)*ay + by);
+        zi = round(particles_(2,i)*az + bz);
+        lx = max(0, xi-vthresh); ux = max(vx_-1, xi+vthresh);
+        ly = max(0, yi-vthresh); uy = max(vy_-1, yi+vthresh);
+        lz = max(0, zi-vthresh); uz = max(vz_-1, zi+vthresh);
+
+        for (int xii = lx; xii <= ux; xii++) {
+            for (int yii = ly; yii <= uy; yii++) {
+                for (int zii = lz; zii <= uz; zii++) {
+
+                    dx = pow(voxelsX_[xii]-particles_(0,i), 2);
+                    dy = pow(voxelsY_[yii]-particles_(1,i), 2); 
+                    dz = pow(voxelsZ_[zii]-particles_(2,i), 2);
+
+                    I = exp( -1.0*(dx/(2*pow(sigmax_, 2)) + dy/(2*pow(sigmay_, 2)) + dz/(2*pow(sigmaz_, 2))) );
+                    volumeCPU_[zii].at<float>(yii,xii) += I;
+
+                }
+            }
+        }
+
+    }
+
+    LOG(FATAL) << "fuck off";
 
 }
 
@@ -288,8 +367,7 @@ double Scene::f(double x, double y, double z) {
     for (int i=0; i<particles_.cols; i++) {
         dx = pow(x-particles_(0,i), 2); dy = pow(y-particles_(1,i), 2); dz = pow(z-particles_(2,i), 2);
         d = dx + dy + dz;
-        if (d<25)
-        {
+        if (d < dthresh_) {
             b = exp( -1.0*(dx/(2*pow(sigmax_, 2)) + dy/(2*pow(sigmay_, 2)) + dz/(2*pow(sigmaz_, 2))) );
             intensity += b;
         }
@@ -361,6 +439,8 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
         volumeGPU_.push_back(result.clone());
 
     }
+
+    volumesGPU_.push_back(volumeGPU_);
 
     VLOG(1)<<"done";
 
@@ -436,6 +516,8 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
 
     }
 
+    volumesGPU_.push_back(volumeGPU_);
+
     VLOG(1)<<"done";
 
 }
@@ -449,9 +531,9 @@ Mat Scene::getSlice(int z_ind) {
     Mat img;
 
     if (GPU_FLAG) {
-        img = volumeGPU_[z_ind];
+        img = volumesGPU_[frame_][z_ind];
     } else {
-        img = volumeCPU_[z_ind];
+        img = volumesCPU_[frame_][z_ind];
     }
 
     return(img);
@@ -460,12 +542,19 @@ Mat Scene::getSlice(int z_ind) {
 
 vector<Mat> Scene::getVolume() {
 
-    return(volumeGPU_);
+    if (GPU_FLAG) {
+        return(volumesGPU_[frame_]);
+    } else {
+        return(volumesCPU_[frame_]);
+    }
 
 }
 
 Mat Scene::getParticles() {
-    return(particles_);
+
+    VLOG(2) << "Retreiving particles for frame " << frame_;
+    return(trajectory_[frame_]);
+
 }
 
 vector<float> Scene::getRefGeom() {
@@ -540,11 +629,11 @@ void Scene::dumpStack(string path) {
 
 #ifndef WITHOUT_CUDA
     if (GPU_FLAG) {
-        io<<volumeGPU_;
+        io<<volumesGPU_[frame_];
     }
 #endif
     if (!GPU_FLAG) {
-        io<<volumeCPU_;
+        io<<volumesCPU_[frame_];
     }
 
 }
