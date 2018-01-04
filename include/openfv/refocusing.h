@@ -162,6 +162,8 @@ class saRefocus {
     void updateLiveFrame();
     void liveViewWindow(Mat img);
 
+    void weight_images();
+    void saturate_images();
     void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
     void write_piv_settings(string path, double zmin, double zmax, double dz, double thresh);
     void dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, vector<Mat> &returnStack);
@@ -188,6 +190,7 @@ class saRefocus {
     void setNlcaWindow(int size);
     void setHF(int hf);
     void setRefractive(int ref, double zW, double n1, double n2, double n3, double t);
+    void setWeightingMode(int mode) { weighting_mode_ = mode; }
     string showSettings();
 
     Mat project_point(int cam, Mat_<double> X);
@@ -203,7 +206,7 @@ class saRefocus {
 
     void calc_ref_refocus_map(Mat_<double> Xcam, double z, Mat_<double> &x, Mat_<double> &y, int cam);
     void calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam);
-    void calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H);
+    void calc_ref_refocus_H(int cam, Mat &H);
     void calc_refocus_H(int cam, Mat &H);
     void img_refrac(Mat_<double> Xcam, Mat_<double> X, Mat_<double> &X_out);
 
@@ -211,6 +214,8 @@ class saRefocus {
     void apply_preprocess(void (*preprocess_func)(Mat, Mat), string path);
     void adaptiveNorm(Mat in, Mat &out, int xf, int yf);
     void slidingMinToZero(Mat in, Mat &out, int xf, int yf);
+    void weight_image(Mat &img);
+    void saturate_image(Mat &img);
 
 #ifndef WITHOUT_CUDA
     void uploadSingleToGPU(int);
@@ -254,6 +259,7 @@ class saRefocus {
     int nlca_fast_;
     int nlca_win_;
     double delta_;
+    int weighting_mode_;
     double warp_factor_;
     int active_frame_;
     int start_frame_;

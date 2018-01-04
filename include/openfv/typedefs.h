@@ -52,6 +52,8 @@ struct refocus_settings {
     //! NLCA window size
     int nlca_win;
 
+    //! Additive weighting (0 -> -1)
+    int weighting;
 
     //! Flag to use a GPU or not
     int use_gpu; // 1 for GPU

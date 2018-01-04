@@ -43,6 +43,7 @@ boost::program_options::options_description get_options() {
         ("nlca_fast", po::value<int>()->default_value(0), "ON to use fast nonlinear contrast adjustment")
         ("nlca_win", po::value<int>()->default_value(32), "NLCA window size")
         ("delta", po::value<double>()->default_value(0.1), "NLCA delta")
+        ("weighting", po::value<int>()->default_value(0), "ON to use weightin (0 -> -1)")
         ("hf_method", po::value<int>()->default_value(0), "ON to use HF method")
         ("mtiff", po::value<int>()->default_value(0), "ON if data is in multipage tiff files")
         ("frames", po::value<string>()->default_value(""), "Array of values in format start, end, skip")
@@ -129,6 +130,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
     settings.nlca_fast = vm["nlca_fast"].as<int>();
     settings.nlca_win = vm["nlca_win"].as<int>();
     settings.delta = vm["delta"].as<double>();
+    settings.weighting = vm["weighting"].as<int>();
     settings.resize_images = vm["resize_images"].as<int>();
     settings.rf = vm["rf"].as<double>();
     settings.undistort = vm["undistort"].as<int>();

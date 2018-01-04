@@ -66,6 +66,12 @@ saRefocus::saRefocus() {
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
 
+    z_ = 0; dz_ = 0.1;
+    xs_ = 0; ys_ = 0; zs_ = 0; dx_ = 0.1; dy_ = 0.1;
+    rx_ = 0; ry_ = 0; rz_ = 0; drx_ = 1.0; dry_ = 1.0; drz_ = 1.0;
+    cxs_ = 0; cys_ = 0; czs_ = 0;
+    crx_ = 0; cry_ = 0; crz_ = 0;
+
 }
 
 saRefocus::saRefocus(int num_cams, double f) {
@@ -93,7 +99,7 @@ saRefocus::saRefocus(int num_cams, double f) {
 }
 
 saRefocus::saRefocus(refocus_settings settings):
-    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minlos_(settings.minlos), nlca_(settings.nlca), nlca_fast_(settings.nlca_fast), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), UNDISTORT_IMAGES(settings.undistort) {
+    GPU_FLAG(settings.use_gpu), CORNER_FLAG(settings.hf_method), MTIFF_FLAG(settings.mtiff), mult_(settings.mult), minlos_(settings.minlos), nlca_(settings.nlca), nlca_fast_(settings.nlca_fast), weighting_mode_(settings.weighting), ALL_FRAME_FLAG(settings.all_frames), start_frame_(settings.start_frame), end_frame_(settings.end_frame), skip_frame_(settings.skip), RESIZE_IMAGES(settings.resize_images), rf_(settings.rf), UNDISTORT_IMAGES(settings.undistort) {
 
 #ifdef WITHOUT_CUDA
     if (GPU_FLAG)
@@ -659,6 +665,9 @@ void saRefocus::initializeRefocus() {
         }
     }
 
+    if (weighting_mode_ > 0)
+        weight_images();
+
     // preprocess();
 
 }
@@ -902,7 +911,6 @@ void saRefocus::GPUrefocus(int live, int frame) {
         } else {
             calc_refocus_H(i, H);
             gpu::warpPerspective(array_all[frame][i], warped_[i], H, img_size_);
-            gpu::normalize(warped_[i], warped_[i]);
             if (SINGLE_CAM_DEBUG) {
                 Mat single_cam_img(warped_[i]);
                 cam_stacks_[i].push_back(single_cam_img.clone());
@@ -991,7 +999,7 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
 
     for (int i=0; i<num_cams_; i++) {
 
-        calc_ref_refocus_H(cam_locations_[i], z_, i, H);
+        calc_ref_refocus_H(i, H);
         gpu::warpPerspective(array_all[frame][i], warped_[i], H, img_size_);
 
         if (SINGLE_CAM_DEBUG) {
@@ -1369,7 +1377,7 @@ void saRefocus::CPUrefocus_ref(int live, int frame) {
 void saRefocus::CPUrefocus_ref_corner(int live, int frame) {
 
     Mat H;
-    calc_ref_refocus_H(cam_locations_[0], z_, 0, H);
+    calc_ref_refocus_H(0, H);
 
     Mat res;
     warpPerspective(imgs[0][frame], res, H, img_size_);
@@ -1386,7 +1394,7 @@ void saRefocus::CPUrefocus_ref_corner(int live, int frame) {
     
     for (int i=1; i<num_cams_; i++) {
 
-        calc_ref_refocus_H(cam_locations_[i], z_, i, H);
+        calc_ref_refocus_H(i, H);
         warpPerspective(imgs[i][frame], res, H, img_size_);
         
 	if (mult_) {
@@ -1499,7 +1507,7 @@ void saRefocus::calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam) {
 
 }
 
-void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H) {
+void saRefocus::calc_ref_refocus_H(int cam, Mat &H) {
 
     int width = img_size_.width;
     int height = img_size_.height;
@@ -1516,24 +1524,21 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
     X(0,3) = width-1; X(1,3) = 0;
     X(0,2) = width-1; X(1,2) = height-1;
     X(0,1) = 0;       X(1,1) = height-1;
-    for (int i=0; i<X.cols; i++)
-        X(2,i) = 1.0;
-
-    Mat_<double> A = X.clone();
-
     X = hinv*X;
-
-    for (int i=0; i<X.cols; i++)
-        X(2,i) = z;
 
     Mat R = getRotMat(rx_, ry_, rz_);
     X = R*X;
 
-    //cout<<"Refracting points"<<endl;
-    Mat_<double> X_out = Mat_<double>::zeros(4, 4);
-    img_refrac(Xcam, X, X_out);
+    Mat_<double> X2 = Mat_<double>::zeros(3, 4);
+    for (int j=0; j<X.cols; j++) {
+        X2(0,j) = X(0,j) + xs_;
+        X2(1,j) = X(1,j) + ys_;
+        X2(2,j) = X(2,j) + z_;
+    }
 
-    //cout<<"Projecting to find final map"<<endl;
+    Mat_<double> X_out = Mat_<double>::zeros(4, 4);
+    img_refrac(cam_locations_[cam], X2, X_out);
+
     Mat_<double> proj = P_mats_[cam]*X_out;
 
     Point2f src, dst;
@@ -1541,15 +1546,13 @@ void saRefocus::calc_ref_refocus_H(Mat_<double> Xcam, double z, int cam, Mat &H)
     int i, j;
 
     for (int i=0; i<X.cols; i++) {
-        src.x = A.at<double>(0,i); src.y = A.at<double>(1,i);
-        //src.x = X(0,i); src.y = X(1,i);
+        src.x = X(0,i); src.y = X(1,i);
         dst.x = proj(0,i)/proj(2,i); dst.y = proj(1,i)/proj(2,i);
         sp.push_back(src); dp.push_back(dst);
     }
 
-    H = getPerspectiveTransform(dp, sp);
-    //H = findHomography(dp, sp, 0);
-    //H = D*H;
+    H = findHomography(dp, sp, 0);
+    H = D*H;
 
 }
 
@@ -2027,6 +2030,72 @@ double saRefocus::getQ(vector<Mat> &stack, vector<Mat> &refStack) {
 void saRefocus::threshold_image(Mat &img) {
 
     // add code here and later replace for CPU functions
+
+}
+
+void saRefocus::saturate_images() {
+
+    LOG(INFO) << "Saturating images...";
+
+    for (int i=0; i<imgs.size(); i++) {
+        for (int j=0; j<imgs[i].size(); j++) {
+            saturate_image(imgs[i][j]);
+        }
+    }
+
+}
+
+void saRefocus::saturate_image(Mat &img) {
+
+    Scalar max_val(1);
+    Mat le_mask, gt_mask;
+    compare(img, max_val, le_mask, CMP_LE);
+    compare(img, max_val, gt_mask, CMP_GT);
+    le_mask.convertTo(le_mask, CV_32F);
+    gt_mask.convertTo(gt_mask, CV_32F);
+    le_mask /= 255.0;
+    gt_mask /= 255.0;
+    
+    multiply(img, le_mask, img);
+    add(img, gt_mask, img);
+
+}
+
+void saRefocus::weight_images() {
+
+    LOG(INFO) << "Weighting images i.e. setting pixels < mean value to -1...";
+
+    for (int i=0; i<imgs.size(); i++) {
+        for (int j=0; j<imgs[i].size(); j++) {
+            weight_image(imgs[i][j]);
+        }
+    }
+
+}
+
+void saRefocus::weight_image(Mat &img) {
+
+    Scalar mean_val = mean(img);
+    double min_val, max_val;
+    minMaxIdx(img, &min_val, &max_val);
+    if (max_val > 1.0)
+        LOG(WARNING) << "Maximum intensity (" << max_val << ") in image is larger than 1! This means images have not been saturated and final reconstruction will be affected.";
+
+    Mat ge_mask, lt_mask;
+    compare(img, mean_val, ge_mask, CMP_GE);
+    compare(img, mean_val, lt_mask, CMP_LT);
+    ge_mask.convertTo(ge_mask, CV_32F);
+    lt_mask.convertTo(lt_mask, CV_32F);
+    ge_mask /= 255.0;
+    if (weighting_mode_ == 1)
+        lt_mask *= -1.0*max_val/255.0;
+    else if (weighting_mode_ == 2)
+        lt_mask *= -1.0*num_cams_/255.0;
+    else
+        LOG(FATAL) << "Invalid weighting mode! Only options are 0, 1 and 2.";
+
+    multiply(img, ge_mask, img);
+    add(img, lt_mask, img);
 
 }
 
