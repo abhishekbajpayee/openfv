@@ -715,7 +715,7 @@ void Camera::setCustomParticleSigma(double sigma) {
 
 }
 
-void Camera::setScene(Scene scene) {
+void Camera::setScene(Scene &scene) {
 
     scene_ = scene;
     REF_FLAG = scene_.getRefFlag();

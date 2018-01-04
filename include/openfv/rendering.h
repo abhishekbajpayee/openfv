@@ -206,7 +206,7 @@ class Camera {
     */
     void init(double f, int imsx, int imsy, int gpu);
     //! Attach Scene object to camera
-    void setScene(Scene scene);
+    void setScene(Scene &scene);
     //! Set location of camera
     void setLocation(double x, double y, double z);
     //! Point camera at point
