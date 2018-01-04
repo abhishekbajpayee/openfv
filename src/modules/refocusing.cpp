@@ -154,7 +154,7 @@ saRefocus::saRefocus(refocus_settings settings):
 #endif
 
     z_ = 0; dz_ = 0.1;
-    xs_ = 0; ys_ = 0; zs_ = 0;
+    xs_ = 0; ys_ = 0; zs_ = 0; dx_ = 0.1; dy_ = 0.1;
     rx_ = 0; ry_ = 0; rz_ = 0; drx_ = 1.0; dry_ = 1.0; drz_ = 1.0;
     cxs_ = 0; cys_ = 0; czs_ = 0;
     crx_ = 0; cry_ = 0; crz_ = 0;
