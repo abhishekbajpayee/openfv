@@ -125,7 +125,7 @@ class Scene {
     vector<int> getVoxelGeom();
     vector<double> getSceneGeom();
     double sigma();
-    int getNumParticles() { return particles_.cols; }
+    int getNumParticles() { return trajectory_[0].cols; }
 
     void temp();
 
