@@ -268,7 +268,6 @@ void saRefocus::read_imgs(string path) {
             string path_tmp;
             vector<Mat> refocusing_imgs_sub;
 
-            // path_tmp = path+cam_names_[i]+"/"+img_prefix;
             path_tmp = path+cam_names_[i]+"/";
 
             if (!boost::filesystem::is_directory(path_tmp))
@@ -294,10 +293,15 @@ void saRefocus::read_imgs(string path) {
             // check if number of frames in camera folders
             // equal or not
             if (i==0)
-                size = img_names.size();
+                img_names_ = img_names;
             else
-                if (img_names.size() != size)
-                    LOG(WARNING) << "Number of images in camera folder for " << cam_names_[i] << " not equal to images in folder for " << cam_names_[0] << "! Corresponding frames will be read in order from beginning. Syncing might be off.";
+                if (img_names.size() != img_names_.size())
+                    LOG(FATAL) << "Number of images in camera folder for " << cam_names_[i] << " not equal to images in folder for " << cam_names_[0] << "! They must be same in order to ensure syncing.";
+
+            // check if names of corresponding images are same or not
+            for (int f=0; f<img_names.size(); f++)
+                if (strcmp(explode(img_names_[f].c_str(), '/').back().c_str(), explode(img_names[f].c_str(), '/').back().c_str()) != 0)
+                    LOG(FATAL) << "Name of image " << f << " (" << img_names[f] << ") in camera folder for " << cam_names_[i] << " not same as corresponding image (" << img_names_[f] << ") in camera folder for " << cam_names_[0] << "! This could be because image names in camera folders are not the same or they do not naturally sort well.";
 
             int begin;
             int end;
@@ -318,12 +322,9 @@ void saRefocus::read_imgs(string path) {
             }
 
             for (int j=begin; j<end; j+=skip+1) {
+
                 VLOG(1)<<j<<": "<<img_names.at(j)<<endl;
                 image = imread(img_names.at(j), 0);
-                // image = imread(img_names[i]);
-                // Mat imgI;
-                // preprocess(image, imgI);
-                // refocusing_imgs_sub.push_back(imgI.clone());
 
                 if (j==begin) {
                     img_size_ = Size(image.cols, image.rows);
@@ -353,6 +354,7 @@ void saRefocus::read_imgs(string path) {
 
         }
 
+        generate_stack_names();
         initializeRefocus();
 
         VLOG(1)<<"DONE READING IMAGES"<<endl;
@@ -607,6 +609,19 @@ void saRefocus::CPUliveView() {
 
             }*/
 
+    }
+
+}
+
+void saRefocus::generate_stack_names() {
+
+    VLOG(1) << "Generating names of folders in which stacks will be saved...";
+
+    for (int i=0; i<img_names_.size(); i++) {
+        string img_name = explode(img_names_[i].c_str(), '/').back();
+        string stack_name = explode(img_name.c_str(), '.')[0];
+        VLOG(1) << img_name << " --> " << stack_name;
+        stack_names_.push_back(stack_name);
     }
 
 }
@@ -1786,25 +1801,20 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
     for (int f=0; f<frames_.size(); f++) {
 
         stringstream fn;
-        char fnum[4];
-        sprintf(fnum, "%04d", frames_.at(f));
-        fn<<path<<fnum;
+        fn<<path<<stack_names_[frames_[f]];
         mkdir(fn.str().c_str(), S_IRWXU);
 
-        LOG(INFO)<<"Saving frame "<<frames_.at(f)<<"...";
+        LOG(INFO) << "Saving frame " << frames_.at(f) << " (" << fn.str() << ")...";
 
         uploadSingleToGPU(f);
         vector<Mat> stack;
         for (double z=zmin; z<=zmax; z+=dz) {
-            // Mat img = refocus(z, 0, 0, 0, thresh, frames_.at(f));
             Mat img = refocus(z, 0, 0, 0, thresh, 0);
             stack.push_back(img);
         }
 
         imageIO io(fn.str());
         io<<stack; stack.clear();
-
-        LOG(INFO)<<"done!"<<endl;
 
     }
 

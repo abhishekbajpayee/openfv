@@ -115,6 +115,8 @@ vector<double> dir_field(double, double, double, double);
 
 string generate_unique_path(string);
 
+vector<string> explode(string const &s, char delim);
+
 // Movie class
 
 class Movie {

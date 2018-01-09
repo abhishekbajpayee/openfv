@@ -217,6 +217,7 @@ class saRefocus {
     void slidingMinToZero(Mat in, Mat &out, int xf, int yf);
     void weight_image(Mat &img);
     void saturate_image(Mat &img);
+    void generate_stack_names();
 
 #ifndef WITHOUT_CUDA
     void uploadSingleToGPU(int);
@@ -234,6 +235,8 @@ class saRefocus {
     vector<Mat> K_mats_;
     vector<Mat> R_mats_;
     vector<Mat> t_vecs_;
+    vector<string> img_names_;
+    vector<string> stack_names_;
     vector<string> cam_names_;
     vector<Mat> cam_locations_;
     vector<Mat> dist_coeffs_;

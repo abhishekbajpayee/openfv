@@ -671,6 +671,19 @@ string generate_unique_path(string path) {
 
 }
 
+vector<string> explode(string const &s, char delim) {
+
+    vector<string> result;
+    istringstream iss(s);
+
+    for (string token; getline(iss, token, delim); ) {
+        result.push_back(token);
+    }
+
+    return result;
+
+}
+
 // ----------------------------------------------------
 // Movie class functions
 // ----------------------------------------------------
