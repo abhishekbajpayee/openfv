@@ -63,7 +63,15 @@ end
 dirs(inds) = [];
 nFrames = size(dirs, 1);
 
-for i=1:nFrames
+start_frame = 1;
+end_frame = nFrames;
+
+if (isfield(yaml_data, 'start_frame'))
+    start_frame = yaml_data.start_frame;
+    end_frame = yaml_data.end_frame;
+end
+
+for i=start_frame:end_frame
     
     display(['Reconstructing frame ' num2str(i) '...']);
     
