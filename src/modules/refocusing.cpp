@@ -325,8 +325,10 @@ void saRefocus::read_imgs(string path) {
                 // preprocess(image, imgI);
                 // refocusing_imgs_sub.push_back(imgI.clone());
 
-                if (j==begin)
+                if (j==begin) {
                     img_size_ = Size(image.cols, image.rows);
+                    updateHinv();
+                }
 
                 Mat image2;
                 if (UNDISTORT_IMAGES) {
@@ -1162,7 +1164,7 @@ void saRefocus::GPUliveView() {
         tulimit = 1.0;
         tllimit = 0.0;
     }
-    double mult_exp_limit = 1.0;
+    double mult_exp_limit = 5.0;
     double mult_thresh = 0.01;
     double ddelta = 0.01;
 
@@ -1509,25 +1511,15 @@ void saRefocus::calc_refocus_map(Mat_<double> &x, Mat_<double> &y, int cam) {
 
 void saRefocus::calc_ref_refocus_H(int cam, Mat &H) {
 
-    int width = img_size_.width;
-    int height = img_size_.height;
-
-    Mat_<double> D = Mat_<double>::zeros(3,3);
-    D(0,0) = scale_; D(1,1) = scale_;
-    D(0,2) = width*0.5;
-    D(1,2) = height*0.5;
-    D(2,2) = 1;
-    Mat hinv = D.inv();
-
     Mat_<double> X = Mat_<double>::zeros(3, 4);
-    X(0,0) = 0;       X(1,0) = 0;
-    X(0,3) = width-1; X(1,3) = 0;
-    X(0,2) = width-1; X(1,2) = height-1;
-    X(0,1) = 0;       X(1,1) = height-1;
-    X = hinv*X;
+    X(0,0) = 0;                 X(1,0) = 0;
+    X(0,3) = img_size_.width-1; X(1,3) = 0;
+    X(0,2) = img_size_.width-1; X(1,2) = img_size_.height-1;
+    X(0,1) = 0;                 X(1,1) = img_size_.height-1;
+    X = hinv_*X;
 
-    Mat R = getRotMat(rx_, ry_, rz_);
-    X = R*X;
+    // Mat R = getRotMat(rx_, ry_, rz_);
+    // X = R*X;
 
     Mat_<double> X2 = Mat_<double>::zeros(3, 4);
     for (int j=0; j<X.cols; j++) {
@@ -1552,29 +1544,18 @@ void saRefocus::calc_ref_refocus_H(int cam, Mat &H) {
     }
 
     H = findHomography(dp, sp, 0);
-    H = D*H;
+    H = D_*H;
 
 }
 
 void saRefocus::calc_refocus_H(int cam, Mat &H) {
 
-    double width = img_size_.width;
-    double height = img_size_.height;
-
-    Mat D;
-    if (INVERT_Y_FLAG) {
-        D = (Mat_<double>(3,3) << scale_, 0, width*0.5, 0, -1.0*scale_, height*0.5, 0, 0, 1);
-    } else {
-        D = (Mat_<double>(3,3) << scale_, 0, width*0.5, 0, scale_, height*0.5, 0, 0, 1);
-    }
-    Mat hinv = D.inv();
-
     Mat_<double> X = Mat_<double>::zeros(3, 4);
-    X(0,0) = 0;       X(1,0) = 0;
-    X(0,1) = width-1; X(1,1) = 0;
-    X(0,2) = width-1; X(1,2) = height-1;
-    X(0,3) = 0;       X(1,3) = height-1;
-    X = hinv*X;
+    X(0,0) = 0;                 X(1,0) = 0;
+    X(0,1) = img_size_.width-1; X(1,1) = 0;
+    X(0,2) = img_size_.width-1; X(1,2) = img_size_.height-1;
+    X(0,3) = 0;                 X(1,3) = img_size_.height-1;
+    X = hinv_*X;
 
     Mat_<double> X2 = Mat_<double>::zeros(4, 4);
 
@@ -1604,7 +1585,7 @@ void saRefocus::calc_refocus_H(int cam, Mat &H) {
     }
 
     H = findHomography(dp, sp, 0);
-    H = D*H;
+    H = D_*H;
 
 }
 
@@ -1890,17 +1871,13 @@ void saRefocus::write_piv_settings(string path, double zmin, double zmax, double
 
 }
 
-void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, vector<Mat> &returnStack) {
+void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, vector<Mat> &returnStack, double &time) {
 
-    LOG(INFO)<<"SAVING STACK TO "<<path<<endl;
+    LOG(INFO)<<"SAVING STACK TO "<<path;
 
     stringstream fn;
     fn<<path<<f;
     mkdir(fn.str().c_str(), S_IRWXU);
-
-    // string qfn = fn.str() + "/q.txt";
-    // fileIO qio(qfn);
-    // qio<<q;
 
     fn<<"/refocused";
     mkdir(fn.str().c_str(), S_IRWXU);
@@ -1916,6 +1893,7 @@ void saRefocus::dump_stack_piv(string path, double zmin, double zmax, double dz,
     }
 
     boost::chrono::duration<double> t2 = boost::chrono::system_clock::now() - t1;
+    time = t2.count();
     VLOG(1)<<"Time taken for reconstruction: "<<t2;
 
     imageIO io(fn.str());
@@ -1989,7 +1967,7 @@ void saRefocus::return_stack(double zmin, double zmax, double dz, double thresh,
 
     boost::chrono::system_clock::time_point t1 = boost::chrono::system_clock::now();
 
-    for (double z=zmin; z<=zmax+(dz*0.5); z+=dz) {
+    for (double z=zmin; z<=zmax; z+=dz) {
         Mat img = refocus(z, 0, 0, 0, thresh, frame);
         stack.push_back(img);
     }
@@ -2255,6 +2233,7 @@ void saRefocus::setStdevThresh(int flag) {
 void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats, vector<Mat> cam_locations) {
 
     img_size_ = Size(imgs_sub[0].cols, imgs_sub[0].rows);
+    updateHinv();
 
     P_mats_ = Pmats;
 
@@ -2281,9 +2260,24 @@ void saRefocus::setArrayData(vector<Mat> imgs_sub, vector<Mat> Pmats, vector<Mat
 
 }
 
+void saRefocus::updateHinv() {
+
+    Mat D;
+    if (INVERT_Y_FLAG) {
+        D = (Mat_<double>(3,3) << scale_, 0, img_size_.width*0.5, 0, -1.0*scale_, img_size_.height*0.5, 0, 0, 1);
+    } else {
+        D = (Mat_<double>(3,3) << scale_, 0, img_size_.width*0.5, 0, scale_, img_size_.height*0.5, 0, 0, 1);
+    }
+    Mat hinv = D.inv();
+    D_ = D;
+    hinv_ = hinv;
+
+}
+
 void saRefocus::addView(Mat img, Mat P, Mat location) {
 
     img_size_ = Size(img.cols, img.rows);
+    updateHinv();
 
     P_mats_.push_back(P);
 
@@ -2301,6 +2295,7 @@ void saRefocus::addViews(vector< vector<Mat> > frames, vector<Mat> Ps, vector<Ma
 
     Mat img = frames[0][0];
     img_size_ = Size(img.cols, img.rows);
+    updateHinv();
 
     P_mats_ = Ps;
     cam_locations_ = locations;

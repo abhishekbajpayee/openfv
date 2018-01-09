@@ -166,7 +166,7 @@ class saRefocus {
     void saturate_images();
     void dump_stack(string path, double zmin, double zmax, double dz, double thresh, string type);
     void write_piv_settings(string path, double zmin, double zmax, double dz, double thresh);
-    void dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, vector<Mat> &returnStack);
+    void dump_stack_piv(string path, double zmin, double zmax, double dz, double thresh, string type, int f, vector<Mat> &returnStack, double &time);
     void calculateQ(double zmin, double zmax, double dz, double thresh, int frame, string refPath);
     void return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack);
     void return_stack(double zmin, double zmax, double dz, double thresh, int frame, vector<Mat> &stack, double &time);
@@ -180,6 +180,7 @@ class saRefocus {
     void setSingleCamDebug(int);
     void setStdevThresh(int);
     void setArrayData(vector<Mat> imgs, vector<Mat> Pmats, vector<Mat> cam_locations);
+    void updateHinv();
     void addView(Mat img, Mat P, Mat location);
     void addViews(vector< vector<Mat> > frames, vector<Mat> Ps, vector<Mat> locations);
     void clearViews();
@@ -243,6 +244,7 @@ class saRefocus {
     int imgs_read_;
     vector<Mat> stack_;
     vector< vector<Mat> > cam_stacks_;
+    Mat D_, hinv_;
 
     // Scene geometry params
     float geom[5];
