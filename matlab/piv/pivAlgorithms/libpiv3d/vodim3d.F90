@@ -201,7 +201,7 @@ SUBROUTINE vodim3d(WSIZE, NWINDOWS, NCORRS, fd1, fd2, fd3, &
      !       ENDIF
      ! IT IS KEY TO MAKE THIS NUMBER LESS THAN THE TOTAL CORES
      ! ON THE MACHINE OTHERWISE CRAZY SHIT WILL LIKELY ENSUE
-     maxThreads = 20
+     maxThreads = 16
   ELSE
      maxThreads = 1
   ENDIF
