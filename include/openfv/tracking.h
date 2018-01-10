@@ -35,10 +35,13 @@
 #ifndef TRACKING_LIBRARY
 #define TRACKING_LIBRARY
 
+// Ceres Solver headers
+#include <ceres/ceres.h>
+#include <ceres/rotation.h>
+
 #include "std_include.h"
 #include "typedefs.h"
 #include "tools.h"
-#include "optimization.h"
 
 using namespace std;
 using namespace cv;
@@ -258,5 +261,50 @@ class pTracking {
     int reject_singles_;
 
 };
+
+// Poly2 Fit Error function
+class poly2FitError {
+
+ public:
+
+ poly2FitError(double xin, double yin):
+    x(xin), y(yin) {}
+
+    template <typename T>
+    bool operator()(const T* const params,
+                    T* residuals) const {
+
+        residuals[0] = y - T(params[0]*x*x + params[1]*x + params[2]);
+        return true;
+
+    }
+
+    double x;
+    double y;
+
+};
+
+// Gaussian Fit Error function
+class gaussFitError {
+
+ public:
+
+ gaussFitError(double xin, double yin):
+    x(xin), y(yin) {}
+
+    template <typename T>
+    bool operator()(const T* const params,
+                    T* residuals) const {
+
+        residuals[0] = y - T(params[0]*exp(-pow(((x-params[1])/params[2]),2)));
+        return true;
+
+    }
+
+    double x;
+    double y;
+
+};
+
 
 #endif

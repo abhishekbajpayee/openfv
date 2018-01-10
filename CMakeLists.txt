@@ -7,7 +7,7 @@
 #                           License Agreement
 #                For Open Source Flow Visualization Library
 #
-# Copyright 2013-2017 Abhishek Bajpayee
+# Copyright 2013-2018 Abhishek Bajpayee
 #
 # This file is part of OpenFV.
 #
@@ -35,6 +35,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" ON)
+option(BUILD_TRACKING "BUILD_TRACKING" OFF)
 option(WITH_CUDA "WITH_CUDA" ON)
 
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
@@ -91,19 +92,31 @@ endif()
 # Boost Libraries
 find_package(Boost)
 if(Boost_FOUND)
-  find_package ( Boost COMPONENTS program_options filesystem system serialization chrono REQUIRED )
+  find_package(Boost COMPONENTS program_options filesystem system serialization chrono REQUIRED)
   set(Boost_GENERAL ${Boost_LIBRARIES})
   if(BUILD_PYTHON)
-    find_package ( Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED )
+    find_package(Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED)
     set(Boost_PY ${Boost_LIBRARIES})
   endif()
 elseif(NOT Boost_FOUND)
   message("Boost not found!")
 endif()
 
+# Tiff Library
 find_package(TIFF REQUIRED)
 if(NOT TIFF_FOUND)
   message("libtiff not found!")
+endif()
+
+if(BUILD_TRACKING)
+  message("---Ceres Solver---")
+  find_package(Ceres REQUIRED)
+  if(Ceres_FOUND)
+    message("Ceres Libraries: " ${CERES_LIBRARIES})
+    message("Ceres Include Dirs: " ${CERES_INCLUDES})
+  else()
+    message("Ceres Solver not found!")
+  endif()
 endif()
 
 # Include directories
@@ -113,39 +126,38 @@ include_directories( ${PYTHON_INCLUDE_DIRS} )
 include_directories( ${EIGEN_INC_DIR} )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories( ${CUDA_INCLUDE_DIRS} )
+include_directories( ${CERES_INCLUDES} )
 
 # Don't think these are needed because OpenFV
 # doesn't link to Qt
 # include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
-set (CERES_LIBS ceres glog gflags cholmod cxsparse blas lapack gomp) # protobuf lgomp (removed)
-set (OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY} yaml-cpp)
-if (WITH_CUDA)
-  set(OTHER_LIBS ${OTHER_LIBS}) # cufft cufftw
+set(OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY} yaml-cpp glog gflags)
+if(WITH_CUDA)
+  set(OTHER_LIBS ${OTHER_LIBS})
   set (OFV_LIBS openfv cuda_openfv)
 else()
   set (OFV_LIBS openfv)
 endif()
-if (BUILD_PYTHON)
+if(BUILD_PYTHON)
   set (OTHER_LIBS ${OTHER_LIBS} ${PYTHON_LIBRARIES})
 endif()
-set (PROF_LIB profiler)
-set (LIBS ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
+set(PROF_LIB profiler)
+if(BUILD_TRACKING)
+  set(CERES_LIBS ${CERES_LIBRARIES} cholmod cxsparse blas lapack gomp)
+  set(LIBS ${PROF_LIBS} ${OTHER_LIBS} ${CERES_LIBS} ${OpenCV_LIBS})
+else()
+  set(LIBS ${PROF_LIBS} ${OTHER_LIBS} ${OpenCV_LIBS})
+endif()
 
 # fPIC flags, needed?
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-execute_process ( COMMAND ${PYTHON_EXEC} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-message("Python package install directory: " ${PYTHON_SITE_PACKAGES})
-
-set(CMAKE_INSTALL_PREFIX "/usr/local")
-set(CMAKE_PYTHON_INSTALL_PREFIX ${PYTHON_SITE_PACKAGES}/openfv)
-
 # Subdirectories
 add_subdirectory(src)
 
-add_executable (sa_reconstruct ${PROJECT_SOURCE_DIR}/src/tools/sa_reconstruct.cpp)
-target_link_libraries (sa_reconstruct ${LIBS} ${OFV_LIBS})
+add_executable(sa_reconstruct ${PROJECT_SOURCE_DIR}/src/tools/sa_reconstruct.cpp)
+target_link_libraries(sa_reconstruct ${LIBS} ${OFV_LIBS})
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/openfv/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include/openfv)

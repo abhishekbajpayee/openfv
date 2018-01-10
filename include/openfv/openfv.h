@@ -39,7 +39,6 @@
 // Core
 #include "std_include.h"
 #include "typedefs.h"
-#include "optimization.h"
 #include "refocusing.h"
 #include "rendering.h"
 #include "serialization.h"
@@ -58,6 +57,7 @@
 
 // Core
 // #include "calibration.h"
+// #include "optimization.h"
 
 // Other
 // #include "piv.h"

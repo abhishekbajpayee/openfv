@@ -45,8 +45,8 @@ namespace libtiff {
 }
 
 // Ceres Solver headers
-#include <ceres/ceres.h>
-#include <ceres/rotation.h>
+// #include <ceres/ceres.h>
+// #include <ceres/rotation.h>
 
 // glog and gflags
 #include <glog/logging.h>
