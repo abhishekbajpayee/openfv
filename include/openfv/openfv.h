@@ -37,16 +37,16 @@
 // ----------------------
 
 // Core
-#include "std_include.h"
-#include "typedefs.h"
 #include "refocusing.h"
 #include "rendering.h"
-#include "serialization.h"
 #include "parse_settings.h"
-#include "tools.h"
 
 // Particle Localization and Tracking
+// #include "std_include.h"
+// #include "typedefs.h"
 // #include "tracking.h"
+// #include "serialization.h"
+// #include "tools.h"
 
 // CUDA
 // #include "cuda_lib.h"
