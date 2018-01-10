@@ -49,9 +49,7 @@
 // #include "tracking.h"
 
 // CUDA
-#ifndef _WITHOUT_CUDA_
-#include "cuda_lib.h"
-#endif
+// #include "cuda_lib.h"
 
 // LEGACY INCLUDES
 
