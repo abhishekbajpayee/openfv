@@ -28,6 +28,8 @@ set (SRC_TO_BUILD ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp
 
 if (BUILD_TRACKING)
   set (SRC_TO_BUILD ${SRC_TO_BUILD} ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
+else()
+  add_definitions(-DWITHOUT_TRACKING)
 endif()
 
 if (WITH_CUDA)

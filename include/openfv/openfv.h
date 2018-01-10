@@ -46,7 +46,9 @@
 #include "tools.h"
 
 // Particle Localization and Tracking
+#ifndef _WITHOUT_TRACKING_
 #include "tracking.h"
+#endif
 
 // CUDA
 #ifndef _WITHOUT_CUDA_
