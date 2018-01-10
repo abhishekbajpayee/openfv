@@ -1806,12 +1806,23 @@ void saRefocus::dump_stack(string path, double zmin, double zmax, double dz, dou
 
         LOG(INFO) << "Saving frame " << frames_.at(f) << " (" << fn.str() << ")...";
 
-        uploadSingleToGPU(f);
         vector<Mat> stack;
-        for (double z=zmin; z<=zmax; z+=dz) {
-            Mat img = refocus(z, 0, 0, 0, thresh, 0);
-            stack.push_back(img);
+#ifndef WITHOUT_CUDA
+        if (GPU_FLAG) {
+            uploadSingleToGPU(f);            
+            for (double z=zmin; z<=zmax; z+=dz) {
+                Mat img = refocus(z, 0, 0, 0, thresh, 0);
+                stack.push_back(img);
+            }
         }
+#endif
+        if (!GPU_FLAG) {
+            for (double z=zmin; z<=zmax; z+=dz) {
+                Mat img = refocus(z, 0, 0, 0, thresh, frames_[f]);
+                stack.push_back(img);
+            }
+        }
+
 
         imageIO io(fn.str());
         io<<stack; stack.clear();
