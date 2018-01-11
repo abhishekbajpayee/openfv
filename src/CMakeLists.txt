@@ -87,7 +87,7 @@ if(BUILD_PYTHON)
   # boost_python_module(np_opencv_module tests/np_opencv_module.cpp)
   # target_link_libraries(np_opencv_module boost_system boost_python np_opencv_converter ${OpenCV_LDFLAGS})
 
-  install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"\")")
+  install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"import np_opencv_converter\n\")")
 
   if(BUILD_TRACKING)
     install(TARGETS rendering refocusing tools tracking
