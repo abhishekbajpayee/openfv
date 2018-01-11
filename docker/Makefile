@@ -23,15 +23,25 @@
 
 # Makefile to build OpenFV docker images
 
+# generating random number to force new builds
+# flag := $(shell bash -c 'echo $$RANDOM')
+
 # TODO: doesn't seem to be working properly
 remove-untagged-images:
-	@-(docker rmi $$(docker images | grep "^<none>" | awk '{print $3}')) > /dev/null
+	@-(docker rmi $$(docker images | grep "^<none>" | awk '{print $3}')) 2> /dev/null
+	@-(docker rmi $$(docker images | grep "<none>" | awk '{print $3}')) 2> /dev/null
 
-build-image:
-	@docker build -t openfv/openfv .
+build-image-base:
+	@docker build -t openfv/openfv-base -f Dockerfile.base .
 
-build-cuda-image:
-	@-(cd cuda && nvidia-docker build -t openfv/openfv-cuda .)
+build-cuda-image-base:
+	@-(cd cuda && nvidia-docker build -t openfv/openfv-cuda-base -f Dockerfile.base .)
+
+build-image: build-image-base
+	@-(docker build --no-cache -t openfv/openfv .)
+
+build-cuda-image: build-cuda-image-base
+	@-(cd cuda && nvidia-docker build --no-cache -t openfv/openfv-cuda .)
 
 pull-images:
 	@docker pull openfv/openfv
