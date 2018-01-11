@@ -25,9 +25,6 @@ FROM nvidia/cuda:7.5
 
 USER root
 
-#ENV DEBIAN_FRONTEND noninteractive RUN REPO=http://cdn-fastly.deb.debian.org \
-# && echo "deb $REPO/debian jessie main\ndeb $REPO/debian-security jessie/updates main" > /etc/apt/sources.list \
-
 # Install all OS dependencies for fully functioning notebook server,
 # libav-tools for matplotlib anim,
 # and OpenFV dependencies
@@ -56,7 +53,12 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     libxrender1 \
     inkscape \
     libav-tools \
+    libx11-xcb-dev \
+    mesa-common-dev \
+    libglu1-mesa-dev \
     qt5-default \
+    libqt5opengl5 \
+    x11-apps \
     cmake \
     build-essential \
     libboost-all-dev \
@@ -66,6 +68,7 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     libatlas-base-dev \
     libsuitesparse-dev \
     libtiff5-dev \
+    libyaml-cpp-dev \
     autoconf \
     automake \
     libtool && \
@@ -82,46 +85,59 @@ RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.10.0/tini 
     chmod +x /usr/local/bin/tini
 
 # Configure environment
-ENV CONDA_DIR /opt/conda
-ENV PATH $CONDA_DIR/bin:$PATH
-ENV SHELL /bin/bash
-ENV NB_USER jovyan
-ENV NB_UID 1000
-ENV HOME /home/$NB_USER
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-ENV LD_LIBRARY_PATH /usr/local/lib/:$LD_LIBRARY_PATH
+ENV CONDA_DIR=/opt/conda \
+    SHELL=/bin/bash \
+    NB_USER=jovyan \
+    NB_UID=1000 \
+    NB_GID=100 \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8
+ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
+    PATH=$CONDA_DIR/bin:$PATH \
+    HOME=/home/$NB_USER
+
+ADD fix-permissions /usr/local/bin/fix-permissions
 
 # Create jovyan user with UID=1000 and in the 'users' group
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir -p $CONDA_DIR && \
-    chown $NB_USER $CONDA_DIR
+    chown $NB_USER:$NB_GID $CONDA_DIR && \
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
 USER $NB_USER
 
 # Setup jovyan home directory
 RUN mkdir /home/$NB_USER/work && \
     mkdir /home/$NB_USER/.jupyter && \
-    echo "cacert=/etc/ssl/certs/ca-certificates.crt" > /home/$NB_USER/.curlrc
+    echo "cacert=/etc/ssl/certs/ca-certificates.crt" > /home/$NB_USER/.curlrc \
+    fix-permissions $HOME
 
-# Install conda as jovyan
+# Install conda as jovyan and check the md5 sum provided on the download site
+ENV MINICONDA_VERSION 4.3.30
 RUN cd /tmp && \
-    mkdir -p $CONDA_DIR && \
-    wget --quiet https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh && \
-    echo "c59b3dd3cad550ac7596e0d599b91e75d88826db132e4146030ef471bb434e9a *Miniconda3-4.2.12-Linux-x86_64.sh" | sha256sum -c - && \
-    /bin/bash Miniconda3-4.2.12-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
-    rm Miniconda3-4.2.12-Linux-x86_64.sh && \
-    $CONDA_DIR/bin/conda config --system --add channels conda-forge && \
+    wget --quiet https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
+    echo "0b80a152332a4ce5250f3c09589c7a81 *Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh" | md5sum -c - && \
+    /bin/bash Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
+    rm Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
+    $CONDA_DIR/bin/conda config --system --prepend channels conda-forge && \
     $CONDA_DIR/bin/conda config --system --set auto_update_conda false && \
-    conda clean -tipsy
+    $CONDA_DIR/bin/conda config --system --set show_channel_urls true && \
+    $CONDA_DIR/bin/conda update --all --quiet --yes
+RUN conda clean -tipsy && \
+    fix-permissions $CONDA_DIR
 
 # Install Jupyter Notebook and Hub
-RUN conda install --quiet --yes \
-    'notebook=4.4.*' \
-    'jupyterhub=0.7.*' \
-    'jupyterlab=0.17.*' \
-    && conda clean -tipsy
+RUN conda install -c conda-forge --quiet --yes \
+    'notebook=5.2.*' \
+    'jupyterhub=0.8.*' \
+    'jupyterlab=0.30.*' && \
+    conda clean -tipsy && \
+    jupyter labextension install @jupyterlab/hub-extension@^0.7.0 && \
+    npm cache clean && \
+    rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
+    fix-permissions $CONDA_DIR
 
 USER root
 
@@ -219,29 +235,29 @@ RUN pip install kernda --no-cache && \
     kernda -o -y /usr/local/share/jupyter/kernels/python2/kernel.json && \
     pip uninstall kernda -y
 
-# Installing Glog
+# Installing glog
 RUN git clone https://github.com/google/glog.git && \
         autoreconf --force --install glog && \
         cd glog && ./configure && make && make install
 
-# Installing Gflags
+# Installing gflags
 RUN git clone https://github.com/gflags/gflags.git && \
         cd gflags && mkdir bin && cd bin && \
         cmake .. && make && make install
 
 # Installing Ceres Solver
-RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
-        tar -xvzf ceres-solver-1.11.0.tar.gz && \
-        cd ceres-solver-1.11.0 && \
-        mkdir build && cd build && \
-        cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && \
-        make && make install
+# RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
+#         tar -xvzf ceres-solver-1.11.0.tar.gz && \
+#         cd ceres-solver-1.11.0 && \
+#         mkdir build && cd build && \
+#         cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && \
+#         make && make install
 
 # Install OpenCV
 RUN wget https://github.com/Itseez/opencv/archive/2.4.10.zip
 RUN unzip 2.4.10.zip
 RUN cd opencv-2.4.10 && mkdir build && cd build && \
-        cmake -D CUDA_ARCH_BIN=5.0 -D CUDA_ARCH_PTX=5.0 .. && \
+        cmake -D CUDA_ARCH_BIN=5.0 -D CUDA_ARCH_PTX=5.0 -D WITH_QT=ON .. && \
         make -j7 && make install
 
 # Install openfv
@@ -250,7 +266,8 @@ RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
         cmake -D BUILD_PYTHON=ON -D WITH_CUDA=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python .. && \
         make && make install
 
-RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
+# RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
+RUN rm -rf *.zip gflags glog opencv* openfv
 
 # Download sample data
 RUN git clone https://github.com/abhishekbajpayee/openfv-sample-data.git
