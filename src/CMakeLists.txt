@@ -90,10 +90,10 @@ if(BUILD_PYTHON)
   install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"import np_opencv_converter\n\")")
 
   if(BUILD_TRACKING)
-    install(TARGETS rendering refocusing tools tracking
+    install(TARGETS rendering refocusing tools np_opencv_converter tracking
       DESTINATION ${CMAKE_PYTHON_INSTALL_PREFIX})
   else()
-    install(TARGETS rendering refocusing tools
+    install(TARGETS rendering refocusing tools np_opencv_converter
       DESTINATION ${CMAKE_PYTHON_INSTALL_PREFIX})
   endif()
 
