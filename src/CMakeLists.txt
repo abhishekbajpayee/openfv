@@ -70,9 +70,22 @@ if(BUILD_PYTHON)
     target_link_libraries(tracking ${OFV_LIBS} ${LIBS})
   endif()
 
-  # add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/pLoc.cpp)
+  # add_library(localization SHARED ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
   # set_target_properties(localization PROPERTIES ${PYTHON_PROPS} PREFIX "")
   # target_link_libraries(localization ${LIBS})
+
+  include(cmake/boost-python.cmake)
+
+  # Build np<=>opencv converter library
+  include_directories(${PROJECT_SOURCE_DIR}/include)
+  boost_python_module(np_opencv_converter numpy-opencv-converter/np_opencv_converter.cpp numpy-opencv-converter/conversion.cpp)
+  set_target_properties(np_opencv_converter PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
+  target_link_libraries(np_opencv_converter boost_system boost_python ${OpenCV_LDFLAGS})
+  
+  # Build test library
+  # include_directories(${PROJECT_SOURCE_DIR}/include/numpy-opencv-converter)
+  # boost_python_module(np_opencv_module tests/np_opencv_module.cpp)
+  # target_link_libraries(np_opencv_module boost_system boost_python np_opencv_converter ${OpenCV_LDFLAGS})
 
   install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"\")")
 
