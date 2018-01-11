@@ -260,11 +260,13 @@ RUN cd opencv-2.4.10 && mkdir build && cd build && \
         cmake -D CUDA_ARCH_BIN=5.0 -D CUDA_ARCH_PTX=5.0 -D WITH_QT=ON .. && \
         make -j7 && make install
 
+ARG REFRESH=unknown
+
 # Install openfv
-RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
+RUN REFRESH=${REFRESH} git clone https://github.com/abhishekbajpayee/openfv.git && \
         cd openfv && ./configure && cd bin && \
         cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=ON \
-        -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include .. && \
+        -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
         make && make install
 
 # RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
