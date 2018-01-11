@@ -80,20 +80,20 @@ if(BUILD_PYTHON)
   include_directories(${PROJECT_SOURCE_DIR}/include)
   boost_python_module(np_opencv_converter numpy-opencv-converter/np_opencv_converter.cpp numpy-opencv-converter/conversion.cpp)
   set_target_properties(np_opencv_converter PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
-  target_link_libraries(np_opencv_converter boost_system boost_python ${OpenCV_LDFLAGS})
+  target_link_libraries(np_opencv_converter boost_system boost_python ${OpenCV_LIBS})
   
   # Build test library
-  # include_directories(${PROJECT_SOURCE_DIR}/include/numpy-opencv-converter)
-  # boost_python_module(np_opencv_module tests/np_opencv_module.cpp)
-  # target_link_libraries(np_opencv_module boost_system boost_python np_opencv_converter ${OpenCV_LDFLAGS})
+  boost_python_module(np_opencv_module numpy-opencv-converter/np_opencv_module.cpp)
+  set_target_properties(np_opencv_module PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
+  target_link_libraries(np_opencv_module boost_system boost_python np_opencv_converter ${OpenCV_LIBS})
 
-  install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"import np_opencv_converter\n\")")
+  install(CODE "file(WRITE ${PROJECT_SOURCE_DIR}/bin/openfv/__init__.py \"import np_opencv_module\n\")")
 
   if(BUILD_TRACKING)
-    install(TARGETS rendering refocusing tools np_opencv_converter tracking
+    install(TARGETS rendering refocusing tools np_opencv_converter np_opencv_module tracking
       DESTINATION ${CMAKE_PYTHON_INSTALL_PREFIX})
   else()
-    install(TARGETS rendering refocusing tools np_opencv_converter
+    install(TARGETS rendering refocusing tools np_opencv_converter np_opencv_module
       DESTINATION ${CMAKE_PYTHON_INSTALL_PREFIX})
   endif()
 

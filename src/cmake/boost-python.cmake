@@ -1,7 +1,7 @@
 function(boost_python_module NAME)
 
   set(DEP_LIBS
-    ${Boost_PYTHON_LIBRARY}
+    ${Boost_PY}
     ${PYTHON_LIBRARIES}
     )
   #these are required includes for every ecto module
