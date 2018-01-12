@@ -273,16 +273,24 @@ void saRefocus::read_imgs(string path) {
             if (!boost::filesystem::is_directory(path_tmp))
                 LOG(FATAL) << "Directory for camera " << cam_names_[i] << " does not exist!";
 
+            int hidden=0;
             dir = opendir(path_tmp.c_str());
             while(ent = readdir(dir)) {
                 temp_name = ent->d_name;
                 if (temp_name.compare(dir1)) {
                     if (temp_name.compare(dir2)) {
-                        string path_img = path_tmp+temp_name;
-                        img_names.push_back(path_img);
+                        if (temp_name[0] != '.') {
+                            string path_img = path_tmp+temp_name;
+                            img_names.push_back(path_img);
+                        } else {
+                            hidden=1;
+                        }
                     }
                 }
             }
+
+            if (hidden)
+                LOG(WARNING) << "Camera folders seem to contain hidden files (filenames starting with '.')!";
 
             // validate number of images in folder not 0
             if (img_names.size() == 0)
