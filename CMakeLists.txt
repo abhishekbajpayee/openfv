@@ -36,7 +36,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Options
 option(BUILD_PYTHON "BUILD_PYTHON" ON)
 option(BUILD_TRACKING "BUILD_TRACKING" OFF)
-option(WITH_CUDA "WITH_CUDA" ON)
+option(WITH_CUDA "WITH_CUDA" OFF)
 
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
 set(PYTHON_EXEC "python2.7" CACHE PATH "Python executable (used to find which dir to install python bindings in)")
@@ -84,7 +84,7 @@ if (NOT WITH_CUDA)
 endif()
 
 # Find OpenCV
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 4.1.2 REQUIRED)
 message("---OpenCV---")
 message("OpenCV Libraries: " ${OpenCV_LIBS})
 message("OpenCV Include Dirs: " ${OpenCV_INCLUDE_DIRS})

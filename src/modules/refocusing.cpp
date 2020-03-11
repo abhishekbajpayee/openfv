@@ -790,7 +790,8 @@ void saRefocus::initializeSpecificGPU(int gpu) {
     
     LOG(WARNING) << "Explicitly setting GPU to device number " << gpu << ". This is an expert function!";
 
-    gpu::setDevice(gpu);
+    //gpu::setDevice(gpu);
+    cuda::setDevice(gpu);
     
     if (REF_FLAG)
         if (!CORNER_FLAG)
@@ -1324,7 +1325,7 @@ void saRefocus::CPUrefocus(int live, int frame) {
 
     Mat H, trans;
     calc_refocus_H(0, H);
-    warpPerspective(imgs[0][frame], cputemp, H, img_size_);
+    cv::warpPerspective(imgs[0][frame], cputemp, H, img_size_);
     // qimshow(cputemp);
 
     if (mult_) {
@@ -2230,7 +2231,8 @@ void saRefocus::setIntImgMode(int flag) {
 
 void saRefocus::setGpuDevice(int id) {
 
-    gpu::setDevice(id);
+    //gpu::setDevice(id);
+    cuda::setDevice(id);
 
 }
 

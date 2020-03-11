@@ -43,8 +43,10 @@
 #endif
 
 #include <Eigen/Core>
-#include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
+//#include <opencv/opencv.hpp>
+#include <opencv/include/opencv2/opencv.hpp>
+//#include <opencv2/gpu/gpu.hpp>
+#include <opencv/modules/cudaarithm/include/opencv2/cudaarithm.hpp>
 
 #include <yaml-cpp/yaml.h>
 

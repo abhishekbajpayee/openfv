@@ -39,9 +39,10 @@
 #include "typedefs.h"
 #include "refocusing.h"
 #include "serialization.h"
+#include <opencv/include/opencv/cv.h>
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
+//#include <opencv2/opencv.hpp>
+//#include <opencv2/gpu/gpu.hpp>
 
 using namespace std;
 using namespace cv;
