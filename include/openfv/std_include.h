@@ -23,16 +23,11 @@
 
 // OpenCV headers
 // B: As far as I know, opencv is the opencv 4 installation, but I thought cv.h was the old
-// convention?
-#include <opencv/include/opencv/cv.h>
-//#include <opencv/include/opencv/cv.hpp>
-#include <opencv/modules/features2d/include/opencv2/features2d.hpp>
-#include <opencv/modules/highgui/include/opencv2/highgui.hpp>
-
-// Old headers
-//#include <opencv/highgui.h>
-//#include <opencv2/features2d/features2d.hpp>
-//#include <opencv2/nonfree/features2d.hpp>
+// convention? 
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/nonfree/features2d.hpp>
 
 // Standard headers
 #include <iostream>

@@ -42,11 +42,12 @@
 #include "cuda_lib.h"
 #endif
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
+//#include <Eigen/Core>
 //#include <opencv/opencv.hpp>
-#include <opencv/include/opencv2/opencv.hpp>
-//#include <opencv2/gpu/gpu.hpp>
-#include <opencv/modules/cudaarithm/include/opencv2/cudaarithm.hpp>
+//#include <opencv/include/opencv2/opencv.hpp>
+#include <opencv2/gpu/gpu.hpp>
+//#include <opencv/modules/cudaarithm/include/opencv2/cudaarithm.hpp>
 
 #include <yaml-cpp/yaml.h>
 
