@@ -39,9 +39,7 @@
 #include "numpy-opencv-converter/conversion.h"
 
 // opencv includes
-//#include <opencv2/opencv.hpp>
-#include "std_include.h"
-#include "parse_settings.h"
+#include <opencv2/opencv.hpp>
 
 namespace fs { namespace python {
 

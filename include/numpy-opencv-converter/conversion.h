@@ -29,19 +29,9 @@
 # define __COVERSION_OPENCV_H__
 
 #include <Python.h>
-
-// Instead of the below line, let's include only std_include
-// Trying to solve abstract type error
-// Worked for np_opencv_convert.cpp.o but not conversion.cpp.o?
-
-//#include <opencv/include/opencv/cv.h>
-#include "std_include.h"
-
-//#include <opencv2/opencv.hpp>
-#include <opencv/modules/core/include/opencv2/core.hpp>
-//#include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
 #include <numpy/ndarrayobject.h>
-
 
 static PyObject* opencv_error = 0;
 
