@@ -22,12 +22,10 @@
 // OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 // OpenCV headers
-// B: As far as I know, opencv is the opencv 4 installation, but I thought cv.h was the old
-// convention? 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <cv.h>
+#include <highgui.h>
 #include <opencv2/features2d/features2d.hpp>
-//#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/nonfree/features2d.hpp>
 
 // Standard headers
 #include <iostream>

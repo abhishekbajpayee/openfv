@@ -261,7 +261,7 @@ RUN cd opencv && mkdir build && cd build && \
 	#-D WITH_TBB=ON \
 	#-D WITH_V4L=ON \
 	-D WITH_QT=ON \
-	-D WITH_OPENGL=ON \
+	#-D WITH_OPENGL=ON \
 	-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
 	.. && make -j3 && make install
 #RUN cd opencv-3.4.10 && mkdir build && cd build && \
