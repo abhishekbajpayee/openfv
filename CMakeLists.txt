@@ -84,7 +84,8 @@ if (NOT WITH_CUDA)
 endif()
 
 # Find OpenCV
-find_package(OpenCV 3.4.10 REQUIRED)
+#find_package(OpenCV 3.4.10 REQUIRED)
+find_package(OpenCV)
 message("---OpenCV---")
 message("OpenCV Libraries: " ${OpenCV_LIBS})
 message("OpenCV Include Dirs: " ${OpenCV_INCLUDE_DIRS})
