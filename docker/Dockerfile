@@ -29,6 +29,7 @@ USER root
 # libav-tools for matplotlib anim,
 # and OpenFV dependencies
 RUN apt-get update -qq && apt-get -yq dist-upgrade && \
+    apt-get autoclean && apt-get clean && \
     apt-get install -yq --no-install-recommends \
     wget \
     bzip2 \
@@ -38,9 +39,10 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     git \
     vim \
     jed \
-    emacs \
+    #emacs \
     build-essential \
     python-dev \
+    python-numpy \
     unzip \
     libsm6 \
     pandoc \
@@ -51,7 +53,7 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     texlive-generic-recommended \
     texlive-xetex \
     libxrender1 \
-    inkscape \
+    #inkscape \
     libav-tools \
     libx11-xcb-dev \
     mesa-common-dev \
@@ -99,17 +101,16 @@ ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
 
 # Berlin: Testing, changed directory of Dockerfile
 #ADD cuda/fix-permissions /usr/local/bin/fix-permissions
-ADD fix-permissions .
+ADD fix-permissions /usr/local/bin/fix-permissions
+#ADD fix-permissions .
 #COPY fix-permissions .
 
 # Create jovyan user with UID=1000 and in the 'users' group
-# Berlin: Well, I think fix-permissions needs to be explicitly run bc it was
-# throwing errors before
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
     mkdir -p $CONDA_DIR && \
     chown $NB_USER:$NB_GID $CONDA_DIR && \
-    ./fix-permissions $HOME && \
-    ./fix-permissions $CONDA_DIR
+    fix-permissions $HOME && \
+    fix-permissions $CONDA_DIR
 
 USER $NB_USER
 
@@ -137,7 +138,7 @@ RUN cd /tmp && \
     $CONDA_DIR/bin/conda config --system --set show_channel_urls true && \
     $CONDA_DIR/bin/conda update --all --quiet --yes
 RUN conda clean -tipsy && \
-    ./fix-permissions $CONDA_DIR
+    fix-permissions $CONDA_DIR
 
 # Install Jupyter Notebook and Hub
 RUN conda install -c conda-forge --quiet --yes \
@@ -152,7 +153,7 @@ RUN conda install -c conda-forge --quiet --yes \
     #npm cache clean && \
     npm cache verify && \
     rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
-    ./fix-permissions $CONDA_DIR
+    fix-permissions $CONDA_DIR
 
 USER root
 
@@ -174,7 +175,8 @@ USER $NB_USER
 # Remove pyqt and qt pulled in for matplotlib since we're only ever going to
 # use notebook-friendly backends in these images
 # Berlin: removed the variables specifying build version
-RUN conda create --quiet --yes -p $CONDA_DIR/envs/python2 python=2.7 \
+RUN conda update conda && \
+    conda create --quiet --yes -p $CONDA_DIR/envs/python2 python=2.7 \
     'nomkl' \
     'ipython' \
     'ipywidgets' \
@@ -203,6 +205,7 @@ RUN conda create --quiet --yes -p $CONDA_DIR/envs/python2 python=2.7 \
     conda remove -n python2 --quiet --yes --force qt pyqt && \
     conda clean -tipsy
 # Add shortcuts to distinguish pip for python2 and python3 envs
+#RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
 RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
     ln -s $CONDA_DIR/bin/pip $CONDA_DIR/bin/pip3
 
@@ -232,16 +235,44 @@ RUN git clone https://github.com/gflags/gflags.git && \
 	cmake .. && make && make install
 
 # Installing Ceres Solver
-# RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
-# 	tar -xvzf ceres-solver-1.11.0.tar.gz && \
-# 	cd ceres-solver-1.11.0 && \
-# 	mkdir build && cd build && \
-# 	cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && make && make install
+ RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
+ 	tar -xvzf ceres-solver-1.11.0.tar.gz && \
+ 	cd ceres-solver-1.11.0 && \
+ 	mkdir build && cd build && \
+ 	cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && make && make install
 
 # Install OpenCV
-# Berlin: Changing url to work with latest version of opencv
-#RUN wget https://github.com/opencv/opencv/archive/$OPENCV_VER.zip
-RUN wget https://github.com/opencv/opencv/archive/3.4.10.zip
-RUN unzip 3.4.10.zip
-RUN cd opencv-3.4.10 && mkdir build && cd build && \
-        cmake -D WITH_QT=ON .. && make -j3 && make install
+# Berlin: OpenCv 3.1.0 does have the cuda modules along with regular modules!
+#RUN wget https://github.com/opencv/opencv/archive/3.4.10.zip && \
+	#unzip 3.4.10.zip && rm -r 3.4.10.zip
+#RUN CUDA_BIN_PATH=/usr/local/cuda
+RUN git clone https://github.com/opencv/opencv.git && \
+	cd opencv && \
+	git checkout 4.3.0 && \
+	cd ..
+RUN git clone https://github.com/opencv/opencv_contrib.git && \
+	cd opencv_contrib && \
+	git checkout 4.3.0 && \
+	cd ..
+RUN cd opencv && mkdir build && cd build && \
+	cmake -D CMAKE_BUILD_TYPE=RELEASE \
+	-D CMAKE_INSTALL_PREFIX=/usr/local \
+	-D WITH_CUDA=ON \
+	#-D WITH_TBB=ON \
+	#-D WITH_V4L=ON \
+	-D WITH_QT=ON \
+	-D WITH_OPENGL=ON \
+	-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
+	.. && make -j3 && make install
+#RUN cd opencv-3.4.10 && mkdir build && cd build && \
+	#cmake -D WITH_QT=ON \
+	#-D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.2 \
+	#-D WITH_CUDA=ON \
+	#-D BUILD_opencv_cudaarithm=ON \
+	#-D PYTHON_DEFAULT_EXECUTABLE=$CONDA_DIR/envs/python2/bin/python \
+	#-D PYTHON_INCLUDE_DIRS=$CONDA_DIR/envs/python2/include/python \
+	#-D PYTHON_LIBRARY=$CONDA_DIR/envs/python2/lib/libpython2.7.so \
+	#-D PYTHON2_NUMPY_INCLUDE_DIRS=$CONDA_DIR/envs/python2/lib/python2.7/site-packages/numpy/core/include \
+	#-D PYTHON_EXECUTABLE=$CONDA_DIR/envs/python2/bin/python2 .. && \
+	#.. && \
+	#make -j3 && make install
