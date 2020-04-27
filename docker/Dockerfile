@@ -232,7 +232,7 @@ RUN git clone https://github.com/google/glog.git && \
 # Installing gflags
 RUN git clone https://github.com/gflags/gflags.git && \
 	cd gflags && mkdir bin && cd bin && \
-	cmake .. && make && make install
+	cmake -D BUILD_SHARED_LIBS=ON .. && make && make install
 
 # Installing Ceres Solver
  RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
@@ -248,14 +248,13 @@ RUN git clone https://github.com/gflags/gflags.git && \
 #RUN CUDA_BIN_PATH=/usr/local/cuda
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
-	git checkout 4.3.0 && \
+	git checkout 3.3.1 && \
 	cd ..
 RUN git clone https://github.com/opencv/opencv_contrib.git && \
 	cd opencv_contrib && \
-	git checkout 4.3.0 && \
+	git checkout 3.3.1 && \
 	cd ..
-RUN cd opencv && mkdir build && cd build && \
-	cmake -D CMAKE_BUILD_TYPE=RELEASE \
+RUN cd opencv && mkdir build && cd build && cmake \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
 	-D WITH_CUDA=ON \
 	#-D WITH_TBB=ON \
