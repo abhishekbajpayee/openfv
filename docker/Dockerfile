@@ -42,7 +42,6 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     #emacs \
     build-essential \
     python-dev \
-    python-numpy \
     unzip \
     libsm6 \
     pandoc \
@@ -232,7 +231,7 @@ RUN git clone https://github.com/google/glog.git && \
 # Installing gflags
 RUN git clone https://github.com/gflags/gflags.git && \
 	cd gflags && mkdir bin && cd bin && \
-	cmake -D BUILD_SHARED_LIBS=ON .. && make && make install
+	cmake .. && make && make install
 
 # Installing Ceres Solver
  RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
@@ -248,20 +247,23 @@ RUN git clone https://github.com/gflags/gflags.git && \
 #RUN CUDA_BIN_PATH=/usr/local/cuda
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
-	git checkout 3.3.1 && \
+	#git checkout 3.3.1 && \
+	git checkout 2.4.10 && \
 	cd ..
-RUN git clone https://github.com/opencv/opencv_contrib.git && \
-	cd opencv_contrib && \
-	git checkout 3.3.1 && \
-	cd ..
-RUN cd opencv && mkdir build && cd build && cmake \
+#RUN git clone https://github.com/opencv/opencv_contrib.git && \
+	#cd opencv_contrib && \
+	#git checkout 3.3.1 && \
+	#git checkout 2.4.10 && \
+	#cd ..
+RUN cd opencv && mkdir build && cd build && \
+	cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
-	-D WITH_CUDA=ON \
-	#-D WITH_TBB=ON \
-	#-D WITH_V4L=ON \
+	-D WITH_TBB=ON \
+	-D WITH_V4L=ON \
 	-D WITH_QT=ON \
-	#-D WITH_OPENGL=ON \
-	-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
+	-D WITH_OPENGL=ON \
+	-D WITH_CUDA=ON \
+	#-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
 	.. && make -j3 && make install
 #RUN cd opencv-3.4.10 && mkdir build && cd build && \
 	#cmake -D WITH_QT=ON \
