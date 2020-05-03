@@ -243,35 +243,20 @@ RUN git clone https://github.com/gflags/gflags.git && \
 
 # Install OpenCV
 # Berlin: OpenCv 3.1.0 does have the cuda modules along with regular modules!
-#RUN wget https://github.com/opencv/opencv/archive/3.4.10.zip && \
-	#unzip 3.4.10.zip && rm -r 3.4.10.zip
 #RUN CUDA_BIN_PATH=/usr/local/cuda
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
 	git checkout 3.3.1 && \
-	cd ..
-RUN git clone https://github.com/opencv/opencv_contrib.git && \
-	cd opencv_contrib && \
-	git checkout 3.3.1 && \
-	cd ..
+	# Can't build with CUDA, but code requires CUDA to compile,
+	# so we use the include file in the github repo instead 
+	cp modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/opencv2
+#RUN git clone https://github.com/opencv/opencv_contrib.git && \
+	#cd opencv_contrib && \
+	#git checkout 3.3.1 && \
+	#cd ..
 RUN cd opencv && mkdir build && cd build && cmake \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
-	-D WITH_CUDA=ON \
-	#-D WITH_TBB=ON \
-	#-D WITH_V4L=ON \
+	-D WITH_CUDA=OFF \
 	-D WITH_QT=ON \
-	#-D WITH_OPENGL=ON \
-	-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
+	#-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
 	.. && make -j3 && make install
-#RUN cd opencv-3.4.10 && mkdir build && cd build && \
-	#cmake -D WITH_QT=ON \
-	#-D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-10.2 \
-	#-D WITH_CUDA=ON \
-	#-D BUILD_opencv_cudaarithm=ON \
-	#-D PYTHON_DEFAULT_EXECUTABLE=$CONDA_DIR/envs/python2/bin/python \
-	#-D PYTHON_INCLUDE_DIRS=$CONDA_DIR/envs/python2/include/python \
-	#-D PYTHON_LIBRARY=$CONDA_DIR/envs/python2/lib/libpython2.7.so \
-	#-D PYTHON2_NUMPY_INCLUDE_DIRS=$CONDA_DIR/envs/python2/lib/python2.7/site-packages/numpy/core/include \
-	#-D PYTHON_EXECUTABLE=$CONDA_DIR/envs/python2/bin/python2 .. && \
-	#.. && \
-	#make -j3 && make install
