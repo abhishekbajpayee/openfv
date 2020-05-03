@@ -39,15 +39,18 @@
 #include "typedefs.h"
 
 #ifndef WITHOUT_CUDA
+
 #include "cuda_lib.h"
+#include <opencv/modules/cudaarithm/cudaarithm.hpp>
+
+#else //Use the sketchy way to do it
+
+#include "~/work/opencv/modules/cudaarithm/include/opencv2/cudaarithm.hpp"
+
 #endif
 
 #include <eigen3/Eigen/Core>
-//#include <Eigen/Core>
-//#include <opencv/opencv.hpp>
-//#include <opencv/include/opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
-//#include <opencv/modules/cudaarithm/include/opencv2/cudaarithm.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <yaml-cpp/yaml.h>
 
