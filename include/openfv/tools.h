@@ -29,7 +29,7 @@
 #include "refocusing.h"
 #include "rendering.h"
 //#include <opencv/modules/highgui/include/opencv2/highgui.hpp>
-#include <opencv2/modules/highgui/highgui.hpp>
+#include <opencv2/highgui/highgui.hpp>
 using namespace std;
 using namespace cv;
 using namespace libtiff;
