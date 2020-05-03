@@ -60,7 +60,7 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     qt5-default \
     libqt5opengl5 \
     x11-apps \
-    cmake \
+    #cmake \
     build-essential \
     libboost-all-dev \
     libgoogle-perftools-dev \
@@ -75,6 +75,15 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     libtool && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Install CMAKE
+RUN apt-get update && apt-get upgrade && apt remove --purge --auto-remove cmake && apt-get install -y libssl-dev
+RUN version=3.16 && build=5 && mkdir ~/temp && \
+    cd ~/temp && wget https://cmake.org/files/v$version/cmake-$version.$build.tar.gz && \
+    tar -xzvf cmake-$version.$build.tar.gz && \
+    cd cmake-$version.$build/ && \
+    ./bootstrap && \
+    make -j2 && sudo make install
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
