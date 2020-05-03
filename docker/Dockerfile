@@ -249,7 +249,7 @@ RUN git clone https://github.com/opencv/opencv.git && \
 	git checkout 3.3.1 && \
 	# Can't build with CUDA, but code requires CUDA to compile,
 	# so we use the include file in the github repo instead 
-	cp modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/opencv2
+	cp modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/
 #RUN git clone https://github.com/opencv/opencv_contrib.git && \
 	#cd opencv_contrib && \
 	#git checkout 3.3.1 && \

@@ -45,7 +45,7 @@
 
 #else //Use the sketchy way to do it
 
-#include <opencv2/cudaarithm.hpp>
+#include <cudaarithm.hpp>
 
 #endif
 
