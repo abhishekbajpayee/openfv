@@ -247,9 +247,6 @@ RUN git clone https://github.com/gflags/gflags.git && \
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
 	git checkout 3.3.1 && \
-	# Can't build with CUDA, but code requires CUDA to compile,
-	# so we use the include file in the github repo instead 
-	cp modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/
 #RUN git clone https://github.com/opencv/opencv_contrib.git && \
 	#cd opencv_contrib && \
 	#git checkout 3.3.1 && \
@@ -259,4 +256,7 @@ RUN cd opencv && mkdir build && cd build && cmake \
 	-D WITH_CUDA=OFF \
 	-D WITH_QT=ON \
 	#-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
-	.. && make -j3 && make install
+	.. && make -j3 && make install && \
+	# Can't build with CUDA, but code requires CUDA to compile,
+	# so we use the include file in the github repo instead 
+	cp modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/opencv2
