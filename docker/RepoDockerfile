@@ -21,11 +21,12 @@
 # You should have received a copy of the GNU General Public License version 2 along with
 # OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
-FROM openfv/openfv-base
+FROM bpaez1/openfv:base3
 
 # Install openfv
-RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
-	cd openfv && ./configure && cd bin && \
+RUN git clone https://gitlab.com/Bpaez/FILMopenfv.git && \
+        cd FILMopenfv && git checkout build3 && \
+        ./configure && cd bin && \
 	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=OFF \
         -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
     make && make install
@@ -37,7 +38,7 @@ RUN rm -rf *.zip gflags glog opencv* openfv
 RUN git clone https://github.com/abhishekbajpayee/openfv-sample-data.git
 
 # Download and test sample
-RUN git clone https://github.com/abhishekbajpayee/openfv-samples.git # && cd openfv-samples && \
+RUN git clone https://github.com/abhishekbajpayee/openfv-samples.git && cd openfv-samples && \
      	mkdir bin && cd bin && cmake .. && make
 
 # Add local files as late as possible to avoid cache busting
