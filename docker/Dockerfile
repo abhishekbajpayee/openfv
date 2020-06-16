@@ -59,7 +59,7 @@ RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     mesa-common-dev \
     libglu1-mesa-dev \
     qt5-default \
-    libqt5opengl5 \
+    libqt5opengl5-dev \
     x11-apps \
     cmake \
     build-essential \
@@ -246,14 +246,17 @@ RUN git clone https://github.com/gflags/gflags.git && \
 #RUN CUDA_BIN_PATH=/usr/local/cuda
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
-	git checkout 3.3.1
+	git checkout 3.1.0 && \
+	git cherry-pick 10896 && \
+	git cherry-pick 24dbb
+
 #RUN git clone https://github.com/opencv/opencv_contrib.git && \
 	#cd opencv_contrib && \
 	#git checkout 3.3.1 && \
 	#cd ..
 RUN cd opencv && mkdir build && cd build && cmake \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
-	-D WITH_CUDA=OFF \
+	-D WITH_CUDA=ON \
 	-D WITH_QT=ON \
 	#-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
 	.. && make -j3 && make install && \
