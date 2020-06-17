@@ -129,7 +129,7 @@ RUN mkdir /home/$NB_USER/work && \
 RUN cd /tmp && \
     #wget --quiet https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    echo "87e77f097f6ebb5127c77662dfc3165e *Miniconda3-latest-Linux-x86_64.sh" | md5sum -c - && \
+    #echo "87e77f097f6ebb5127c77662dfc3165e *Miniconda3-latest-Linux-x86_64.sh" | md5sum -c - && \
     /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
     #rm Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
     rm Miniconda3-latest-Linux-x86_64.sh && \
@@ -206,8 +206,8 @@ RUN conda update conda && \
     conda clean -tipsy
 # Add shortcuts to distinguish pip for python2 and python3 envs
 #RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
-RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
-    ln -s $CONDA_DIR/bin/pip $CONDA_DIR/bin/pip3
+RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2
+    #ln -s $CONDA_DIR/bin/pip $CONDA_DIR/bin/pip3
 
 # Import matplotlib the first time to build the font cache.
 ENV XDG_CACHE_HOME /home/$NB_USER/.cache/
@@ -247,8 +247,7 @@ RUN git clone https://github.com/gflags/gflags.git && \
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
 	git checkout 3.1.0 && \
-	git cherry-pick 10896 && \
-	git cherry-pick 24dbb
+	git cherry-pick -n 10896
 
 #RUN git clone https://github.com/opencv/opencv_contrib.git && \
 	#cd opencv_contrib && \
