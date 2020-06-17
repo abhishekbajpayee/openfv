@@ -23,7 +23,9 @@
 
 
 // CUDA-off version
+#ifndef WITHOUT_CUDA
 #define WITHOUT_CUDA
+#endif
 
 // OpenCV headers
 #include <opencv/cv.h>
