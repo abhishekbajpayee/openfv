@@ -935,9 +935,9 @@ imageIO::imageIO(string path) {
     counter_ = 1;
     prefix_ = string("");
 
-    // B: OpenCV 3 had some issues with this, so will change to .bpm for now
+    // B: OpenCV 3 had some issues with this, so will change to .png for now
     //ext_ = ".tif";
-    ext_ = ".bmp";
+    ext_ = ".png";
 
 }
 
