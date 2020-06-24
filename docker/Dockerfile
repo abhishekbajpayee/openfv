@@ -21,244 +21,34 @@
 # You should have received a copy of the GNU General Public License version 2 along with
 # OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
-FROM ubuntu:16.04
+FROM bpaez1/openfv:base3
 
-USER root
+# Install openfv
+RUN git clone https://gitlab.com/Bpaez/FILMopenfv.git && \
+        cd FILMopenfv && git checkout build3 && \
+        ./configure && cd bin && \
+	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=OFF \
+        -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
+    make && make install
 
-# Install all OS dependencies for fully functioning notebook server,
-# libav-tools for matplotlib anim,
-# and OpenFV dependencies
-RUN apt-get update -qq && apt-get -yq dist-upgrade && \
-    apt-get autoclean && apt-get clean && \
-    apt-get install -yq --no-install-recommends \
-    wget \
-    bzip2 \
-    ca-certificates \
-    sudo \
-    locales \
-    git \
-    vim \
-    jed \
-    #emacs \
-    build-essential \
-    python-dev \
-    python-numpy \
-    unzip \
-    libsm6 \
-    pandoc \
-    texlive-latex-base \
-    texlive-latex-extra \
-    texlive-fonts-extra \
-    texlive-fonts-recommended \
-    texlive-generic-recommended \
-    texlive-xetex \
-    libxrender1 \
-    #inkscape \
-    libav-tools \
-    libx11-xcb-dev \
-    mesa-common-dev \
-    libglu1-mesa-dev \
-    qt5-default \
-    libqt5opengl5-dev \
-    x11-apps \
-    cmake \
-    build-essential \
-    libboost-all-dev \
-    libgoogle-perftools-dev \
-    google-perftools \
-    libeigen3-dev \
-    libatlas-base-dev \
-    libsuitesparse-dev \
-    libtiff5-dev \
-    libyaml-cpp-dev \
-    autoconf \
-    automake \
-    libtool && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
+RUN rm -rf *.zip gflags glog opencv* openfv
 
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen
+# Download sample repo (note: downloading it bc current repo is private)
+RUN git clone https://gitlab.com/Bpaez/FILMopenfv-samples.git && \
+    cd FILMopenfv-samples && mkdir bin && cd bin && \
+    cmake .. && make
 
-# Install Tini
-RUN wget --quiet https://github.com/krallin/tini/releases/download/v0.10.0/tini && \
-    echo "1361527f39190a7338a0b434bd8c88ff7233ce7b9a4876f3315c22fce7eca1b0 *tini" | sha256sum -c - && \
-    mv tini /usr/local/bin/tini && \
-    chmod +x /usr/local/bin/tini
 
-# Configure environment
-ENV CONDA_DIR=/opt/conda \
-    SHELL=/bin/bash \
-    NB_USER=jovyan \
-    NB_UID=1000 \
-    NB_GID=100 \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8
-ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
-    PATH=$CONDA_DIR/bin:$PATH \
-    HOME=/home/$NB_USER
+# Add local files as late as possible to avoid cache busting
+COPY cuda/start.sh /usr/local/bin/
+COPY cuda/start-notebook.sh /usr/local/bin/
+COPY cuda/start-singleuser.sh /usr/local/bin/
+COPY cuda/jupyter_notebook_config.py /home/$NB_USER/.jupyter/
 
-# Berlin: Testing, changed directory of Dockerfile
-#ADD cuda/fix-permissions /usr/local/bin/fix-permissions
-ADD fix-permissions /usr/local/bin/fix-permissions
-#ADD fix-permissions .
-#COPY fix-permissions .
+# Configure ipython kernel to use matplotlib inline backend by default
+RUN mkdir -p $HOME/.ipython/profile_default/startup
+COPY cuda/mplimporthook.py $HOME/.ipython/profile_default/startup/
 
-# Create jovyan user with UID=1000 and in the 'users' group
-RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
-    mkdir -p $CONDA_DIR && \
-    chown $NB_USER:$NB_GID $CONDA_DIR && \
-    fix-permissions $HOME && \
-    fix-permissions $CONDA_DIR
-
+# Switch back to jovyan to avoid accidental container runs as root
 USER $NB_USER
-
-# Setup jovyan home directory
-RUN mkdir /home/$NB_USER/work && \
-    mkdir /home/$NB_USER/.jupyter && \
-    echo "cacert=/etc/ssl/certs/ca-certificates.crt" > /home/$NB_USER/.curlrc \
-    fix-permissions $HOME
-
-# Allow python wrappers to find shared
-# RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/:/usr/lib/:/usr/local/openfv/lib:${LD_LIBRARY_PATH}" >> ~/.bashrc
-
-# Install conda as jovyan and check the md5 sum provided on the download site
-# Berlin: Changed some urls to fit with updated syntax
-#ENV MINICONDA_VERSION 4.3.30, replaced with "latest"
-RUN cd /tmp && \
-    #wget --quiet https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
-    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    #echo "87e77f097f6ebb5127c77662dfc3165e *Miniconda3-latest-Linux-x86_64.sh" | md5sum -c - && \
-    /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
-    #rm Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh && \
-    rm Miniconda3-latest-Linux-x86_64.sh && \
-    $CONDA_DIR/bin/conda config --system --prepend channels conda-forge && \
-    $CONDA_DIR/bin/conda config --system --set auto_update_conda false && \
-    $CONDA_DIR/bin/conda config --system --set show_channel_urls true && \
-    $CONDA_DIR/bin/conda update --all --quiet --yes
-RUN conda clean -tipsy && \
-    fix-permissions $CONDA_DIR
-
-# Install Jupyter Notebook and Hub
-RUN conda install -c conda-forge --quiet --yes \
-    #'notebook=5.2.*' \
-    'notebook' \
-    #'jupyterhub=0.8.*' \
-    'jupyterhub' \
-    #'jupyterlab=0.30.*' && \
-    'jupyterlab' && \
-    conda clean -tipsy && \
-    jupyter labextension install @jupyterlab/hub-extension && \
-    #npm cache clean && \
-    npm cache verify && \
-    rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
-    fix-permissions $CONDA_DIR
-
-USER root
-
-EXPOSE 8888
-WORKDIR /home/$NB_USER/work
-
-# Configure container startup
-ENTRYPOINT ["tini", "--"]
-CMD ["cuda/start-notebook.sh"]
-
-RUN chown -R $NB_USER:users /home/$NB_USER/.jupyter
-
-USER $NB_USER
-
-# Activate ipywidgets extension in the environment that runs the notebook server
-# RUN jupyter nbextension enable --py widgetsnbextension --sys-prefix
-
-# Install Python packages
-# Remove pyqt and qt pulled in for matplotlib since we're only ever going to
-# use notebook-friendly backends in these images
-# Berlin: removed the variables specifying build version
-RUN conda update conda && \
-    conda create --quiet --yes -p $CONDA_DIR/envs/python2 python=2.7 \
-    'nomkl' \
-    'ipython' \
-    'ipywidgets' \
-    'pandas' \
-    'numexpr' \
-    'matplotlib' \
-    'scipy' \
-    'seaborn' \
-    'scikit-learn' \
-    'scikit-image' \
-    'sympy' \
-    'cython' \
-    'patsy' \
-    'statsmodels' \
-    'cloudpickle' \
-    'dill' \
-    'numba' \
-    'bokeh' \
-    'hdf5' \
-    'h5py' \
-    'sqlalchemy' \
-    'pyzmq' \
-    'vincent' \
-    'beautifulsoup4' \
-    'xlrd' && \
-    conda remove -n python2 --quiet --yes --force qt pyqt && \
-    conda clean -tipsy
-# Add shortcuts to distinguish pip for python2 and python3 envs
-#RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
-RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2
-    #ln -s $CONDA_DIR/bin/pip $CONDA_DIR/bin/pip3
-
-# Import matplotlib the first time to build the font cache.
-ENV XDG_CACHE_HOME /home/$NB_USER/.cache/
-RUN MPLBACKEND=Agg $CONDA_DIR/envs/python2/bin/python -c "import matplotlib.pyplot"
-
-USER root
-
-# Install Python 2 kernel spec globally to avoid permission problems when NB_UID
-# switching at runtime and to allow the notebook server running out of the root
-# environment to find it. Also, activate the python2 environment upon kernel
-# launch.
-RUN pip install kernda --no-cache && \
-    $CONDA_DIR/envs/python2/bin/python -m ipykernel install && \
-    kernda -o -y /usr/local/share/jupyter/kernels/python2/kernel.json && \
-    pip uninstall kernda -y
-
-# Installing glog
-RUN git clone https://github.com/google/glog.git && \
-	autoreconf --force --install glog && \
-	cd glog && ./configure && make && make install
-
-# Installing gflags
-RUN git clone https://github.com/gflags/gflags.git && \
-	cd gflags && mkdir bin && cd bin && \
-	cmake -D BUILD_SHARED_LIBS=ON .. && make && make install
-
-# Installing Ceres Solver
- RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
- 	tar -xvzf ceres-solver-1.11.0.tar.gz && \
- 	cd ceres-solver-1.11.0 && \
- 	mkdir build && cd build && \
- 	cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && make && make install
-
-# Install OpenCV
-# Berlin: OpenCv 3.1.0 does have the cuda modules along with regular modules!
-#RUN CUDA_BIN_PATH=/usr/local/cuda
-RUN git clone https://github.com/opencv/opencv.git && \
-	cd opencv && \
-	git checkout 3.1.0 && \
-	git cherry-pick -n 10896
-
-#RUN git clone https://github.com/opencv/opencv_contrib.git && \
-	#cd opencv_contrib && \
-	#git checkout 3.3.1 && \
-	#cd ..
-RUN cd opencv && mkdir build && cd build && cmake \
-	-D CMAKE_INSTALL_PREFIX=/usr/local \
-	-D WITH_CUDA=ON \
-	-D WITH_QT=ON \
-	#-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
-	.. && make -j3 && make install && \
-	# Can't build with CUDA, but code requires CUDA to compile,
-	# so we use the include file in the github repo instead 
-	cp ../modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/opencv2
