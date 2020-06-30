@@ -25,6 +25,8 @@
 #define OPTIMIZATION_H
 
 #include "std_include.h"
+#include <ceres/ceres.h>
+#include <ceres/rotation.h>
 
 using namespace cv;
 using namespace std;

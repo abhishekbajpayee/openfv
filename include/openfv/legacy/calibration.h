@@ -35,9 +35,10 @@
 #define CALIBRATION_LIBRARY
 
 #include "std_include.h"
-#include "optimization.h"
+#include "legacy/optimization.h"
 #include "typedefs.h"
 #include "tools.h"
+#include <ceres/ceres.h>
 
 /*!
     Class with functions that allow user to calibrate multiple cameras via bundle

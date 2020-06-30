@@ -24,7 +24,8 @@
 set (SRC_TO_BUILD ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp
                   ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp
                   ${PROJECT_SOURCE_DIR}/src/modules/parse_settings.cpp
-                  ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
+                  ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp
+		  ${PROJECT_SOURCE_DIR}/src/modules/legacy/calibration.cpp)
 
 if (BUILD_TRACKING)
   set (SRC_TO_BUILD ${SRC_TO_BUILD} ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
