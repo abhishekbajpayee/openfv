@@ -27,7 +27,7 @@ FROM bpaez1/openfv:base3
 RUN git clone https://gitlab.com/Bpaez/FILMopenfv.git && \
         cd FILMopenfv && git checkout build3 && \
         ./configure && cd bin && \
-	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=OFF \
+	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=OFF -D WTIH_TRACKING=ON \
         -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
     make && make install
 
