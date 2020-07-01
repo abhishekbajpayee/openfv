@@ -34,8 +34,8 @@
 #ifndef CALIBRATION_LIBRARY
 #define CALIBRATION_LIBRARY
 
-#include "std_include.h"
-#include "legacy/optimization.h"
+#include <openfv/std_include.h>
+#include <openfv/legacy/optimization.h>
 #include "typedefs.h"
 #include "tools.h"
 #include <ceres/ceres.h>
