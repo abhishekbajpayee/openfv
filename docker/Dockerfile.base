@@ -227,7 +227,6 @@ RUN git clone https://github.com/gflags/gflags.git && \
  	cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && make && make install
 
 # Install OpenCV
-# Berlin: OpenCv 3.1.0 does have the cuda modules along with regular modules!
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
 	git checkout 3.1.0 && \

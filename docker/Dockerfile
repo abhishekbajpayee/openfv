@@ -31,10 +31,9 @@ RUN git clone https://gitlab.com/Bpaez/FILMopenfv.git && \
         -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
     make && make install
 
-# RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
 RUN rm -rf *.zip gflags glog opencv* openfv
 
-# Download sample repo (note: downloading it bc current repo is private)
+# Download sample repo 
 RUN git clone https://gitlab.com/Bpaez/FILMopenfv-samples.git && \
     cd FILMopenfv-samples && mkdir bin && cd bin && \
     cmake .. && make

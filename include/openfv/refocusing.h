@@ -43,7 +43,7 @@
 #include "cuda_lib.h"
 #include <opencv/modules/cudaarithm/cudaarithm.hpp>
 
-#else //Use the sketchy way to do it
+#else // Use the copied over version
 
 #include <opencv2/cudaarithm.hpp>
 
