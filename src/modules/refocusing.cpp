@@ -790,7 +790,7 @@ void saRefocus::initializeSpecificGPU(int gpu) {
     
     LOG(WARNING) << "Explicitly setting GPU to device number " << gpu << ". This is an expert function!";
 
-    gpu::setDevice(gpu);
+    cuda::setDevice(gpu);
     
     if (REF_FLAG)
         if (!CORNER_FLAG)
@@ -2230,7 +2230,7 @@ void saRefocus::setIntImgMode(int flag) {
 
 void saRefocus::setGpuDevice(int id) {
 
-    gpu::setDevice(id);
+    cuda::setDevice(id);
 
 }
 
