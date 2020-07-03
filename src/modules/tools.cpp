@@ -1055,8 +1055,7 @@ mp4Reader::mp4Reader(string path) {
     if (!cap_.isOpened())
         LOG(FATAL)<<"Could not open "<<path;
 
-    //num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
-    num_frames_ = cap_.get(CAP_PROP_FRAME_COUNT);
+    num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
     VLOG(1)<<"Total number of frames in "<<path<<": "<<num_frames_;
 
 }
@@ -1069,16 +1068,14 @@ mp4Reader::mp4Reader(string path, int color) {
     if (!cap_.isOpened())
         LOG(FATAL)<<"Could not open "<<path;
 
-    //num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
-    num_frames_ = cap_.get(CAP_PROP_FRAME_COUNT);
+    num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
     VLOG(1)<<"Total number of frames in "<<path<<": "<<num_frames_;
 
 }
 
 int mp4Reader::num_frames() { return num_frames_; }
 
-double mp4Reader::time_stamp(int n) { return cap_.get(CAP_PROP_POS_MSEC); }
-//double mp4Reader::time_stamp(int n) { return cap_.get(CV_CAP_PROP_POS_MSEC); }
+double mp4Reader::time_stamp(int n) { return cap_.get(CV_CAP_PROP_POS_MSEC); }
 
 Mat mp4Reader::get_frame(int n) {
 
@@ -1089,8 +1086,7 @@ Mat mp4Reader::get_frame(int n) {
         return(img);
     }
 
-    //cap_.set(CV_CAP_PROP_POS_FRAMES, n);
-    cap_.set(CAP_PROP_POS_FRAMES, n);
+    cap_.set(CV_CAP_PROP_POS_FRAMES, n);
     cap_ >> frame;
 
     if (color_) {

@@ -39,7 +39,6 @@
 #include <opencv2/core/core.hpp>
 #include <numpy/ndarrayobject.h>
 
-
 static PyObject* opencv_error = 0;
 
 static int failmsg(const char *fmt, ...);

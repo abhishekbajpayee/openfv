@@ -30,14 +30,13 @@ RUN git clone https://gitlab.com/Bpaez/FILMopenfv.git && \
 	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=OFF -D BUILD_TRACKING=ON \
         -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
     make && make install
-
+    
 RUN rm -rf *.zip gflags glog opencv* openfv
 
 # Download sample repo 
 RUN git clone https://gitlab.com/Bpaez/FILMopenfv-samples.git && \
     cd FILMopenfv-samples && mkdir bin && cd bin && \
     cmake .. && make
-
 
 # Add local files as late as possible to avoid cache busting
 COPY cuda/start.sh /usr/local/bin/
