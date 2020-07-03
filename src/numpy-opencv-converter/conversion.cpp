@@ -146,7 +146,7 @@ public:
     bool allocate(cv::UMatData* u, int accessFlags, cv::UMatUsageFlags usageFlags) const
 
     {
-        return stdAllocator->allocate(u, accessFlags);
+        return stdAllocator->allocate(u, accessFlags, usageFlags);
     }
 
     void deallocate(UMatData* u) const
