@@ -226,11 +226,14 @@ RUN git clone https://github.com/gflags/gflags.git && \
  	mkdir build && cd build && \
  	cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && make && make install
 
+RUN apt-get -y update && apt-get -y update && apt-get install -y libpng-dev
+
 # Install OpenCV
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
-	git checkout 3.1.0 && \
-	git cherry-pick -n 10896
+	#git checkout 3.1.0 && \
+	git checkout 3.4
+	#git cherry-pick -n 10896
 
 RUN cd opencv && mkdir build && cd build && cmake \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
