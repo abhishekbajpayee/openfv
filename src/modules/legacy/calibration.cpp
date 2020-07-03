@@ -35,7 +35,7 @@
 // #include "optimization.h"
 // #include "tools.h"
 
-#include "calibration.h"
+#include "legacy/calibration.h"
 
 using namespace libtiff;
 

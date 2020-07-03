@@ -21,11 +21,16 @@
 // You should have received a copy of the GNU General Public License version 2 along with
 // OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
+
+// CUDA-off version, cuda build should not include this
+#ifndef WITHOUT_CUDA
+#define WITHOUT_CUDA
+#endif
+
 // OpenCV headers
-#include <cv.h>
-#include <highgui.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 #include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/features2d.hpp>
 
 // Standard headers
 #include <iostream>

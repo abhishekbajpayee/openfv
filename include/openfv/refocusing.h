@@ -39,12 +39,18 @@
 #include "typedefs.h"
 
 #ifndef WITHOUT_CUDA
+
 #include "cuda_lib.h"
+#include <opencv/modules/cudaarithm/cudaarithm.hpp>
+
+#else // Use the copied over version
+
+#include <opencv2/cudaarithm.hpp>
+
 #endif
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
 
 #include <yaml-cpp/yaml.h>
 

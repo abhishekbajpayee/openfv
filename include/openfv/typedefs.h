@@ -171,7 +171,6 @@ struct particle_path {
 
 };
 
-/*
 struct calibration_settings {
 
     //! Path to directory where input images / videos lie
@@ -227,6 +226,6 @@ struct safe_refocus_settings {
   int debug;
 
 };
-*/
+
 
 #endif

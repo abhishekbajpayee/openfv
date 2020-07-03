@@ -109,7 +109,10 @@ public:
         return u;
     }
 
-    UMatData* allocate(int dims0, const int* sizes, int type, void* data, size_t* step, int flags) const
+    // B: Found a thread on github that had a solution, trying implementation now!
+    //UMatData* allocate(int dims0, const int* sizes, int type, void* data, size_t* step, int flags) const
+    UMatData* allocate(int dims0, const int* sizes, int type, void* data, size_t* step, int flags, cv::UMatUsageFlags usageFlags) const
+
     {
         if( data != 0 )
         {
@@ -138,7 +141,10 @@ public:
         return allocate(o, dims0, sizes, type, step);
     }
 
-    bool allocate(UMatData* u, int accessFlags) const
+    // B: Same as deal above
+    //bool allocate(UMatData* u, int accessFlags) const
+    bool allocate(cv::UMatData* u, int accessFlags, cv::UMatUsageFlags usageFlags) const
+
     {
         return stdAllocator->allocate(u, accessFlags);
     }

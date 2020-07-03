@@ -29,7 +29,13 @@
 # define __COVERSION_OPENCV_H__
 
 #include <Python.h>
-#include <opencv2/opencv.hpp>
+
+// Instead of the below line, let's include only std_include
+// Trying to solve abstract type error
+// Worked for np_opencv_convert.cpp.o but not conversion.cpp.o?
+
+#include "std_include.h"
+
 #include <opencv2/core/core.hpp>
 #include <numpy/ndarrayobject.h>
 
