@@ -88,7 +88,7 @@ static PyObject* failmsgp(const char *fmt, ...)
   return 0;
 }
 
-#define OPENCV_3 0
+#define OPENCV_3 1
 #if OPENCV_3
 class NumpyAllocator : public MatAllocator
 {
@@ -118,7 +118,8 @@ public:
         {
             CV_Error(Error::StsAssert, "The data should normally be NULL!");
             // probably this is safe to do in such extreme case
-            return stdAllocator->allocate(dims0, sizes, type, data, step, flags);
+	    return stdAllocator->allocate(dims0, sizes, type, data, step, flags);
+
         }
         PyEnsureGIL gil;
 
@@ -146,7 +147,7 @@ public:
     bool allocate(cv::UMatData* u, int accessFlags, cv::UMatUsageFlags usageFlags) const
 
     {
-        return stdAllocator->allocate(u, accessFlags);
+    	return stdAllocator->allocate(u, accessFlags);
     }
 
     void deallocate(UMatData* u) const
