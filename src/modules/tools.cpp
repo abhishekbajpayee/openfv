@@ -111,7 +111,7 @@ int matrixMean(vector<Mat> mats_in, Mat &mat_out) {
 Mat P_from_KRT(Mat K, Mat rvec, Mat tvec, Mat rmean, Mat &P_u, Mat &P) {
 
     Mat rmean_t;
-    transpose(rmean, rmean_t);
+    cuda::transpose(rmean, rmean_t);
 
     Mat R = rvec*rmean_t;
 
@@ -316,7 +316,7 @@ Mat getTransform(vector<Point2f> src, vector<Point2f> dst) {
     }
 
     Mat A1t;
-    transpose(A1, A1t);
+    cuda::transpose(A1, A1t);
 
     Mat C1;
     invert(A1t*A1, C1, DECOMP_SVD);
@@ -1055,7 +1055,8 @@ mp4Reader::mp4Reader(string path) {
     if (!cap_.isOpened())
         LOG(FATAL)<<"Could not open "<<path;
 
-    num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
+    //num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
+    num_frames_ = cap_.get(CAP_PROP_FRAME_COUNT);
     VLOG(1)<<"Total number of frames in "<<path<<": "<<num_frames_;
 
 }
@@ -1068,14 +1069,16 @@ mp4Reader::mp4Reader(string path, int color) {
     if (!cap_.isOpened())
         LOG(FATAL)<<"Could not open "<<path;
 
-    num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
+    //num_frames_ = cap_.get(CV_CAP_PROP_FRAME_COUNT);
+    num_frames_ = cap_.get(CAP_PROP_FRAME_COUNT);
     VLOG(1)<<"Total number of frames in "<<path<<": "<<num_frames_;
 
 }
 
 int mp4Reader::num_frames() { return num_frames_; }
 
-double mp4Reader::time_stamp(int n) { return cap_.get(CV_CAP_PROP_POS_MSEC); }
+double mp4Reader::time_stamp(int n) { return cap_.get(CAP_PROP_POS_MSEC); }
+//double mp4Reader::time_stamp(int n) { return cap_.get(CV_CAP_PROP_POS_MSEC); }
 
 Mat mp4Reader::get_frame(int n) {
 
@@ -1086,13 +1089,14 @@ Mat mp4Reader::get_frame(int n) {
         return(img);
     }
 
-    cap_.set(CV_CAP_PROP_POS_FRAMES, n);
+    //cap_.set(CV_CAP_PROP_POS_FRAMES, n);
+    cap_.set(CAP_PROP_POS_FRAMES, n);
     cap_ >> frame;
 
     if (color_) {
         img = frame.clone();
     } else {
-        cvtColor(frame, img, CV_BGR2GRAY);
+	cuda::cvtColor(frame, img, CV_BGR2GRAY);
         img.convertTo(img, CV_8U);
     }
 

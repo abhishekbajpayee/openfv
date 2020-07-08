@@ -41,9 +41,9 @@
 #ifndef WITHOUT_CUDA
 
 #include "cuda_lib.h"
-#include <opencv/modules/cudaarithm/cudaarithm.hpp>
+#include <opencv2/cudaarithm.hpp>
 
-#else // Use the copied over version
+#else //Use the sketchy way to do it
 
 #include <opencv2/cudaarithm.hpp>
 
@@ -284,9 +284,9 @@ class saRefocus {
     Mat cputemp; Mat cputemp2; Mat cpurefocused;
 
 #ifndef WITHOUT_CUDA
-    vector<gpu::GpuMat> array, xmaps, ymaps, warped_, warped2_, P_mats_gpu, cam_locations_gpu;
-    vector< vector<gpu::GpuMat> > array_all;
-    gpu::GpuMat temp, temp2, refocused, xmap, ymap, blank_, blank_int_;
+    vector<GpuMat> array, xmaps, ymaps, warped_, warped2_, P_mats_gpu, cam_locations_gpu;
+    vector< vector<GpuMat> > array_all;
+    GpuMat temp, temp2, refocused, xmap, ymap, blank_, blank_int_;
 #endif
 
     int frame_to_upload_;

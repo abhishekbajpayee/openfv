@@ -21,7 +21,7 @@
 # You should have received a copy of the GNU General Public License version 2 along with
 # OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
-FROM ubuntu:16.04
+FROM nvidia/cuda:10.2-devel-ubuntu16.04
 
 USER root
 
@@ -122,6 +122,7 @@ RUN mkdir /home/$NB_USER/work && \
 # Install conda as jovyan and check the md5 sum provided on the download site
 RUN cd /tmp && \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    #echo "87e77f097f6ebb5127c77662dfc3165e *Miniconda3-latest-Linux-x86_64.sh" | md5sum -c - && \
     /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
     rm Miniconda3-latest-Linux-x86_64.sh && \
     $CONDA_DIR/bin/conda config --system --prepend channels conda-forge && \
@@ -133,11 +134,15 @@ RUN conda clean -tipsy && \
 
 # Install Jupyter Notebook and Hub
 RUN conda install -c conda-forge --quiet --yes \
+    #'notebook=5.2.*' \
     'notebook' \
+    #'jupyterhub=0.8.*' \
     'jupyterhub' \
+    #'jupyterlab=0.30.*' && \
     'jupyterlab' && \
     conda clean -tipsy && \
     jupyter labextension install @jupyterlab/hub-extension && \
+    #npm cache clean && \
     npm cache verify && \
     rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
     fix-permissions $CONDA_DIR
@@ -161,6 +166,7 @@ USER $NB_USER
 # Install Python packages
 # Remove pyqt and qt pulled in for matplotlib since we're only ever going to
 # use notebook-friendly backends in these images
+# Berlin: removed the variables specifying build version
 RUN conda update conda && \
     conda create --quiet --yes -p $CONDA_DIR/envs/python2 python=2.7 \
     'nomkl' \
@@ -191,6 +197,7 @@ RUN conda update conda && \
     conda remove -n python2 --quiet --yes --force qt pyqt && \
     conda clean -tipsy
 # Add shortcuts to distinguish pip for python2 and python3 envs
+#RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2 && \
 RUN ln -s $CONDA_DIR/envs/python2/bin/pip $CONDA_DIR/bin/pip2
     #ln -s $CONDA_DIR/bin/pip $CONDA_DIR/bin/pip3
 
@@ -229,15 +236,17 @@ RUN git clone https://github.com/gflags/gflags.git && \
 RUN apt-get -y update && apt-get -y update && apt-get install -y libpng-dev
 
 # Install OpenCV
+# Berlin: OpenCv 3.1.0 does have the cuda modules along with regular modules!
+#RUN CUDA_BIN_PATH=/usr/local/cuda
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
-	#git checkout 3.1.0 && \
 	git checkout 3.4
-	#git cherry-pick -n 10896
 
 RUN cd opencv && mkdir build && cd build && cmake \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
 	-D WITH_CUDA=ON \
 	-D WITH_QT=ON \
 	.. && make -j3 && make install && \
-	cp ../modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/opencv2
+	# Can't build with CUDA, but code requires CUDA to compile,
+	# so we use the include file in the github repo instead 
+cp ../modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/opencv2

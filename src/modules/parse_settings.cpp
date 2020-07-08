@@ -223,7 +223,7 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool h)
 
 }
 
-
+/*
 void parse_calibration_settings(string filename, calibration_settings &settings, bool h) {
 
     namespace po = boost::program_options;
@@ -313,4 +313,4 @@ void parse_calibration_settings(string filename, calibration_settings &settings,
     settings.corners_file_path = vm["corners_file"].as<string>();
 
 }
-
+*/

@@ -22,10 +22,10 @@
 // OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
 
-// CUDA-off version, cuda build should not include this
-#ifndef WITHOUT_CUDA
-#define WITHOUT_CUDA
-#endif
+// CUDA-on version
+//#ifndef WITHOUT_CUDA
+//#define WITHOUT_CUDA
+//#endif
 
 // OpenCV headers
 #include <opencv/cv.h>

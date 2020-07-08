@@ -40,8 +40,12 @@
 #include "refocusing.h"
 #include "serialization.h"
 
+//#include <opencv2/opencv.hpp>
+//#include <opencv2/gpu/gpu.hpp>
+
 using namespace std;
 using namespace cv;
+using namespace cuda;
 
 /*!
   Class with functions to create a synthetic particle seeded volume.
@@ -171,9 +175,9 @@ class Scene {
     int frame_; // active frame
 
 #ifndef WITHOUT_CUDA
-    gpu::GpuMat gx, gy;
-    gpu::GpuMat tmp1, tmp2, tmp3, tmp4;
-    gpu::GpuMat slice;
+    GpuMat gx, gy;
+    GpuMat tmp1, tmp2, tmp3, tmp4;
+    GpuMat slice;
 #endif
 
     int REF_FLAG;
@@ -251,7 +255,7 @@ class Camera {
     Mat_<double> s_;
 
 #ifndef WITHOUT_CUDA
-    gpu::GpuMat gx, gy, tmp1, tmp2, img;
+    GpuMat gx, gy, tmp1, tmp2, img;
 #endif
 
     Scene scene_;

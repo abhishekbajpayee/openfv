@@ -24,9 +24,7 @@
 #ifndef OPTIMIZATION_H
 #define OPTIMIZATION_H
 
-#include <openfv/std_include.h>
-#include <ceres/ceres.h>
-#include <ceres/rotation.h>
+#include "std_include.h"
 
 using namespace cv;
 using namespace std;

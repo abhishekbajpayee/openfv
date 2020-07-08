@@ -21,21 +21,21 @@
 # You should have received a copy of the GNU General Public License version 2 along with
 # OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
-FROM bpaez1/openfv:base3
+FROM cudabase
 
 # Install openfv
-RUN git clone https://gitlab.com/Bpaez/FILMopenfv.git && \
-        cd FILMopenfv && git checkout build3 && \
+RUN git clone https://github.com/bpaez/openfv.git && \
+        cd openfv && \
         ./configure && cd bin && \
-	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=OFF -D BUILD_TRACKING=ON \
+	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=ON \
         -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
     make && make install
-    
+
 RUN rm -rf *.zip gflags glog opencv* openfv
 
-# Download sample repo 
+# Download sample repo (note: downloading it bc current repo is private)
 RUN git clone https://gitlab.com/Bpaez/FILMopenfv-samples.git && \
-    cd FILMopenfv-samples && mkdir bin && cd bin && \
+    cd FILMopenfv-samples && git checkout 9160 && mkdir bin && cd bin && \
     cmake .. && make
 
 # Add local files as late as possible to avoid cache busting
