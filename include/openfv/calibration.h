@@ -26,7 +26,7 @@
 // --- Calibration Library ---
 // -------------------------------------------------------
 // Author: Abhishek Bajpayee
-//         Dept. of Mechanical Engineering
+//         Dept. of Mechanical Engineering:
 //         Massachusetts Institute of Technology
 // -------------------------------------------------------
 // -------------------------------------------------------
@@ -37,6 +37,7 @@
 #include "std_include.h"
 #include "typedefs.h"
 #include "openfv/tools.h"
+#include "optimization.h"
 
 /*!
     Class with functions that allow user to calibrate multiple cameras via bundle
