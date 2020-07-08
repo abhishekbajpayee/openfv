@@ -559,7 +559,7 @@ void multiCamCalibration::read_calib_imgs_mp4() {
 
             Mat small;
             if (resize_input_images_) {
-                resize(frame, small, Size(int(frame.cols*rf_), int(frame.rows*rf_)));
+		cuda::resize(frame, small, Size(int(frame.cols*rf_), int(frame.rows*rf_)));
             } else {
                 small = frame.clone();
             }
@@ -622,7 +622,7 @@ void multiCamCalibration::find_corners() {
 
                     if (show_corners_flag) {
                         scene_drawn = scene;
-                        cvtColor(scene_drawn, scene_drawn, CV_GRAY2RGB);
+			cuda::cvtColor(scene_drawn, scene_drawn, CV_GRAY2RGB);
                         drawChessboardCorners(scene_drawn, grid_size_, points, found);
                         namedWindow("Pattern", CV_WINDOW_AUTOSIZE);
                         imshow("Pattern", scene_drawn);
@@ -1477,7 +1477,7 @@ void multiCamCalibration::write_calib_results() {
             K(1,2) = img_size_.height*0.5;
             K(2,2) = 1;
 
-            transpose(R, Rt);
+	    cuda::transpose(R, Rt);
             C = -Rt*tvec;
 
             rVecs_.push_back(R.clone());
@@ -1492,7 +1492,7 @@ void multiCamCalibration::write_calib_results() {
         Mat_<double> rmean = Mat_<double>::zeros(3,3);
         matrixMean(rVecs_, rmean);
         Mat rmean_t;
-        transpose(rmean, rmean_t);
+	cuda::transpose(rmean, rmean_t);
 
         for (int i=0; i<num_cams_; i++) {
 
@@ -1623,7 +1623,7 @@ void multiCamCalibration::write_calib_results_ref() {
         Mat_<double> rmean = Mat_<double>::zeros(3,3);
         matrixMean(rVecs_, rmean);
         Mat rmean_t;
-        transpose(rmean, rmean_t);
+	cuda::transpose(rmean, rmean_t);
         for (int i=0; i<num_cams_; i++) {
 
             R = rVecs_[i]*rmean_t;
@@ -2052,7 +2052,7 @@ void multiCamCalibration::grid_view() {
 
                 grid.create(img.rows, img.cols, CV_32F);
                 Mat small;
-                resize(img, small, Size(img.cols/3,img.rows/3));
+		cuda::resize(img, small, Size(img.cols/3,img.rows/3));
                 small.copyTo(grid.colRange(i*grid.cols/3,i*grid.cols/3+grid.cols/3).rowRange(j*grid.rows/3,j*grid.rows/3+grid.rows/3));
 
             }
@@ -2159,7 +2159,7 @@ void multiCamCalibration::update_grid_view_mp4() {
             Mat small;
             double w = ow/f2;
             double h = w*img.rows/img.cols;
-            resize(img, small, Size(w, h));
+	    cuda::resize(img, small, Size(w, h));
             int r = floor(i/3);
             int c = i%3;
             small.copyTo(grid.colRange(c*w, (c+1)*w).rowRange(r*h, (r+1)*h));
