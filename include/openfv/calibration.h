@@ -35,7 +35,7 @@
 #define CALIBRATION_LIBRARY
 
 #include <openfv/std_include.h>
-#include <openfv/legacy/optimization.h>
+#include <openfv/optimization.h>
 #include <openfv/typedefs.h>
 #include <openfv/tools.h>
 #include <ceres/ceres.h>
