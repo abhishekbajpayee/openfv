@@ -70,3 +70,5 @@ namespace libtiff {
 // Python library
 #include <Python.h>
 
+//Ceres
+#include <ceres/ceres.h>

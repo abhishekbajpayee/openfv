@@ -34,11 +34,9 @@
 #ifndef CALIBRATION_LIBRARY
 #define CALIBRATION_LIBRARY
 
-#include <openfv/std_include.h>
-//#include <openfv/optimization.h>
-#include <openfv/typedefs.h>
-#include <openfv/tools.h>
-#include <ceres/ceres.h>
+#include "std_include.h"
+#include "typedefs.h"
+#include "openfv/tools.h"
 
 /*!
     Class with functions that allow user to calibrate multiple cameras via bundle
