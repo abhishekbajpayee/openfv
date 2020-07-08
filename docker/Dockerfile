@@ -35,7 +35,7 @@ RUN rm -rf *.zip gflags glog opencv* openfv
 
 # Download sample repo (note: downloading it bc current repo is private)
 RUN git clone https://gitlab.com/Bpaez/FILMopenfv-samples.git && \
-    cd FILMopenfv-samples && git checkout 9160 && mkdir bin && cd bin && \
+    cd FILMopenfv-samples && mkdir bin && cd bin && \
     cmake .. && make
 
 # Add local files as late as possible to avoid cache busting
