@@ -21,7 +21,7 @@
 # You should have received a copy of the GNU General Public License version 2 along with
 # OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
-FROM cudabase
+FROM bpaez1/openfV:cudabase
 
 # Install openfv
 RUN git clone https://github.com/bpaez/openfv.git && \
