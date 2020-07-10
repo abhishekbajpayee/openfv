@@ -62,21 +62,17 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
     string temp_name;
     dir = opendir(path_.c_str());
 
-    int choice;
-
+    char choice;
     while(ent = readdir(dir)) {
         temp_name = ent->d_name;
         if (!temp_name.compare(result_dir_)) {
             result_dir_found = 1;
-            LOG(INFO)<<"\'"<<result_dir_<<"\' directory found in "<<path_<<"! It seems that calibration has already been performed earlier. Run calibration again (y/n)?: ";
+            LOG(INFO)<<"\'"<<result_dir_<<"\' directory found in "<<path_<<"! Is seems like calibration has already been performed earlier. Run calibration again (y/n)?";
             cin>>choice;
-            LOG(INFO)<<choice;
-            if (choice==1) {
+            if (choice=='y') {
                 run_calib_flag = 1;
-            } else if (choice==2) {
-                load_results_flag = 1;
             } else {
-                LOG(FATAL)<<"Invalid choice!\n";
+                LOG(FATAL)<<"Invalid choice or n entered! Calibration termination...";
             }
         }
     }
