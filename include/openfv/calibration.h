@@ -74,9 +74,9 @@ class multiCamCalibration {
       \param mtiff Flag indicating whether images are in multipage tiff files or as separate images
       \param skip Number of frames to skip between each successive frame used
       \param show_corners Flag to enable displaying of corners in each image after they are found
+    */
 
     multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners);
-    */
 
     // TODO: document this constructor!
     multiCamCalibration(calibration_settings settings);

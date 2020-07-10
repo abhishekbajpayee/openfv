@@ -39,7 +39,7 @@
 
 using namespace libtiff;
 
-/*
+
 multiCamCalibration::multiCamCalibration(string path, Size grid_size, double grid_size_phys, int refractive, int dummy_mode, int mtiff, int mp4, int skip, int start_frame, int end_frame, int show_corners): path_(path), grid_size_(grid_size), grid_size_phys_(grid_size_phys), dummy_mode_(dummy_mode), refractive_(refractive), mtiff_(mtiff), mp4_(mp4), skip_frames_(skip), start_frame_(start_frame), end_frame_(end_frame), show_corners_flag(show_corners) {
 
     // Standard directories and filenames
@@ -98,7 +98,7 @@ multiCamCalibration::multiCamCalibration(string path, Size grid_size, double gri
     cams_initialized_ = 0;
 
 }
-*/
+
 
 multiCamCalibration::multiCamCalibration(calibration_settings settings) {
 
