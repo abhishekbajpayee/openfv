@@ -128,7 +128,7 @@ include_directories( ${EIGEN_INC_DIR} )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories( ${CUDA_INCLUDE_DIRS} )
 include_directories( ${CERES_INCLUDES} )
-include_directories( ${NUMPY_INC_DIR} )
+#include_directories( ${NUMPY_INC_DIR} )
 
 # Don't think these are needed because OpenFV
 # doesn't link to Qt
