@@ -79,9 +79,9 @@ if(BUILD_PYTHON)
 
   # Build np<=>opencv converter library
   include_directories(${PROJECT_SOURCE_DIR}/include)
-  boost_python_module(np_opencv_converter numpy-opencv-converter/np_opencv_converter.cpp numpy-opencv-converter/conversion.cpp)
+  #boost_python_module(np_opencv_converter numpy-opencv-converter/np_opencv_converter.cpp numpy-opencv-converter/conversion.cpp)
   # set_target_properties(np_opencv_converter PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/openfv)
-  target_link_libraries(np_opencv_converter boost_system boost_python ${OpenCV_LIBS})
+  #target_link_libraries(np_opencv_converter boost_system boost_python ${OpenCV_LIBS})
   
   # Build test library
   boost_python_module(np_opencv_module numpy-opencv-converter/np_opencv_module.cpp)
