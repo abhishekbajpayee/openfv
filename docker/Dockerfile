@@ -41,7 +41,7 @@ RUN git clone https://gitlab.com/Bpaez/FILMopenfv-samples.git && \
 # Add aliases so users can depend on a consistent format
 RUN echo 'alias refCalib="python3 refCalib.py -c "' >> ~/.bashrc && \
     echo 'alias pinCalib="python3 pinCalib.py -c "' >> ~/.bashrc && \
-    echo 'alias refocus="./refocus --config_file="' >> ~/.bashrc 
+    echo 'alias refocus="./refocus --config_file "' >> ~/.bashrc 
 
 # Add local files as late as possible to avoid cache busting
 #COPY cuda/start.sh /usr/local/bin/
