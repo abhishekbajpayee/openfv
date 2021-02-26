@@ -1,12 +1,12 @@
-#Pseudocode:
+# Pseudocode/General Overview:
 # parse config file, get calibration images, get camera IDs, perform variable setups
 # 
 # find chessboard corners in all images and store them in variable called cor_all
 #
 # create "real world" coordinates using grid spacing and number of corners
 #
-# line up real world coordinates with corner of checkerboard image?
-#       use planar_grid to world?
+# line up real world coordinates with corner of checkerboard image
+#       use planar_grid to world
 #       now have object points and image points
 #
 # perform single camera calibration:
@@ -132,7 +132,7 @@ def multiCamCalib(umeas, camMatrix. boardRotMat, boardTransVec, planeData, camer
     for e in listb:
         b = np.append(b, e, axis=1)
 
-    # TODO: FIGURE OUT HOW TO DO THIS
+    # TODO: FIGURE OUT HOW TO DO THE MINIMIZATION lmao
     # define constraint t^1 = 0
     C = np.eye(3, np.size(A, 1)) #B: this could be 2 but matlab indexes at 1 so we will see
     d = np.zeroes([3,1])
@@ -252,6 +252,7 @@ def singleCamCalib(umeas, xworld, planeData, cameraData):
 
         # calculate initial camera matrix for this camera 
         # use all world points but only image points in this camera
+        # calls opencv function initCameraMatrix
         camUmeas = umeas[:, :, i]
         camMatrix = initCameraMatrix2D(xworld, camUmeas, nX*nY, imageSize, aspectRatio)
 
