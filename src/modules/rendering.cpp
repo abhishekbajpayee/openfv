@@ -1059,11 +1059,9 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
         .def("getC", &Camera::getC)
     ;
 
-    /*
     class_<benchmark>("benchmark")
         .def("benchmarkSA", &benchmark::benchmarkSA)
         .def("calcQ", &benchmark::calcQ)
     ;
-    */
 
 }*/
