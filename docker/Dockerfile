@@ -27,9 +27,10 @@ FROM bpaez1/openfv:cudabase
 RUN git clone https://github.com/bpaez/openfv.git && \
         cd openfv && \
         ./configure && cd bin && \
-	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=ON \
-        -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
-    make && make install
+	#cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=ON \
+	cmake -D WITH_CUDA=ON .. && \
+        #-D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
+    	make && make install
 
 RUN rm -rf *.zip gflags glog opencv* 
 
