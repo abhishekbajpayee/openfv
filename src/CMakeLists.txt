@@ -102,7 +102,8 @@ if(BUILD_PYTHON)
 
 endif()
 
-install(TARGETS openfv np_opencv_converter DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+#install(TARGETS openfv np_opencv_converter DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS openfv DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 if (WITH_CUDA)
   install(TARGETS cuda_openfv DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
