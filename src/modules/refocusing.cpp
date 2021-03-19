@@ -2476,7 +2476,7 @@ vector< vector<Mat> > saRefocus::getCamStacks() {
 }
 
 // Python wrapper
-BOOST_PYTHON_MODULE(refocusing) {
+/*BOOST_PYTHON_MODULE(refocusing) {
 
     using namespace boost::python;
 
@@ -2502,6 +2502,7 @@ BOOST_PYTHON_MODULE(refocusing) {
     ;
 
 }
+*/
 
 /* LEGACY CODE
 void saRefocus::read_calib_data_pin(string path) {
