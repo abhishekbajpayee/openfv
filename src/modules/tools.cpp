@@ -1106,7 +1106,7 @@ Mat mp4Reader::get_frame(int n) {
 }
 
 // Python wrapper
-BOOST_PYTHON_MODULE(tools) {
+/*BOOST_PYTHON_MODULE(tools) {
 
     using namespace boost::python;
 
@@ -1126,3 +1126,4 @@ BOOST_PYTHON_MODULE(tools) {
     ;
 
 }
+*/

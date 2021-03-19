@@ -1030,7 +1030,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
 */
 
 // Python wrapper
-BOOST_PYTHON_MODULE(rendering) {
+/*BOOST_PYTHON_MODULE(rendering) {
 
     using namespace boost::python;
 
@@ -1066,4 +1066,4 @@ BOOST_PYTHON_MODULE(rendering) {
     ;
     */
 
-}
+}*/

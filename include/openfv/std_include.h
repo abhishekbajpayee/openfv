@@ -68,7 +68,7 @@ namespace libtiff {
 #include <boost/chrono.hpp>
 
 // Python library
-#include <Python.h>
+//#include <Python.h>
 
 //Ceres
 #include <ceres/ceres.h>
