@@ -34,14 +34,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Options
-option(BUILD_PYTHON "BUILD_PYTHON" ON)
+option(BUILD_PYTHON "BUILD_PYTHON" OFF)
 option(BUILD_TRACKING "BUILD_TRACKING" OFF)
 option(WITH_CUDA "WITH_CUDA" OFF)
 
 set(EIGEN_INC_DIR "/usr/include/eigen3" CACHE PATH "Path to Eigen Directory")
-set(PYTHON_EXEC "python2.7" CACHE PATH "Python executable (used to find which dir to install python bindings in)")
+#set(PYTHON_EXEC "python2.7" CACHE PATH "Python executable (used to find which dir to install python bindings in)")
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include/openfv" CACHE PATH "Project Include Directory")
-set(NUMPY_INC_DIR "" CACHE PATH "Path to numpy include directory")
+#set(NUMPY_INC_DIR "" CACHE PATH "Path to numpy include directory")
 
 if(POLICY CMP0022)
   cmake_policy(SET CMP0022 OLD)
@@ -92,18 +92,18 @@ if(NOT OpenCV_FOUND)
   message("OpenCV not found!")
 endif()
 
-# Boost Libraries
-find_package(Boost)
-if(Boost_FOUND)
-  find_package(Boost COMPONENTS program_options filesystem system serialization chrono REQUIRED)
-  set(Boost_GENERAL ${Boost_LIBRARIES})
-  if(BUILD_PYTHON)
-    find_package(Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED)
-    set(Boost_PY ${Boost_LIBRARIES})
-  endif()
-elseif(NOT Boost_FOUND)
-  message("Boost not found!")
-endif()
+## Boost Libraries
+#find_package(Boost)
+#if(Boost_FOUND)
+#  find_package(Boost COMPONENTS program_options filesystem system serialization chrono REQUIRED)
+#  set(Boost_GENERAL ${Boost_LIBRARIES})
+#  if(BUILD_PYTHON)
+#    find_package(Boost COMPONENTS ${BOOST_PYTHON_VERSION} REQUIRED)
+#    set(Boost_PY ${Boost_LIBRARIES})
+#  endif()
+#elseif(NOT Boost_FOUND)
+#  message("Boost not found!")
+#endif()
 
 # Tiff Library
 find_package(TIFF REQUIRED)
@@ -122,19 +122,20 @@ endif()
 
 # Include directories
 include_directories( ${PROJECT_INCLUDE_DIR} )
-include_directories( ${Boost_INCLUDE_DIR} )
-include_directories( ${PYTHON_INCLUDE_DIRS} )
+#include_directories( ${Boost_INCLUDE_DIR} )
+#include_directories( ${PYTHON_INCLUDE_DIRS} )
 include_directories( ${EIGEN_INC_DIR} )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories( ${CUDA_INCLUDE_DIRS} )
 include_directories( ${CERES_INCLUDES} )
-include_directories( ${NUMPY_INC_DIR} )
+#include_directories( ${NUMPY_INC_DIR} )
 
 # Don't think these are needed because OpenFV
 # doesn't link to Qt
 # include_directories( "/opt/Qt/5.4/gcc_64/include" )
 
-set(OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY} yaml-cpp glog gflags)
+#set(OTHER_LIBS ${TIFF_LIBRARIES} ${Boost_GENERAL} ${Boost_PY} yaml-cpp glog gflags)
+set(OTHER_LIBS ${TIFF_LIBRARIES} yaml-cpp glog gflags)
 if(WITH_CUDA)
   set(OTHER_LIBS ${OTHER_LIBS})
   set (OFV_LIBS openfv cuda_openfv)
