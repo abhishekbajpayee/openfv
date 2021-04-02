@@ -12,6 +12,40 @@ FLAGS = flags.FLAGS
 MAX = 4
 
 
+class Log(logging.Logger):
+    def setLevel(self, level):
+        if type(level) == str:
+            super().setLevel(level)
+        else:
+            super().setLevel(MAX - level + 1)
+        self.log(DEBUG, 'Log level set to %s', level)
+        
+    def VLOG(self, level, msg, *args, **kwargs):
+        level = MAX-level+1
+        if not isinstance(level, int):
+            if raiseExceptions:
+                raise TypeError("level must be an integer")
+            else:
+                return
+        if self.isEnabledFor(level):
+            self._log(level, msg, args, **kwargs)
+
+def getLogger(name="root", loglevel = 1):
+    """
+    Return a logger with the specified name, creating it if necessary.
+
+    If no name is specified, return the root logger.
+    """
+    Log.manager.loggerDict[name] = Log(name)
+    logger = Log.manager.getLogger(name)
+    logger.setLevel(loglevel)
+    handler = logging.StreamHandler()
+    # format = logging.Formatter('%(levelname)s d:%(asctime)s %(name)-18s:%(lineno)-4s | %(message)s', '%Y.%m.%d %H:%M:%S')
+    handler.setFormatter(GlogFormatter())
+    logger.addHandler(handler)
+
+    return logger
+
 def format_message(record):
     try:
         record_message = '%s' % (record.msg % record.args)
@@ -38,11 +72,10 @@ class GlogFormatter(logging.Formatter):
         except KeyError:
             level = str(MAX - record.levelno + 1)
         date = time.localtime(record.created)
-        date_usec = (record.created - int(record.created)) * 1e6
-        record_message = '%c d:%02d.%02d %02d:%02d:%02d.%06d r:%s %s:%04d | %s' % (
+        date_usec = (record.created - int(record.created)) * 1e3
+        record_message = '%c d:%02d.%02d %02d:%02d:%02d.%03d %16s:%4d | %s' % (
             level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
             date.tm_sec, date_usec,
-            record.process if record.process is not None else '?????',
             record.filename,
             record.lineno,
             format_message(record))
@@ -61,20 +94,15 @@ logger = logging.getLogger()
 handler = logging.StreamHandler()
 
 
-def setLevel(newlevel):
-    if type(newlevel) == str:
-        logger.setLevel(newlevel)
+def setLevel(level):
+    if type(level) == str:
+        logger.setLevel(level)
     else:
-        logger.setLevel(MAX - newlevel + 1)
-    logger.debug('Log level set to %s', newlevel)
-
-
-def init():
-    setLevel(MAX - FLAGS.verbosity + 1)
-
-
+        logger.setLevel(MAX - level + 1)
+    logger.debug('Log level set to %s', level)
+        
 def VLOG(vLevel,string):
-    log(MAX-vLevel+1,string)
+    logger.log(MAX-vLevel+1,string)
 
 debug = logging.debug
 info = logging.info
@@ -83,7 +111,7 @@ warn = logging.warning
 error = logging.error
 exception = logging.exception
 fatal = logging.fatal
-log = logging.log
+log = logger.log
 
 DEBUG = logging.DEBUG
 INFO = logging.INFO

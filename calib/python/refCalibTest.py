@@ -18,7 +18,7 @@ from statistics import mean
 from mpl_toolkits.mplot3d import Axes3D
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
-import logger as log
+import logger
 
 
 # This code performs the "Belden" method of self-calibration for multiple cameras in a refractive system 
@@ -1116,7 +1116,7 @@ def cam_model_adjust(u, par0, X, sD, cD, rTol, bounded, maxFev=1600, maxfunc_don
 
             # print in format for test
             # verbosity level 3: prints errors
-            log.VLOG(3, '\nAdjusting camera ' + str(j + 1) + ' parameters:')
+            log.VLOG(3, 'Adjusting camera ' + str(j + 1) + ' parameters:')
             log.VLOG(3, 'error pre-optimization = ' + str(
                 np.mean(refrac_proj_onecam(par0[:, j], Xtemp, sD, cD, rTol) - umeas)))
             log.VLOG(3, 'error post-optimization = ' + str(
@@ -1527,7 +1527,7 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbosity', help='verbosity level for file prints', type=int)
     args = parser.parse_args()
     configPath = args.config_file
-    log.setLevel(args.verbosity)
+    log = logger.getLogger(__file__, args.verbosity)
 
     # parse config file and setup experimental parameter storage objects
     planeData, cameraData, sceneData, tolerances, calImgs, exptPath, camIDs, bounded = parseConfigFile(configPath)
