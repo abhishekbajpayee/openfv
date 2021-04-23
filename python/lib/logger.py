@@ -14,10 +14,10 @@ MAX = 4
 
 class Log(logging.Logger):
     def setLevel(self, level):
-        if type(level) == str:
-            super().setLevel(level)
-        else:
-            super().setLevel(MAX - level + 1)
+        try:
+            super().setLevel(MAX - int(level) + 1)
+        except:
+            super().setLevel(level.upper())
         self.log(DEBUG, 'Log level set to %s', level)
         
     def VLOG(self, level, msg, *args, **kwargs):
@@ -95,10 +95,10 @@ handler = logging.StreamHandler()
 
 
 def setLevel(level):
-    if type(level) == str:
-        logger.setLevel(level)
-    else:
-        logger.setLevel(MAX - level + 1)
+    try:
+        logger.setLevel(MAX - int(level) + 1)
+    except:
+        logger.setLevel(level.upper())
     logger.debug('Log level set to %s', level)
         
 def VLOG(vLevel,string):
