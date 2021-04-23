@@ -19,6 +19,10 @@ from mpl_toolkits.mplot3d import Axes3D
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
+import inspect
+frame = inspect.stack()[1]
+filename = frame[0].f_code.co_filename
+log = logger.getLogger(filename)
 
 
 # This code performs the "Belden" method of self-calibration for multiple cameras in a refractive system 

@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import time
 import configparser
 import argparse
+import refCalib as rc
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
@@ -106,7 +107,7 @@ def singleCamCalib(umeas, xworld, planeData, cameraData):
 
     return [cameraMats, boardRotMats, boardTransVecs]
 
-
+"""
 def kabsch(X1, X2):
     # X1: The world coordinates of the first camera stacked as columns.
     # X2: The world coordinates of the second camera stacked as columns.
@@ -489,10 +490,10 @@ def multiCamCalib1(umeas, xworld, camMatrix, boardRotMat, boardTransVec, planeDa
 
     # find the average size of each grid in pixels
     return []
-
+"""
 ############################################# MAIN LOOP #######################################################
 
-if __name__ == "main_":
+if __name__ == "__main__":
     # read config file flag passed from terminal
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config_file', help='relative path to config file', type=str)
@@ -502,12 +503,12 @@ if __name__ == "main_":
     log = logger.getLogger(__file__, args.verbosity)
 
     # read and parse config file
-    planeData, cameraData, sceneData, toleranes, calImgs, exptPath, camIDs = parseConfigFile(configPath)
+    planeData, cameraData, sceneData, toleranes, calImgs, exptPath, camIDs, _ = rc.parseConfigFile(configPath)
 
     # find corners and pix_phys
-    umeas = findCorners(planeData, cameraData.ncams, exptPath, imgs = calImgs)) 
+    umeas = rc.findCorners(planeData, cameraData.ncams, exptPath, imgs = calImgs)
     # find pixel scaling using passed in parameters
-    pix_phys = getScale(planeData, Umeas)
+    pix_phys = rc.getScale(planeData, umeas)
 
     # perform single camera calibration to get initial calibration matrices 
     # and board geometric changes
@@ -516,8 +517,8 @@ if __name__ == "main_":
     # perform multi camera calibration
     # TODO: check inputs after multiCamCalib is fully written
     # TODO: will need more varibale than just x
-    x = multiCamCalib(umeas, camMatrix, boardRotMat, boardTransVec, planeData, cameraData)
+    #x = multiCamCalib(umeas, camMatrix, boardRotMat, boardTransVec, planeData, cameraData)
 
     # TODO: Change saved data according to waht multiCamCalib returns (we should probably try to make it return these though)
-    f = saveCalibData(exptPath, camIDs, P, camParams, Xworld, planeParams, sceneData,cameraData, planeData, errorLog, pix_phys, 'results_')
-    print('\nData saved in '+str(f))
+    #f = saveCalibData(exptPath, camIDs, P, camParams, Xworld, planeParams, sceneData,cameraData, planeData, errorLog, pix_phys, 'results_')
+    #print('\nData saved in '+str(f))
