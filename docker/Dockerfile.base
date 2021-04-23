@@ -25,15 +25,14 @@ FROM nvidia/cuda:10.2-devel-ubuntu16.04
 
 USER root
 
-# Install all OS dependencies for fully functioning notebook server,
-# libav-tools for matplotlib anim,
-# and OpenFV dependencies
+# Install all OS dependencies of OpenFV
 RUN apt-get update -qq && apt-get -yq dist-upgrade && \
     apt-get autoclean && apt-get clean && \
     apt-get install -yq --no-install-recommends \
     wget \
     bzip2 \
     ca-certificates \
+    libpng-dev \ 
     sudo \
     locales \
     git \
@@ -100,28 +99,7 @@ ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
 
 ADD fix-permissions /usr/local/bin/fix-permissions
 
-# Installing gflags
-RUN git clone https://github.com/gflags/gflags.git && \
-	cd gflags && mkdir bin && cd bin && \
-	cmake -D BUILD_SHARED_LIBS=ON .. && make && make install
-
-# Installing glog
-RUN git clone https://github.com/google/glog.git && \
-	cd glog && git checkout d516278b1cd33cd148e8989aec488b6049a4ca0b && cd .. && \
-	autoreconf --force --install glog && \
-	cd glog && ./configure && make && make install
-
-# Installing Ceres Solver
- RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
- 	tar -xvzf ceres-solver-1.11.0.tar.gz && \
- 	cd ceres-solver-1.11.0 && \
- 	mkdir build && cd build && \
- 	cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC .. && make && make install
-
-RUN apt-get -y update && apt-get -y update && apt-get install -y libpng-dev
-
 # Install OpenCV
-# Berlin: OpenCv 3.1.0 does have the cuda modules along with regular modules!
 RUN git clone https://github.com/opencv/opencv.git && \
 	cd opencv && \
 	git checkout 3.4
@@ -131,8 +109,7 @@ RUN cd opencv && mkdir build && cd build && cmake \
 	-D WITH_CUDA=ON \
 	-D WITH_QT=ON \
 	.. && make -j3 && make install && \
-	# Can't build with CUDA, but code requires CUDA to compile,
-	# so we use the include file in the github repo instead 
+	# Can't build with CUDA, but code requires CUDA to compile so we're using the include file in the repo
 	cp ../modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/opencv2
 
 # Create jovyan user with UID=1000 and in the 'users' group
@@ -145,18 +122,11 @@ RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
 USER $NB_USER
 
 # Setup jovyan home directory
-RUN mkdir /home/$NB_USER/work && \
-    mkdir /home/$NB_USER/.jupyter && \
-    echo "cacert=/etc/ssl/certs/ca-certificates.crt" > /home/$NB_USER/.curlrc \
-    fix-permissions $HOME
-
-# Allow python wrappers to find shared
- RUN echo "export LD_LIBRARY_PATH=/usr/local/lib/:/usr/lib/:/usr/local/openfv/lib:${LD_LIBRARY_PATH}" >> ~/.bashrc
+RUN mkdir /home/$NB_USER/work 
 
 # Install conda as jovyan and check the md5 sum provided on the download site
 RUN cd /tmp && \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    #echo "87e77f097f6ebb5127c77662dfc3165e *Miniconda3-latest-Linux-x86_64.sh" | md5sum -c - && \
     /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p $CONDA_DIR && \
     rm Miniconda3-latest-Linux-x86_64.sh && \
     $CONDA_DIR/bin/conda config --system --prepend channels conda-forge && \
@@ -171,7 +141,16 @@ USER root
 EXPOSE 8888
 WORKDIR /home/$NB_USER/work
 
-USER $NB_USER
-    
-USER root
+# Installing gflags and glog
+RUN sudo apt-get update -y && \
+	sudo apt-get install libgoogle-glog-dev libgflags-dev -y
+
+## Installing Ceres Solver
+ RUN wget http://ceres-solver.org/ceres-solver-1.11.0.tar.gz && \
+ 	tar -xvzf ceres-solver-1.11.0.tar.gz && \
+ 	cd ceres-solver-1.11.0 && \
+ 	mkdir build && cd build && \
+ 	cmake -D CMAKE_CXX_FLAGS=-fPIC -D CMAKE_C_FLAGS=-fPIC -D GLOG_INCLUDE_DIRS=\
+	/vcpkg/installed/x64-linux/include/glog .. && make && make install
+
 
