@@ -30,19 +30,28 @@ class Log(logging.Logger):
         if self.isEnabledFor(level):
             self._log(level, msg, args, **kwargs)
 
-def getLogger(name="root", loglevel = 1):
+def getLogger(name="root", loglevel = 1, logType = "cpp"):
     """
     Return a logger with the specified name, creating it if necessary.
 
     If no name is specified, return the root logger.
     """
-    Log.manager.loggerDict[name] = Log(name)
+    new = name not in Log.manager.loggerDict
+    if new:
+        Log.manager.loggerDict[name] = Log(name)
+
     logger = Log.manager.getLogger(name)
-    logger.setLevel(loglevel)
-    handler = logging.StreamHandler()
-    # format = logging.Formatter('%(levelname)s d:%(asctime)s %(name)-18s:%(lineno)-4s | %(message)s', '%Y.%m.%d %H:%M:%S')
-    handler.setFormatter(GlogFormatter())
-    logger.addHandler(handler)
+
+    if new:
+        logger.setLevel(loglevel)
+        handler = logging.StreamHandler()
+        # format = logging.Formatter('%(levelname)s d:%(asctime)s %(name)-18s:%(lineno)-4s | %(message)s', '%Y.%m.%d %H:%M:%S')
+        if logType == "pretty":
+            handler.setFormatter(PrettyFormatter())
+        else:
+            handler.setFormatter(GlogFormatter())
+
+        logger.addHandler(handler)
 
     return logger
 
@@ -55,6 +64,43 @@ def format_message(record):
 
 
 class GlogFormatter(logging.Formatter):
+    LEVEL_MAP = {
+        logging.FATAL: 'F',  # FATAL is alias of CRITICAL
+        logging.ERROR: 'E',
+        logging.WARN: 'W',
+        logging.INFO: 'I',
+        logging.DEBUG: 'D'
+    }
+
+    def __init__(self):
+        logging.Formatter.__init__(self)
+
+    def format(self, record):
+        try:
+            level = GlogFormatter.LEVEL_MAP[record.levelno]
+        except KeyError:
+            level = str(MAX - record.levelno + 1)
+        date = time.localtime(record.created)
+        date_usec = (record.created - int(record.created)) * 1e6
+        record_message = '%c%02d%02d %02d:%02d:%02d.%06d %s %s:%d] %s' % (
+            level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
+            date.tm_sec, date_usec,
+            record.process if record.process is not None else '?????',
+            record.filename,
+            record.lineno,
+            format_message(record))
+        message = record_message
+        message = message.split("\n")
+        length = message[0].index("] ") + 2
+        newMessage = message[0]
+        message = message[1:]
+        for string in message:
+            newMessage += "\n" + " " * length + string
+        record.getMessage = lambda: newMessage
+        return logging.Formatter.format(self, record)
+
+
+class PrettyFormatter(logging.Formatter):
     LEVEL_MAP = {
         logging.FATAL: 'F',  # FATAL is alias of CRITICAL
         logging.ERROR: 'E',
@@ -88,7 +134,6 @@ class GlogFormatter(logging.Formatter):
             newMessage += "\n" + " " * length + string
         record.getMessage = lambda: newMessage
         return logging.Formatter.format(self, record)
-
 
 logger = logging.getLogger()
 handler = logging.StreamHandler()

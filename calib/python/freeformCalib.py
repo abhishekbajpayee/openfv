@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import time
 import configparser
 import argparse
-import refCalib as rc
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
@@ -497,11 +496,15 @@ if __name__ == "__main__":
     # read config file flag passed from terminal
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config_file', help='relative path to config file', type=str)
-    parser.add_argument('-v', '--verbosity', help='verbosity level for file prints', type=int)
+    parser.add_argument('-v', '--verbosity', help='verbosity level for file prints (1 through 4 or DEBUG, INFO, etc.)', type=str, default="1")
+    parser.add_argument('-l', '--logType', help='style of log print messages (cpp (default), pretty)', type=str, default="cpp")
     args = parser.parse_args()
     configPath = args.config_file
-    log = logger.getLogger(__file__, args.verbosity)
+    log = logger.getLogger(__file__, args.verbosity, args.logType)
 
+    # import refCalib here so that our freeform logger gets created before the one in refCalib (so refCalib methods will use the freeform logger)
+    import refCalib as rc
+    
     # read and parse config file
     planeData, cameraData, sceneData, toleranes, calImgs, exptPath, camIDs, _ = rc.parseConfigFile(configPath)
 
