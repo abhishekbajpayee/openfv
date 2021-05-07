@@ -412,7 +412,7 @@ def reproj_error(normal_factor, img_coor, world_coor, camMatrix, rotMatrixCam, r
     
     Returns
     ------------------------------------
-    the reproduction error
+    the reprojection error
     """
     
     # TODO scaling paramter k for principal optical axis assumed here.
