@@ -13,141 +13,174 @@ MAX = 4
 
 
 class Log(logging.Logger):
-    def setLevel(self, level):
-        try:
-            super().setLevel(MAX - int(level) + 1)
-        except:
-            super().setLevel(level.upper())
-        self.log(DEBUG, 'Log level set to %s', level)
-        
-    def VLOG(self, level, msg, *args, **kwargs):
-        level = MAX-level+1
-        if not isinstance(level, int):
-            if raiseExceptions:
-                raise TypeError("level must be an integer")
-            else:
-                return
-        if self.isEnabledFor(level):
-            self._log(level, msg, args, **kwargs)
+	def setLevel(self, level):
+		"""
+		setLevel: sets the verbosity level of the logger
+		@param: level	verbosity level setting
+		"""
+		try:
+			super().setLevel(MAX - int(level) + 1)
+		except:
+			super().setLevel(level.upper())
+		self.log(DEBUG, 'Log level set to %s', level)
 
-def getLogger(name="root", loglevel = 1, logType = "cpp"):
-    """
+	def VLOG(self, level, msg, *args, **kwargs):
+		"""
+		logs a log message at a given level with a given message
+		@param: level	log level for message
+		@param: msg		message that gets logged
+		"""
+		level = MAX - level + 1
+		if not isinstance(level, int):
+			if raiseExceptions:
+				raise TypeError("level must be an integer")
+			else:
+				return
+		if self.isEnabledFor(level):
+			self._log(level, msg, args, **kwargs)
+
+
+def getLogger(name="root", loglevel=1, logType="cpp"):
+	"""
     Return a logger with the specified name, creating it if necessary.
 
     If no name is specified, return the root logger.
+	@param: name		the name of the logger
+	@param:	loglevel	log level for message
+	@param: logType		formatting type
+	@returns: logger	the logger
     """
-    new = name not in Log.manager.loggerDict
-    if new:
-        Log.manager.loggerDict[name] = Log(name)
+	new = name not in Log.manager.loggerDict
+	if new:
+		Log.manager.loggerDict[name] = Log(name)
 
-    logger = Log.manager.getLogger(name)
+	logger = Log.manager.getLogger(name)
 
-    if new:
-        logger.setLevel(loglevel)
-        handler = logging.StreamHandler()
-        # format = logging.Formatter('%(levelname)s d:%(asctime)s %(name)-18s:%(lineno)-4s | %(message)s', '%Y.%m.%d %H:%M:%S')
-        if logType == "pretty":
-            handler.setFormatter(PrettyFormatter())
-        else:
-            handler.setFormatter(GlogFormatter())
+	if new:
+		logger.setLevel(loglevel)
+		handler = logging.StreamHandler()
+		# format = logging.Formatter('%(levelname)s d:%(asctime)s %(name)-18s:%(lineno)-4s | %(message)s', '%Y.%m.%d
+		# %H:%M:%S')
+		if logType == "pretty":
+			handler.setFormatter(PrettyFormatter())
+		else:
+			handler.setFormatter(GlogFormatter())
 
-        logger.addHandler(handler)
+		logger.addHandler(handler)
 
-    return logger
+	return logger
+
 
 def format_message(record):
-    try:
-        record_message = '%s' % (record.msg % record.args)
-    except TypeError:
-        record_message = record.msg
-    return record_message
+	"""
+	formats the log message using the log record
+
+	@param: record				log record
+	@returns: record_message	the final log message
+	"""
+	try:
+		record_message = '%s' % (record.msg % record.args)
+	except TypeError:
+		record_message = record.msg
+	return record_message
 
 
 class GlogFormatter(logging.Formatter):
-    LEVEL_MAP = {
-        logging.FATAL: 'F',  # FATAL is alias of CRITICAL
-        logging.ERROR: 'E',
-        logging.WARN: 'W',
-        logging.INFO: 'I',
-        logging.DEBUG: 'D'
-    }
+	LEVEL_MAP = {
+		logging.FATAL: 'F',  # FATAL is alias of CRITICAL
+		logging.ERROR: 'E',
+		logging.WARN: 'W',
+		logging.INFO: 'I',
+		logging.DEBUG: 'D'
+	}
 
-    def __init__(self):
-        logging.Formatter.__init__(self)
+	def __init__(self):
+		logging.Formatter.__init__(self)
 
-    def format(self, record):
-        try:
-            level = GlogFormatter.LEVEL_MAP[record.levelno]
-        except KeyError:
-            level = str(MAX - record.levelno + 1)
-        date = time.localtime(record.created)
-        date_usec = (record.created - int(record.created)) * 1e6
-        record_message = '%c%02d%02d %02d:%02d:%02d.%06d %s %s:%d] %s' % (
-            level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
-            date.tm_sec, date_usec,
-            record.process if record.process is not None else '?????',
-            record.filename,
-            record.lineno,
-            format_message(record))
-        message = record_message
-        message = message.split("\n")
-        length = message[0].index("] ") + 2
-        newMessage = message[0]
-        message = message[1:]
-        for string in message:
-            newMessage += "\n" + " " * length + string
-        record.getMessage = lambda: newMessage
-        return logging.Formatter.format(self, record)
+	def format(self, record):
+		"""
+		formats the input message according to C++ glog standards
+
+		@param: record	contains the message logging information
+		@returns: log record containing record and formatted message
+		"""
+		try:
+			level = GlogFormatter.LEVEL_MAP[record.levelno]
+		except KeyError:
+			level = str(MAX - record.levelno + 1)
+		date = time.localtime(record.created)
+		date_usec = (record.created - int(record.created)) * 1e6
+		record_message = '%c%02d%02d %02d:%02d:%02d.%06d %s %s:%d] %s' % (
+			level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
+			date.tm_sec, date_usec,
+			record.process if record.process is not None else '?????',
+			record.filename,
+			record.lineno,
+			format_message(record))
+		message = record_message
+		message = message.split("\n")
+		length = message[0].index("] ") + 2
+		newMessage = message[0]
+		message = message[1:]
+		for string in message:
+			newMessage += "\n" + " " * length + string
+		record.getMessage = lambda: newMessage
+		return logging.Formatter.format(self, record)
 
 
 class PrettyFormatter(logging.Formatter):
-    LEVEL_MAP = {
-        logging.FATAL: 'F',  # FATAL is alias of CRITICAL
-        logging.ERROR: 'E',
-        logging.WARN: 'W',
-        logging.INFO: 'I',
-        logging.DEBUG: 'D'
-    }
+	LEVEL_MAP = {
+		logging.FATAL: 'F',  # FATAL is alias of CRITICAL
+		logging.ERROR: 'E',
+		logging.WARN: 'W',
+		logging.INFO: 'I',
+		logging.DEBUG: 'D'
+	}
 
-    def __init__(self):
-        logging.Formatter.__init__(self)
+	def __init__(self):
+		logging.Formatter.__init__(self)
 
-    def format(self, record):
-        try:
-            level = GlogFormatter.LEVEL_MAP[record.levelno]
-        except KeyError:
-            level = str(MAX - record.levelno + 1)
-        date = time.localtime(record.created)
-        date_usec = (record.created - int(record.created)) * 1e3
-        record_message = '%c d:%02d.%02d %02d:%02d:%02d.%03d %16s:%4d | %s' % (
-            level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
-            date.tm_sec, date_usec,
-            record.filename,
-            record.lineno,
-            format_message(record))
-        message = record_message
-        message = message.split("\n")
-        length = message[0].index(" | ") + 3
-        newMessage = message[0]
-        message = message[1:]
-        for string in message:
-            newMessage += "\n" + " " * length + string
-        record.getMessage = lambda: newMessage
-        return logging.Formatter.format(self, record)
+	def format(self, record):
+		"""
+		formats the input message with simplified C++ glog standards
+		
+		@param: record	contains the message logging information
+		@returns: log record containing record and formatted message
+		"""
+		try:
+			level = GlogFormatter.LEVEL_MAP[record.levelno]
+		except KeyError:
+			level = str(MAX - record.levelno + 1)
+		date = time.localtime(record.created)
+		date_usec = (record.created - int(record.created)) * 1e3
+		record_message = '%c d:%02d.%02d %02d:%02d:%02d.%03d %16s:%4d | %s' % (
+			level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
+			date.tm_sec, date_usec,
+			record.filename,
+			record.lineno,
+			format_message(record))
+		message = record_message
+		message = message.split("\n")
+		length = message[0].index(" | ") + 3
+		newMessage = message[0]
+		message = message[1:]
+		for string in message:
+			newMessage += "\n" + " " * length + string
+		record.getMessage = lambda: newMessage
+		return logging.Formatter.format(self, record)
+
 
 logger = logging.getLogger()
 handler = logging.StreamHandler()
 
 
 def setLevel(level):
-    try:
-        logger.setLevel(MAX - int(level) + 1)
-    except:
-        logger.setLevel(level.upper())
-    logger.debug('Log level set to %s', level)
-        
-def VLOG(vLevel,string):
-    logger.log(MAX-vLevel+1,string)
+	try:
+		logger.setLevel(MAX - int(level) + 1)
+	except:
+		logger.setLevel(level.upper())
+	logger.debug('Log level set to %s', level)
+
 
 debug = logging.debug
 info = logging.info
@@ -166,17 +199,17 @@ ERROR = logging.ERROR
 FATAL = logging.FATAL
 
 _level_names = {
-    DEBUG: 'DEBUG',
-    INFO: 'INFO',
-    WARN: 'WARN',
-    ERROR: 'ERROR',
-    FATAL: 'FATAL'
+	DEBUG: 'DEBUG',
+	INFO: 'INFO',
+	WARN: 'WARN',
+	ERROR: 'ERROR',
+	FATAL: 'FATAL'
 }
 
 _level_letters = [name[0] for name in _level_names.values()]
 
 GLOG_PREFIX_REGEX = (
-                        r"""
+	                    r"""
     (?x) ^
     (?P<severity>[%s])
     (?P<month>\d\d)(?P<day>\d\d)\s
@@ -193,147 +226,147 @@ logger.addHandler(handler)
 
 
 class CaptureWarningsFlag(flags.BooleanFlag):
-    def __init__(self):
-        flags.BooleanFlag.__init__(self, 'glog_capture_warnings', True,
-                                   "Redirect warnings to log.warn messages")
+	def __init__(self):
+		flags.BooleanFlag.__init__(self, 'glog_capture_warnings', True,
+		                           "Redirect warnings to log.warn messages")
 
-    def Parse(self, arg):
-        flags.BooleanFlag.Parse(self, arg)
-        logging.captureWarnings(self.value)
+	def Parse(self, arg):
+		flags.BooleanFlag.Parse(self, arg)
+		logging.captureWarnings(self.value)
 
 
 flags.DEFINE_flag(CaptureWarningsFlag())
 
 
 class VerbosityParser(flags.ArgumentParser):
-    """Sneakily use gflags parsing to get a simple callback."""
+	"""Sneakily use gflags parsing to get a simple callback."""
 
-    def Parse(self, arg):
-        try:
-            intarg = int(arg)
-            # Look up the name for this level (DEBUG, INFO, etc) if it exists
-            try:
-                level = logging._levelNames.get(intarg, intarg)
-            except AttributeError:  # This was renamed somewhere b/w 2.7 and 3.4
-                level = logging._levelToName.get(intarg, intarg)
-        except ValueError:
-            level = arg
-        setLevel(level)
-        return level
+	def Parse(self, arg):
+		try:
+			intarg = int(arg)
+			# Look up the name for this level (DEBUG, INFO, etc) if it exists
+			try:
+				level = logging._levelNames.get(intarg, intarg)
+			except AttributeError:  # This was renamed somewhere b/w 2.7 and 3.4
+				level = logging._levelToName.get(intarg, intarg)
+		except ValueError:
+			level = arg
+		setLevel(level)
+		return level
 
 
 flags.DEFINE(
-    parser=VerbosityParser(),
-    serializer=flags.ArgumentSerializer(),
-    name='verbosity',
-    default=logging.INFO,
-    help='Logging verbosity')
+	parser=VerbosityParser(),
+	serializer=flags.ArgumentSerializer(),
+	name='verbosity',
+	default=logging.INFO,
+	help='Logging verbosity')
 
 
 # Define functions emulating C++ glog check-macros
 # https://htmlpreview.github.io/?https://github.com/google/glog/master/doc/glog.html#check
 
 def format_stacktrace(stack):
-    """Print a stack trace that is easier to read.
+	"""Print a stack trace that is easier to read.
 
     * Reduce paths to basename component
     * Truncates the part of the stack after the check failure
     """
-    lines = []
-    for _, f in enumerate(stack):
-        fname = os.path.basename(f[0])
-        line = "\t%s:%d\t%s" % (fname + "::" + f[2], f[1], f[3])
-        lines.append(line)
-    return lines
+	lines = []
+	for _, f in enumerate(stack):
+		fname = os.path.basename(f[0])
+		line = "\t%s:%d\t%s" % (fname + "::" + f[2], f[1], f[3])
+		lines.append(line)
+	return lines
 
 
 class FailedCheckException(AssertionError):
-    """Exception with message indicating check-failure location and values."""
+	"""Exception with message indicating check-failure location and values."""
 
 
 def check_failed(message):
-    stack = traceback.extract_stack()
-    stack = stack[0:-2]
-    stacktrace_lines = format_stacktrace(stack)
-    filename, line_num, _, _ = stack[-1]
+	stack = traceback.extract_stack()
+	stack = stack[0:-2]
+	stacktrace_lines = format_stacktrace(stack)
+	filename, line_num, _, _ = stack[-1]
 
-    try:
-        raise FailedCheckException(message)
-    except FailedCheckException:
-        log_record = logger.makeRecord('CRITICAL', 50, filename, line_num,
-                                       message, None, None)
-        handler.handle(log_record)
+	try:
+		raise FailedCheckException(message)
+	except FailedCheckException:
+		log_record = logger.makeRecord('CRITICAL', 50, filename, line_num,
+		                               message, None, None)
+		handler.handle(log_record)
 
-        log_record = logger.makeRecord('DEBUG', 10, filename, line_num,
-                                       'Check failed here:', None, None)
-        handler.handle(log_record)
-        for line in stacktrace_lines:
-            log_record = logger.makeRecord('DEBUG', 10, filename, line_num,
-                                           line, None, None)
-            handler.handle(log_record)
-        raise
-    return
+		log_record = logger.makeRecord('DEBUG', 10, filename, line_num,
+		                               'Check failed here:', None, None)
+		handler.handle(log_record)
+		for line in stacktrace_lines:
+			log_record = logger.makeRecord('DEBUG', 10, filename, line_num,
+			                               line, None, None)
+			handler.handle(log_record)
+		raise
+	return
 
 
 def check(condition, message=None):
-    """Raise exception with message if condition is False."""
-    if not condition:
-        if message is None:
-            message = "Check failed."
-        check_failed(message)
+	"""Raise exception with message if condition is False."""
+	if not condition:
+		if message is None:
+			message = "Check failed."
+		check_failed(message)
 
 
 def check_eq(obj1, obj2, message=None):
-    """Raise exception with message if obj1 != obj2."""
-    if obj1 != obj2:
-        if message is None:
-            message = "Check failed: %s != %s" % (str(obj1), str(obj2))
-        check_failed(message)
+	"""Raise exception with message if obj1 != obj2."""
+	if obj1 != obj2:
+		if message is None:
+			message = "Check failed: %s != %s" % (str(obj1), str(obj2))
+		check_failed(message)
 
 
 def check_ne(obj1, obj2, message=None):
-    """Raise exception with message if obj1 == obj2."""
-    if obj1 == obj2:
-        if message is None:
-            message = "Check failed: %s == %s" % (str(obj1), str(obj2))
-        check_failed(message)
+	"""Raise exception with message if obj1 == obj2."""
+	if obj1 == obj2:
+		if message is None:
+			message = "Check failed: %s == %s" % (str(obj1), str(obj2))
+		check_failed(message)
 
 
 def check_le(obj1, obj2, message=None):
-    """Raise exception with message if not (obj1 <= obj2)."""
-    if obj1 > obj2:
-        if message is None:
-            message = "Check failed: %s > %s" % (str(obj1), str(obj2))
-        check_failed(message)
+	"""Raise exception with message if not (obj1 <= obj2)."""
+	if obj1 > obj2:
+		if message is None:
+			message = "Check failed: %s > %s" % (str(obj1), str(obj2))
+		check_failed(message)
 
 
 def check_ge(obj1, obj2, message=None):
-    """Raise exception with message unless (obj1 >= obj2)."""
-    if obj1 < obj2:
-        if message is None:
-            message = "Check failed: %s < %s" % (str(obj1), str(obj2))
-        check_failed(message)
+	"""Raise exception with message unless (obj1 >= obj2)."""
+	if obj1 < obj2:
+		if message is None:
+			message = "Check failed: %s < %s" % (str(obj1), str(obj2))
+		check_failed(message)
 
 
 def check_lt(obj1, obj2, message=None):
-    """Raise exception with message unless (obj1 < obj2)."""
-    if obj1 >= obj2:
-        if message is None:
-            message = "Check failed: %s >= %s" % (str(obj1), str(obj2))
-        check_failed(message)
+	"""Raise exception with message unless (obj1 < obj2)."""
+	if obj1 >= obj2:
+		if message is None:
+			message = "Check failed: %s >= %s" % (str(obj1), str(obj2))
+		check_failed(message)
 
 
 def check_gt(obj1, obj2, message=None):
-    """Raise exception with message unless (obj1 > obj2)."""
-    if obj1 <= obj2:
-        if message is None:
-            message = "Check failed: %s <= %s" % (str(obj1), str(obj2))
-        check_failed(message)
+	"""Raise exception with message unless (obj1 > obj2)."""
+	if obj1 <= obj2:
+		if message is None:
+			message = "Check failed: %s <= %s" % (str(obj1), str(obj2))
+		check_failed(message)
 
 
 def check_notnone(obj, message=None):
-    """Raise exception with message if obj is None."""
-    if obj is None:
-        if message is None:
-            message = "Check failed: Object is None."
-        check_failed(message)
+	"""Raise exception with message if obj is None."""
+	if obj is None:
+		if message is None:
+			message = "Check failed: Object is None."
+		check_failed(message)
