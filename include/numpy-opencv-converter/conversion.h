@@ -29,7 +29,7 @@
 # define __COVERSION_OPENCV_H__
 
 #include <Python.h>
-#include <opencv2/opencv.hpp>
+#include "std_include.h"
 #include <opencv2/core/core.hpp>
 #include <numpy/ndarrayobject.h>
 

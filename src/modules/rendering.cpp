@@ -36,7 +36,6 @@
 #include "tools.h"
 
 using namespace std;
-using namespace cv;
 
 // Scene class functions
 
@@ -408,30 +407,34 @@ void Scene::renderVolumeGPU(int xv, int yv, int zv) {
 
     for (int z=0; z<vz_; z++) {
 
-        slice = 0;
+        //slice = 0;
+        slice.upload(blank);
 
         for (int k=0; k<particles_.cols; k++) {
 
-            tmp1 = 0; tmp2 = 0;
+            //tmp1 = 0; tmp2 = 0;
+	    tmp1.upload(blank);
+	    tmp2.upload(blank);
 
             // outputs -(x-ux)^2/2sig^2
-            gpu::add(gx, Scalar(-particles_(0,k)), tmp1);
-            gpu::pow(tmp1, 2.0, tmp1);
-            gpu::multiply(tmp1, Scalar(-1.0/(2*pow(sigmax_, 2))), tmp1);
-            gpu::add(tmp1, tmp2, tmp2);
+            cuda::add(gx, Scalar(-particles_(0,k)), tmp1);
+            cuda::pow(tmp1, 2.0, tmp1);
+            cuda::multiply(tmp1, Scalar(-1.0/(2*pow(sigmax_, 2))), tmp1);
+            cuda::add(tmp1, tmp2, tmp2);
 
-            tmp1 = 0;
+            //tmp1 = 0;
+	    tmp1.upload(blank);
 
             // outputs -(y-uy)^2/2sig^2
-            gpu::add(gy, Scalar(-particles_(1,k)), tmp1);
-            gpu::pow(tmp1, 2.0, tmp1);
-            gpu::multiply(tmp1, Scalar(-1.0/(2*pow(sigmay_, 2))), tmp1);
-            gpu::add(tmp1, tmp2, tmp2);
+            cuda::add(gy, Scalar(-particles_(1,k)), tmp1);
+            cuda::pow(tmp1, 2.0, tmp1);
+            cuda::multiply(tmp1, Scalar(-1.0/(2*pow(sigmay_, 2))), tmp1);
+            cuda::add(tmp1, tmp2, tmp2);
 
-            gpu::add(tmp2, Scalar( -1.0*pow(voxelsZ_[z]-particles_(2,k), 2.0) / (2*pow(sigmaz_, 2)) ), tmp2);
+            cuda::add(tmp2, Scalar( -1.0*pow(voxelsZ_[z]-particles_(2,k), 2.0) / (2*pow(sigmaz_, 2)) ), tmp2);
 
-            gpu::exp(tmp2, tmp2);
-            gpu::add(slice, tmp2, slice);
+            cuda::exp(tmp2, tmp2);
+            cuda::add(slice, tmp2, slice);
 
         }
 
@@ -475,7 +478,8 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
 
     for (int z=0; z<vz_; z++) {
 
-        slice = 0;
+        //slice = 0;
+	slice.upload(blank);
 
         // sorting particles into bins...
         vector<Mat> partbin;
@@ -488,26 +492,29 @@ void Scene::renderVolumeGPU2(int xv, int yv, int zv) {
 
             Mat_<double> particle = partbin[k];
 
-            tmp1 = 0; tmp2 = 0;
+            //tmp1 = 0; tmp2 = 0;
+	    tmp1.upload(blank);
+	    tmp2.upload(blank);
 
             // outputs -(x-ux)^2/2sig^2
-            gpu::add(gx, Scalar(-particle(0,0)), tmp1);
-            gpu::pow(tmp1, 2.0, tmp1);
-            gpu::multiply(tmp1, Scalar(-1.0/(2*pow(sigmax_, 2))), tmp1);
-            gpu::add(tmp1, tmp2, tmp2);
+            cuda::add(gx, Scalar(-particle(0,0)), tmp1);
+            cuda::pow(tmp1, 2.0, tmp1);
+            cuda::multiply(tmp1, Scalar(-1.0/(2*pow(sigmax_, 2))), tmp1);
+            cuda::add(tmp1, tmp2, tmp2);
 
-            tmp1 = 0;
+            //tmp1 = 0;
+	    tmp1.upload(blank);
 
             // outputs -(y-uy)^2/2sig^2
-            gpu::add(gy, Scalar(-particle(1,0)), tmp1);
-            gpu::pow(tmp1, 2.0, tmp1);
-            gpu::multiply(tmp1, Scalar(-1.0/(2*pow(sigmay_, 2))), tmp1);
-            gpu::add(tmp1, tmp2, tmp2);
+            cuda::add(gy, Scalar(-particle(1,0)), tmp1);
+            cuda::pow(tmp1, 2.0, tmp1);
+            cuda::multiply(tmp1, Scalar(-1.0/(2*pow(sigmay_, 2))), tmp1);
+            cuda::add(tmp1, tmp2, tmp2);
 
-            gpu::add(tmp2, Scalar( -1.0*pow(voxelsZ_[z]-particle(2,0), 2.0) / (2*pow(sigmaz_, 2)) ), tmp2);
+            cuda::add(tmp2, Scalar( -1.0*pow(voxelsZ_[z]-particle(2,0), 2.0) / (2*pow(sigmaz_, 2)) ), tmp2);
 
-            gpu::exp(tmp2, tmp2);
-            gpu::add(slice, tmp2, slice);
+            cuda::exp(tmp2, tmp2);
+            cuda::add(slice, tmp2, slice);
 
         }
 
@@ -801,24 +808,26 @@ void Camera::renderGPU() {
 
     for (int k=0; k<p_.cols; k++) {
 
-        tmp1 = 0; tmp2 = 0;
+        //tmp1 = 0; tmp2 = 0;
+	tmp1.upload(blank), tmp2.upload(blank);
 
         // outputs -(x-ux)^2/2sig^2
-        gpu::add(gx, Scalar(-p_(0,k)), tmp1);
-        gpu::pow(tmp1, 2.0, tmp1);
-        gpu::multiply(tmp1, Scalar(-1.0/(2*s_(0,k)*s_(0,k))), tmp1);
-        gpu::add(tmp2, tmp1, tmp2);
+        cuda::add(gx, Scalar(-p_(0,k)), tmp1);
+        cuda::pow(tmp1, 2.0, tmp1);
+        cuda::multiply(tmp1, Scalar(-1.0/(2*s_(0,k)*s_(0,k))), tmp1);
+        cuda::add(tmp2, tmp1, tmp2);
 
-        tmp1 = 0;
+        //tmp1 = 0;
+	tmp1.upload(blank);
 
         // outputs -(y-uy)^2/2sig^2
-        gpu::add(gy, Scalar(-p_(1,k)), tmp1);
-        gpu::pow(tmp1, 2.0, tmp1);
-        gpu::multiply(tmp1, Scalar(-1.0/(2*s_(0,k)*s_(0,k))), tmp1);
-        gpu::add(tmp2, tmp1, tmp2);
+        cuda::add(gy, Scalar(-p_(1,k)), tmp1);
+        cuda::pow(tmp1, 2.0, tmp1);
+        cuda::multiply(tmp1, Scalar(-1.0/(2*s_(0,k)*s_(0,k))), tmp1);
+        cuda::add(tmp2, tmp1, tmp2);
 
-        gpu::exp(tmp2, tmp2);
-        gpu::add(img, tmp2, img);
+        cuda::exp(tmp2, tmp2);
+        cuda::add(img, tmp2, img);
 
     }
 
@@ -1021,7 +1030,7 @@ double benchmark::calcQ(double thresh, int mult, double mult_exp) {
 */
 
 // Python wrapper
-BOOST_PYTHON_MODULE(rendering) {
+/*BOOST_PYTHON_MODULE(rendering) {
 
     using namespace boost::python;
 
@@ -1050,11 +1059,9 @@ BOOST_PYTHON_MODULE(rendering) {
         .def("getC", &Camera::getC)
     ;
 
-    /*
     class_<benchmark>("benchmark")
         .def("benchmarkSA", &benchmark::benchmarkSA)
         .def("calcQ", &benchmark::calcQ)
     ;
-    */
 
-}
+}*/

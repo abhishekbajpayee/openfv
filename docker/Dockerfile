@@ -21,34 +21,29 @@
 # You should have received a copy of the GNU General Public License version 2 along with
 # OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
-FROM openfv/openfv-base
+FROM bpaez1/openfv:cudabase
+
+# Install boost
+RUN apt-get update -qq && apt-get install libboost-all-dev -y
 
 # Install openfv
-RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
-	cd openfv && ./configure && cd bin && \
-	cmake -D BUILD_PYTHON=ON -D PYTHON_EXEC=/opt/conda/envs/python2/bin/python -D WITH_CUDA=OFF \
-        -D NUMPY_INC_DIR=/opt/conda/envs/python2/lib/python2.7/site-packages/numpy/core/include ..  && \
-    make && make install
+RUN git clone https://github.com/bpaez/openfv.git && \
+	#apt-get update -qq && apt-get install libboost-all-dev -y && \
+        cd openfv && \
+        ./configure && cd bin && \
+	cmake -D WITH_CUDA=ON .. && \
+    	make && make install
 
-# RUN rm -rf *.zip ceres-solver* gflags glog opencv* openfv
-RUN rm -rf *.zip gflags glog opencv* openfv
+RUN rm -rf *.zip gflags glog opencv* 
 
-# Download sample data
-RUN git clone https://github.com/abhishekbajpayee/openfv-sample-data.git
+# Download sample repo (note: downloading it bc current repo is private)
+RUN git clone https://gitlab.com/Bpaez/FILMopenfv-samples.git && \
+    cd FILMopenfv-samples && mkdir bin && cd bin && \
+    cmake .. && make
 
-# Download and test sample
-RUN git clone https://github.com/abhishekbajpayee/openfv-samples.git # && cd openfv-samples && \
-     	mkdir bin && cd bin && cmake .. && make
+# Add aliases so users can depend on a consistent format
+RUN echo 'alias refCalib="python3 refCalib.py -c "' >> ~/.bashrc && \
+    echo 'alias pinCalib="python3 pinCalib.py -c "' >> ~/.bashrc && \
+    echo 'alias refocus="./refocus --config_file "' >> ~/.bashrc 
 
-# Add local files as late as possible to avoid cache busting
-COPY cuda/start.sh /usr/local/bin/
-COPY cuda/start-notebook.sh /usr/local/bin/
-COPY cuda/start-singleuser.sh /usr/local/bin/
-COPY cuda/jupyter_notebook_config.py /home/$NB_USER/.jupyter/
-
-# Configure ipython kernel to use matplotlib inline backend by default
-RUN mkdir -p $HOME/.ipython/profile_default/startup
-COPY cuda/mplimporthook.py $HOME/.ipython/profile_default/startup/
-
-# Switch back to jovyan to avoid accidental container runs as root
 USER $NB_USER

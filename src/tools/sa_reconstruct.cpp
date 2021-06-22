@@ -1,4 +1,7 @@
 #include "refocusing.h"
+
+// Added std_include because was getting unidentified reference error
+#include "std_include.h"
 #include "parse_settings.h"
 
 using namespace cv;
