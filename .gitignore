@@ -28,3 +28,6 @@ docs/build/
 docs/source/html/
 docs/source/xml/
 docs/source/latex/
+
+# iPython checkpoints
+*.ipynb_checkpoints
