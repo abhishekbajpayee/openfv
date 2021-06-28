@@ -30,4 +30,5 @@ docs/source/xml/
 docs/source/latex/
 
 # iPython checkpoints
-*.ipynb_checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
