@@ -501,7 +501,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     configPath = args.config_file
     log = logger.getLogger(__file__, args.verbosity, args.logType)
-    log.VLOG(3, "Hi! This is our own glog version!")
+    log.VLOG(3, "Hi!\nThis is our own glog version!")
 
     # import refCalib here so that our freeform logger gets created before the one in refCalib (so refCalib methods will use the freeform logger)
     import refCalib as rc

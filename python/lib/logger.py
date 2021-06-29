@@ -1,4 +1,5 @@
 """A simple Google-style logging wrapper taken from the glog package."""
+"""Use %%% to extend your previous log message (instead of logging a new message)"""
 
 import logging
 import time
@@ -24,6 +25,9 @@ class Log(logging.Logger):
 			super().setLevel(level.upper())
 		self.log(DEBUG, 'Log level set to %s', level)
 
+	def getLevel(self):
+		return MAX - int(self.level) + 1
+
 	def VLOG(self, level, msg, *args, **kwargs):
 		"""
 		logs a log message at a given level with a given message
@@ -32,7 +36,7 @@ class Log(logging.Logger):
 		"""
 		level = MAX - level + 1
 		if not isinstance(level, int):
-			if raiseExceptions:
+			if logging.raiseExceptions:
 				raise TypeError("level must be an integer")
 			else:
 				return
@@ -40,7 +44,7 @@ class Log(logging.Logger):
 			self._log(level, msg, args, **kwargs)
 
 
-def getLogger(name="root", loglevel=1, logType="cpp"):
+def getLogger(name="root", log_level=False, log_type=False):
 	"""
     Return a logger with the specified name, creating it if necessary.
 
@@ -50,21 +54,20 @@ def getLogger(name="root", loglevel=1, logType="cpp"):
 	@param: logType		formatting type
 	@returns: logger	the logger
     """
-	new = name not in Log.manager.loggerDict
-	if new:
+	if name not in Log.manager.loggerDict:
 		Log.manager.loggerDict[name] = Log(name)
 
 	logger = Log.manager.getLogger(name)
 
-	if new:
-		logger.setLevel(loglevel)
+	if log_level or log_type:
 		handler = logging.StreamHandler()
 		# format = logging.Formatter('%(levelname)s d:%(asctime)s %(name)-18s:%(lineno)-4s | %(message)s', '%Y.%m.%d
 		# %H:%M:%S')
-		if logType == "pretty":
-			handler.setFormatter(PrettyFormatter())
-		else:
-			handler.setFormatter(GlogFormatter())
+		logger.removeHandler(handler)
+
+		logger.setLevel(log_level)
+
+		handler.setFormatter(LoggerFormatter(log_type))
 
 		logger.addHandler(handler)
 
@@ -85,7 +88,7 @@ def format_message(record):
 	return record_message
 
 
-class GlogFormatter(logging.Formatter):
+class LoggerFormatter(logging.Formatter):
 	LEVEL_MAP = {
 		logging.FATAL: 'F',  # FATAL is alias of CRITICAL
 		logging.ERROR: 'E',
@@ -94,51 +97,9 @@ class GlogFormatter(logging.Formatter):
 		logging.DEBUG: 'D'
 	}
 
-	def __init__(self):
+	def __init__(self, log_type="cpp"):
 		logging.Formatter.__init__(self)
-
-	def format(self, record):
-		"""
-		formats the input message according to C++ glog standards
-
-		@param: record	contains the message logging information
-		@returns: log record containing record and formatted message
-		"""
-		try:
-			level = GlogFormatter.LEVEL_MAP[record.levelno]
-		except KeyError:
-			level = str(MAX - record.levelno + 1)
-		date = time.localtime(record.created)
-		date_usec = (record.created - int(record.created)) * 1e6
-		record_message = '%c%02d%02d %02d:%02d:%02d.%06d %s %s:%d] %s' % (
-			level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
-			date.tm_sec, date_usec,
-			record.process if record.process is not None else '?????',
-			record.filename,
-			record.lineno,
-			format_message(record))
-		message = record_message
-		message = message.split("\n")
-		length = message[0].index("] ") + 2
-		newMessage = message[0]
-		message = message[1:]
-		for string in message:
-			newMessage += "\n" + " " * length + string
-		record.getMessage = lambda: newMessage
-		return logging.Formatter.format(self, record)
-
-
-class PrettyFormatter(logging.Formatter):
-	LEVEL_MAP = {
-		logging.FATAL: 'F',  # FATAL is alias of CRITICAL
-		logging.ERROR: 'E',
-		logging.WARN: 'W',
-		logging.INFO: 'I',
-		logging.DEBUG: 'D'
-	}
-
-	def __init__(self):
-		logging.Formatter.__init__(self)
+		self.log_type = log_type
 
 	def format(self, record):
 		"""
@@ -148,24 +109,42 @@ class PrettyFormatter(logging.Formatter):
 		@returns: log record containing record and formatted message
 		"""
 		try:
-			level = GlogFormatter.LEVEL_MAP[record.levelno]
+			level = LoggerFormatter.LEVEL_MAP[record.levelno]
 		except KeyError:
 			level = str(MAX - record.levelno + 1)
 		date = time.localtime(record.created)
 		date_usec = (record.created - int(record.created)) * 1e3
-		record_message = '%c d:%02d.%02d %02d:%02d:%02d.%03d %16s:%4d | %s' % (
-			level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
-			date.tm_sec, date_usec,
-			record.filename,
-			record.lineno,
-			format_message(record))
+		delim = " | " if self.log_type == "pretty" else "] "
+		if self.log_type == "pretty":
+			record_message = '%c d:%02d.%02d %02d:%02d:%02d.%03d %16s:%4d%s%s' % (
+				level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
+				date.tm_sec, date_usec,
+				record.filename,
+				record.lineno,
+				delim,
+				format_message(record))
+		else:
+			record_message = '%c%02d%02d %02d:%02d:%02d.%06d %s %s:%d%s%s' % (
+				level, date.tm_mon, date.tm_mday, date.tm_hour, date.tm_min,
+				date.tm_sec, date_usec,
+				record.process if record.process is not None else '?????',
+				record.filename,
+				record.lineno,
+				delim,
+				format_message(record))
+
 		message = record_message
-		message = message.split("\n")
-		length = message[0].index(" | ") + 3
-		newMessage = message[0]
-		message = message[1:]
-		for string in message:
-			newMessage += "\n" + " " * length + string
+		try:
+			start = message.index("%%%") + 3
+			length = message.index(delim) + len(delim)
+			newMessage = " " * length + message[start:].lstrip()
+		except:
+			message = message.split("\n")
+			length = message[0].index(delim) + len(delim)
+			newMessage = message[0]
+			message = message[1:]
+			for string in message:
+				newMessage += "\n" + " " * length + string
 		record.getMessage = lambda: newMessage
 		return logging.Formatter.format(self, record)
 
@@ -221,7 +200,7 @@ GLOG_PREFIX_REGEX = (
     """) % ''.join(_level_letters)
 """Regex you can use to parse glog line prefixes."""
 
-handler.setFormatter(GlogFormatter())
+handler.setFormatter(LoggerFormatter())
 logger.addHandler(handler)
 
 

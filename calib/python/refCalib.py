@@ -23,7 +23,7 @@ import logger
 if not __name__ == "__main__":
     import traceback
     filename = traceback.format_stack()[0]
-    log = logger.getLogger(filename.split('"')[1])
+    log = logger.getLogger(filename.split('"')[1], False, False)
 
 
 # This code performs the "Belden" method of self-calibration for multiple cameras in a refractive system 
@@ -450,9 +450,9 @@ def ptnormalize(x):
             d = np.sqrt(xs)
             s = np.sqrt(2) / (np.sum(d) / len(d))
 
-            T[:, :, j] = ([s, 0, s * xm[0]], \
+            T[:, :, j] = np.array([[s, 0, s * xm[0]], \
                           [0, s, s * xm[1]], \
-                          [0, 0, 1])
+                          [0, 0, 1]], dtype=object)
 
             xpad = np.append(xtemp, np.ones((1, x.shape[1])), axis=0)
             xnormtemp = np.dot(T[:, :, j], xpad)
@@ -470,10 +470,10 @@ def ptnormalize(x):
             d = np.sqrt(xs)
             s = np.sqrt(2) / (np.sum(d) / len(d))
 
-            T[:, :, j] = ([s, 0, 0, s * xm[0]], \
+            T[:, :, j] = np.array([[s, 0, 0, s * xm[0]], \
                           [0, s, 0, s * xm[1]], \
                           [0, 0, s, s * xm[2]], \
-                          [0, 0, 0, 1])
+                          [0, 0, 0, 1]], dtype=object)
             xpad = np.append(xtemp, np.ones((1, x.shape[1])), axis=0)
             xnormtemp = np.dot(T[:, :, j], xpad)
             xnorm[:, :, j] = xnormtemp[0:3, :]
@@ -573,7 +573,7 @@ def f_eval_1eq(r1, r2, z1, z2, n1, n2):
     # f        - output of ray tracing equation for one refractive interface
     # df_dr1   - derivative of f with regards to r1
 
-    r1, r2, z1, z2, n1, n2 = np.array([r1, r2, z1, z2, n1, n2]) + 0.  # convert all values to floats
+    r1, r2, z1, z2, n1, n2 = np.array([r1, r2, z1, z2, n1, n2], dtype=object) + 0.  # convert all values to floats
 
     f = (r1) / np.sqrt(r1 ** 2 + z1 ** 2) \
         - (n2 / n1) * (r2 - r1) / np.sqrt((r2 - r1) ** 2 + z2 ** 2)
@@ -599,7 +599,7 @@ def f_eval_2eq(r1, r2, r3, z1, z2, z3, n1, n2, n3):
     # dg_dr1     - derivative of g with regards to r1
 
     [r1, r2, r3, z1, z2, z3, n1, n2, n3] = np.array(
-        [r1, r2, r3, z1, z2, z3, n1, n2, n3]) + 0.  # convert all values to floats
+        [r1, r2, r3, z1, z2, z3, n1, n2, n3], dtype=object) + 0.  # convert all values to floats
 
     f = (r1) / np.sqrt(r1 ** 2. + z1 ** 2.) \
         - (n2 / n1) * (r2 - r1) / np.sqrt((r2 - r1) ** 2. + z2 ** 2.)
@@ -708,7 +708,7 @@ def f_refrac(r1, r2, r3, z1, z2, n1, n2):
     # Outputs:
     # f          - output of snell's law equation (ideally 0)
 
-    [r1, r2, r3, z1, z2, n1, n2] = np.array([r1, r2, r3, z1, z2, n1, n2]) + 0.  # convert all values to floats
+    [r1, r2, r3, z1, z2, n1, n2] = np.array([r1, r2, r3, z1, z2, n1, n2], dtype=object) + 0.  # convert all values to floats
 
     f = (r2 - r1) / np.sqrt((r2 - r1) ** 2.0 + z1 ** 2.0) \
         - (n2 / n1) * (r3 - r2) / np.sqrt((r3 - r2) ** 2.0 + z2 ** 2.0)
@@ -828,7 +828,7 @@ def refrac_solve_bisec(r10, r20, r3, z1, z2, z3, n1, n2, n3, tol, maxIter):
                 l = np.delete(l, i4)
 
     if Iter == maxIter:
-        warnings.warn('Warning: max # iterations reached in refrac_solve_bisec', stacklevel=2)
+        log.warning('Warning: max # iterations reached in refrac_solve_bisec', stacklevel=2)
 
     return [r1n, r2n, Iter]
 
@@ -897,11 +897,11 @@ def img_refrac(XC, X, spData, rTol):
         fcheck[i2] = f_eval_1eq(rB[i2], rP[i2], z1[i2], z3[i2], n1, n3)[0]
 
         if max(np.absolute(fcheck)) > rTol.fg_tol:
-            warnings.warn('Warning: max values of f = ' + str(
+            log.warning('Warning: max values of f = ' + str(
                 max(np.absolute(fcheck))) + '. This may be larger than it should be', stacklevel=2)
 
         if np.any(np.isnan(fcheck)):
-            warnings.warn('Warning: f has a NaN', stacklevel=2)
+            log.warning('Warning: f has a NaN', stacklevel=2)
 
     elif t > 0:
         rB = rP
@@ -945,11 +945,11 @@ def img_refrac(XC, X, spData, rTol):
         fcheck[i2], _, _, gcheck[i2], _, _ = f_eval_2eq(rB[i2], rD[i2], rP[i2], z1[i2], z2[i2], z3[i2], n1, n2, n3)
 
         if max(np.absolute(fcheck)) > rTol.fg_tol or max(np.absolute(gcheck)) > rTol.fg_tol:
-            warnings.warn('Warning: max values of f = ' + str(max(np.absolute(fcheck))) + ', max values of g = ' + str(
+            log.warning('Warning: max values of f = ' + str(max(np.absolute(fcheck))) + ', max values of g = ' + str(
                 max(np.absolute(gcheck))) + '. These may be larger than they should be', stacklevel=2)
 
         if np.any(np.isnan(fcheck)) or np.any(np.isnan(gcheck)):
-            warnings.warn('Warning: f or g has a NaN', stacklevel=2)
+            log.warning('Warning: f or g has a NaN', stacklevel=2)
 
     phi = np.arctan2((X[1, :] - XC[1, :]).flatten(), (X[0, :] - XC[0, :]).flatten())
     XB[0, :] = rB * np.cos(phi) + XC[0, :]
@@ -1128,15 +1128,16 @@ def cam_model_adjust(u, par0, X, sD, cD, rTol, bounded, maxFev=1600, maxfunc_don
                 np.mean(refrac_proj_onecam(params[:, j], Xtemp, sD, cD, rTol) - umeas)))
         
             # verbosity level 4: prints data
-            par = ''
-            for l in par0[:, j]:
-                par += l
-            log.VLOG(4, '\npar0: ' + l)
+            if log.getLevel() == 4:
+                par = ''
+                for l in par0[:, j]:
+                    par += str(l) + ', '
+                log.VLOG(4, 'par0: {}'.format(par[:-2]))
 
-            param = ''
-            for l in params[:, j]:
-                param += l
-            log.VLOG(4,'\nparams: ' + l)
+                param = ''
+                for l in params[:, j]:
+                    param += str(l) + ', '
+                log.VLOG(4,'params: {}'.format(par[:-2]))
 
     return (Pnew, params)
 
@@ -1243,20 +1244,21 @@ def planar_grid_triang(umeas_mat, P, xyzgrid, planeParams0, spData, planeData, r
     # verbosity level 3: prints errors
     log.VLOG(3, '\nAdjusting plane parameters:')
     log.VLOG(3, 'error pre-optimization = ' + str(
-        np.me3, an(planar_grid_adj(planeParams0, P, xyzgrid, spData, planeData, rTol) - umeas_temp)))
+        np.mean(planar_grid_adj(planeParams0, P, xyzgrid, spData, planeData, rTol) - umeas_temp)))
     log.VLOG(3, 'error post-optimization = ' + str(
         np.mean(planar_grid_adj(planeParams, P, xyzgrid, spData, planeData, rTol) - umeas_temp)))
     
     # verbosity level 4: prints data
-    param0 = ''
-    for l in planeParams0:
-        param0 += l
-    log.VLOG(4, 'planeParams0: ' + param0)
-    
-    param = ''
-    for l in planeParams:
-        param += l
-    log.VLOG(4, 'planeParams: ' + param)
+    if log.getLevel() == 4:
+        param0 = ''
+        for l in planeParams0:
+            param0 += str(l) + ', '
+        log.VLOG(4, 'planeParams0: ' + param0[:-2])
+        
+        param = ''
+        for l in planeParams:
+            param += str(l) + ', '
+        log.VLOG(4, 'planeParams: ' + param[:-2])
 
     return (Xadj, planeParams)
 
@@ -1396,7 +1398,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     Iter = 0
     repTol = tols.rep_err_tol * np.ones(ncams)  # reprojection error tolerance for each camera
     while np.any(rep_err_mean[Iter] > repTol) and Iter <= tols.maxiter and np.any(np.abs(rep_err_diff) > repTol / 10):
-        log.VLOG(1, '\n\nIteration ' + str(Iter + 1) + '\nInitial mean reprojection error in each camera= ' + str(
+        log.VLOG(1, 'Iteration ' + str(Iter + 1) + '\nInitial mean reprojection error in each camera= ' + str(
             rep_err_mean[Iter]))
 
         # optimize camera and plane parameters in sequence
@@ -1410,7 +1412,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
         rep_err_diff = rep_err_mean[Iter] - rep_err_mean[Iter - 1]
 
         if np.any(rep_err_diff > 0):  # reprojection error should reaally be decreasing each iteration
-            warnings.warn('\nReprojection error increasing in iteration ' + str(Iter), stacklevel=3)
+            log.warning('\nReprojection error increasing in iteration ' + str(Iter), stacklevel=3)
 
     log.info('Calibration Complete!')
     if not np.any(rep_err_mean[Iter] > repTol):
@@ -1552,3 +1554,4 @@ if __name__ == "__main__":
     f = saveCalibData(exptPath, camIDs, P, camParams, Xworld, planeParams, sceneData, cameraData, planeData, errorLog,
                       pix_phys, 'results_')
     log.info('\nData saved in ' + str(f))
+    
