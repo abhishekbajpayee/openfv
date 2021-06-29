@@ -204,6 +204,7 @@ def parseConfigFile(configPath):
 
 def getCameraNames(dataPath):
     folders = glob.glob(os.path.join(dataPath, 'calibration', '*'))
+    folders.sort()
     camIDs = []
     for i in range(0, len(folders)):
         camIDs.append(os.path.basename(folders[i]))
@@ -260,7 +261,7 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
     # Outputs:
     # cor_all           - 2 by nX*nY*ncalplanes by ncams array of corner coordinates
     # saved corners.dat file containing corner coordinates on path if save_corners is true
-
+    
     ncalplanes = pData.ncalplanes
     nX, nY = pData.nX, pData.nY
 
@@ -301,8 +302,8 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
 
             else:
                 I = imgs[j][i]
-                log.VLOG(2, 'Finding corners in preloaded image ' + str(i + 1) + ' in camera ' + str(j + 1))
-
+                log.VLOG(4, 'Finding corners in preloaded image ' + str(i + 1) + ' in camera ' + str(j + 1))
+            
             # Find corners and refine them using OpenCV
             ret, corners = cv2.findChessboardCorners(I, (nX, nY),
                                                      flags=cv2.CALIB_CB_ADAPTIVE_THRESH | cv2.CALIB_CB_FILTER_QUADS)
@@ -1400,7 +1401,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     while np.any(rep_err_mean[Iter] > repTol) and Iter <= tols.maxiter and np.any(np.abs(rep_err_diff) > repTol / 10):
         log.VLOG(1, 'Iteration ' + str(Iter + 1) + '\nInitial mean reprojection error in each camera= ' + str(
             rep_err_mean[Iter]))
-
+        
         # optimize camera and plane parameters in sequence
         P, camParams = cam_model_adjust(umeas, camParams, Xworld, scData, camData, tols, bounded)
         Xworld, planeParams = planar_grid_triang(umeas, P, xyz_phys, planeParams, scData, pData, tols)
