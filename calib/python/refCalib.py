@@ -233,7 +233,11 @@ def getCalibImages(datapath, exptpath, camNames, fileType):
         for i in range(0, ncams):
             # create and read images
             imagepath = os.path.join(datapath, 'calibration', camNames[i])
-            images = [cv2.imread(file, 0) for file in glob.glob(os.path.join(imagepath, '*' + fileType))]
+
+            files = [file for file in glob.glob(os.path.join(imagepath, '*' + fileType))]
+            files.sort()
+
+            images = [cv2.imread(file, 0) for file in files]
 
             # determines num of planes based on num of images (should be the same across paths)
             if (i == 0): ncalplanes = len(images)
@@ -303,7 +307,7 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
             else:
                 I = imgs[j][i]
                 log.VLOG(4, 'Finding corners in preloaded image ' + str(i + 1) + ' in camera ' + str(j + 1))
-            
+
             # Find corners and refine them using OpenCV
             ret, corners = cv2.findChessboardCorners(I, (nX, nY),
                                                      flags=cv2.CALIB_CB_ADAPTIVE_THRESH | cv2.CALIB_CB_FILTER_QUADS)
