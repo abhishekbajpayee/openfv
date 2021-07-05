@@ -1016,8 +1016,7 @@ void multiCamCalibration::write_BA_data() {
     int op2 = op1+grid_size_.width-1;
     int op3 = op1+(grid_size_.width*(grid_size_.height-1));
     const_points_.push_back(op1);
-    const_points_.push_back(op2);
-    const_points_.push_back(op3);
+    const_points_.push_back(op2).push_back(op3);
 
     for (int j=0; j<imgs_per_cam; j++) {
         for (int k=0; k<points_per_img; k++) {

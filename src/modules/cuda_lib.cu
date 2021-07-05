@@ -34,9 +34,6 @@
 
 #include "cuda_lib.h"
 
-using namespace cv;
-using namespace gpu;
-
 // Constant variables on device
 __constant__ float Hinv[6];
 __constant__ float PX[9][3];

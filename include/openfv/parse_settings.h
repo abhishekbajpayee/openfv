@@ -51,5 +51,5 @@ void parse_refocus_settings(string filename, refocus_settings &settings, bool he
   \param filename Full path to configuration file
   \param settings Destination calibration_settings variable
   \param help Flag to show all options as a help menu instead of parsing data
+  */
 void parse_calibration_settings(string filename, calibration_settings &settings, bool help);
-*/

@@ -33,12 +33,14 @@
 
 #include <cv.h>
 #include <opencv2/opencv.hpp>
-#include <opencv2/gpu/gpu.hpp>
+#include <opencv2/cudaarithm.hpp>
 
 #include <iostream>
 
 using namespace cv;
-using namespace gpu;
+using namespace cuda;
+using namespace std;
+//using namespace gpu;
 
 // Types
 typedef struct {
@@ -63,8 +65,8 @@ void gpu_calc_refocus_map(GpuMat &xmap, GpuMat &ymap, float z, int i, int rows, 
 
 void gpu_calc_refocus_maps(vector<GpuMat> &xmaps, vector<GpuMat> &ymaps, float z);
 
-void gpu_calc_nlca_image_fast(vector<GpuMat> &warped, GpuMat &nlca_image, int rows, int cols, float sigma);
+void gpu_calc_nlca_image_fast(vector<GpuMat> &warped, cuda::GpuMat &nlca_image, int rows, int cols, float sigma);
 
-void gpu_calc_nlca_image(vector<GpuMat> &warped, GpuMat &nlca_image, int rows, int cols, int window, float sigma);
+void gpu_calc_nlca_image(vector<GpuMat> &warped, cuda::GpuMat &nlca_image, int rows, int cols, int window, float sigma);
 
 #endif

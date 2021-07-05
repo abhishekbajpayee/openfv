@@ -1,4 +1,7 @@
 #include "refocusing.h"
+
+// Added std_include because was getting unidentified reference error
+#include "std_include.h"
 #include "parse_settings.h"
 
 using namespace cv;
@@ -43,7 +46,7 @@ int main(int argc, char** argv) {
         dz = rec_settings.dz;
     else    
         dz = 1/scale;
-
+    VLOG(2)<<"Z spacing of "<<dz<<" units";
     refocus.dump_stack(rec_settings.save_path, rec_settings.zmin, rec_settings.zmax, dz, rec_settings.thresh, "tif");
 
     refocus.write_piv_settings(rec_settings.save_path, rec_settings.zmin, rec_settings.zmax, dz, rec_settings.thresh);

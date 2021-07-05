@@ -25,6 +25,7 @@ set (SRC_TO_BUILD ${PROJECT_SOURCE_DIR}/src/modules/refocusing.cpp
                   ${PROJECT_SOURCE_DIR}/src/modules/tools.cpp
                   ${PROJECT_SOURCE_DIR}/src/modules/parse_settings.cpp
                   ${PROJECT_SOURCE_DIR}/src/modules/rendering.cpp)
+		  #${PROJECT_SOURCE_DIR}/src/modules/calibration.cpp)
 
 if (BUILD_TRACKING)
   set (SRC_TO_BUILD ${SRC_TO_BUILD} ${PROJECT_SOURCE_DIR}/src/modules/tracking.cpp)
@@ -101,7 +102,8 @@ if(BUILD_PYTHON)
 
 endif()
 
-install(TARGETS openfv np_opencv_converter DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+#install(TARGETS openfv np_opencv_converter DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS openfv DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 if (WITH_CUDA)
   install(TARGETS cuda_openfv DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
