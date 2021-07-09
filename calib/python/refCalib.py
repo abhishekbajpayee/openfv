@@ -189,6 +189,7 @@ def parseConfigFile(configPath):
 def getCameraNames(dataPath):
     
     folders = glob.glob(os.path.join(dataPath,'calibration','*'))
+    folders.sort()
     camIDs = []
     for i in range(0,len(folders)):
         camIDs.append(os.path.basename(folders[i]))
@@ -216,7 +217,10 @@ def getCalibImages(datapath, exptpath, camNames, fileType):
         for i in range(0,ncams):
             #create and read images
             imagepath = os.path.join(datapath,'calibration',camNames[i])
-            images = [cv2.imread(file, 0) for file in glob.glob(os.path.join(imagepath,'*'+fileType))]
+
+            files = [file for file in glob.glob(os.path.join(imagepath, '*' + fileType))]
+            files.sort()
+            images = [cv2.imread(file, 0) for file in files]
             
             #determines num of planes based on num of images (should be the same across paths)
             if(i ==0): ncalplanes = len(images) 
