@@ -149,7 +149,7 @@ def parseConfigFile(configPath):
     dY = p.getint('dY')
     nX = p.getint('nX')
     nY = p.getint('nY')
-    zC = p.getint('zC')
+    zC = p.getfloat('zC')
     z0 = zC*np.linspace(0,1,nCalPlanes)
     scaleInfo = [p.getint('centerCamID')-1, p.getint('centerImgIndex')-1]
     pData = planeData(dX,dY,nX,nY,nCalPlanes,fileType, z0, scaleInfo)
