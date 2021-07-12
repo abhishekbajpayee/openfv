@@ -56,6 +56,11 @@ piv3D::piv3D(string resultFile) {
 
 }
 
+/**
+ * piv3D::add_frame
+ *
+ * @param mats
+ */
 void piv3D::add_frame(vector<Mat> mats) {
 
     VLOG(1)<<"Adding frame...";
@@ -80,6 +85,12 @@ void piv3D::add_frame(vector<Mat> mats) {
 
 }
 
+/**
+ * piv3D::run
+ *
+ * @param l
+ * @param overlap
+ */
 void piv3D::run(int l, double overlap) {
 
     wx_ = l; wy_ = l; wz_ = l;
@@ -97,6 +108,13 @@ void piv3D::run(int l, double overlap) {
 
 }
 
+/**
+ * piv3D::run_pass
+ *
+ * @param winx
+ * @param winy
+ * @param winz
+ */
 void piv3D::run_pass(vector< vector<int> > winx, vector< vector<int> > winy, vector< vector<int> > winz) {
 
     double *i1, *i2, *i3;
@@ -142,6 +160,16 @@ void piv3D::run_pass(vector< vector<int> > winx, vector< vector<int> > winy, vec
 
 }
 
+/**
+ * piv3D::get_velocity_vector
+ *
+ * @param a
+ * @param x
+ * @param y
+ * @param z
+ * @param maxval
+ * @return
+ */
 // TODO: z velocity is incorrect and needs to be handled
 vector<int> piv3D::get_velocity_vector(double *a, int x, int y, int z, double &maxval) {
 
@@ -172,7 +200,16 @@ vector<int> piv3D::get_velocity_vector(double *a, int x, int y, int z, double &m
 
 }
 
-// Cross correlation function for complex inputs and outputs
+/**
+ * piv3D::crossex3D - Cross correlation function for complex inputs and outputs
+ *
+ * @param a
+ * @param b
+ * @param out
+ * @param x
+ * @param y
+ * @param z
+ */
 void piv3D::crossex3D(fftw_complex *a, fftw_complex *b, fftw_complex* &out, int x, int y, int z) {
 
     int n = x * y * z;
@@ -198,10 +235,19 @@ void piv3D::crossex3D(fftw_complex *a, fftw_complex *b, fftw_complex* &out, int 
 
 }
 
-// Cross correlation function for real inputs and output
-// NOTE: The cross correlation function returns a result that is shifted by half
-// the window size so needs to be taken care of when peak is calculated to find
-// velocity. TODO: Look into whether this is convention or not.
+/**
+ * piv3D::crossex3D - Cross correlation function for real inputs and output
+ *      NOTE: The cross correlation function returns a result that is shifted by half
+ *      the window size so needs to be taken care of when peak is calculated to find
+ *      velocity. TODO: Look into whether this is convention or not.
+ *
+ * @param a
+ * @param b
+ * @param out
+ * @param x
+ * @param y
+ * @param z
+ */
 void piv3D::crossex3D(double *a, double *b, double* &out, int x, int y, int z) {
 
     int n = x * y * (z/2 +1);
@@ -233,7 +279,18 @@ void piv3D::crossex3D(double *a, double *b, double* &out, int x, int y, int z) {
 
 }
 
-// Cross correlation function for real inputs and output based on plan (use for batch fft)
+/**
+ * piv3D::crossex3D - Cross correlation function for real inputs and output based on plan (use for batch fft)
+ *
+ * @param a
+ * @param b
+ * @param out
+ * @param x
+ * @param y
+ * @param z
+ * @param r2c
+ * @param c2r
+ */
 void piv3D::crossex3D(double *a, double *b, double* &out, int x, int y, int z, fftw_plan r2c, fftw_plan c2r) {
 
     int n = x * y * (z/2 +1);
@@ -262,7 +319,14 @@ void piv3D::crossex3D(double *a, double *b, double* &out, int x, int y, int z, f
 
 }
 
-// Multiply complex volume 1 element wise with complex conjugate of complex volume 2
+/**
+ * piv3D::multiply_conjugate - Multiply complex volume 1 element wise with complex conjugate of complex volume 2
+ *
+ * @param a
+ * @param b
+ * @param out
+ * @param n
+ */
 void piv3D::multiply_conjugate(fftw_complex *a, fftw_complex *b, fftw_complex*& out, int n) {
 
     // multiplying the complex conjugate of a with b
@@ -273,7 +337,12 @@ void piv3D::multiply_conjugate(fftw_complex *a, fftw_complex *b, fftw_complex*& 
 
 }
 
-// Normalize complex volume
+/**
+ * piv3D::normalize - Normalize complex volume
+ *
+ * @param a
+ * @param n
+ */
 void piv3D::normalize(fftw_complex*& a, int n) {
 
     for (int i = 0; i < n; i++) {
@@ -282,7 +351,12 @@ void piv3D::normalize(fftw_complex*& a, int n) {
 
 }
 
-// Normalize real volume
+/**
+ * piv3D::normalize - Normalize real volume
+ *
+ * @param a
+ * @param n
+ */
 void piv3D::normalize(double*& a, int n) {
 
     for (int i = 0; i < n; i++)
@@ -290,7 +364,14 @@ void piv3D::normalize(double*& a, int n) {
 
 }
 
-// Output real volume
+/**
+ * piv3D::print3D - Output real volume
+ *
+ * @param a
+ * @param x
+ * @param y
+ * @param z
+ */
 void piv3D::print3D(double *a, int x, int y, int z) {
 
     for (int k = 0; k < z; k++) {
@@ -312,7 +393,14 @@ void piv3D::print3D(double *a, int x, int y, int z) {
 
 }
 
-// Output complex volume
+/**
+ * piv3D::print3D - Output complex volume
+ *
+ * @param a
+ * @param x
+ * @param y
+ * @param z
+ */
 void piv3D::print3D(fftw_complex *a, int x, int y, int z) {
 
     for (int k = 0; k < z; k++) {
@@ -328,7 +416,12 @@ void piv3D::print3D(fftw_complex *a, int x, int y, int z) {
 
 }
 
-// Shift levels of real volume so mean is zero
+/**
+ * piv3D::mean_shift - Shift levels of real volume so mean is zero
+ *
+ * @param a
+ * @param n
+ */
 void piv3D::mean_shift(double*& a, int n) {
 
     double sum = 0;
@@ -344,6 +437,9 @@ void piv3D::mean_shift(double*& a, int n) {
 
 }
 
+/**
+ * piv3D::batch_test
+ */
 void piv3D::batch_test() {
 
     int N = 32;
@@ -400,8 +496,14 @@ void piv3D::batch_test() {
 
 }
 
-// Generate list of window bounds given total size, window size
-// and overlap
+/**
+ * piv3D::get_windows - Generate list of window bounds given total size, window size and overlap
+ *
+ * @param s
+ * @param w
+ * @param overlap
+ * @return
+ */
 vector< vector<int> > piv3D::get_windows(int s, int w, double overlap) {
 
     vector< vector<int> > outer;
@@ -423,11 +525,23 @@ vector< vector<int> > piv3D::get_windows(int s, int w, double overlap) {
 }
 
 // Container to store stack of Mats as 3D volume
+// TODO why is this function empty?
 Mat3::Mat3(vector<Mat> volume): volume_(volume) {
 
 }
 
-// Return subvolume from Mat3 volume as pointer array
+/**
+ * Mat3::getWindow - Return subvolume from Mat3 volume as pointer array
+ *
+ * @param x1
+ * @param x2
+ * @param y1
+ * @param y2
+ * @param z1
+ * @param z2
+ * @param win
+ * @param zero_padding
+ */
 void Mat3::getWindow(int x1, int x2, int y1, int y2, int z1, int z2, double*& win, int zero_padding) {
 
     int nx = x2 - x1 + 1; int ny = y2 - y1 + 1; int nz = z2 - z1 + 1;
