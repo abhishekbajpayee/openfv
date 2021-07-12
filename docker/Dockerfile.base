@@ -97,7 +97,8 @@ ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH \
     PATH=$CONDA_DIR/bin:$PATH \
     HOME=/home/$NB_USER
 
-ADD fix-permissions /usr/local/bin/fix-permissions
+COPY fix-permissions /usr/local/bin/fix-permissions
+RUN chmod a+rx /usr/local/bin/fix-permissions
 
 # Install OpenCV
 RUN git clone https://github.com/opencv/opencv.git && \
@@ -111,6 +112,11 @@ RUN cd opencv && mkdir build && cd build && cmake \
 	.. && make -j3 && make install && \
 	# Can't build with CUDA, but code requires CUDA to compile so we're using the include file in the repo
 	cp ../modules/cudaarithm/include/opencv2/cudaarithm.hpp /usr/local/include/opencv2
+
+# Add, run, and remove dos2unix to enable builds from linux or Windows docker engine
+RUN apt-get update && apt-get install -y dos2unix
+RUN dos2unix /usr/local/bin/fix-permissions && \
+    apt-get --purge remove -y dos2unix && rm -rf /var/lib/apt/lists
 
 # Create jovyan user with UID=1000 and in the 'users' group
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \

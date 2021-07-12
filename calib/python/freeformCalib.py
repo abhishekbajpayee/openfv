@@ -17,47 +17,21 @@ import argparse
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
 
-#Pseudocode:
-# parse config file, get calibration images, get camera IDs, perform variable setups
-# 
-# find chessboard corners in all images and store them in variable called cor_all
-#
-# create "real world" coordinates using grid spacing and number of corners
-#
-# line up real world coordinates with corner of checkerboard image?
-#       use planar_grid to world?
-#       now have object points and image points
-#
-# perform single camera calibration:
-#   cycle through all images in the camera
-#   create an initial camera matrix using object and image points
-#       use initCameraMatrix2D in opencv
-#   find rotation and translation vectors for each checkerboard
-#       store in a matrix in order
-#
-# perform multi camera calibration:
-#   get first estimate of R and t for each camera
-#       find rotation and translation vector for all checkerboard placements in two cameras, repeat for all camera pairings
-#           put all points into [ x1 y1; x2 y2] order and store into matrices P and Q (corresponding to each camera)
-#           calculate matrix H s.t H = P(^T)Q using summing notation
-#           calculate SVD of matrix H
-#           get R back by plugging V and U into a formula, giving us R^(P->Q)
-#           get t by solving rigid body motion equation, giving us t^(P->Q)
-#       for each camera, take a pairing(?) and solve a minimazation for t^P and R^P ??? appendix B doesn't make sense
-#   estimate all checkerboard positions by averaging all camera's rot and trans vector for a checkerboard position
-#   compute final K, R, and t for all cameras by minimizing reprojection error using our estimates
-#  
-
-
 def singleCamCalib(umeas, xworld, planeData, cameraData):
-    #Inputs:
-    # umeas is 2 x nX*nY*nplanes x ncams array of image points in each camera
-    # xworld is 3 x nX*nY*nplanes of all world points
-    #
-    #Outputs:
-    # cameraMats     - 3 x 3 x ncams that holds all camera calibration matrices
-    # boardRotMats   - 3 x 3 x nplanes x ncams for each boar d in each camera
-    # boardTransVecs - 3 x nplanes x ncams for each board in each camera
+    """
+    Inputs
+    -------------------------------------------
+    umeas              2 x nX*nY*nplanes x ncams array of image points in each camera
+    xworld             3 x nX*nY*nplanes matrix of all world points
+    planeData          struct of image related parameters
+    cameraData         struct of camera related parameters
+    
+    Returns
+    -------------------------------------------
+    cameraMats         3 x 3 x ncams: camera matrices for individual cameras
+    boardRotMats       3 x 3*nplanes x ncams: board rotation matrix per image per camera 
+    boardTransVecs     3 x nplanes x ncams: board translational vector per image per camera
+    """
 
     log.info("Single camera calibrations")
 
@@ -92,7 +66,7 @@ def singleCamCalib(umeas, xworld, planeData, cameraData):
             currWorld = xworld[:, nX*nY*n: nX*nY*(n+1)]
             currImage = umeas[:, nX*nY*n: nX*nY*(n+1), i]
 
-            # find the board's rotation and translation vector
+            # find the board's rotation matrix and translation vector
             _, rotMatrix, transVector = solvePnP(currWorld, currImage, camMatrix, np.zeroes((8,1), dtype='float32')) 
             log.VLOG(4, "Rotation matrix for camera %d image %d: %s", i, n, rotMatrix)
             log.VLOG(4, "Translational vector for camera %d image %d: %s", i, n, transVector)
@@ -108,6 +82,10 @@ def singleCamCalib(umeas, xworld, planeData, cameraData):
 
 """
 def kabsch(X1, X2):
+    """Return pairwise rotation matrix and translation vector by 
+       computing the cross-covariance matrix given two set of world points.
+    """
+    
     # X1: The world coordinates of the first camera stacked as columns.
     # X2: The world coordinates of the second camera stacked as columns.
     x1m = X1.mean(axis = 1)
@@ -131,7 +109,9 @@ def kabsch(X1, X2):
     return R_12, t_12
 
 def quaternionToRotMat(q):
-    # q is a 1 x 4 array.
+    """Convert 1 x 4 quaternion to a 3 x 3 rotation matrix.
+       (Unclear what quaternions correspond to)
+    """
     
     normalizationFactor = np.dot(q, q)
     
@@ -145,7 +125,26 @@ def quaternionToRotMat(q):
     return R                                
 
 
-def multiCamCalib(boardRotMats, boardTransVecs, planeData, cameraData):
+def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, planeData, cameraData):
+    """Compute the calibrated camera matrix, rotation matrix, and translation vector for each camera.
+    
+    Inputs
+    -------------------------------------------
+    umeas              2 x nX*nY*nplanes x ncams array of image points in each camera
+    xworld             3 x nX*nY*nplanes of all world points
+    cameraMats         3 x 3 x ncams that holds all camera calibration matrices; first estimated in single camera calibration
+    boardRotMats       3 x 3*nplanes x ncams for each board in each camera; from single camera calibration.
+    boardTransVecs     3 x nplanes x ncams for each board in each camera; from single camera calibration
+    planeData          struct of image related parameters
+    cameraData         struct of camera related parameters
+    
+    Returns
+    -------------------------------------------
+    cameraMats         3 x 3 x ncams; final estimate of the camera matrices
+    rotationMatsCam    3 x 3 x ncams; final estimate of the camera rotation matrices
+    transVecsCam       3 x ncams; final estimate of the camera translational vectors
+    """
+    
     # loop over all camera pairs
     # call kabsch on each pair
     # store rotation matrices and translational vectors
@@ -225,11 +224,22 @@ def multiCamCalib(boardRotMats, boardTransVecs, planeData, cameraData):
     constraint_array = np.zeros([3*ncams, 3*ncams])
     constraint_array[0:3, 0:3] = np.eye(3)
 
-    # Solve the minimization, requiring the first translational vector to be the zero vector
-    # TODO: figure out what x0 should be
+    # Solve the minimization, requiring the first translational vecotr to be the zero vector
     
-    x0 = np.ones(3*ncams)
-    x0[0:3] = np.zeros(3)
+    # Initialize camera positions assuming the first camera is at the origin and the cameras
+    # are uniformly spaced by horizontal a displacement vector and a vertical vector such as in
+    # a rectangular grid of the dimensions to be specified.
+    cam_hspacing = np.array([1, 0 ,0])
+    cam_vspacing = np.array([0, 1 ,0])
+    cam_num_row = 3
+    cam_num_col = 3
+    
+    x0 = np.zeros(3*ncams)
+    for i in range(cam_num_row):
+        for j in range(cam_num_col):
+            cam_index = i*cam_num_col + j
+            x0[3*cam_index: 3*(cam_index + 1)] = i * cam_vspacing + j * cam_vspacing
+
     res = scipy.optimize.minimize(lambda (x) np.matmult(A, x) - b, x0,
                             constraints=(scipy.minimize.LinearConstraint(constraint_array, np.zeros(3*ncams), np.zeros(3*ncams))))
     if res.success:
@@ -275,11 +285,12 @@ def multiCamCalib(boardRotMats, boardTransVecs, planeData, cameraData):
     bound[4] = 1
     bound[8] = 1
     
-    x0 = np.ones(9*ncams)
-    x0[0:9] = np.zeros(9)
-    x0[0] = 1
-    x0[4] = 1
-    x0[8] = 1
+    # Initialize all rotation matrices to identities assuming no camera is rotated with respect to another.
+    x0 = np.zeroes(9*ncams)
+    for i in range(ncams):
+        x0[9*i] = 1
+        x0[9*i + 4] = 1
+        x0[9*i + 8] = 1
     
     # Solve the minimization, requiring the first rotation matrix to be the identity matrix
     # TODO: figure out (if possible) a better initial guess
@@ -309,183 +320,158 @@ def multiCamCalib(boardRotMats, boardTransVecs, planeData, cameraData):
         log.VLOG(3, 'Average rotation matrix for Image %d = \n %s' % (i, R_vals[:, :, i]))
     for i in range(t_images.shape[1]):
         log.VLOG(3, 'Average translation vector for Image %d = \n %s' % (i, R_vals[:, :, i]))
+    ####################### Final Minimization to Yield All Parameters######################
     
+    # K_c, R_c, R_n, t_c, t_n.
     
+    # Pack all matrices into a very tall column vector for minimization
+    min_vec_ini = np.append(cameraMats.reshape((-1), order = 'F'),
+                            np.append(R_vals.reshape((-1), order = 'F')),
+                            np.append(R_images.reshape((-1), order = 'F')),
+                            np.append(t_vals.reshape((-1), order = 'F'), t_images.reshape((-1), order = 'F')))
+    
+    # Helper function that reduces the number of parameters to one, in order to use scipy minimize.
+    def reprojection_min_fxn(min_vec):
+        return reproj_min_func(planeData, cameraData, minVec)
+    
+    reproj_res = scipy.optimize.minimize(reprojection_min_fxn, min_vec_ini)
+    
+    if reproj_res.success:
+        cameraMats, rotationMatsCam, rotationMatsBoard, transVecsCam, transVecsBoard = unpack_reproj_min_vector(reproj_res.x)
+    else:
+        print('Reprojection Minimization Failed!')
+    
+    return cameraMats, rotationMatsCam, transVecsCam
 
-def multiCamCalib1(umeas, xworld, camMatrix, boardRotMat, boardTransVec, planeData, cameraData):
-
-    # set up implementation variables
+    
+def reproj_min_func(planeData, cameraData, min_vec):
+    """Total error function to be minimized for the final estimates of camera, rotation, and translation matrices.
+    Input
+    ------------------------
+    min_vec         The compact flattened vector storing K_c, R_c, R_n, t_c, t_n in sequence.
+    
+    Returns
+    ------------------------
+    sum_of_error    Total error under the current estimate.
+    """
     nX = planeData.nX
     nY = planeData.nY
+    ncams = cameraData.ncams
     nplanes = planeData.ncalplanes
-    ncams = camreaData.ncams
+    
+    # Total error of reprojections.
+    sum_of_err = 0
+    cameraMatrices, rotationMatricesCam, rotationMatricesBoard, transVecsCam, transVecsBoard = unpack_reproj_min_vector(min_vec)
+    for c in range(ncams):
+        camMat = cameraMatrices[:, :, c]
+        rotMatCam = rotationMatricesCam[:, :, c]
+        transVecCam = transVecsCam[:, c]
+        for n in range(nplanes):
+            rotMatBoard = rotationMatricesBoard[:, :, n]
+            transVecBoard = transVecsBoard[:, n]
+            for i in range(nX):
+                for j in range(nY):
+                    # isolate only points related to this board's placement
+                    img_coor = umeas[:, n*nX*nY + i + j, c]
+                    world_coor = xworld[:, nX*nY*n + i + j]
+                    sum_of_err = sum_of_err + (reproj_error(normal_factor, img_coor, world_coor, camMat, rotMatCam, rotMatBoard, transVecCam, transVecBoard))**2
+    return sum_of_error
+                        
 
-    # set up storage variables
-    Rpq = np.zeroes([3, 3, ncams, ncams-1]) # this way [:,:, 0, 1] holds R^(0,1)
-    tpq = np.zeroes([3, 1, ncams, ncams-1])
+def unpack_reproj_min_vector(cameraData, planeData, min_vec):
+    """ Unpacks minimized column vector into K_c, R_c, R_n, t_c, t_n.
+    
+    Input
+    --------------------
+    min_vec     9*ncams + 9*ncams + 9*nimgs + 3*ncams + 3*nimgs x 1
 
-    # loop through all possible pairs of cameras
-    for p in range(0, ncams):
-        for q in range(p+1, ncams):
-            # set up P matrix, which holds all image points in camera p
-            pX = umeas[0, :, p]
-            pY = umeas[1, :, p]
-            pZ = np.zeroes(nX*nY*nplanes)
-            P = np.concatenate((pX,pY,pZ)).reshape((-1,3),order='F') # stacks as column vectors in format [x y z]
+    Returns
+    --------------------
+    cameraMatrices              3 x 3 x ncams: camera matrices for individual cameras
+    rotationMatricesCam         3 x 3 x ncams: rotation matrix per camera
+    rotationMatricesBoard       3 x 3 x nplanes: rotation matrix per image
+    transVecCam                 3 x ncams: translational vector per camera
+    transVecBoard               3 x nplanes: translational vector per image
+    """
+    nplanes = planeData.ncalplanes
+    ncams = cameraData.ncams
+    
+    # Set up storage variable for extraction
+    cameraMatrices = np.zeros((3, 3, ncams))
+    rotationMatricesCam = np.zeros((3, 3, ncams))
+    rotationMatricesBoard = np.zeros((3, 3, nplanes))
+    transVecsCam = np.zeros((3, ncams))
+    transVecsBoard = np.zeros((3, nplanes))
 
-            # set up Q matrix, which holds all image points in camera q
-            qX = umeas[0, :, q]
-            qY = umeas[1, :, q]
-            qZ = np.zeroes(nX*nY*nplanes)
-            Q = np.concatenate((qX,qY,qZ)).reshape((-1,3),order='F')
+    # Keep track of offset in indexing into min_vec
+    min_vec_counter = 0
 
-            # compute matrix H as product of P^T and Q
-            H = np.matmul(np.transpose(P), Q)
-
-            # perform svd on matrix H 
-            U, S, VTrans = np.linalg.svd(H, full_matrices=True) 
-
-            # calculates variable to correct rotation matrix if necessary
-            UTrans = np.transpose(U)
-            V = np.transpose(VTrans)
-            d = np.det(np.matmul(V, UTrans))
-
-            # calculates optimal rotation matrix R^(p, q)
-            I = np.eye(3)
-            I[2,2] = d
-            tempRpq = np.matmul(np.matmul(V, I), UTrans) 
-
-            # having Rpq, use rigid body motion eq to get t^(p,q)
-            temptpq = Q[0,:] - np.matmul(tempRpq, P[0,:])
-
-            # store in storage variables
-            Rpq[:,:,p,q] = tempRpq
-            tpq[:,:,p,q] = temptpq
-
-    # now that we have all R^(p,q) and t^(p,q), we can setup to solve linear least squares problem
-
-    ######## camera translation ######## 
-    # create empty python list A and b that we will append to 
-    listA = []
+    # Extract camera matrices
     for i in range(ncams):
-        listA.append([None for x in range(ncams)])
-    listb = listA.copy() # creates shallow copy
-
-    # loop through our camera pairings, filling up A and b lists in order (q, p)
-    for q in range(ncams):
-        for p in range(ncams):
-            matA = np.zeroes([3,3*ncams])
-            matb = np.zeroes([3,1])
-            tempRpq = Rpq[:,:, p, q]
-            temptpq = tpq[:, :, p, q]
-
-            matA[:, 3*(q-1):3*q] = -tempRpq
-            matA[:, 3*(p-1):3*p] = np.eye(3)
-            matb = temptpq
-
-            # append these to listA and listb
-            listA.append(matA)
-            listb.append(matb)
-
-    # convert A list into a matrix 
-    A = listA[0]
-    listA = listA[1:]
-    for e in listA:
-        A = np.append(A, e, axis=1)
-
-    # convert b list into a matrix 
-    b = listb[0]
-    listb = listb[1:]
-    for e in listb:
-        b = np.append(b, e, axis=1)
-
-    # TODO: FIGURE OUT HOW TO DO THIS
-    # define constraint t^1 = 0
-    C = np.eye(3, np.size(A, 1)) #B: this could be 2 but matlab indexes at 1 so we will see
-    d = np.zeroes([3,1])
-    cons1 = lambda x: sum(d - C*x)
-    cons = { type:"eq", fun:cons1}
-
-    # solve linear least-squares problem with no bounds and defined constraints
-    fun1 = lambda x: 0.5* ??????
-    res = scipy.optimize.minimize(fun1, x0, args=(), method='SLSQP',jac=None,hess=None,hessp=None, bounds=None,constraints=cons) 
-
-    # save all translation vectors in variable tVec
-    tVec = res.x
-
-    ######### camera rotation ######### 
-    # create empty python list A that we will append to
-    listA = []
+        cameraMatrices[:, :, i] = min_vec[9*i: 9*(i+1)].reshape((3, 3))
+    min_vec_counter = 9*ncams
+    
+    # Extract rotation matrices for cameras
     for i in range(ncams):
-        listA.append([None for x in range(ncams)])
-
-    # loop through camera pairings, filling up A list in order (q, p)
-    for q in range(ncams):
-        for p in range(ncams):
-            matA = np.zeroes([9, 9*ncams])
-            matA[:, 9*(q-1):9*q] = np.eye(9)
-
-            tempRqp = Rpq[:,:, p, q]
-
-            matA[:, 9*(p-1):9*p] = -np.kron(np.eye(3), tempRqp)
-
-    # convert A list into a matrix 
-    A = listA[0]
-    listA = listA[1:]
-    for e in listA:
-        A = np.append(A, e, axis=1)
-
-    # create matrix b 
-    b = np.zeroes([size(A,0), 1)] #B: another axis that might be 1 instead of 0
-
-    # define constraints that fix global frame to first view
-    C2 = np.eye([9, 9*ncams])
-    d2 = np.reshape(np.eye(3), (-1, 1))
-    cons2 = lambda x: sum(d2 - C2*x)
-    cons = { type:"eq", fun:cons2}
-
-    # define fun and solve linear least-squares
-    fun2 = lambda x: 0.5 * np.norm(sum(A*x - b)) # this does Frobenius norm; do I have to square it now?
-    res = scipy.optimize.minimize(fun2, x0, args=(), method='SLSQP',jac=None,hess=None,hessp=None, bounds=None,constraints=cons) 
-
-    # save all rotations in variable Rmat
-    Rmat = res.x
-
-    ######### checkerboard world positions ######## 
-    # for each calib image, estimate position R^n and t^n in world coordinate system
-
-    # set up storage variables
-    #avgBoardRotMat = np.zeroes([3, 3*ncalplanes, ncams]) # so avgBoardRotMat[:,0:3,:] has all the images checkerboard placement 1
-    #avgBoardTransVec = np.zeroes([3, ncalplanes, ncams])
-    avgBoardRotMat = np.zeroes([3, 3*ncalplanes]) # so avgBoardRotMat[:,0:3] has all the images checkerboard placement 1
-    avgBoardTransVec = np.zeroes([3, ncalplanes])
-
-    # iterate through each plane in each camera, effectively hitting all images
-    for n in range(0, ncalplanes):
-        tempRotAvg = boardRotMat[:, 3*n:3*(n+1), 0]
-        tempTransAvg = boardTransVec[:, n:(n+1), 0]
-
-        for c in range(0, ncams):
-            # add up rotational matrices and board vectors
-            tempRotMat = boardRotMat[:, 3*n:3*(n+1), c]
-            tempTransVec = boardTransVec[:, 3*n:3*(n+1), c]
-
-            tempRotAvg = np.add(tempRotAvg, tempRotMat)
-            tempTransAvg = np.add(tempTransAvg, tempTransVec)
-
-        # divide by total number of cameras ncams to get average 
-        tempRotAvg = tempRotAvg/ncams
-        tempTransAvg = tempTransAvg/ncams
-
-        # place into storage variables
-        avgBoardRotMat[:, 3*n:3*n+1] = tempRotAvg
-        avgBoardTransVec[:,n:(n+1)] = tempTransAvg
+        rotationMatricesCam[:, :, i] = min_vec[min_vec_counter + 9*i: min_vec_counter + 9*(i+1)].reshape((3, 3))
+    min_vec_counter = min_vec_counter + 9*ncams
+    
+    # Extract rotation matrices for images
+    for i in range(nplanes):
+        rotationMatricesBoard[:, :, i] = min_vec[min_vec_counter + 9*i: min_vec_counter + 9*(i+1)].reshape((3, 3))
+    min_vec_counter = min_vec_counter + 9*nplanes
+    
+    # Extract translation vectors for cameras
+    for i in range(ncams):
+        transVecsCam[:, i] = min_vec[min_vec_counter + 3*i: min_vec_counter + 3*(i+1)]
+    min_vec_counter = min_vec_counter + 3*ncams
+    
+    # Extract rotation matrices for images
+    for i in range(nplanes):
+        transVecsBoard[:, i] = min_vec[min_vec_counter + 3*i: min_vec_counter + 3*(i+1)]
+    min_vec_counter = min_vec_counter + 3*nplanes
+    
+    return cameraMatrices, rotationMatricesCam, rotationMatricesBoard, transVecsCam, transVecsBoard
+    
+    
+def proj_red(ray_trace_vec, k):
+    """Reduce an augmented 3D image vector, the ray tracing vector, to the image position.
+    """
+    return np.array([[ray_trace_vec[0], ray_trace_vec[1]]]).transpose()/k
 
 
-    ########## reprojection error ########## 
-
-    for n in range(0, ncalplanes):
-        for c in range(0, ncams):
+def reproj_error(normal_factor, img_coor, world_coor, camMatrix, rotMatrixCam, rotMatrixBoard, transVecCam, transVecBoard):
+    """Compute the reprojection error term for a given pair of camera and image. See paper (Muller 2019) formula (6).
+    
+    Inputs
+    -----------------------------------
+    normal_factor               normalized area in pixels of a checkerboard tile
+    img_coor                    image coordinate, from umeas
+    world_coor                  world coordinate
+    cameraMatrix                3 x 3: camera matrix for this camera
+    rotMatricesCam              3 x 3: rotation matrix for this camera
+    rotMatricesBoard            3 x 3: rotation matrix for this image
+    transVecCam                 3: translational vector for this camera
+    transVecBoard               3: translational vector for this image
+    
+    Returns
+    ------------------------------------
+    the reprojection error
+    """
+    
+    # TODO scaling paramter k for principal optical axis assumed here.
+    
+    # [R_c t_c].
+    transMatCam = np.column_stack((rotMatrixCam, transVecCam))
+    # Corresponds to eq(6) in Muller paper. 4x4 matrix with image rot matrices and trans vectors
+    transMatImg = np.column_stack((rotMatrixBoard, transVecBoard))
+    rowToAdd = np.zeros(4)
+    rowToAdd[3] = 1
+    transMatImg = np.row_stack((transMatImg, rowToAdd))
+    aug_world_coor = np.row_stack((world_coor, np.array([[1]])))
+    
+    # Compute matrix multiplication
+    product = np.matmul(camMatrix, np.matmul(transMatCam, np.matmul(tansMatImg, aug_world_coor)))
 
     # find the average size of each grid in pixels
     return []
@@ -526,3 +512,5 @@ if __name__ == "__main__":
     # TODO: Change saved data according to waht multiCamCalib returns (we should probably try to make it return these though)
     #f = saveCalibData(exptPath, camIDs, P, camParams, Xworld, planeParams, sceneData,cameraData, planeData, errorLog, pix_phys, 'results_')
     #print('\nData saved in '+str(f))
+    # Compute reprojection error term.
+    # return 1/np.sqrt(normal_factor)*np.sqrt(np.sum((img_coor - proj_red(product))**2))
