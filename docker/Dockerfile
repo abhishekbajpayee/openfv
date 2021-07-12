@@ -27,7 +27,7 @@ FROM openfv/openfv-base
 RUN apt-get update -qq && apt-get install libboost-all-dev -y
 
 # Install openfv
-RUN git clone https://github.com/bpaez/openfv.git && \
+RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
 	#apt-get update -qq && apt-get install libboost-all-dev -y && \
         cd openfv && \
         ./configure && cd bin && \
