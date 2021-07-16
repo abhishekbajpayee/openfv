@@ -1,21 +1,19 @@
 # %matplotlib notebook
+import argparse
+import configparser
+import glob
+import math
 import os
 import sys
-import glob
+import time
+from statistics import mean
+
+import cv2
+import matplotlib.pyplot as plt
 # import tiffcapture as tc #using jpg for now
 import numpy as np
-import cv2
 import numpy.linalg as lin
-import math
-import itertools
-import warnings
 import scipy.optimize
-import matplotlib.pyplot as plt
-import time
-import configparser
-import argparse
-from statistics import mean
-from mpl_toolkits.mplot3d import Axes3D
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
@@ -273,7 +271,8 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
         if len(cams) < ncams:
             if not any(cams):
                 raise Exception(
-                    "Folder containing calibration image folders not found or empty. It should be named 'calibration' and located in " + path)
+                    "Folder containing calibration image folders not found or empty. It should be named 'calibration' "
+                    "and located in " + path)
             else:
                 raise Exception("Not enough camera folders in calibration folder.")
     else:
