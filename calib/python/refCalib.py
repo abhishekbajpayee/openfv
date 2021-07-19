@@ -1287,13 +1287,13 @@ def selfCalibrate (umeas, pData, camData, scData, tols, bounded):
     planeParams = setupPlanes(ncalplanes,z0)
     
     # generate locations of the points on each plane
-    # if even, set up so we get right amount of points
+    # if even, set up so we get right amount of points and center
     if (nx%2==0):
-        xvec = np.arange(-(math.floor(nx/2))+1,math.floor(nx/2)+1)
+        xvec = np.arange(-(math.floor(nx/2))+1,math.floor(nx/2)+1)-0.5
     else:
         xvec = np.arange(-(math.floor(nx/2)),math.floor(nx/2)+1)
     if (ny%2==0): 
-        yvec = np.arange(-(math.floor(ny/2))+1,math.floor(ny/2)+1)
+        yvec = np.arange(-(math.floor(ny/2))+1,math.floor(ny/2)+1)-0.5
     else:
         yvec= np.arange(-(math.floor(ny/2)),math.floor(ny/2)+1)
     xphys       = dx*xvec
