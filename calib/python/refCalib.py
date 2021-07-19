@@ -1410,7 +1410,7 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
     # World Points of Camera
     # ------------------------------------------
     # Refractive as Boolean
-    # zW n1 n2 n3 tW
+    # zW tW n1 n2 n3
     #
     # dX dY nX nY
     # so f zC
@@ -1440,8 +1440,8 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
             f.write(str(worldPoints[0]) +' '+ str(worldPoints[1]) +' '+
                     str(worldPoints[2])+'\n')
         f.write('1\n') #Refractive or not
-        f.write(str(scdata.zW) +' '+ str(scdata.n[0]) +' '+ str(scdata.n[1]) +' '+ 
-                str(scdata.n[2]) +' '+ str(scdata.tW)+'\n')
+        f.write(str(scdata.zW) +' '+ str(scdata.tW) +' '+ str(scdata.n[0]) +' '+ 
+                str(scdata.n[1]) +' '+ str(scdata.n[2])+'\n')
         f.write('\n'+str(planeData.dX) +' '+ str(planeData.dY) +' '+
                str(planeData.nX) +' '+ str(planeData.nY)+'\n')
         f.write(str(camData.so) +' '+ str(camData.f) +' '+ str(planeData.z0[-1]) +'\n')
