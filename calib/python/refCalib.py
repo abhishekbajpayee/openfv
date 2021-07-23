@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import time
 import configparser
 import argparse
+import copy
 from statistics import mean
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -841,7 +842,7 @@ def img_refrac(XC,X,spData,rTol):
     
     # solve the refractve equations (snell's law) for the length of the ray in each medium
     if t==0: # no wall thickness -> no ray in wall
-        rB = rP
+        rB = copy.copy(rP)
         #indices of out-of-tank and in-tank points
         i1 = np.array([x for x in range (Npts) if z3[x] ==0])
         i2 = np.array([x for x in range (Npts) if z3[x] not in i1])
@@ -864,8 +865,8 @@ def img_refrac(XC,X,spData,rTol):
            warnings.warn('Warning: f has a NaN',stacklevel=2)
             
     elif t > 0:
-        rB = rP
-        rD = rP
+        rB = copy.copy(rP)
+        rD = copy.copy(rP)
 
         #indices of out-of-tank and in-tank points
         i1 = np.array([x for x in range (Npts) if z3[x] < rTol.z3_tol])
