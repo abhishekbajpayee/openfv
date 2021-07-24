@@ -222,7 +222,7 @@ def getCalibImages(datapath, exptpath, camNames, fileType):
     # find calibration files to use
     ncams = len(camNames)
 
-    if (fileType == '.jpg'):
+    if fileType == '.jpg':
         ical = []
         ncalplanes = 0
 
@@ -234,7 +234,8 @@ def getCalibImages(datapath, exptpath, camNames, fileType):
             images = [cv2.imread(file, 0) for file in files]
 
             # determines num of planes based on num of images (should be the same across paths)
-            if (i == 0): ncalplanes = len(images)
+            if i == 0:
+                ncalplanes = len(images)
 
             ical.append(images)
     else:
@@ -259,7 +260,7 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
     # Outputs:
     # cor_all           - 2 by nX*nY*ncalplanes by ncams array of corner coordinates
     # saved corners.dat file containing corner coordinates on path if save_corners is true
-    
+
     ncalplanes = pData.ncalplanes
     nX, nY = pData.nX, pData.nY
 
@@ -310,7 +311,7 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
             cv2.cornerSubPix(I, corners, (10, 10), (-1, -1), criteria)
 
             # Check number of found corners, print error statement if not found
-            if (ret and len(corners) == nX * nY):
+            if ret and len(corners) == nX * nY:
 
                 # OpenCV saves the corners in either row by row (dir < 0) or column by column (dir > 0)
                 dir = corners[1] - corners[2]
@@ -321,7 +322,7 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
                 cor = np.empty(0)
                 for k in range(0, nX):
                     for l in range(0, nY):
-                        if (dir > 0):
+                        if dir > 0:
                             cor = np.append(cor, corners[N - (k + nX * l)])
                         else:
                             cor = np.append(cor, corners[k + nX * l])
@@ -408,11 +409,11 @@ def planar_grid_to_world(plane_params, xyzgrid, planeData):
         Rot = np.array([[math.cos(theta[j]) * math.cos(phi[j]) + math.sin(theta[j]) * math.sin(alpha[j]) * math.sin(
             phi[j]), math.sin(theta[j]) * math.cos(alpha[j]),
                          -math.cos(theta[j]) * math.sin(phi[j]) + math.sin(theta[j]) * math.sin(alpha[j]) * math.cos(
-                             phi[j])], \
+                             phi[j])],
                         [-math.sin(theta[j]) * math.cos(phi[j]) + math.cos(theta[j]) * math.sin(alpha[j]) * math.sin(
                             phi[j]), math.cos(theta[j]) * math.cos(alpha[j]),
                          math.sin(theta[j]) * math.sin(phi[j]) + math.cos(theta[j]) * math.sin(alpha[j]) * math.cos(
-                             phi[j])], \
+                             phi[j])],
                         [math.cos(alpha[j]) * math.sin(phi[j]), -math.sin(alpha[j]),
                          math.cos(alpha[j]) * math.cos(phi[j])]])
 
@@ -450,9 +451,7 @@ def ptnormalize(x):
             d = np.sqrt(xs)
             s = np.sqrt(2) / (np.sum(d) / len(d))
 
-            T[:, :, j] = np.array([[s, 0, s * xm[0]], \
-                          [0, s, s * xm[1]], \
-                          [0, 0, 1]], dtype=object)
+            T[:, :, j] = np.array([[s, 0, s * xm[0]], [0, s, s * xm[1]], [0, 0, 1]], dtype=object)
 
             xpad = np.append(xtemp, np.ones((1, x.shape[1])), axis=0)
             xnormtemp = np.dot(T[:, :, j], xpad)
@@ -470,10 +469,8 @@ def ptnormalize(x):
             d = np.sqrt(xs)
             s = np.sqrt(2) / (np.sum(d) / len(d))
 
-            T[:, :, j] = np.array([[s, 0, 0, s * xm[0]], \
-                          [0, s, 0, s * xm[1]], \
-                          [0, 0, s, s * xm[2]], \
-                          [0, 0, 0, 1]], dtype=object)
+            T[:, :, j] = np.array([[s, 0, 0, s * xm[0]], [0, s, 0, s * xm[1]], [0, 0, s, s * xm[2]], [0, 0, 0, 1]],
+                                  dtype=object)
             xpad = np.append(xtemp, np.ones((1, x.shape[1])), axis=0)
             xnormtemp = np.dot(T[:, :, j], xpad)
             xnorm[:, :, j] = xnormtemp[0:3, :]
@@ -482,7 +479,7 @@ def ptnormalize(x):
         log.info('error normalizing')
         log.info(x.shape[0])
 
-    return (xnorm, T)
+    return xnorm, T
 
 
 def P_from_DLT(X, u):
@@ -575,14 +572,14 @@ def f_eval_1eq(r1, r2, z1, z2, n1, n2):
 
     r1, r2, z1, z2, n1, n2 = np.array([r1, r2, z1, z2, n1, n2], dtype=object) + 0.  # convert all values to floats
 
-    f = (r1) / np.sqrt(r1 ** 2 + z1 ** 2) \
+    f = r1 / np.sqrt(r1 ** 2 + z1 ** 2) \
         - (n2 / n1) * (r2 - r1) / np.sqrt((r2 - r1) ** 2 + z2 ** 2)
 
     df_dr1 = 1 / np.sqrt(r1 ** 2 + z1 ** 2) - r1 ** 2 / (r1 ** 2 + z1 ** 2) ** (3. / 2) \
              + (n2 / n1) / np.sqrt(z2 ** 2 + (r1 - r2) ** 2) \
              - (n2 / n1) * (r1 - r2) * (2 * r1 - 2 * r2) / (2 * ((r1 - r2) ** 2 + z2 ** 2) ** (3. / 2))
 
-    return (f, df_dr1)
+    return f, df_dr1
 
 
 def f_eval_2eq(r1, r2, r3, z1, z2, z3, n1, n2, n3):
@@ -601,7 +598,7 @@ def f_eval_2eq(r1, r2, r3, z1, z2, z3, n1, n2, n3):
     [r1, r2, r3, z1, z2, z3, n1, n2, n3] = np.array(
         [r1, r2, r3, z1, z2, z3, n1, n2, n3], dtype=object) + 0.  # convert all values to floats
 
-    f = (r1) / np.sqrt(r1 ** 2. + z1 ** 2.) \
+    f = r1 / np.sqrt(r1 ** 2. + z1 ** 2.) \
         - (n2 / n1) * (r2 - r1) / np.sqrt((r2 - r1) ** 2. + z2 ** 2.)
 
     df_dr1 = 1. / np.sqrt(r1 ** 2. + z1 ** 2.) \
@@ -623,7 +620,7 @@ def f_eval_2eq(r1, r2, r3, z1, z2, z3, n1, n2, n3):
              - (r1 - r2) * (2. * r1 - 2. * r2) / (2. * ((r1 - r2) ** 2. + z2 ** 2.) ** (3. / 2.)) \
              - (n3 / n2) * (r2 - r3) * (2. * r2 - 2. * r3) / (2. * ((r2 - r3) ** 2. + z3 ** 2.) ** (3. / 2.))
 
-    return (f, df_dr1, df_dr2, g, dg_dr1, dg_dr2)
+    return f, df_dr1, df_dr2, g, dg_dr1, dg_dr2
 
 
 def NR_1eq(r1, r2, z1, z2, n1, n2, tol):
@@ -652,7 +649,7 @@ def NR_1eq(r1, r2, z1, z2, n1, n2, tol):
         Iter = Iter + 1
         max_err_r1 = err_r1.max()
 
-    return (r1new, Iter, max_err_r1)
+    return r1new, Iter, max_err_r1
 
 
 def NR_2eq(r1, r2, r3, z1, z2, z3, n1, n2, n3, tol, maxIter):
@@ -695,7 +692,7 @@ def NR_2eq(r1, r2, r3, z1, z2, z3, n1, n2, n3, tol, maxIter):
         max_err_r1 = err_r1.max()
         max_err_r2 = err_r2.max()
 
-    return (r1new, r2new, Iter, max_err_r1, max_err_r2)
+    return r1new, r2new, Iter, max_err_r1, max_err_r2
 
 
 def f_refrac(r1, r2, r3, z1, z2, n1, n2):
@@ -708,7 +705,8 @@ def f_refrac(r1, r2, r3, z1, z2, n1, n2):
     # Outputs:
     # f          - output of snell's law equation (ideally 0)
 
-    [r1, r2, r3, z1, z2, n1, n2] = np.array([r1, r2, r3, z1, z2, n1, n2], dtype=object) + 0.  # convert all values to floats
+    [r1, r2, r3, z1, z2, n1, n2] = np.array([r1, r2, r3, z1, z2, n1, n2],
+                                            dtype=object) + 0.  # convert all values to floats
 
     f = (r2 - r1) / np.sqrt((r2 - r1) ** 2.0 + z1 ** 2.0) \
         - (n2 / n1) * (r3 - r2) / np.sqrt((r3 - r2) ** 2.0 + z2 ** 2.0)
@@ -758,7 +756,7 @@ def bisection(r2L, r2U, r1, r3, z1, z2, n1, n2, tol):
                           n2)  # output of snell's law function for reverse ray tracing  (ideally 0)
 
         err = (abs(r2[0, :] - r2[1, :]))  # forwards and reverse ray tracing should yield same values
-        i2 = [x for x in range(len(err)) if (err)[x] < tol]
+        i2 = [x for x in range(len(err)) if err[x] < tol]
         i3 = [x for x in range(len(fL * fU)) if fL[x] * fU[x] > 0]
         i4 = np.union1d(i2, i3).astype(int)
 
@@ -798,7 +796,8 @@ def refrac_solve_bisec(r10, r20, r3, z1, z2, z3, n1, n2, n3, tol, maxIter):
     err_f2 = err_f1
     i1 = np.array(range(0, len(r1)))
 
-    # Iteratively solve for the length of the ray in each medium until output from refractive equation is less than a tolerance
+    # Iteratively solve for the length of the ray in each medium until output from refractive equation is less than a
+    # tolerance
     while np.any(np.greater(err_f1, tol2)) or np.any(np.greater(err_f2, tol2)) or Iter > maxIter:
         r1o = r1
         rdummy = np.zeros(len(r1))
@@ -807,8 +806,8 @@ def refrac_solve_bisec(r10, r20, r3, z1, z2, z3, n1, n2, n3, tol, maxIter):
         r2o = r2
         r2 = bisection(r2o, r3, r1, r3, z2, z3, n2, n3, tol)[0]  # use bisection to find the length of the ray in wall
 
-        f1, _, _, g1, _, _ = f_eval_2eq(r1, r2, r3, z1, z2, z3, n1, n2,
-                                        n3)  # get the output from the refractive equations to check error (f,g ideally are 0)
+        # get the output from the refractive equations to check error (f,g ideally are 0)
+        f1, _, _, g1, _, _ = f_eval_2eq(r1, r2, r3, z1, z2, z3, n1, n2, n3)
 
         err_f1 = np.absolute(f1)
         err_f2 = np.absolute(g1)
@@ -825,7 +824,7 @@ def refrac_solve_bisec(r10, r20, r3, z1, z2, z3, n1, n2, n3, tol, maxIter):
             err_f1_n[ind_rem] = err_f1[i4]
             err_f2_n[ind_rem] = err_f2[i4]
             for l in [r1, r2, r3, z1, z2, z3, i1]:
-                l = np.delete(l, i4)
+                np.delete(l, i4)
 
     if Iter == maxIter:
         log.warning('Warning: max # iterations reached in refrac_solve_bisec', stacklevel=2)
@@ -955,7 +954,7 @@ def img_refrac(XC, X, spData, rTol):
     XB[0, :] = rB * np.cos(phi) + XC[0, :]
     XB[1, :] = rB * np.sin(phi) + XC[1, :]
 
-    return (XB, rB, max_err_rB)
+    return XB, rB, max_err_rB
 
 
 def P_from_params(cam_params, caData):
@@ -992,10 +991,10 @@ def P_from_params(cam_params, caData):
     # Rotation matrix
     Rot = np.array([[math.cos(theta) * math.cos(phi) + math.sin(theta) * math.sin(alpha) * math.sin(phi),
                      math.sin(theta) * math.cos(alpha),
-                     -math.cos(theta) * math.sin(phi) + math.sin(theta) * math.sin(alpha) * math.cos(phi)], \
+                     -math.cos(theta) * math.sin(phi) + math.sin(theta) * math.sin(alpha) * math.cos(phi)],
                     [-math.sin(theta) * math.cos(phi) + math.cos(theta) * math.sin(alpha) * math.sin(phi),
                      math.cos(theta) * math.cos(alpha),
-                     math.sin(theta) * math.sin(phi) + math.cos(theta) * math.sin(alpha) * math.cos(phi)], \
+                     math.sin(theta) * math.sin(phi) + math.cos(theta) * math.sin(alpha) * math.cos(phi)],
                     [math.cos(alpha) * math.sin(phi), -math.sin(alpha), math.cos(alpha) * math.cos(phi)]])
 
     P[:, 0:3] = Rot
@@ -1099,15 +1098,16 @@ def cam_model_adjust(u, par0, X, sD, cD, rTol, bounded, maxFev=1600, maxfunc_don
                 else:
                     bound = []
 
-                    # curve_fit needs a function that takes the independent variable as the first argument and the parameters to fit as separate remaining arguments, which the lambda function provides
+                    # curve_fit needs a function that takes the independent variable as the first argument and the
+                    # parameters to fit as separate remaining arguments, which the lambda function provides
                 f = lambda x, *p: refrac_proj_onecam(np.array(p), x, sD, cD, rTol)
 
                 if any(bound):
                     params[:, j] = \
-                    scipy.optimize.curve_fit(f, Xtemp, umeas, par0[:, j], max_nfev=m_eval, verbose=0, bounds=bound)[0]
+                        scipy.optimize.curve_fit(f, Xtemp, umeas, par0[:, j], max_nfev=m_eval, verbose=0, bounds=bound)[
+                            0]
                 else:
                     params[:, j] = scipy.optimize.curve_fit(f, Xtemp, umeas, par0[:, j], method='lm', maxfev=m_eval)[0]
-
 
             except RuntimeError:  # the minimizer hit its max eval count without converging
                 if maxfunc_dontstop_flag:
@@ -1126,7 +1126,7 @@ def cam_model_adjust(u, par0, X, sD, cD, rTol, bounded, maxFev=1600, maxfunc_don
                 np.mean(refrac_proj_onecam(par0[:, j], Xtemp, sD, cD, rTol) - umeas)))
             log.VLOG(3, 'error post-optimization = ' + str(
                 np.mean(refrac_proj_onecam(params[:, j], Xtemp, sD, cD, rTol) - umeas)))
-        
+
             # verbosity level 4: prints data
             if log.getLevel() == 4:
                 par = ''
@@ -1137,9 +1137,9 @@ def cam_model_adjust(u, par0, X, sD, cD, rTol, bounded, maxFev=1600, maxfunc_don
                 param = ''
                 for l in params[:, j]:
                     param += str(l) + ', '
-                log.VLOG(4,'params: {}'.format(par[:-2]))
+                log.VLOG(4, 'params: {}'.format(par[:-2]))
 
-    return (Pnew, params)
+    return Pnew, params
 
 
 def planar_grid_adj(planeParams, P, xyzgrid, spData, planeData, rTol):
@@ -1226,12 +1226,14 @@ def planar_grid_triang(umeas_mat, P, xyzgrid, planeParams0, spData, planeData, r
     ngridpts = len(xyzgrid[0, :])
     nplanes = len(planeParams0[0, :])
 
-    # curve_fit needs a function that accepts parameters individually and 1D arrays for dependent and independent variables, so the lambda function reshapes arguments for/from planar_grid_adj
+    # curve_fit needs a function that accepts parameters individually and 1D arrays for dependent and independent
+    # variables, so the lambda function reshapes arguments for/from planar_grid_adj
     f = lambda xyz, *params: planar_grid_adj(np.array([params[p * nplanes:(p + 1) * nplanes] for p in range(6)]), P,
                                              np.array([xyz[:ngridpts], xyz[ngridpts:2 * ngridpts], xyz[2 * ngridpts:]]),
                                              spData, planeData, rTol).flatten()
 
-    # fit projected image points to the measured image points by adjusting plane parameters and projecting resulting world points to image plane
+    # fit projected image points to the measured image points by adjusting plane parameters and projecting resulting
+    # world points to image plane
     planeParamsFlat = scipy.optimize.curve_fit(f, np.ravel(xyzgrid), np.ravel(umeas_temp), np.ravel(planeParams0))[0]
 
     # reshape 1D output
@@ -1247,20 +1249,20 @@ def planar_grid_triang(umeas_mat, P, xyzgrid, planeParams0, spData, planeData, r
         np.mean(planar_grid_adj(planeParams0, P, xyzgrid, spData, planeData, rTol) - umeas_temp)))
     log.VLOG(3, 'error post-optimization = ' + str(
         np.mean(planar_grid_adj(planeParams, P, xyzgrid, spData, planeData, rTol) - umeas_temp)))
-    
+
     # verbosity level 4: prints data
     if log.getLevel() == 4:
         param0 = ''
         for l in planeParams0:
             param0 += str(l) + ', '
         log.VLOG(4, 'planeParams0: ' + param0[:-2])
-        
+
         param = ''
         for l in planeParams:
             param += str(l) + ', '
         log.VLOG(4, 'planeParams: ' + param[:-2])
 
-    return (Xadj, planeParams)
+    return Xadj, planeParams
 
 
 def refrac_proj(X, P, spData, rTol):
@@ -1315,7 +1317,7 @@ def reprojError(umeas, P, xPts, spData, rTol):
     rep_err_mean = [np.mean(err) for err in np.transpose(rep_err)]
     # mean reprojection error for each camera    
 
-    return (rep_err, rep_err_mean)
+    return rep_err, rep_err_mean
 
 
 def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
@@ -1358,11 +1360,11 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
 
     # generate locations of the points on each plane
     # if even, set up so we get right amount of points
-    if (nx % 2 == 0):
+    if nx % 2 == 0:
         xvec = np.arange(-(math.floor(nx / 2)) + 1, math.floor(nx / 2) + 1)
     else:
         xvec = np.arange(-(math.floor(nx / 2)), math.floor(nx / 2) + 1)
-    if (ny % 2 == 0):
+    if ny % 2 == 0:
         yvec = np.arange(-(math.floor(ny / 2)) + 1, math.floor(ny / 2) + 1)
     else:
         yvec = np.arange(-(math.floor(ny / 2)), math.floor(ny / 2) + 1)
@@ -1400,7 +1402,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     while np.any(rep_err_mean[Iter] > repTol) and Iter <= tols.maxiter and np.any(np.abs(rep_err_diff) > repTol / 10):
         log.VLOG(1, 'Iteration ' + str(Iter + 1) + '\nInitial mean reprojection error in each camera= ' + str(
             rep_err_mean[Iter]))
-        
+
         # optimize camera and plane parameters in sequence
         P, camParams = cam_model_adjust(umeas, camParams, Xworld, scData, camData, tols, bounded)
         Xworld, planeParams = planar_grid_triang(umeas, P, xyz_phys, planeParams, scData, pData, tols)
@@ -1531,8 +1533,10 @@ if __name__ == "__main__":
     # read config file flag passed from terminal
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config_file', help='relative path to config file', type=str)
-    parser.add_argument('-v', '--verbosity', help='verbosity level for file prints (1 through 4 or DEBUG, INFO, etc.)', type=str, default="1")
-    parser.add_argument('-l', '--logType', help='style of log print messages (cpp (default), pretty)', type=str, default="cpp")
+    parser.add_argument('-v', '--verbosity', help='verbosity level for file prints (1 through 4 or DEBUG, INFO, etc.)',
+                        type=str, default="1")
+    parser.add_argument('-l', '--logType', help='style of log print messages (cpp (default), pretty)', type=str,
+                        default="cpp")
     args = parser.parse_args()
     configPath = args.config_file
     log = logger.getLogger(__file__, args.verbosity, args.logType)
@@ -1554,4 +1558,3 @@ if __name__ == "__main__":
     f = saveCalibData(exptPath, camIDs, P, camParams, Xworld, planeParams, sceneData, cameraData, planeData, errorLog,
                       pix_phys, 'results_')
     log.info('\nData saved in ' + str(f))
-    
