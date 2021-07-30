@@ -9,7 +9,9 @@ import cv2
 import scipy
 import scipy.integrate
 import scipy.optimize
-
+import cvxpy as cp
+import matplotlib.pyplot as plt
+from lmfit import Minimizer, Parameters, report_fit
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
 
@@ -18,6 +20,42 @@ if not __name__ == "__main__":
 
     filename = traceback.format_stack()[0]
     log = logger.getLogger(filename.split('"')[1], False, False)
+
+
+def singleCamCalibMat(umeas, xworld, planeData, cameraData):
+	# set up implementation variables
+	nX = planeData.nX
+	nY = planeData.nY
+	nplanes = planeData.ncalplanes
+	ncams = cameraData.ncams
+	imageSize = (cameraData.sX, cameraData.sY)
+	aspectRatio = cameraData.sX / cameraData.sY
+
+	# set up storage variables
+	cameraMats = np.zeros([3, 3, ncams])
+	boardRotMats = np.zeros([3, 3, nplanes, ncams])
+	boardTransVecs = np.zeros([3, nplanes, ncams])
+
+	Hcb = np.zeros((ncams, nplanes, 9))
+	rcb = np.zeros((3, 3, nplanes, ncams))
+	tcb = np.zeros((3, nplanes, ncams))
+	opt_list = ['lm', 'dog', 'reg']
+	for c in range(ncams):
+		camUmeas = np.transpose(umeas[:, :, c]).astype('float32')
+
+		camMatrix = cv2.initCameraMatrix2D([xworld],[camUmeas], imageSize, aspectRatio)
+		cameraMats[:, :, c] = camMatrix
+		
+
+		for n in range(nplanes):
+			x = camUmeas[n * nX * nY:(n + 1) * nX * nY, :]
+			X = xworld[n * nX * nY:(n + 1) * nX * nY, :]
+			_, _, _, rVec, tVec = cv2.calibrateCamera([X], [x], imageSize, camMatrix, None)
+			R, _ = cv2.Rodrigues(rVec[0].ravel())
+			rcb[:, :, n, c] = R
+
+			tcb[:, n, c] = tVec[0].ravel()
+	return cameraMats, rcb, tcb
 
 
 def singleCamCalib(umeas, xworld, planeData, cameraData):
@@ -31,7 +69,7 @@ def singleCamCalib(umeas, xworld, planeData, cameraData):
     Returns
     -------------------------------------------
     cameraMats         3 x 3 x ncams: camera matrices for individual cameras
-    boardRotMats       3 x 3*nplanes x ncams: board rotation matrix per image per camera
+	boardRotMats       3 x 3 x nplanes x ncams: board rotation matrix per image per camera
     boardTransVecs     3 x nplanes x ncams: board translational vector per image per camera
     """
 
@@ -70,9 +108,11 @@ def singleCamCalib(umeas, xworld, planeData, cameraData):
             currImage = camUmeas[nX * nY * n: nX * nY * (n + 1), :]
 
             # find the board's rotation matrix and translation vector
-
-            _, rotMatrix, transVector = cv2.solvePnP(currWorld, currImage, camMatrix,
+			_, rotvec, transVector = cv2.solvePnP(currWorld, currImage, camMatrix,
                                                      np.zeros((8, 1), dtype='float32'))
+			# Convert rotation vector to rotation matrix.
+			rotMatrix, _ = cv2.Rodrigues(rotvec)
+
             log.VLOG(4, "Rotation matrix for camera %d image %d: %s", c, n, rotMatrix)
             log.VLOG(4, "Translational vector for camera %d image %d: %s", c, n, transVector)
 
@@ -188,15 +228,17 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
     R_pair = np.zeros([3, 3, ncams, ncams])
     t_pair = np.zeros([3, ncams, ncams])
 
+	xworld = np.transpose(xworld)
+
     for i in range(0, ncams):
         for j in range(i + 1, ncams):
             log.VLOG(2, 'Correlating cameras (%d, %d)' % (i, j))
 
             # Compute world coordinates used by kabsch.
-            Ri = boardRotMats[:, :, :, i].ravel().reshape((1, -1, 3))[0]
-            ti = boardTransVecs[:, :, i].reshape((-1, 1))
-            Rj = boardRotMats[:, :, :, j].ravel().reshape((1, -1, 3))[0]
-            tj = boardTransVecs[:, :, j].reshape((-1, 1))
+			Ri = np.concatenate(np.moveaxis(boardRotMats[:, :, :, i], 2, 0), axis=0)
+			ti = boardTransVecs[:, :, i].reshape((-1, 1), order='F')
+			Rj = np.concatenate(np.moveaxis(boardRotMats[:, :, :, j], 2, 0), axis=0)
+			tj = boardTransVecs[:, :, j].reshape((-1, 1), order='F')
 
             # Compute world coordinates and use Kabsch
             Xi = np.matmul(Ri, xworld) + ti
@@ -233,7 +275,7 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 
             b[:, i, j] = tij
 
-    A = np.transpose(A.reshape((3 * ncams, -1), order='F'))
+	A = np.concatenate(np.concatenate(np.moveaxis(A, (2, 3), (0, 1)), axis=0), axis=0)
     b = b.reshape((-1, 1), order='F')
 
     log.VLOG(4, 'Minimization matrix A for translation vectors \n %s' % A)
@@ -251,8 +293,8 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
     # a rectangular grid of the dimensions to be specified.
     cam_hspacing = np.array([1, 0, 0])
     cam_vspacing = np.array([0, 1, 0])
-    cam_num_row = 2
-    cam_num_col = 2
+	cam_num_row = 3
+	cam_num_col = 3
 
     x0 = np.zeros((3 * ncams))
     for i in range(cam_num_row):
@@ -264,20 +306,26 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
         return np.linalg.norm(np.matmul(A, np.array(x)) - b)
     # trans_cost_deriv = autograd.grad(lambda *args: trans_cost(np.transpose(np.array(args))))
 
-    res = scipy.optimize.minimize(lambda x: trans_cost(x), x0,
-                                  constraints=(scipy.optimize.LinearConstraint(constraint_array, np.zeros(3 * ncams),
-                                                                               np.zeros(3 * ncams))),
-                                                                               method = 'trust-constr')
-    if res.success:
+	# Construct the problem.
+	x = cp.Variable((3 * ncams, 1))
+	objective = cp.Minimize(cp.sum_squares(A @ x - b))
+	constraints = [constraint_array @ x == np.zeros((3 * ncams, 1))]
+	prob = cp.Problem(objective, constraints)
+
+	print("Optimal value", prob.solve())
+
+	if prob.status == cp.OPTIMAL:
         log.info("Minimization for Translation Vectors Succeeded!")
-        t_vals = res.x
+		print('Optimized translation error: ', trans_cost(x.value))
+		t_vals = x.value
     else:
         log.error('Minimization Failed for Translation Vectors!')
+		return
     # Translation vectors stored as columns.
-    t_vals = t_vals.reshape((3, -1), order='F')
+	t_vals = np.transpose(t_vals.reshape((-1, 3), order='F'))
 
     for i in range(t_vals.shape[1]):
-        log.VLOG(3, 'R(%d) = \n %s' % (i, t_vals[:, i]))
+		log.VLOG(3, 't(%d) = \n %s' % (i, t_vals[:, i]))
 
     log.info('Minimizing for tranlation vectors of cameras: %s', res.message)
 
@@ -296,7 +344,7 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 
             A[:, 9 * j: 9 * (j + 1), i, j] = -np.kron(np.eye(3), Rij)
 
-    A = np.transpose(A.reshape((9 * ncams, -1), order='F'))
+	A = np.concatenate(np.concatenate(np.moveaxis(A, (2, 3), (0, 1)), axis=0), axis=0)
     b = np.zeros(A.shape[0])
 
     log.VLOG(4, 'Minimization matrix A for rotation matrices \n %s' % A)
@@ -321,20 +369,30 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
     # Solve the minimization, requiring the first rotation matrix to be the identity matrix
     # TODO: figure out (if possible) a better initial guess
 
-    res = scipy.optimize.minimize(lambda x: np.linalg.norm(np.matmul(A, x) - b), x0,
-                                  constraints=(scipy.optimize.LinearConstraint(constraint_array, bound, bound)),
-                                  method = 'trust-constr')
-    if res.success:
+	# Construct the problem.
+	x = cp.Variable(9 * ncams)
+	objective = cp.Minimize(cp.sum_squares(A @ x - b))
+	constraints = [constraint_array @ x == bound]
+	prob = cp.Problem(objective, constraints)
+
+	print("Optimal value", prob.solve())
+
+	print('Minimization status: ', prob.status)
+	if prob.status == cp.OPTIMAL:
         log.info("Minimization for Rotational Matrices Succeeded!")
-        R_vals = res.x
+		print('Optimized rotation error: ', rotCost(x.value))
+		R_vals = x.value
     else:
         log.error('Minimization Failed for Rotational Matrices!')
+		return
 
     log.info('Minimizing for rotational matrices of cameras: %s', res.message)
     # Rotation matrices stored rows first
-    R_vals = R_vals.reshape((3, 3, -1))
+	R_vals = np.moveaxis(R_vals.reshape(-1, 3, 3), 0, 2)
 
-    for i in range(R_vals.shape[2]):
+	# Fit rotation matrices from optimized result.
+	for i in range(ncams):
+		R_vals[:, :, i] = fitRotMat(R_vals[:, :, i])
         log.VLOG(3, 'R(%d) = \n %s' % (i, R_vals[:, :, i]))
 
     log.info("Finding average rotation matrices and translational vectors from single camera calibration.")
@@ -368,8 +426,13 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
             cameraData, planeData, reproj_res.x)
     else:
         log.error('Reprojection Minimization Failed!')
+		return
 
     return cameraMats, rotationMatsCam, transVecsCam
+
+
+error_dict = {}
+error_list = []
 
 
 def reproj_min_func(planeData, cameraData, umeas, xworld, min_vec):
@@ -387,6 +450,9 @@ def reproj_min_func(planeData, cameraData, umeas, xworld, min_vec):
     ncams = cameraData.ncams
     nplanes = planeData.ncalplanes
 
+	if str(min_vec) in error_dict:
+		return error_dict[str(min_vec)]
+
     # Total error of reprojections.
     sum_of_err = 0
     cameraMatrices, rotationMatricesCam, rotationMatricesBoard, transVecsCam, transVecsBoard = unpack_reproj_min_vector(
@@ -398,16 +464,32 @@ def reproj_min_func(planeData, cameraData, umeas, xworld, min_vec):
         for n in range(nplanes):
             rotMatBoard = rotationMatricesBoard[:, :, n]
             transVecBoard = transVecsBoard[:, n]
-            for i in range(nX - 1):
-                for j in range(nY - 1):
+			for i in range(nX):
+				for j in range(nY):
                     # isolate only points related to this board's placement
-                    # corners = [umeas[:, n * nX * nY + (i + m) * nX + j + n, c] for m in range(2) for n in range(2)]
-                    img_coor = umeas[:, n * nX * nY + i * nX + j, c]
-                    world_coor = xworld[:, nX * nY * n + i * nX + j]
+					# corners = [umeas[:, n * nX * nY + (i + m) * nY + j + n, c] for m in range(2) for n in range(2)]
+					img_coor = umeas[:, n * nX * nY + i * nY + j, c]
+					world_coor = xworld[:, nX * nY * n + i * nY + j]
                     # normal_factor = computeNormalFactor(corners, camMat, rotMatCam, transVecCam)
                     sum_of_err = sum_of_err + (
                         reproj_error(1, img_coor, world_coor, camMat, rotMatCam, rotMatBoard,
                                      transVecCam, transVecBoard)) ** 2
+
+	error_dict[str(min_vec)] = sum_of_err
+	global error_list
+	error_list += [(min_vec, sum_of_err)]
+
+	def deriv(entry1, entry2):
+		x1, err1 = entry1
+		x2, err2 = entry2
+		x1 = np.array(x1)
+		x2 = np.array(x2)
+		return (err1 - err2) / np.linalg.norm(x1 - x2)
+
+	print('Error: ', sum_of_err)
+	if len(error_list) > 1:
+		print('derivative: ', deriv(error_list[-1], error_list[-2]))
+
     return sum_of_err
 
 
@@ -545,16 +627,20 @@ def computeNormalFactor(corners, camMat, rotMatCam, transVecCam):
 def reproj_error(normal_factor, img_coor, world_coor, camMatrix, rotMatrixCam, rotMatrixBoard, transVecCam,
                  transVecBoard):
     """
-    Compute the reprojection error term for a given pair of camera and image. See paper (Muller 2019) formula (6).
-    :param normal_factor:   normalized area in pixels of a checkerboard tile
-    :param img_coor:        image coordinate, from umeas
-    :param world_coor:      world coordinate
-    :param camMatrix:       3 x 3: camera matrix for this camera
-    :param rotMatrixCam:    3 x 3: rotation matrix for this camera
-    :param rotMatrixBoard:  3 x 3: rotation matrix for this image
-    :param transVecCam:     3: translational vector for this camera
-    :param transVecBoard:   3: translational vector for this image
-    :return: the reprojection error
+	Parameters
+	----------
+	normal_factor   normalized area in pixels of a checkerboard tile
+	img_coor        image coordinate, from umeas
+	world_coor      world coordinate
+	camMatrix       3 x 3: camera matrix for this camera
+	rotMatrixCam    3 x 3: rotation matrix for this camera
+	rotMatrixBoard  3 x 3: rotation matrix for this image
+	transVecCam     3: translational vector for this camera
+	transVecBoard   3: translational vector for this image
+
+	Returns
+	-------
+	the reprojection error
     """
 
     # TODO scaling parameter k for principal optical axis assumed here.
@@ -627,22 +713,18 @@ if __name__ == '__main__':
     # and board geometric changes
     nX = planeData.nX
     nY = planeData.nY
+	dX = planeData.dX
+	dY = planeData.dY
     nplanes = planeData.ncalplanes
-    xworld = np.array([[i, j, 0] for i in range(nX) for j in range(nY) for _ in range(nplanes)]).astype('float32')
-    camMatrix, boardRotMat, boardTransVec = singleCamCalib(umeas, xworld, planeData, cameraData)
+	xworld = np.array([[i * dX + 1, j * dY + 1, 0] for _ in range(nplanes) for i in range(nX) for j in range(nY)]).astype(
+			'float32')
+	camMatrix, boardRotMat, boardTransVec = singleCamCalibMat(umeas, xworld, planeData, cameraData)
 
-    cameraMats, rotationMatsCam, transVecsCam = multiCamCalib(umeas, np.transpose(xworld), camMatrix, boardRotMat,
-                                                              boardTransVec,
-                                                              planeData, cameraData)
-
-    # perform multi camera calibration
-    # TODO: check inputs after multiCamCalib is fully written
-    # TODO: will need more variable than just x
-    # x = multiCamCalib(umeas, camMatrix, boardRotMat, boardTransVec, planeData, cameraData)
+	cameraMats, rotationMatsCam, transVecsCam = multiCamCalib(umeas, xworld, camMatrix, boardRotMat, boardTransVec, planeData, cameraData)
 
     # TODO: Change saved data according to what multiCamCalib returns (we should probably try to make it return these
     #  though)
-    xworld = np.array([[i * 10, j * 10, k * 5] for i in range(nX) for j in range(nY) for k in range(nplanes)]).astype(
-        'float32')
-    f = saveCalibData(cameraMats, rotationMatsCam, transVecsCam, xworld)
-    print('\nData saved in ' + str(f))
+# xworld = np.array([[i * 10, j * 10, k * 5] for i in range(nX) for j in range(nY) for k in range(nplanes)]).astype(
+#     'float32')
+# f = saveCalibData(cameraMats, rotationMatsCam, transVecsCam, xworld)
+# print('\nData saved in ' + str(f))
