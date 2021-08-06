@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import time
 import configparser
 import argparse
+import copy
 from statistics import mean
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -149,7 +150,7 @@ def parseConfigFile(configPath):
     dY = p.getint('dY')
     nX = p.getint('nX')
     nY = p.getint('nY')
-    zC = p.getint('zC')
+    zC = p.getfloat('zC')
     z0 = zC*np.linspace(0,1,nCalPlanes)
     scaleInfo = [p.getint('centerCamID')-1, p.getint('centerImgIndex')-1]
     pData = planeData(dX,dY,nX,nY,nCalPlanes,fileType, z0, scaleInfo)
@@ -189,6 +190,7 @@ def parseConfigFile(configPath):
 def getCameraNames(dataPath):
     
     folders = glob.glob(os.path.join(dataPath,'calibration','*'))
+    folders.sort()
     camIDs = []
     for i in range(0,len(folders)):
         camIDs.append(os.path.basename(folders[i]))
@@ -216,7 +218,10 @@ def getCalibImages(datapath, exptpath, camNames, fileType):
         for i in range(0,ncams):
             #create and read images
             imagepath = os.path.join(datapath,'calibration',camNames[i])
-            images = [cv2.imread(file, 0) for file in glob.glob(os.path.join(imagepath,'*'+fileType))]
+
+            files = [file for file in glob.glob(os.path.join(imagepath, '*' + fileType))]
+            files.sort()
+            images = [cv2.imread(file, 0) for file in files]
             
             #determines num of planes based on num of images (should be the same across paths)
             if(i ==0): ncalplanes = len(images) 
@@ -837,7 +842,7 @@ def img_refrac(XC,X,spData,rTol):
     
     # solve the refractve equations (snell's law) for the length of the ray in each medium
     if t==0: # no wall thickness -> no ray in wall
-        rB = rP
+        rB = copy.copy(rP)
         #indices of out-of-tank and in-tank points
         i1 = np.array([x for x in range (Npts) if z3[x] ==0])
         i2 = np.array([x for x in range (Npts) if z3[x] not in i1])
@@ -860,8 +865,8 @@ def img_refrac(XC,X,spData,rTol):
            warnings.warn('Warning: f has a NaN',stacklevel=2)
             
     elif t > 0:
-        rB = rP
-        rD = rP
+        rB = copy.copy(rP)
+        rD = copy.copy(rP)
 
         #indices of out-of-tank and in-tank points
         i1 = np.array([x for x in range (Npts) if z3[x] < rTol.z3_tol])
@@ -1283,13 +1288,13 @@ def selfCalibrate (umeas, pData, camData, scData, tols, bounded):
     planeParams = setupPlanes(ncalplanes,z0)
     
     # generate locations of the points on each plane
-    # if even, set up so we get right amount of points
+    # if even, set up so we get right amount of points and center
     if (nx%2==0):
-        xvec = np.arange(-(math.floor(nx/2))+1,math.floor(nx/2)+1)
+        xvec = np.arange(-(math.floor(nx/2))+1,math.floor(nx/2)+1)-0.5
     else:
         xvec = np.arange(-(math.floor(nx/2)),math.floor(nx/2)+1)
     if (ny%2==0): 
-        yvec = np.arange(-(math.floor(ny/2))+1,math.floor(ny/2)+1)
+        yvec = np.arange(-(math.floor(ny/2))+1,math.floor(ny/2)+1)-0.5
     else:
         yvec= np.arange(-(math.floor(ny/2)),math.floor(ny/2)+1)
     xphys       = dx*xvec
@@ -1406,7 +1411,7 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
     # World Points of Camera
     # ------------------------------------------
     # Refractive as Boolean
-    # zW n1 n2 n3 tW
+    # zW tW n1 n2 n3
     #
     # dX dY nX nY
     # so f zC
@@ -1436,8 +1441,8 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
             f.write(str(worldPoints[0]) +' '+ str(worldPoints[1]) +' '+
                     str(worldPoints[2])+'\n')
         f.write('1\n') #Refractive or not
-        f.write(str(scdata.zW) +' '+ str(scdata.n[0]) +' '+ str(scdata.n[1]) +' '+ 
-                str(scdata.n[2]) +' '+ str(scdata.tW)+'\n')
+        f.write(str(scdata.zW) +' '+ str(scdata.tW) +' '+ str(scdata.n[0]) +' '+ 
+                str(scdata.n[1]) +' '+ str(scdata.n[2])+'\n')
         f.write('\n'+str(planeData.dX) +' '+ str(planeData.dY) +' '+
                str(planeData.nX) +' '+ str(planeData.nY)+'\n')
         f.write(str(camData.so) +' '+ str(camData.f) +' '+ str(planeData.z0[-1]) +'\n')

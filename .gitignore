@@ -3,6 +3,7 @@ python/data_files/
 matlab/data_files/
 matlab/*.txt
 python/*.txt
+samples/calib/*/*/results*.dat
 
 bin
 temp

@@ -21,13 +21,13 @@
 # You should have received a copy of the GNU General Public License version 2 along with
 # OpenFV. If not, see https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html.
 
-FROM leahmendelson/openfv:base
+FROM openfv/openfv-base
 
 # Install boost
 RUN apt-get update -qq && apt-get install libboost-all-dev -y
 
 # Install openfv
-RUN git clone https://github.com/bpaez/openfv.git && \
+RUN git clone https://github.com/abhishekbajpayee/openfv.git && \
 	#apt-get update -qq && apt-get install libboost-all-dev -y && \
         cd openfv && \
         ./configure && cd bin && \
