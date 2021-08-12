@@ -60,6 +60,9 @@ def singleCamCalibMat(umeas, xworld, planeData, cameraData):
     rcb = np.zeros((3, 3, nplanes, ncams))
     tcb = np.zeros((3, nplanes, ncams))
     repErr = np.zeros((nX*nY, nplanes, ncams))
+    
+    # try using initial guess for param (eventually get from config file)
+    init_f_value = 9000;
                         
     for c in range(ncams):
         
@@ -75,8 +78,15 @@ def singleCamCalibMat(umeas, xworld, planeData, cameraData):
             objpts.append(X)
             imgpts.append(x)
 
-        camMatrix = cv2.initCameraMatrix2D(objpts, imgpts, imageSize, None)
-        _, _, _, rVec, tVec = cv2.calibrateCamera(objpts, imgpts, imageSize,camMatrix,None)
+        #camMatrix = cv2.initCameraMatrix2D(objpts, imgpts, imageSize, 0)
+        camMatrix = np.zeros((3,3))
+        camMatrix[0,0] = init_f_value
+        camMatrix[1,1] = init_f_value
+        camMatrix[0,2] = imageSize[0]*0.5
+        camMatrix[1,2] = imageSize[1]*0.5
+        camMatrix[2,2] = 1
+        ret, camMatrix, _, rVec, tVec = cv2.calibrateCamera(objpts, imgpts, imageSize,camMatrix,None,rvecs=None,
+                      tvecs=None,flags=cv2.CALIB_FIX_ASPECT_RATIO+cv2.CALIB_USE_INTRINSIC_GUESS+cv2.CALIB_FIX_PRINCIPAL_POINT)
         
         cameraMats[:, :, c] = camMatrix
         log.VLOG(4, "with Intrinsic Parameter Matrix %s", camMatrix)
@@ -275,7 +285,11 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
     xworld = np.transpose(xworld)
 
     for i in range(0, ncams):
-        for j in range(i + 1, ncams):
+        for j in range(0, ncams):
+            if i ==j:
+                t_pair[:, i, j] = np.zeros((3))
+                R_pair[:,:,i,j] = np.eye(3,3)
+                continue
             log.VLOG(2, 'Correlating cameras (%d, %d)' % (i, j))
 
             # Compute world coordinates used by kabsch.
@@ -311,8 +325,10 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
         for j in range(0, ncams):
             if i == j:
                 continue
-            Rij = R_pair[:, :, min(i, j), max(i, j)]
-            tij = t_pair[:, min(i, j), max(i, j)]
+            #Rij = R_pair[:, :, min(i, j), max(i, j)]
+            #tij = t_pair[:, min(i, j), max(i, j)]
+            Rij = R_pair[:, :, i, j]
+            tij = t_pair[:, i, j]
 
             A[:, 3 * i: 3 * (i + 1), i, j] = -Rij
             A[:, 3 * j: 3 * (j + 1), i, j] = np.eye(3)
@@ -335,16 +351,19 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
     # Initialize camera positions assuming the first camera is at the origin and the cameras
     # are uniformly spaced by horizontal a displacement vector and a vertical vector such as in
     # a rectangular grid of the dimensions to be specified.
-    cam_hspacing = np.array([0, 0, 0])
-    cam_vspacing = np.array([0, 0, 0])
+    cam_hspacing = np.array([1, 0, 0])
+    cam_vspacing = np.array([0, 1, 0])
     cam_num_row = 3
     cam_num_col = 3
 
-    x0 = np.zeros((3 * ncams))
-    for i in range(cam_num_row):
-        for j in range(cam_num_col):
-            cam_index = i * cam_num_col + j
-            x0[3 * cam_index: 3 * (cam_index + 1)] = i * cam_vspacing + j * cam_hspacing
+    x0 = t_pair[:,:,0]
+    x0 = np.reshape(x0,(-1,1), order='F')
+
+    #x0 = np.zeros((3 * ncams))
+    #for i in range(cam_num_row):
+    #    for j in range(cam_num_col):
+    #        cam_index = i * cam_num_col + j
+    #        x0[3 * cam_index: 3 * (cam_index + 1)] = i * cam_vspacing + j * cam_hspacing
 
     def trans_cost(x):
         return np.linalg.norm(np.matmul(A, np.array(x)) - b)
@@ -382,7 +401,7 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
         for j in range(0, ncams):
             if i == j:
                 continue
-            Rij = R_pair[:, :, min(i, j), max(i, j)]
+            Rij = R_pair[:, :, i, j]
 
             A[:, 9 * i: 9 * (i + 1), i, j] = np.eye(9)
 
@@ -673,10 +692,10 @@ def unpack_reproj_min_vector(cameraData, planeData, min_vec):
     return cameraMatrices, rotationMatricesCam, rotationMatricesBoard, transVecsCam, transVecsBoard
 
 
-def proj_red(ray_trace_vec, k=1):
+def proj_red(ray_trace_vec):
     """Reduce an augmented 3D image vector, the ray tracing vector, to the image position.
     """
-    return np.array([ray_trace_vec[0], ray_trace_vec[1]]).transpose() / k
+    return np.array([ray_trace_vec[0]/ray_trace_vec[2], ray_trace_vec[1]/ray_trace_vec[2]]).transpose()
 
 
 def jacobian2(vec_fxn):
