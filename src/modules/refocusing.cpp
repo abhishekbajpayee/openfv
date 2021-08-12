@@ -66,6 +66,7 @@ saRefocus::saRefocus() {
     MAX_NR_ITERS = 20;
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
+    live = 0;
 
     z_ = 0; dz_ = 0.1;
     xs_ = 0; ys_ = 0; zs_ = 0; dx_ = 0.1; dy_ = 0.1;
@@ -96,6 +97,7 @@ saRefocus::saRefocus(int num_cams, double f) {
     MAX_NR_ITERS = 20;
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
+    live = 0;
 
 }
 
@@ -877,7 +879,7 @@ void saRefocus::uploadSingleToGPU(int frame) {
 
 void saRefocus::uploadToGPU_ref() {
 
-    VLOG(1)<<"Uploading data required by full refocusing method to GPU...";
+    VLOG(1)<<"Uploading data requirede by full refocusing method to GPU...";
 
     Mat_<float> D = Mat_<float>::zeros(3,3);
     D(0,0) = scale_; D(1,1) = scale_;

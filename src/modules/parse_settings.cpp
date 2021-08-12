@@ -59,7 +59,7 @@ boost::program_options::options_description get_options() {
         ("zmax", po::value<double>()->default_value(10), "zmax")
         ("manual_dz", po::value<int>()->default_value(0), "flag to enable manual specification of dz")
         ("dz", po::value<double>()->default_value(0.1), "dz (manual)")
-        ("thresh", po::value<double>()->default_value(2.5), "threshold (std devs above mean)")
+        ("thresh", po::value<double>()->default_value(0), "threshold (std devs above mean)")
 
         ;
 

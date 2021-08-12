@@ -7,6 +7,7 @@
 using namespace cv;
 using namespace std;
 
+DEFINE_bool(live, false, "live refocusing");
 DEFINE_bool(fhelp, false, "show config file options");
 DEFINE_string(config_file, "config.cfg", "config file path");
 
@@ -36,9 +37,18 @@ int main(int argc, char** argv) {
         LOG(INFO) << "Multiplicative reconstruction is ON. Threshold level (thresh) will be ignored...";
 
     if (ref_settings.minlos)
-        LOG(INFO) << "minLOS reconstruction is ON. Threshold level (thresh) will be ignored...";        
+        LOG(INFO) << "minLOS reconstruction is ON. Threshold level (thresh) will be ignored...";
 
     saRefocus refocus(ref_settings);
+
+    if (FLAGS_live) {
+        if (ref_settings.use_gpu) {
+            // might mess with non-cuda build
+            refocus.GPUliveView();
+        } else {
+            refocus.CPUliveView();
+        }
+    }
 
     double dz;
     double scale = refocus.scale();
