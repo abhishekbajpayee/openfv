@@ -1,19 +1,22 @@
 # %matplotlib notebook
-import argparse
-import configparser
-import glob
-import math
 import os
 import sys
-import time
-from statistics import mean
-
-import cv2
-import matplotlib.pyplot as plt
+import glob
 # import tiffcapture as tc #using jpg for now
 import numpy as np
+import cv2
 import numpy.linalg as lin
+import math
+import itertools
+import warnings
 import scipy.optimize
+import matplotlib.pyplot as plt
+import time
+import configparser
+import argparse
+import copy
+from statistics import mean
+from mpl_toolkits.mplot3d import Axes3D
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
@@ -878,12 +881,21 @@ def img_refrac(XC, X, spData, rTol):
     max_err_rB = np.zeros(Npts)
 
     # solve the refractve equations (snell's law) for the length of the ray in each medium
+<<<<<<< HEAD
+    if t==0: # no wall thickness -> no ray in wall
+        rB = copy.copy(rP)
+        #indices of out-of-tank and in-tank points
+        i1 = np.array([x for x in range (Npts) if z3[x] ==0])
+        i2 = np.array([x for x in range (Npts) if z3[x] not in i1])
+
+=======
     if t == 0:  # no wall thickness -> no ray in wall
         rB = rP
         # indices of out-of-tank and in-tank points
         i1 = np.array([x for x in range(Npts) if z3[x] == 0])
         i2 = np.array([x for x in range(Npts) if z3[x] not in i1])
 
+>>>>>>> f09fb78354427b8564971458752dd10326f116d6
         # use Newton-Raphson iteration to solve the refractive equation for the rays from the wall to the camera
         rB[i2] = NR_1eq(rB0[i2], rP[i2], z1[i2], z3[i2], n1, n3, rTol.tol)[0]
 
@@ -903,8 +915,8 @@ def img_refrac(XC, X, spData, rTol):
             log.warning('Warning: f has a NaN', stacklevel=2)
 
     elif t > 0:
-        rB = rP
-        rD = rP
+        rB = copy.copy(rP)
+        rD = copy.copy(rP)
 
         # indices of out-of-tank and in-tank points
         i1 = np.array([x for x in range(Npts) if z3[x] < rTol.z3_tol])
@@ -1359,6 +1371,15 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     planeParams = setupPlanes(ncalplanes, z0)
 
     # generate locations of the points on each plane
+<<<<<<< HEAD
+    # if even, set up so we get right amount of points and center
+    if (nx%2==0):
+        xvec = np.arange(-(math.floor(nx/2))+1,math.floor(nx/2)+1)-0.5
+    else:
+        xvec = np.arange(-(math.floor(nx/2)),math.floor(nx/2)+1)
+    if (ny%2==0):
+        yvec = np.arange(-(math.floor(ny/2))+1,math.floor(ny/2)+1)-0.5
+=======
     # if even, set up so we get right amount of points
     if nx % 2 == 0:
         xvec = np.arange(-(math.floor(nx / 2)) + 1, math.floor(nx / 2) + 1)
@@ -1366,6 +1387,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
         xvec = np.arange(-(math.floor(nx / 2)), math.floor(nx / 2) + 1)
     if ny % 2 == 0:
         yvec = np.arange(-(math.floor(ny / 2)) + 1, math.floor(ny / 2) + 1)
+>>>>>>> f09fb78354427b8564971458752dd10326f116d6
     else:
         yvec = np.arange(-(math.floor(ny / 2)), math.floor(ny / 2) + 1)
     xphys = dx * xvec
@@ -1484,7 +1506,7 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
     # World Points of Camera
     # ------------------------------------------
     # Refractive as Boolean
-    # zW n1 n2 n3 tW
+    # zW tW n1 n2 n3
     #
     # dX dY nX nY
     # so f zC
@@ -1507,6 +1529,7 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
         f.write(str(camData.ncams) + '\n')
 
         for c in range(len(camnames)):
+
             f.write(str(camnames[c]) + '\n')
             np.savetxt(f, p[:, :, c], delimiter=' ', fmt='%f')
             camParam = cparams[:, c]
@@ -1519,6 +1542,7 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
         f.write('\n' + str(planeData.dX) + ' ' + str(planeData.dY) + ' ' +
                 str(planeData.nX) + ' ' + str(planeData.nY) + '\n')
         f.write(str(camData.so) + ' ' + str(camData.f) + ' ' + str(planeData.z0[-1]) + '\n')
+
         f.write('Initial error: \n')
         np.savetxt(f, errorLog[0], delimiter=', ', fmt='%f')
         f.write('Final error: \n')

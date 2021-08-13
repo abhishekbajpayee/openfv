@@ -891,9 +891,9 @@ void saRefocus::uploadToGPU_ref() {
     hinv[0] = Dinv.at<float>(0,0); hinv[1] = Dinv.at<float>(0,1); hinv[2] = Dinv.at<float>(0,2);
     hinv[3] = Dinv.at<float>(1,0); hinv[4] = Dinv.at<float>(1,1); hinv[5] = Dinv.at<float>(1,2);
 
-    float locations[9][3];
-    float pmats[9][12];
-    for (int i=0; i<9; i++) {
+    float locations[num_cams_][3];
+    float pmats[num_cams_][12];
+    for (int i=0; i<num_cams_; i++) {
         for (int j=0; j<3; j++) {
             locations[i][j] = cam_locations_[i].at<double>(j,0);
             for (int k=0; k<4; k++) {
@@ -909,7 +909,7 @@ void saRefocus::uploadToGPU_ref() {
     temp.upload(blank); temp2.upload(blank);
     // refocused.upload(blank);
 
-    for (int i=0; i<9; i++) {
+    for (int i=0; i<num_cams_; i++) {
         xmaps.push_back(xmap.clone());
         ymaps.push_back(ymap.clone());
     }
