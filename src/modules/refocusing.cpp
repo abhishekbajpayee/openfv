@@ -66,7 +66,6 @@ saRefocus::saRefocus() {
     MAX_NR_ITERS = 20;
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
-    live = 0;
 
     z_ = 0; dz_ = 0.1;
     xs_ = 0; ys_ = 0; zs_ = 0; dx_ = 0.1; dy_ = 0.1;
@@ -97,7 +96,6 @@ saRefocus::saRefocus(int num_cams, double f) {
     MAX_NR_ITERS = 20;
     BENCHMARK_MODE = 0;
     INT_IMG_MODE = 0;
-    live = 0;
 
 }
 
@@ -969,7 +967,7 @@ void saRefocus::GPUrefocus(int live, int frame) {
     else if (nlca_fast_)
         gpu_calc_nlca_image_fast(warped_, refocused, img_size_.height, img_size_.width, delta_);
     else
-        if (!BENCHMARK_MODE)
+        if (BENCHMARK_MODE)
             threshold_image(refocused);
 
     refocused.download(refocused_host_);
@@ -1005,7 +1003,7 @@ void saRefocus::GPUrefocus_ref(int live, int frame) {
 
     }
 
-    if (!BENCHMARK_MODE)
+    if (BENCHMARK_MODE)
         threshold_image(refocused);
 
     refocused.download(refocused_host_);
@@ -1059,7 +1057,7 @@ void saRefocus::GPUrefocus_ref_corner(int live, int frame) {
     else if (nlca_fast_)
         gpu_calc_nlca_image_fast(warped_, refocused, img_size_.height, img_size_.width, delta_);
     else
-        if (!BENCHMARK_MODE)
+        if (BENCHMARK_MODE)
             threshold_image(refocused);
 
     refocused.download(refocused_host_);
@@ -2221,7 +2219,7 @@ void saRefocus::slidingMinToZero(Mat in, Mat &out, int xf, int yf) {
 
 void saRefocus::setBenchmarkMode(int flag) {
 
-    LOG(WARNING)<<"Benchmarking mode is ON now! Thresholding might not work...";
+//    LOG(WARNING)<<"Benchmarking mode is ON now! Thresholding might not work...";
     BENCHMARK_MODE = flag;
 
 }

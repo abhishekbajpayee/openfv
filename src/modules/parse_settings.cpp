@@ -60,6 +60,7 @@ boost::program_options::options_description get_options() {
         ("manual_dz", po::value<int>()->default_value(0), "flag to enable manual specification of dz")
         ("dz", po::value<double>()->default_value(0.1), "dz (manual)")
         ("thresh", po::value<double>()->default_value(0), "threshold (std devs above mean)")
+        ("thresholding", po::value<int>()->default_value(1), "ON to use thresholding")
 
         ;
 
@@ -88,6 +89,7 @@ void parse_reconstruction_settings(string filename, reconstruction_settings &set
     if (settings.manual_dz)
         settings.dz = vm["dz"].as<double>();
     settings.thresh = vm["thresh"].as<double>();
+    settings.thresholding = vm["thresholding"].as<int>();
 
     boost::filesystem::path saveP(vm["save_path"].as<string>());
     if(saveP.string().empty()) {
