@@ -881,6 +881,7 @@ def img_refrac(XC, X, spData, rTol):
     max_err_rB = np.zeros(Npts)
 
     # solve the refractve equations (snell's law) for the length of the ray in each medium
+
     if t==0: # no wall thickness -> no ray in wall
         rB = copy.copy(rP)
         #indices of out-of-tank and in-tank points
@@ -1362,13 +1363,15 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     planeParams = setupPlanes(ncalplanes, z0)
 
     # generate locations of the points on each plane
-    # if even, set up so we get right amount of points
-    if nx % 2 == 0:
-        xvec = np.arange(-(math.floor(nx / 2)) + 1, math.floor(nx / 2) + 1)
+
+    # if even, set up so we get right amount of points and center
+    if (nx%2==0):
+        xvec = np.arange(-(math.floor(nx/2))+1,math.floor(nx/2)+1)-0.5
     else:
-        xvec = np.arange(-(math.floor(nx / 2)), math.floor(nx / 2) + 1)
-    if ny % 2 == 0:
-        yvec = np.arange(-(math.floor(ny / 2)) + 1, math.floor(ny / 2) + 1)
+        xvec = np.arange(-(math.floor(nx/2)),math.floor(nx/2)+1)
+    if (ny%2==0):
+        yvec = np.arange(-(math.floor(ny/2))+1,math.floor(ny/2)+1)-0.5
+
     else:
         yvec = np.arange(-(math.floor(ny / 2)), math.floor(ny / 2) + 1)
     xphys = dx * xvec
