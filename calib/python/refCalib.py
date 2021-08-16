@@ -165,7 +165,7 @@ def parseConfigFile(configPath):
     dY = p.getint('dY')
     nX = p.getint('nX')
     nY = p.getint('nY')
-    zC = p.getint('zC')
+    zC = p.getfloat('zC')
     z0 = zC * np.linspace(0, 1, nCalPlanes)
     scaleInfo = [p.getint('centerCamID') - 1, p.getint('centerImgIndex') - 1]
     pData = planeData(dX, dY, nX, nY, nCalPlanes, fileType, z0, scaleInfo)
@@ -882,21 +882,13 @@ def img_refrac(XC, X, spData, rTol):
     max_err_rB = np.zeros(Npts)
 
     # solve the refractve equations (snell's law) for the length of the ray in each medium
-<<<<<<< HEAD
+
     if t==0: # no wall thickness -> no ray in wall
         rB = copy.copy(rP)
         #indices of out-of-tank and in-tank points
         i1 = np.array([x for x in range (Npts) if z3[x] ==0])
         i2 = np.array([x for x in range (Npts) if z3[x] not in i1])
         
-=======
-    if t == 0:  # no wall thickness -> no ray in wall
-        rB = rP
-        # indices of out-of-tank and in-tank points
-        i1 = np.array([x for x in range(Npts) if z3[x] == 0])
-        i2 = np.array([x for x in range(Npts) if z3[x] not in i1])
-
->>>>>>> f09fb78354427b8564971458752dd10326f116d6
         # use Newton-Raphson iteration to solve the refractive equation for the rays from the wall to the camera
         rB[i2] = NR_1eq(rB0[i2], rP[i2], z1[i2], z3[i2], n1, n3, rTol.tol)[0]
 
@@ -1369,7 +1361,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     planeParams = setupPlanes(ncalplanes, z0)
 
     # generate locations of the points on each plane
-<<<<<<< HEAD
+
     # if even, set up so we get right amount of points and center
     if (nx%2==0):
         xvec = np.arange(-(math.floor(nx/2))+1,math.floor(nx/2)+1)-0.5
@@ -1377,15 +1369,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
         xvec = np.arange(-(math.floor(nx/2)),math.floor(nx/2)+1)
     if (ny%2==0): 
         yvec = np.arange(-(math.floor(ny/2))+1,math.floor(ny/2)+1)-0.5
-=======
-    # if even, set up so we get right amount of points
-    if (nx % 2 == 0):
-        xvec = np.arange(-(math.floor(nx / 2)) + 1, math.floor(nx / 2) + 1)
-    else:
-        xvec = np.arange(-(math.floor(nx / 2)), math.floor(nx / 2) + 1)
-    if (ny % 2 == 0):
-        yvec = np.arange(-(math.floor(ny / 2)) + 1, math.floor(ny / 2) + 1)
->>>>>>> f09fb78354427b8564971458752dd10326f116d6
+
     else:
         yvec = np.arange(-(math.floor(ny / 2)), math.floor(ny / 2) + 1)
     xphys = dx * xvec
