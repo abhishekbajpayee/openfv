@@ -13,6 +13,7 @@ from scipy.sparse import lil_matrix
 import cvxpy as cp
 import matplotlib.pyplot as plt
 from lmfit import Minimizer, Parameters, report_fit
+import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
@@ -801,8 +802,8 @@ def reproj_error(normal_factor, img_coor, world_coor, camMatrix, rotMatrixCam, r
     return 1 / np.sqrt(normal_factor) * np.linalg.norm(img_coor - proj_red(product))
 
 
-def saveCalibData(exptPath, camIDs, P, cparams, tplanes, sceneData, cameraData, finalError,
-                      pix_phys, prefix):
+def saveCalibData(exptPath, camnames, p, cparams, tplanes, sceneData, camData, finalError,
+                      pix_phys, name):
     """
     Save and display calibration data
     :param cparams:     parameters from which the matrices were contructed
@@ -818,10 +819,43 @@ def saveCalibData(exptPath, camIDs, P, cparams, tplanes, sceneData, cameraData, 
     ax.set_ylabel('Y axis')
     ax.set_zlabel('Z axis')
     # include a sample of the tank wall for context
-    grid, = ax.plot(tplanes[0, :], tplanes[1, :], tplanes[2, :], 'b.', label='Grid Points')
+    board, = ax.plot(tplanes[0, :], tplanes[1, :], tplanes[2, :], 'b.', label='Board Positions')
     cams, = ax.plot(cparams[0, :], cparams[1, :], cparams[2, :], 'r+', label='Cameras')
-    plt.legend(handles=[grid, cams, wall])
+    plt.legend(handles=[board, cams])
     plt.show()
+    
+    ts = time.localtime()
+    time_stamp = time.strftime('%H%M%m%d%y', ts)
+    file = os.path.join(exptPath, name + time_stamp + '.dat')
+    log.info(file)
+
+    with open(file, 'w') as f:
+        f.write('Pinhole Calibration performed: ' + time.strftime('%c', ts) + '\n')
+        f.write(str(finalError) + '\n')
+        f.write(str(camData.sX) + ' ' + str(camData.sY) + ' ' + str(pix_phys) + '\n')
+        f.write(str(camData.ncams) + '\n')
+
+        for c in range(len(camnames)):
+
+            f.write(str(camnames[c]) + '\n')
+            np.savetxt(f, p[:, :, c], delimiter=' ', fmt='%f')
+            camParam = cparams[:, c]
+            worldPoints = camParam[0:3]
+            f.write(str(worldPoints[0]) + ' ' + str(worldPoints[1]) + ' ' +
+                    str(worldPoints[2]) + '\n')
+        f.write('0\n')  # calibration not refractive
+        #f.write(str(scdata.zW) + ' ' + str(scdata.n[0]) + ' ' + str(scdata.n[1]) + ' ' +
+        #        str(scdata.n[2]) + ' ' + str(scdata.tW) + '\n')
+        #f.write('\n' + str(planeData.dX) + ' ' + str(planeData.dY) + ' ' +
+        #        str(planeData.nX) + ' ' + str(planeData.nY) + '\n')
+        #f.write(str(camData.so) + ' ' + str(camData.f) + ' ' + str(planeData.z0[-1]) + '\n')
+
+        #f.write('Initial error: \n')
+        #np.savetxt(f, errorLog[0], delimiter=', ', fmt='%f')
+        #f.write('Final error: \n')
+        #np.savetxt(f, errorLog[1], delimiter=', ', fmt='%f')
+
+        return f  # file will close when with statement terminates
 
     return plt
 
@@ -872,7 +906,7 @@ if __name__ == '__main__':
         Rt = np.column_stack((np.transpose(rotationMatsCam[:,:,c]), transVecsCam[:,c]))
         P[:,:,c]=np.matmul(cameraMats[:,:,c],Rt)
     
-    f = saveCalibData(exptPath, camIDs, P, transVecsCam, boardTransVec, sceneData, cameraData, finalError,
+    f = saveCalibData(exptPath, camIDs, P, transVecsCam, transVecBoard, sceneData, cameraData, finalError,
                       pix_phys, 'results_')
     log.info('\nData saved in ' + str(f))
 
