@@ -14,7 +14,7 @@ import cvxpy as cp
 import matplotlib.pyplot as plt
 from lmfit import Minimizer, Parameters, report_fit
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..', 'python/lib/'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
 
 # from test import interpretResults
@@ -43,7 +43,7 @@ def fitRotMat(Q):
 	D = np.eye(S.shape[0])
 	D[-1, -1] = np.linalg.det(np.matmul(U, Vt))
 
-	return np.matmul(U, np.matmul(D, Vt)), S
+	return np.matmul(U, np.matmul(D, Vt))
 
 
 def singleCamCalibMat(umeas, xworld, planeData, cameraData):
@@ -59,16 +59,16 @@ def singleCamCalibMat(umeas, xworld, planeData, cameraData):
 	cameraMats = np.zeros([3, 3, ncams])
 	rcb = np.zeros((3, 3, nplanes, ncams))
 	tcb = np.zeros((3, nplanes, ncams))
-	repErr = np.zeros((nX*nY, nplanes, ncams))
+	repErr = np.zeros((nX * nY, nplanes, ncams))
 
 	# try using initial guess for param (eventually get from config file)
 	init_f_value = 9000;
 
 	for c in range(ncams):
 
-		#initialize comparison variables
-		objpts = [] # world coordinates
-		imgpts = [] # image coordinates
+		# initialize comparison variables
+		objpts = []  # world coordinates
+		imgpts = []  # image coordinates
 
 		camUmeas = np.transpose(umeas[:, :, c]).astype('float32')
 
@@ -78,15 +78,16 @@ def singleCamCalibMat(umeas, xworld, planeData, cameraData):
 			objpts.append(X)
 			imgpts.append(x)
 
-		#camMatrix = cv2.initCameraMatrix2D(objpts, imgpts, imageSize, 0)
-		camMatrix = np.zeros((3,3))
-		camMatrix[0,0] = init_f_value
-		camMatrix[1,1] = init_f_value
-		camMatrix[0,2] = imageSize[0]*0.5
-		camMatrix[1,2] = imageSize[1]*0.5
-		camMatrix[2,2] = 1
-		ret, camMatrix, _, rVec, tVec = cv2.calibrateCamera(objpts, imgpts, imageSize,camMatrix,None,rvecs=None,
-		                                                    tvecs=None,flags=cv2.CALIB_FIX_ASPECT_RATIO+cv2.CALIB_USE_INTRINSIC_GUESS+cv2.CALIB_FIX_PRINCIPAL_POINT)
+		# camMatrix = cv2.initCameraMatrix2D(objpts, imgpts, imageSize, 0)
+		camMatrix = np.zeros((3, 3))
+		camMatrix[0, 0] = init_f_value
+		camMatrix[1, 1] = init_f_value
+		camMatrix[0, 2] = imageSize[0] * 0.5
+		camMatrix[1, 2] = imageSize[1] * 0.5
+		camMatrix[2, 2] = 1
+		ret, camMatrix, _, rVec, tVec = cv2.calibrateCamera(objpts, imgpts, imageSize, camMatrix, None, rvecs=None,
+		                                                    tvecs=None,
+		                                                    flags=cv2.CALIB_FIX_ASPECT_RATIO + cv2.CALIB_USE_INTRINSIC_GUESS + cv2.CALIB_FIX_PRINCIPAL_POINT)
 
 		cameraMats[:, :, c] = camMatrix
 		log.VLOG(4, "with Intrinsic Parameter Matrix %s", camMatrix)
@@ -103,9 +104,9 @@ def singleCamCalibMat(umeas, xworld, planeData, cameraData):
 			tcb[:, n, c] = tVec[n].ravel()
 
 			# Reprojection error (currently for debugging only)
-			testPts, _ = cv2.projectPoints(X,R,tVec[n],camMatrix,None)
+			testPts, _ = cv2.projectPoints(X, R, tVec[n], camMatrix, None)
 			testPts = np.squeeze(testPts)
-			tmpErr = np.linalg.norm (testPts - x, axis=1)
+			tmpErr = np.linalg.norm(testPts - x, axis=1)
 			repErr[:, n, c] = tmpErr
 
 	return cameraMats, rcb, tcb
@@ -345,108 +346,6 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 	# Initialize camera positions assuming the first camera is at the origin and the cameras
 	# are uniformly spaced by horizontal a displacement vector and a vertical vector such as in
 	# a rectangular grid of the dimensions to be specified.
-	cam_hspacing = np.array([1, 0, 0])
-	cam_vspacing = np.array([0, 1, 0])
-	cam_num_row = 3
-	cam_num_col = 3
-
-	x0 = t_pair[:,:,0]
-	x0 = np.reshape(x0,(-1,1), order='F')
-
-	# Construct the problem.
-	x = cp.Variable((3 * ncams, 1))
-	objective = cp.Minimize(cp.sum_squares(A @ x - b))
-	constraints = [constraint_array @ x == np.zeros((3 * ncams, 1))]
-	prob = cp.Problem(objective, constraints)
-
-	print("Optimal value", prob.solve())
-
-	if prob.status == cp.OPTIMAL:
-		log.info("Minimization for Translation Vectors Succeeded!")
-		print('Optimized translation error: ', trans_cost(x.value))
-		t_vals = x.value
-	else:
-		log.error('Minimization Failed for Translation Vectors!')
-		return
-		# Translation vectors stored as columns.
-	t_vals = np.transpose(t_vals.reshape((-1, 3)))
-
-	for i in range(t_vals.shape[1]):
-		log.VLOG(3, 't(%d) = \n %s' % (i, t_vals[:, i]))
-
-	# log.info('Minimizing for translation vectors of cameras: %s', res.message)
-
-	# Solve linear least square problem to minimize rotation matrices.
-	log.info("Minimizing for first estimates of rotation matrices per camera.")
-	A = np.zeros((9, 9 * ncams, ncams, ncams))
-
-	# Construct expanded matrix expression for minimization.
-	for i in range(0, ncams):
-		for j in range(0, ncams):
-			if i == j:
-				continue
-			Rij = R_pair[:, :, min(i, j), max(i, j)]
-
-			A[:, 9 * i: 9 * (i + 1), i, j] = np.eye(9)
-
-			A[:, 9 * j: 9 * (j + 1), i, j] = -np.kron(np.eye(3), Rij)
-
-	A = np.concatenate(np.concatenate(np.moveaxis(A, (2, 3), (0, 1)), axis=0), axis=0)
-	b = np.zeros(A.shape[0])
-
-	log.VLOG(4, 'Minimization matrix A for rotation matrices \n %s' % A)
-	log.VLOG(4, 'Minimization vector b for rotation matrices \n %s' % b)
-
-	# We want to constrain only the rotation matrix for the first camera
-	# Create a constraint array with a 9x9 identity matrix in the top left
-	constraint_array = np.zeros([9 * ncams, 9 * ncams])
-	constraint_array[0:9, 0:9] = np.eye(9)
-	bound = np.zeros(9 * ncams)
-	bound[0] = 1
-	bound[4] = 1
-	bound[8] = 1
-
-	# Initialize all rotation matrices to identities assuming no camera is rotated with respect to another.
-	x0 = np.zeros(9 * ncams)
-	for i in range(ncams):
-		x0[9 * i] = 1
-		x0[9 * i + 4] = 1
-		x0[9 * i + 8] = 1
-
-	# Solve the minimization, requiring the first rotation matrix to be the identity matrix
-	# TODO: figure out (if possible) a better initial guess
-
-	# Construct the problem.
-	x = cp.Variable(9 * ncams)
-	objective = cp.Minimize(cp.sum_squares(A @ x - b))
-	constraints = [constraint_array @ x == bound]
-	prob = cp.Problem(objective, constraints)
-
-	print("Optimal value", prob.solve())
-
-	print('Minimization status: ', prob.status)
-	if prob.status == cp.OPTIMAL:
-		log.info("Minimization for Rotational Matrices Succeeded!")
-		print('Optimized rotation error: ', rotCost(x.value))
-		R_vals = x.value
-	else:
-		log.error('Minimization Failed for Rotational Matrices!')
-		return
-
-	# Rotation matrices stored rows first
-	R_vals = np.moveaxis(R_vals.reshape(-1, 3, 3), 0, 2)
-
-	# Fit rotation matrices from optimized result.
-	for i in range(ncams):
-		R_vals[:, :, i], _ = fitRotMat(R_vals[:, :, i])
-		log.VLOG(3, 'R(%d) = \n %s' % (i, R_vals[:, :, i]))
-
-	log.info("Finding average rotation matrices and translational vectors from single camera calibration.")
-	#x0 = np.zeros((3 * ncams))
-	#for i in range(cam_num_row):
-	#    for j in range(cam_num_col):
-	#        cam_index = i * cam_num_col + j
-	#        x0[3 * cam_index: 3 * (cam_index + 1)] = i * cam_vspacing + j * cam_hspacing
 
 	def trans_cost(x):
 		return np.linalg.norm(np.matmul(A, np.array(x)) - b)
@@ -513,7 +412,6 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 		x0[9 * i + 8] = 1
 
 	# Solve the minimization, requiring the first rotation matrix to be the identity matrix
-	# TODO: figure out (if possible) a better initial guess
 
 	# Construct the problem.
 	x = cp.Variable(9 * ncams)
@@ -526,7 +424,6 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 	print('Minimization status: ', prob.status)
 	if prob.status == cp.OPTIMAL:
 		log.info("Minimization for Rotational Matrices Succeeded!")
-		#print('Optimized rotation error: ', rotCost(x.value))
 		R_vals = x.value
 	else:
 		log.error('Minimization Failed for Rotational Matrices!')
@@ -537,7 +434,7 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 
 	# Fit rotation matrices from optimized result.
 	for i in range(ncams):
-		R_vals[:, :, i], _ = fitRotMat(R_vals[:, :, i])
+		R_vals[:, :, i] = fitRotMat(R_vals[:, :, i])
 		log.VLOG(3, 'R(%d) = \n %s' % (i, R_vals[:, :, i]))
 
 	log.info("Finding average rotation matrices and translational vectors from single camera calibration.")
@@ -564,6 +461,7 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 	                                                      t_images.reshape((-1))))))
 
 	planeVecs = {}
+	rotMats = {}
 
 	# Set up objective function and Jacobian sparsity structure for minimization.
 	def reproj_obj_lsq(min_vec):
@@ -578,7 +476,13 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 		normal_factor = 1
 
 		for c in range(ncams):
+			rotMatsCam[:, :, c] = fitRotMat(rotMatsCam[:, :, c])
 			for n in range(nplanes):
+				if n not in rotMats:
+					rotMatsBoard[:, :, n] = fitRotMat(rotMatsBoard[:, :, n])
+					rotMats[n] = rotMatsBoard[:, :, n]
+				else:
+					rotMatsBoard[:, :, n] = rotMats[n]
 				for i in range(nX):
 					for j in range(nY):
 						err[c * nplanes * nX * nY + n * nX * nY + i * nY + j] = \
@@ -586,7 +490,6 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 							             xworld[:, nX * nY * n + i * nY + j], cameraMats[:, :, c],
 							             rotMatsCam[:, :, c], rotMatsBoard[:, :, n], transVecsCam[:, c],
 							             transVecsBoard[:, n])
-		# print('Mean Reprojection Error: ', np.linalg.norm(err))
 		return err
 
 	def bundle_adjustment_sparsity():
@@ -635,14 +538,32 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 
 		return A
 
+	lbounds = np.full(min_vec_ini.shape, -np.inf)
+	ubounds = np.full(min_vec_ini.shape, np.inf)
+	rotstart = cameraMats.size
+	rotend = rotstart + R_vals.size + R_images.size
+	lbounds[rotstart:rotend] = -np.ones(rotend - rotstart)
+	ubounds[rotstart:rotend] = np.ones(rotend - rotstart)
+
 	A = bundle_adjustment_sparsity()
-	reproj_res = scipy.optimize.least_squares(reproj_obj_lsq, min_vec_ini, jac_sparsity=A, verbose=2, x_scale='jac', ftol=1e-2)
+	reproj_res = scipy.optimize.least_squares(reproj_obj_lsq, min_vec_ini, bounds=(lbounds, ubounds), jac_sparsity=A,
+	                                          verbose=2, x_scale='jac', ftol=1e-2)
 
 	if reproj_res.success:
-		print("Final error: {}".format(reproj_min_func(planeData, cameraData, umeas, xworld, reproj_res.x)))
+		log.info("Final error: {}".format(reproj_min_func(planeData, cameraData, umeas, xworld, reproj_res.x)))
 		log.info("Reprojection Minimization Succeeded!")
 		cameraMats, rotationMatsCam, rotationMatsBoard, transVecsCam, transVecsBoard = unpack_reproj_min_vector(
 			cameraData, planeData, reproj_res.x)
+		for i in range(ncams):
+			rotationMatsCam[:, :, i] = fitRotMat(rotationMatsCam[:, :, i])
+		for i in range(nplanes):
+			rotationMatsBoard[:, :, i] = fitRotMat(rotationMatsBoard[:, :, i])
+		x = np.append(cameraMats.reshape((-1)),
+		                        np.append(rotationMatsCam.reshape((-1)),
+		                                  np.append(rotationMatsBoard.reshape((-1)),
+		                                            np.append(transVecsCam.reshape((-1)),
+		                                                      transVecsBoard.reshape((-1))))))
+		log.info("Real Final error: {}".format(reproj_min_func(planeData, cameraData, umeas, xworld, x)))
 	else:
 		log.error('Reprojection Minimization Failed!')
 		return
@@ -778,7 +699,7 @@ def unpack_reproj_min_vector(cameraData, planeData, min_vec):
 def proj_red(ray_trace_vec):
 	"""Reduce an augmented 3D image vector, the ray tracing vector, to the image position.
 	"""
-	return np.array([ray_trace_vec[0]/ray_trace_vec[2], ray_trace_vec[1]/ray_trace_vec[2]]).transpose()
+	return np.array([ray_trace_vec[0] / ray_trace_vec[2], ray_trace_vec[1] / ray_trace_vec[2]]).transpose()
 
 
 def jacobian2(vec_fxn):
