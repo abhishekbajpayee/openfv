@@ -1,22 +1,19 @@
 # %matplotlib notebook
+import argparse
+import configparser
+import glob
+import math
 import os
 import sys
-import glob
+import time
+from statistics import mean
+
+import cv2
+import matplotlib.pyplot as plt
 # import tiffcapture as tc #using jpg for now
 import numpy as np
-import cv2
 import numpy.linalg as lin
-import math
-import itertools
-import warnings
 import scipy.optimize
-import matplotlib.pyplot as plt
-import time
-import configparser
-import argparse
-import copy
-from statistics import mean
-from mpl_toolkits.mplot3d import Axes3D
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
@@ -27,7 +24,7 @@ if not __name__ == "__main__":
     log = logger.getLogger(filename.split('"')[1], False, False)
 
 
-# This code performs the "Belden" method of self-calibration for multiple cameras in a refractive system 
+# This code performs the "Belden" method of self-calibration for multiple cameras in a refractive system
 
 # class definitions
 class planeData(object):
@@ -112,8 +109,8 @@ def getSpacedFrameInd(tiff, n, nframes=0):
     # Generate indices of n evenly spaced frames in a multipage tiff
     # Inputs:
     # tiff       - location of tiff being calibrated
-    # n          - number of indices to generate  
-    # nframes    - number of frames in each tiff -- if not provided, program will try to determine(slow) 
+    # n          - number of indices to generate
+    # nframes    - number of frames in each tiff -- if not provided, program will try to determine(slow)
     #
     # Outputs:
     # frameind   - indices of frames to be used for calibration
@@ -256,7 +253,7 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
     #     nX,nY         - number of grid points per row and column on each plane
     # path              - location to get images from if they aren't being passed in directly
     #                     (in which case they should be stored by camera in a folder called 'calibration')
-    # imgs              - array of images in which to find corners (order should be [camera[image]]). 
+    # imgs              - array of images in which to find corners (order should be [camera[image]]).
     #                     If not given, program will look on the path.
     # save_corners      - boolean; whether save a file with the corners
     #
@@ -350,7 +347,7 @@ def findCorners(pData, ncams, path, imgs=[], save_corners=bool(0)):
 def getScale(planeData, umeas):
     # Calculate pixel to mm ratio (pix_phys) for later refocusing
     # Inputs:
-    # planeData: 
+    # planeData:
     #   scaleInfo - array holding center camera id and center image index
     #   nX, nY    - number of x and y points
     #   dX, dY    - spacing between grid points
@@ -397,9 +394,9 @@ def planar_grid_to_world(plane_params, xyzgrid, planeData):
     # plane_params - 6 x nplanes matrix of plane parameters
     # xyzgrid      - 3 x nX*nY matrix containing points on a grid
     # planeData:
-    #   nplanes    - number of calibration planes 
+    #   nplanes    - number of calibration planes
     #   nX,nY      - number of grid points per row, column on each plane
-    #    
+    #
     # Output:
     # X            - World Points (3 x nX*nY*nplanes)
 
@@ -586,7 +583,7 @@ def f_eval_1eq(r1, r2, z1, z2, n1, n2):
 
 
 def f_eval_2eq(r1, r2, r3, z1, z2, z3, n1, n2, n3):
-    # evaluate ray tracing function, gradients for 2 refractive equations in (snell's law with 3 media) 
+    # evaluate ray tracing function, gradients for 2 refractive equations in (snell's law with 3 media)
     # Inputs:
     # n1,2,3     - indices of refraction
     # r1,2,3     - length of ray in each refractive medium
@@ -704,7 +701,7 @@ def f_refrac(r1, r2, r3, z1, z2, n1, n2):
     # n1,2       - indices of refraction (assume one index is 1)
     # r1,2,3     - length of ray in each refractive medium
     # z1,2       - z coordinate of ray intersection with each medium
-    # 
+    #
     # Outputs:
     # f          - output of snell's law equation (ideally 0)
 
@@ -724,7 +721,7 @@ def bisection(r2L, r2U, r1, r3, z1, z2, n1, n2, tol):
     # r1,2L,2U,3 - lengths of ray in each medium (2 in wall b/c for forwards and reverse ray tracing)
     # z1,2       - z coordinate of ray intersection with each medium
     # tol        - object containing tolerances for solver
-    #    
+    #
     # Outputs:
     # r2f        - length of ray in second medium
     # Iter       - number of iterations to arrive at solution
@@ -781,7 +778,7 @@ def refrac_solve_bisec(r10, r20, r3, z1, z2, z3, n1, n2, n3, tol, maxIter):
     # r10,20,3   - length of ray in each refractive medium
     # z1,2,3     - z coordinate of ray intersection with each medium
     # tol        - object containing tolerances for solver
-    #    
+    #
     # Outputs:
     # r1n        - length of ray in air (wall to camera)
     # r2n        - length of ray in wall
@@ -841,9 +838,9 @@ def img_refrac(XC, X, spData, rTol):
     # INPUTS:
     # XC            - 3 x 1 vector containing the coordinates of the camera's center of projection (COP)
     # X             - 3 x N vector containing the coordinates of each point
-    # rTol          - object containing tolerances for solver 
-    # spData:       - scene data 
-    #        Zw     - Z coordinate of wall 
+    # rTol          - object containing tolerances for solver
+    # spData:       - scene data
+    #        Zw     - Z coordinate of wall
     #        n      - index of refraction of air, glass and water
     #        tW     - wall thickness
     #
@@ -881,12 +878,11 @@ def img_refrac(XC, X, spData, rTol):
     max_err_rB = np.zeros(Npts)
 
     # solve the refractve equations (snell's law) for the length of the ray in each medium
-
-    if t==0: # no wall thickness -> no ray in wall
-        rB = copy.copy(rP)
-        #indices of out-of-tank and in-tank points
-        i1 = np.array([x for x in range (Npts) if z3[x] ==0])
-        i2 = np.array([x for x in range (Npts) if z3[x] not in i1])
+    if t == 0:  # no wall thickness -> no ray in wall
+        rB = rP
+        # indices of out-of-tank and in-tank points
+        i1 = np.array([x for x in range(Npts) if z3[x] == 0])
+        i2 = np.array([x for x in range(Npts) if z3[x] not in i1])
 
         # use Newton-Raphson iteration to solve the refractive equation for the rays from the wall to the camera
         rB[i2] = NR_1eq(rB0[i2], rP[i2], z1[i2], z3[i2], n1, n3, rTol.tol)[0]
@@ -907,8 +903,8 @@ def img_refrac(XC, X, spData, rTol):
             log.warning('Warning: f has a NaN', stacklevel=2)
 
     elif t > 0:
-        rB = copy.copy(rP)
-        rD = copy.copy(rP)
+        rB = rP
+        rD = rP
 
         # indices of out-of-tank and in-tank points
         i1 = np.array([x for x in range(Npts) if z3[x] < rTol.z3_tol])
@@ -1041,7 +1037,7 @@ def cam_model_adjust(u, par0, X, sD, cD, rTol, bounded, maxFev=1600, maxfunc_don
     # done using a non-linear least squares Lev-Marq solver
     #
     # Inputs:
-    # u                     - 2 x N x M matrix containing N measured 2D image plane points 
+    # u                     - 2 x N x M matrix containing N measured 2D image plane points
     # par0                  - 3 x 4 x M initial guess for the camera matrix (Later I will change this to be refreaction model)
     # X                     - 3 x N x M matrix containing intial guesses for the 3D world point coordinates
     # sD                    - scene data (unpacked later)
@@ -1050,7 +1046,7 @@ def cam_model_adjust(u, par0, X, sD, cD, rTol, bounded, maxFev=1600, maxfunc_don
     # maxFev                - max number of iterations for optimizer
     # maxfunc_dontstop_flag - run until solution is found if 'on'
     # print_err             - boolean; Print pre- and post-optimization error
-    # print_data            - boolean; Print initial and final camera parameters   
+    # print_data            - boolean; Print initial and final camera parameters
     #
     # Outputs:
     # Pnew                  - 3 x 4 x M best-fit camera matrix
@@ -1092,8 +1088,8 @@ def cam_model_adjust(u, par0, X, sD, cD, rTol, bounded, maxFev=1600, maxfunc_don
             # utest = refrac_proj_onecam(par0[:,j],Xtemp,sD,cD,rTol) #test for img_refrac and refrac_proj_onecam
 
             try:
-                # project the guessed world points through the camera model and adjust 
-                # the camera parameters to fit the output to the measured image points   
+                # project the guessed world points through the camera model and adjust
+                # the camera parameters to fit the output to the measured image points
 
                 if bounded:  # bounds for optimization (bounded optimization can't use the lm method)
                     bound = [[-np.inf for x in range(len(par0[:, j]))], [np.inf for x in range(len(par0[:, j]))]]
@@ -1153,14 +1149,14 @@ def planar_grid_adj(planeParams, P, xyzgrid, spData, planeData, rTol):
     # Inputs:
     # P             - 3 x 4 x ncams camera parameter matrix
     # xyzgrid       - 3 x N matrix of points on the grid
-    # rTol          - object containing tolerances  
+    # rTol          - object containing tolerances
     # spData:
-    #       Zw      - Z coordinate of wall 
+    #       Zw      - Z coordinate of wall
     #       n       - index of refraction of air, glass and water
     #       tW      - wall thickness
     #
     # planeData     - basic quantities associated with calibration images (unpacked later)
-    #    
+    #
     # Outputs:
     # u             - 2xN matrix of non-homogeneous image points
 
@@ -1199,15 +1195,15 @@ def planar_grid_triang(umeas_mat, P, xyzgrid, planeParams0, spData, planeData, r
     # umeas_mat           - 2 x Npts x ncams matrix containing N measured image points in M
     #                       cameras.  If any camera doesn't see a point, NaN's should be in place of
     #                       the points.
-    # P                   - 3 x 4 x ncams camera matrix for M cameras 
+    # P                   - 3 x 4 x ncams camera matrix for M cameras
     # xyzgrid             - 3 x Npts matrix of points on a grid
     # plane_params0       - initial guess for plane parameters (6 rows, nPlanes columns)
-    # rTol                - object containing tolerances  
+    # rTol                - object containing tolerances
     # spData              - basic quantities associated with experiment (unpacked later)
     # planeData           - basic quantities associated with calibration images (unpacked later)
     # print_err           - boolean; Print pre- and post- optimization error
     # print_data          - boolean; Print initial and final data (if print_err is also on)
-    #    
+    #
     # Outputs:
     # plane_params        - optimized plane parameters
 
@@ -1276,7 +1272,7 @@ def refrac_proj(X, P, spData, rTol):
     # Inputs:
     # P           - 3x4xM matrix of pinhole camera matrices
     # X           - 3xNpts vector containing coordinates of world points
-    # SpData:     - imaging system parameters 
+    # SpData:     - imaging system parameters
     # rTol        - object containing tolerances for solvers
     #
     # Outputs:
@@ -1307,9 +1303,9 @@ def reprojError(umeas, P, xPts, spData, rTol):
     # xPts          - 3xNpts array of world points
     # spData        - basic quantities associated with experiment (unpacked later)
     # rTol          - tolerances for solvers
-    #    
+    #
     # Outputs:
-    # rep_err       - NptsxNcams array of reprojection error for each point 
+    # rep_err       - NptsxNcams array of reprojection error for each point
     # rep_epp_mean  - Ncams array of mean reprojection error for each cameras
 
     uReproj = refrac_proj(xPts, P, spData, rTol)
@@ -1317,15 +1313,15 @@ def reprojError(umeas, P, xPts, spData, rTol):
 
     rep_err = np.transpose(
         [[np.abs(pX - pU) for pX, pU in zip(mX, mU)] for mX, mU in zip(np.transpose(uReproj), np.transpose(umeas))])
-    # reprojection error for each point in each camera    
+    # reprojection error for each point in each camera
     rep_err_mean = [np.mean(err) for err in np.transpose(rep_err)]
-    # mean reprojection error for each camera    
+    # mean reprojection error for each camera
 
     return rep_err, rep_err_mean
 
 
 def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
-    # Carry out the autocalibration process    
+    # Carry out the autocalibration process
     # Inputs:
     # Umeas        - 2xNxncams array of image points in each camera
     # pData:       - plane data object
@@ -1335,8 +1331,8 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     # camData:     - camera data object
     #   so         -
     #   ncams      - number of cameras being calibrated
-    # scData:      - scene data object 
-    # tols:        - tolerances object 
+    # scData:      - scene data object
+    # tols:        - tolerances object
     #   maxiter    - max number of iterations for optimizers
     #   rep_err_tol- acceptable refraction error
     # bounded      - boolean for using bounding algorithm
@@ -1346,7 +1342,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     # camParams    - parameters for each camera (7 x ncams)
     # Xworld       - world points
     # planeParams  - parameters for each calibration plane (6 x ncalplanes)
-    # rep_err      - NptsxNcams array of reprojection error for each point 
+    # rep_err      - NptsxNcams array of reprojection error for each point
     # errorLog     - array of format [first_mean_errors last_mean_errors total_avg_last_error]
 
     dx = pData.dX
@@ -1358,20 +1354,18 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     ncams = camData.ncams
     z0 = pData.z0
 
-    # generate initial guesses for parameters 
+    # generate initial guesses for parameters
     camParams = setupCamera(camData)
     planeParams = setupPlanes(ncalplanes, z0)
 
     # generate locations of the points on each plane
-
-    # if even, set up so we get right amount of points and center
-    if (nx%2==0):
-        xvec = np.arange(-(math.floor(nx/2))+1,math.floor(nx/2)+1)-0.5
+    # if even, set up so we get right amount of points
+    if nx % 2 == 0:
+        xvec = np.arange(-(math.floor(nx / 2)) + 1, math.floor(nx / 2) + 1) - 0.5
     else:
-        xvec = np.arange(-(math.floor(nx/2)),math.floor(nx/2)+1)
-    if (ny%2==0):
-        yvec = np.arange(-(math.floor(ny/2))+1,math.floor(ny/2)+1)-0.5
-
+        xvec = np.arange(-(math.floor(nx / 2)), math.floor(nx / 2) + 1)
+    if ny % 2 == 0:
+        yvec = np.arange(-(math.floor(ny / 2)) + 1, math.floor(ny / 2) + 1) - 0.5
     else:
         yvec = np.arange(-(math.floor(ny / 2)), math.floor(ny / 2) + 1)
     xphys = dx * xvec
@@ -1402,7 +1396,7 @@ def selfCalibrate(umeas, pData, camData, scData, tols, bounded):
     rep_err_diff = float('Inf')
     rep_err, rep_err_mean[0] = reprojError(umeas, P, Xworld, scData, tols)
 
-    # AUTOCALIBRATION LOOP 
+    # AUTOCALIBRATION LOOP
     Iter = 0
     repTol = tols.rep_err_tol * np.ones(ncams)  # reprojection error tolerance for each camera
     while np.any(rep_err_mean[Iter] > repTol) and Iter <= tols.maxiter and np.any(np.abs(rep_err_diff) > repTol / 10):
@@ -1445,7 +1439,7 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
     # Inputs:
     # exptpath - path on which data should be saved
     # camnames - names of cameras to which data belongs
-    # p        - 3 x 4 x number of cameras array of camera matrices 
+    # p        - 3 x 4 x number of cameras array of camera matrices
     # cparams  - parameters from which the matrices were contructed
     # X        - world points
     # pparams  - parameters of the planes on which the points are found
@@ -1461,7 +1455,7 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
     # and saves data on the experiment path
     # f - file to which data was saved (closed)
 
-    ##### plot world points and camera locations 
+    ##### plot world points and camera locations
     fig = plt.figure('Camera and Grid Locations', figsize=(8, 7))
     ax = fig.add_subplot(111, projection='3d')
     ax.set_xlabel('X axis')
@@ -1513,7 +1507,6 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
         f.write(str(camData.ncams) + '\n')
 
         for c in range(len(camnames)):
-
             f.write(str(camnames[c]) + '\n')
             np.savetxt(f, p[:, :, c], delimiter=' ', fmt='%f')
             camParam = cparams[:, c]
@@ -1521,8 +1514,8 @@ def saveCalibData(exptpath, camnames, p, cparams, X, pparams, scdata, camData, p
             f.write(str(worldPoints[0]) + ' ' + str(worldPoints[1]) + ' ' +
                     str(worldPoints[2]) + '\n')
         f.write('1\n')  # Refractive or not
-        f.write(str(scdata.zW) + ' ' + str(scdata.n[0]) + ' ' + str(scdata.n[1]) + ' ' +
-                str(scdata.n[2]) + ' ' + str(scdata.tW) + '\n')
+        f.write(str(scdata.zW) + ' ' + str(scdata.tW) + ' ' + str(scdata.n[0]) + ' ' + str(scdata.n[1]) + ' ' +
+                str(scdata.n[2]) + '\n')
         f.write('\n' + str(planeData.dX) + ' ' + str(planeData.dY) + ' ' +
                 str(planeData.nX) + ' ' + str(planeData.nY) + '\n')
         f.write(str(camData.so) + ' ' + str(camData.f) + ' ' + str(planeData.z0[-1]) + '\n')
