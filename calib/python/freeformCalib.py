@@ -62,7 +62,7 @@ def singleCamCalibMat(umeas, xworld, planeData, cameraData):
 	repErr = np.zeros((nX * nY, nplanes, ncams))
 
 	# try using initial guess for param (eventually get from config file)
-	init_f_value = 9000;
+	init_f_value = 9000
 
 	for c in range(ncams):
 
@@ -189,63 +189,26 @@ def kabsch(X1, X2):
 		# X1: The world coordinates of the first camera stacked as columns.
 		# X2: The world coordinates of the second camera stacked as columns.
 	"""
-
 	x1m = X1.mean(axis=1)
 	x2m = X2.mean(axis=1)
 
 	# Subtract mean positions.
-	X1_centered = np.zeros(X1.shape)
-	X2_centered = np.zeros(X2.shape)
-
-	for i in range(X1.shape[0]):
-		X1_centered[i, :] = X1[i, :] - x1m[i]
-		X2_centered[i, :] = X2[i, :] - x2m[i]
+	X1_centered = (X1.transpose() - x1m).transpose()
+	X2_centered = (X2.transpose() - x2m).transpose()
 
 	A = np.matmul(X2_centered, np.transpose(X1_centered))
 
-	U, S, Vtrans = np.linalg.svd(A)
+	U, S, Vt = np.linalg.svd(A)
 
 	# calculates variable to correct rotation matrix if necessary
-	d = np.linalg.det(np.matmul(U, Vtrans))
+	d = np.linalg.det(np.matmul(U, Vt))
 	D = np.eye(3)
 	D[2, 2] = d
 
-	R_12 = np.matmul(np.matmul(U, D), Vtrans)
+	R_12 = np.matmul(np.matmul(U, D), Vt)
 	t_12 = np.mean(X2 - np.matmul(R_12, X1), 1)
 
 	return R_12, t_12
-
-
-def quaternionToRotMat(q):
-	"""Convert 1 x 4 quaternion to a 3 x 3 rotation matrix.
-	   (Unclear what quaternions correspond to)
-	"""
-
-	normalizationFactor = np.dot(q, q)
-
-	# qc is a row vector
-	qc = np.array([[q[1], q[2], q[3]]])
-	# Cross operator matrix.
-	Q = np.array([[0, -q[3], q[2]], [q[3], 0, -q[1]], [-q[2], q[1], 0]])
-
-	R = (q[0] ** 2 - np.dot(qc, qc)) * np.eye(3) + 2 * np.matmul(np.transpose(qc), qc) + 2 * q[0] * Q;
-	R = R / normalizationFactor
-	return R
-
-
-def rotMatToQuaternion(R):
-	"""
-	Convert 3x3 rotation matrix to 1x4 quaternion
-	:param R: 3x3 rotation matrix
-	:return: quaternion matrix
-	"""
-	# component-wise from rotation formalism
-	qr = 1 / 2 * np.sqrt(1 + R[0, 0] + R[1, 1] + R[2, 2])
-	qi = (R[2, 1] - R[1, 2]) / (4 * qr)
-	qj = (R[0, 2] - R[2, 0]) / (4 * qr)
-	qk = (R[1, 0] - R[0, 1]) / (4 * qr)
-
-	return [qr, qi, qj, qk]
 
 
 def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, planeData, cameraData):
@@ -286,7 +249,11 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 	xworld = np.transpose(xworld)
 
 	for i in range(0, ncams):
-		for j in range(i + 1, ncams):
+		for j in range(0, ncams):
+			if i == j:
+				t_pair[:, i, j] = np.zeros(3)
+				R_pair[:, :, i, j] = np.eye(3, 3)
+				continue
 			log.VLOG(2, 'Correlating cameras (%d, %d)' % (i, j))
 
 			# Compute world coordinates used by kabsch.
@@ -298,8 +265,8 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 			# Compute world coordinates and use Kabsch
 			Xi = np.matmul(Ri, xworld) + ti
 			Xj = np.matmul(Rj, xworld) + tj
-			Xi = Xi.reshape((3, -1))
-			Xj = Xj.reshape((3, -1))
+			Xi = Xi.reshape((3, -1), order='F')
+			Xj = Xj.reshape((3, -1), order='F')
 			R_pair_ij, t_pair_ij = kabsch(Xi, Xj)
 			R_pair[:, :, i, j] = R_pair_ij
 			t_pair[:, i, j] = t_pair_ij
@@ -322,8 +289,10 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 		for j in range(0, ncams):
 			if i == j:
 				continue
-			Rij = R_pair[:, :, min(i, j), max(i, j)]
-			tij = t_pair[:, min(i, j), max(i, j)]
+			# Rij = R_pair[:, :, min(i, j), max(i, j)]
+			# tij = t_pair[:, min(i, j), max(i, j)]
+			Rij = R_pair[:, :, i, j]
+			tij = t_pair[:, i, j]
 
 			A[:, 3 * i: 3 * (i + 1), i, j] = -Rij
 			A[:, 3 * j: 3 * (j + 1), i, j] = np.eye(3)
@@ -461,7 +430,6 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 	                                                      t_images.reshape((-1))))))
 
 	planeVecs = {}
-	rotMats = {}
 
 	# Set up objective function and Jacobian sparsity structure for minimization.
 	def reproj_obj_lsq(min_vec):
@@ -476,13 +444,7 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 		normal_factor = 1
 
 		for c in range(ncams):
-			rotMatsCam[:, :, c] = fitRotMat(rotMatsCam[:, :, c])
 			for n in range(nplanes):
-				if n not in rotMats:
-					rotMatsBoard[:, :, n] = fitRotMat(rotMatsBoard[:, :, n])
-					rotMats[n] = rotMatsBoard[:, :, n]
-				else:
-					rotMatsBoard[:, :, n] = rotMats[n]
 				for i in range(nX):
 					for j in range(nY):
 						err[c * nplanes * nX * nY + n * nX * nY + i * nY + j] = \
@@ -538,16 +500,9 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 
 		return A
 
-	lbounds = np.full(min_vec_ini.shape, -np.inf)
-	ubounds = np.full(min_vec_ini.shape, np.inf)
-	rotstart = cameraMats.size
-	rotend = rotstart + R_vals.size + R_images.size
-	lbounds[rotstart:rotend] = -np.ones(rotend - rotstart)
-	ubounds[rotstart:rotend] = np.ones(rotend - rotstart)
-
 	A = bundle_adjustment_sparsity()
-	reproj_res = scipy.optimize.least_squares(reproj_obj_lsq, min_vec_ini, bounds=(lbounds, ubounds), jac_sparsity=A,
-	                                          verbose=2, x_scale='jac', ftol=1e-2)
+	reproj_res = scipy.optimize.least_squares(reproj_obj_lsq, min_vec_ini, jac_sparsity=A, verbose=2, x_scale='jac',
+	                                          ftol=1e-2)
 
 	if reproj_res.success:
 		finError = reproj_min_func(planeData, cameraData, umeas, xworld, reproj_res.x)
@@ -555,16 +510,6 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 		log.info("Reprojection Minimization Succeeded!")
 		cameraMats, rotationMatsCam, rotationMatsBoard, transVecsCam, transVecsBoard = unpack_reproj_min_vector(
 			cameraData, planeData, reproj_res.x)
-		for i in range(ncams):
-			rotationMatsCam[:, :, i] = fitRotMat(rotationMatsCam[:, :, i])
-		for i in range(nplanes):
-			rotationMatsBoard[:, :, i] = fitRotMat(rotationMatsBoard[:, :, i])
-		x = np.append(cameraMats.reshape((-1)),
-		                        np.append(rotationMatsCam.reshape((-1)),
-		                                  np.append(rotationMatsBoard.reshape((-1)),
-		                                            np.append(transVecsCam.reshape((-1)),
-		                                                      transVecsBoard.reshape((-1))))))
-		log.info("Real Final error: {}".format(reproj_min_func(planeData, cameraData, umeas, xworld, x)))
 	else:
 		log.error('Reprojection Minimization Failed!')
 		return
@@ -792,15 +737,15 @@ def reproj_error(normal_factor, img_coor, world_coor, camMatrix, rotMatrixCam, r
 
 	# TODO scaling parameter k for principal optical axis assumed here.
 
-    # [R_c t_c].
-    transMatCam = np.column_stack((np.transpose(rotMatrixCam), transVecCam))
-    #transMatCam = np.column_stack((rotMatrixCam, -transVecCam))
-    # Corresponds to eq(6) in Muller paper. 4x4 matrix with image rot matrices and trans vectors
-    transMatImg = np.column_stack((rotMatrixBoard, transVecBoard))
-    rowToAdd = np.zeros(4)
-    rowToAdd[3] = 1
-    transMatImg = np.row_stack((transMatImg, rowToAdd))
-    aug_world_coor = np.append(world_coor, 1)
+	# [R_c t_c].
+	transMatCam = np.column_stack((np.transpose(rotMatrixCam), transVecCam))
+	# transMatCam = np.column_stack((rotMatrixCam, -transVecCam))
+	# Corresponds to eq(6) in Muller paper. 4x4 matrix with image rot matrices and trans vectors
+	transMatImg = np.column_stack((rotMatrixBoard, transVecBoard))
+	rowToAdd = np.zeros(4)
+	rowToAdd[3] = 1
+	transMatImg = np.row_stack((transMatImg, rowToAdd))
+	aug_world_coor = np.append(world_coor, 1)
 
 	# Compute matrix multiplication
 	product = np.matmul(camMatrix, np.matmul(transMatCam, np.matmul(transMatImg, aug_world_coor)))
@@ -810,27 +755,59 @@ def reproj_error(normal_factor, img_coor, world_coor, camMatrix, rotMatrixCam, r
 	return 1 / np.sqrt(normal_factor) * np.linalg.norm(img_coor - proj_red(product))
 
 
-def saveCalibData(exptPath, camIDs, P, cparams, tplanes, sceneData, cameraData, finalError,
-                      pix_phys, prefix):
-    """
-    Save and display calibration data
-    :param cparams:     parameters from which the matrices were contructed
-    :param X:           world points
-    :return: f - file to which data was saved (closed)
-    plots world points and camera locations, with a sample of the wall and saves data on the experiment path
-    """
+def saveCalibData(exptPath, camnames, p, cparams, tplanes, sceneData, camData, finalError,
+                  pix_phys, name):
+	"""
+	Save and display calibration data
+	:param cparams:     parameters from which the matrices were contructed
+	:param X:           world points
+	:return: f - file to which data was saved (closed)
+	plots world points and camera locations, with a sample of the wall and saves data on the experiment path
+	"""
 
-    # plot world points and camera locations
-    fig = plt.figure('Camera and Grid Locations', figsize=(8, 7))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.set_xlabel('X axis')
-    ax.set_ylabel('Y axis')
-    ax.set_zlabel('Z axis')
-    # include a sample of the tank wall for context
-    grid, = ax.plot(tplanes[0, :], tplanes[1, :], tplanes[2, :], 'b.', label='Grid Points')
-    cams, = ax.plot(cparams[0, :], cparams[1, :], cparams[2, :], 'r+', label='Cameras')
-    plt.legend(handles=[grid, cams, wall])
-    plt.show()
+	# plot world points and camera locations
+	fig = plt.figure('Camera and Grid Locations', figsize=(8, 7))
+	ax = fig.add_subplot(111, projection='3d')
+	ax.set_xlabel('X axis')
+	ax.set_ylabel('Y axis')
+	ax.set_zlabel('Z axis')
+	# include a sample of the tank wall for context
+	board, = ax.plot(tplanes[0, :], tplanes[1, :], tplanes[2, :], 'b.', label='Board Positions')
+	cams, = ax.plot(cparams[0, :], cparams[1, :], cparams[2, :], 'r+', label='Cameras')
+	plt.legend(handles=[board, cams])
+	plt.show()
+
+	ts = time.localtime()
+	time_stamp = time.strftime('%H%M%m%d%y', ts)
+	file = os.path.join(exptPath, name + time_stamp + '.dat')
+	log.info(file)
+
+	with open(file, 'w') as f:
+		f.write('Pinhole Calibration performed: ' + time.strftime('%c', ts) + '\n')
+		f.write(str(finalError) + '\n')
+		f.write(str(camData.sX) + ' ' + str(camData.sY) + ' ' + str(pix_phys) + '\n')
+		f.write(str(camData.ncams) + '\n')
+
+		for c in range(len(camnames)):
+			f.write(str(camnames[c]) + '\n')
+			np.savetxt(f, p[:, :, c], delimiter=' ', fmt='%f')
+			camParam = cparams[:, c]
+			worldPoints = camParam[0:3]
+			f.write(str(worldPoints[0]) + ' ' + str(worldPoints[1]) + ' ' +
+			        str(worldPoints[2]) + '\n')
+		f.write('0\n')  # calibration not refractive
+		# f.write(str(scdata.zW) + ' ' + str(scdata.n[0]) + ' ' + str(scdata.n[1]) + ' ' +
+		#        str(scdata.n[2]) + ' ' + str(scdata.tW) + '\n')
+		# f.write('\n' + str(planeData.dX) + ' ' + str(planeData.dY) + ' ' +
+		#        str(planeData.nX) + ' ' + str(planeData.nY) + '\n')
+		# f.write(str(camData.so) + ' ' + str(camData.f) + ' ' + str(planeData.z0[-1]) + '\n')
+
+		# f.write('Initial error: \n')
+		# np.savetxt(f, errorLog[0], delimiter=', ', fmt='%f')
+		# f.write('Final error: \n')
+		# np.savetxt(f, errorLog[1], delimiter=', ', fmt='%f')
+
+		return f  # file will close when with statement terminates
 
 	return plt
 
@@ -869,21 +846,26 @@ if __name__ == '__main__':
 		'float32')
 	camMatrix, boardRotMat, boardTransVec = singleCamCalibMat(umeas, xworld, planeData, cameraData)
 
-    cameraMats, rotationMatsCam, rotationMatsBoard, transVecsCam, transVecBoard, finalError = multiCamCalib(umeas,
-                                                            xworld, camMatrix, boardRotMat, boardTransVec, planeData, cameraData)
+	cameraMats, rotationMatsCam, rotationMatsBoard, transVecsCam, transVecBoard, finalError = multiCamCalib(umeas,
+	                                                                                                        xworld,
+	                                                                                                        camMatrix,
+	                                                                                                        boardRotMat,
+	                                                                                                        boardTransVec,
+	                                                                                                        planeData,
+	                                                                                                        cameraData)
 
-    #print(rotationMatsCam)
-    #print(transVecsCam)
+	# print(rotationMatsCam)
+	# print(transVecsCam)
 
-    #construct P matrix
-    P = np.zeros((3,4,cameraData.ncams))
-    for c in range(cameraData.ncams):
-        Rt = np.column_stack((np.transpose(rotationMatsCam[:,:,c]), transVecsCam[:,c]))
-        P[:,:,c]=np.matmul(cameraMats[:,:,c],Rt)
+	# construct P matrix
+	P = np.zeros((3, 4, cameraData.ncams))
+	for c in range(cameraData.ncams):
+		Rt = np.column_stack((np.transpose(rotationMatsCam[:, :, c]), transVecsCam[:, c]))
+		P[:, :, c] = np.matmul(cameraMats[:, :, c], Rt)
 
-    f = saveCalibData(exptPath, camIDs, P, transVecsCam, boardTransVec, sceneData, cameraData, finalError,
-                      pix_phys, 'results_')
-    log.info('\nData saved in ' + str(f))
+	f = saveCalibData(exptPath, camIDs, P, transVecsCam, transVecBoard, sceneData, cameraData, finalError,
+	                  pix_phys, 'results_')
+	log.info('\nData saved in ' + str(f))
 
 	# TODO: Change saved data according to what multiCamCalib returns (we should probably try to make it return these
 	#  though)
