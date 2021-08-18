@@ -13,6 +13,7 @@ from scipy.sparse import lil_matrix
 import cvxpy as cp
 import matplotlib.pyplot as plt
 from lmfit import Minimizer, Parameters, report_fit
+import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..', 'python/lib/'))
 import logger
