@@ -1,4 +1,5 @@
 import argparse
+import configparser
 import os
 import sys
 from time import sleep
@@ -25,6 +26,17 @@ if not __name__ == "__main__":
 
 	filename = traceback.format_stack()[0]
 	log = logger.getLogger(filename.split('"')[1], False, False)
+
+
+class planeData(object):
+	def __init__(self, dX, dY, nX, nY, num_calib_planes, fileType, scaleInfo):
+		self.dX = dX
+		self.dY = dY
+		self.nX = nX
+		self.nY = nY
+		self.ncalplanes = num_calib_planes
+		self.fileType = fileType
+		self.scaleInfo = scaleInfo
 
 
 def fitRotMat(Q):
@@ -319,6 +331,7 @@ def multiCamCalib(umeas, xworld, cameraMats, boardRotMats, boardTransVecs, plane
 
 	def trans_cost(x):
 		return np.linalg.norm(np.matmul(A, np.array(x)) - b)
+
 	# trans_cost_deriv = autograd.grad(lambda *args: trans_cost(np.transpose(np.array(args))))
 
 	# Construct the problem.
@@ -813,6 +826,55 @@ def saveCalibData(exptPath, camnames, p, cparams, tplanes, sceneData, camData, f
 	return plt
 
 
+def parseConfigFile(configPath):
+	# read calibration parameters from a configuration file
+	# and setup experimental parameter storage objects
+	# Input:
+	# configPath - string with relative path to configuration file
+	#
+	# Outputs:
+	# planeData  - plane data object
+	# cameraData - camera data object
+	# calImgs    - path to folder with image data
+	# exptPath   - path to folder for saving calibration results
+	# camIDs     - name of cameras in data folder
+	# bounded    - boolean to use bounded algorithm
+
+	# create config parser and read config file
+	config = configparser.ConfigParser()
+	config.read(configPath)
+	p = config['default']
+
+	# setup experimental parameter storage objects
+
+	import refCalib as rC
+	# calibration images
+	fileType = p['fileType']
+	dataPath = p['dataPath']
+	exptPath = dataPath + '/calibration_results'
+	camIDs = rC.getCameraNames(dataPath)
+	calImgs, nCalPlanes = rC.getCalibImages(dataPath, exptPath, camIDs, fileType)
+
+	# plane data
+	dX = p.getint('dX')
+	dY = p.getint('dY')
+	nX = p.getint('nX')
+	nY = p.getint('nY')
+	scaleInfo = [p.getint('centerCamID') - 1, p.getint('centerImgIndex') - 1]
+	pData = planeData(dX, dY, nX, nY, nCalPlanes, fileType, scaleInfo)
+
+	# camera data
+	sX = p.getint('sX')
+	sY = p.getint('sY')
+	pix_pitch = p.getfloat('pix_pitch')
+	so = p.getint('so')
+	f = p.getint('f')
+	nCams = len(camIDs)
+	cData = rC.cameraData(sX, sY, pix_pitch, so, f, nCams)
+
+	return [pData, cData, calImgs, exptPath, camIDs]
+
+
 if __name__ == '__main__':
 	# read config file flag passed from terminal
 	parser = argparse.ArgumentParser()
@@ -828,7 +890,7 @@ if __name__ == '__main__':
 	import refCalib as rC  # need to import here for logging purposes
 
 	# read and parse config file
-	planeData, cameraData, sceneData, tolerances, calImgs, exptPath, camIDs, _ = rC.parseConfigFile(configPath)
+	planeData, cameraData, calImgs, exptPath, camIDs = parseConfigFile(configPath)
 
 	# find corners and pix_phys
 	umeas = rC.findCorners(planeData, cameraData.ncams, exptPath, imgs=calImgs)
