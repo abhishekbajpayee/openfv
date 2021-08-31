@@ -877,7 +877,7 @@ void saRefocus::uploadSingleToGPU(int frame) {
 
 void saRefocus::uploadToGPU_ref() {
 
-    VLOG(1)<<"Uploading data requirede by full refocusing method to GPU...";
+    VLOG(1)<<"Uploading data required by full refocusing method to GPU...";
 
     Mat_<float> D = Mat_<float>::zeros(3,3);
     D(0,0) = scale_; D(1,1) = scale_;
