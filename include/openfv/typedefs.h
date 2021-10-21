@@ -104,6 +104,9 @@ struct reconstruction_settings {
     //! threshold level (std devs above mean)
     double thresh;
 
+    //! Whether to use thresholding
+    int thresholding;
+
     //! Whether to manually specify dz or not
     int manual_dz;
 
