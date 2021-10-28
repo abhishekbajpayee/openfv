@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# run a series of commands to link xhost between AWS and docker container
+
+sudo apt install x11-xserver-utils
+sudo apt install x11-apps
+xhost +
+XSOCK=/tmp/.X11-unix
+XAUTH=/tmp/.docker.xauth
+xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | sudo xauth -f $XAUTH nmerge -
+sudo chmod 777 $XAUTH
+X11PORT=`echo $DISPLAY | sed 's/^[^:]*:\([^\.]\+\).*/\1/'`
+TCPPORT=`expr 6000 + $X11PORT`
+sudo ufw allow from 172.17.0.0/16 to any port $TCPPORT proto tcp
+
